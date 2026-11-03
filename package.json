@@ -1,0 +1,40 @@
+{
+  "name": "maths",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "description": "Математически открития - състезателна математика за 4. клас",
+  "scripts": {
+    "dev": "node scripts/start-local.mjs",
+    "local:start": "node scripts/start-local.mjs",
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/start-hosted.mjs",
+    "test": "NODE_ENV=test tsx --test tests/*.test.ts tests/*.test.tsx",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "progress:import": "node --env-file=.env.local --import tsx scripts/import-progress.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
+    "next": "^16.4.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^16.4.3",
+    "@types/d3-selection": "^3.0.12",
+    "@types/d3-zoom": "^3.0.9",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@typescript-eslint/parser": "^8.68.0",
+    "eslint": "^9.39.5",
+    "linkedom": "^0.18.13",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

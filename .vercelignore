@@ -1,0 +1,8 @@
+data/
+backups/
+materials/
+.env*
+.git/
+.next/
+node_modules/
+*.tsbuildinfo

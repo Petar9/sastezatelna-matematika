@@ -1,0 +1,21 @@
+.sparkle { fill: #ffe198; stroke: #887044; stroke-width: 1.5px; }
+.award { width: 32px; height: 36px; overflow: visible; color: #738d78; }
+.medal, .blossom { fill: #243d33; stroke: #738d78; stroke-width: 1.8px; }
+.ribbon { fill: #243d33; stroke: #738d78; stroke-width: 1.5px; }
+.flowerStem { fill: #456949; stroke: #8ca481; stroke-width: 2px; }
+.flowerCentre { fill: #738d78; }
+.award[data-earned="true"] { color: #71501e; filter: drop-shadow(0 0 5px #e8c87f40); }
+.award[data-earned="true"] .medal { fill: #f4cf76; stroke: #ffe6a6; }
+.award[data-earned="true"] .ribbon { fill: #d79a56; stroke: #ffd38b; }
+.award[data-earned="true"] .blossom { fill: #b69ae7; stroke: #e2cfff; }
+.award[data-earned="true"] .flowerCentre { fill: #f8d782; }
+.leaf { width: 44px; height: 48px; flex-shrink: 0; overflow: visible; }
+.stem { fill: none; stroke: #91aa74; stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
+.bud { fill: #3c5e49; stroke: #b2c29e; stroke-width: 2px; }
+.leafBody { fill: #e0bb68; stroke: #f3da95; stroke-width: 2px; }
+.leaf[data-state="confirmed"] .leafBody, .leaf[data-state="review"] .leafBody { fill: #8ac69a; stroke: #c9eac2; }
+.leaf[data-state="confirmed"] .stem, .leaf[data-state="review"] .stem { stroke: #3b7049; }
+.check { fill: none; stroke: #244e32; stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; }
+.leaf[data-growing="true"], .award[data-growing="true"] { animation: unfurl 650ms ease-out; transform-origin: 20% 90%; }
+@keyframes unfurl { from { opacity: .3; transform: scale(.35) rotate(-18deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+@media (prefers-reduced-motion: reduce) { .leaf[data-growing="true"], .award[data-growing="true"] { animation: none; } }

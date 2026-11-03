@@ -1,0 +1,11 @@
+import {spawn} from "node:child_process";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const port=process.env.PORT||"3002";
+if(!/^\d+$/.test(port)||+port<1024||+port>65535)throw new Error("Invalid PORT");
+if(process.env.MATHS_MODE && process.env.MATHS_MODE!=="local")throw new Error("Use next start for hosted mode; local:start only runs local mode");
+const args=process.argv.includes("--production")?[path.join(root,".next/standalone/server.js")]:[path.join(root,"node_modules/next/dist/bin/next"),"dev","--hostname","127.0.0.1","--port",port];
+const child=spawn(process.execPath,args,{cwd:root,stdio:"inherit",env:{...process.env,HOSTNAME:"127.0.0.1",PORT:port,MATHS_MODE:"local",MATHS_DATA_DIR:process.env.MATHS_DATA_DIR||path.join(root,"data")}});
+for(const signal of ["SIGTERM","SIGINT"])process.on(signal,()=>child.kill(signal));
+child.on("exit",code=>process.exit(code??1));

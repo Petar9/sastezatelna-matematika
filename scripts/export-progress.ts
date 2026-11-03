@@ -1,0 +1,18 @@
+import fs from "node:fs";
+import {createHash} from "node:crypto";
+import {createClient} from "@supabase/supabase-js";
+import {DEFAULT_COMPETITION_ID} from "../src/server/competitions.ts";
+const option=(name:string)=>{const index=process.argv.indexOf(name);const value=index>=0?process.argv[index+1]:undefined;if(!value||value.startsWith("--"))throw new Error(`Required ${name}`);return value;};
+const parentId=option("--parent-id"),childId=option("--child-id"),file=option("--file");
+const competition=process.argv.includes("--competition")?option("--competition"):DEFAULT_COMPETITION_ID;
+const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+if(!uuid.test(parentId)||!uuid.test(childId))throw new Error("Expected explicit parent and child UUIDs");
+const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+if(!url||!key)throw new Error("Set SUPABASE_URL and server-only SUPABASE_SERVICE_ROLE_KEY");
+const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+const {data,error}=await db.from("course_progress").select("revision,course").eq("parent_id",parentId).eq("child_id",childId).eq("competition_id",competition).maybeSingle();
+if(error)throw error;if(!data)throw new Error("No progress found for this parent and child");
+if(!data.course||data.course.revision!==data.revision)throw new Error("Progress revision mismatch");
+const bytes=Buffer.from(JSON.stringify(data.course,null,2)+"\n");
+fs.writeFileSync(file,bytes,{flag:"wx",mode:0o600});
+console.log(`Exported revision ${data.revision}; SHA-256 ${createHash("sha256").update(bytes).digest("hex")}`);

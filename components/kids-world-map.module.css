@@ -1,0 +1,19 @@
+.world { min-width: 0; margin: 12px 0 18px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0; }
+.tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin: 0; }
+.tools button { min-width: 44px; min-height: 44px; padding: 6px 12px; border: 1px solid #83b6b8; border-bottom-width: 3px; border-radius: 12px; background: #244d57; color: #eef4df; font-size: 15px; font-weight: 600; cursor: pointer; }
+.tools button:first-child, .tools button:nth-child(2) { font-size: 24px; padding: 2px 10px; }
+.surface { position: relative; width: 100%; height: clamp(400px, 68vw, 620px); overflow: hidden; border-radius: 24px; border: 1px solid #689c9f; isolation: isolate; cursor: grab; touch-action: none; user-select: none; }
+.surface:active { cursor: grabbing; }
+.sea { position: absolute; inset: 0; pointer-events: none; }
+.islandTarget { position: absolute; transform: translate(-50%, -50%); border: 2px solid transparent; border-radius: 42%; background: none; cursor: pointer; padding: 0; color: #f8f1d4; font-family: inherit; line-height: 1.15; text-align: center; }
+.islandTarget > span { position: absolute; top: 72%; left: -6%; width: 112%; padding: 4px 5px; border-radius: 10px; background: #1c424ce8; box-shadow: 0 2px 0 #132d3440; overflow-wrap: anywhere; }
+.islandTarget[data-compact="true"] > span { left: -12%; width: 124%; padding: 3px 2px; }
+.islandTarget[data-selected="true"] { border-color: #b4e8ff; background: #b4e8ff0d; }
+.islandTarget:hover > span, .islandTarget:focus-visible > span, .islandTarget[data-selected="true"] > span { background: #15343e; color: #fff4c6; }
+.help { margin: 10px 4px 0; color: #c3d9d5; font-size: 13px; line-height: 1.4; }
+.scenery > g > svg { width: 86px; height: 76px; overflow: visible; }
+.scenery[data-new-growth="true"] { animation: islandGlow 1.8s ease-out; }
+@keyframes islandGlow { 0%, 40% { filter: drop-shadow(0 0 14px #fff0b4); } 100% { filter: none; } }
+@media (max-width: 540px) { .surface { border-radius: 18px; height: 400px; } .tools { justify-content: flex-start; } }
+@media (prefers-reduced-motion: reduce) { .scenery[data-new-growth="true"] { animation: none; } }

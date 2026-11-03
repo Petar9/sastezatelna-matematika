@@ -1,0 +1,10 @@
+.preview { margin: 28px 0; }
+.preview img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 16px; }
+.preview figcaption { margin-top: 10px; color: #b7b7b7; font-size: 16px; }
+.form { display: grid; gap: 16px; }
+.email { display: grid; gap: 8px; }
+.email input { width: 100%; min-width: 0; padding: 10px 12px; border: 2px solid #777; border-radius: 12px; background: var(--background); color: var(--foreground); }
+.consent { display: flex; align-items: flex-start; gap: 10px; }
+.consent input { flex-shrink: 0; width: 20px; height: 20px; margin-top: 4px; }
+.form button { justify-self: start; }
+.form input:focus-visible { outline: 3px solid #accfff; outline-offset: 3px; }

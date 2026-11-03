@@ -1,0 +1,12 @@
+import fs from "node:fs";
+import path from "node:path";
+import {spawnSync} from "node:child_process";
+import {verifyDeployment} from "./deployment-check.mjs";
+const root=process.cwd(),bundle=path.join(root,".next/standalone");
+fs.rmSync(bundle,{recursive:true,force:true});
+const result=spawnSync(process.execPath,["node_modules/next/dist/bin/next","build"],{stdio:"inherit"});
+if(result.status!==0)process.exit(result.status??1);
+fs.cpSync(path.join(root,"public"),path.join(bundle,"public"),{recursive:true});
+fs.cpSync(path.join(root,".next/static"),path.join(bundle,".next/static"),{recursive:true});
+verifyDeployment(root);
+console.log("Deployment traces and standalone output checked for private files.");
