@@ -92,7 +92,7 @@ Verified locally on 2026-11-03:
 
 Unresolved gates - ask the owner, do not infer answers:
 
-1. Source repository selected by owner: public `Petar9/sastezatelna-matematika` (https://github.com/Petar9/sastezatelna-matematika). Admin access and an empty remote were verified on 2026-11-03; publish only reviewed source files, never private history, materials or credentials.
+1. Source repository selected by owner: public `Petar9/sastezatelna-matematika` (https://github.com/Petar9/sastezatelna-matematika). Admin access and an empty remote were verified on 2026-11-03. Reviewed source was published to `main` in initial commit `efb0576`; private history, materials and credentials were excluded.
 2. Owner reports Vercel and Supabase accounts are available through GitHub. The accessible Chrome sessions still show sign-in; Vercel GitHub login reaches the GitHub credential screen. Browser login and Google OAuth configuration remain pending. Sign-in tabs have been left for the owner. No external projects, costs, terms acceptance or deployments were created.
 3. Public contact email for the landing page is pending. `MATHS_CONTACT_EMAIL` is documented in `.env.example`; do not invent an address or open public invitations without a real contact.
 4. Only „Математика за всеки“ 2024-2026 sources are present. Request the owner's folder path or supplied PDFs/keys/solutions/video links for Олимпиада, then НВО, before preparing new content.
@@ -102,7 +102,7 @@ Operational details: [deployment and recovery](docs/deployment.md); [content int
 
 Deployment preparation update, 2026-11-03:
 
-- Owner selected the public GitHub repository above; the local `origin` will target only that repository.
+- Owner selected the public GitHub repository above; the local `origin` targets only that repository. Initial source commit `efb0576` was pushed successfully to `main` on 2026-11-03.
 - Re-ran `npm test` (89 passed), `npm run typecheck`, `npm run lint` and `npm run build`: all passed. Build trace and standalone private-file checks passed.
 - Reviewed 132 source candidates before this status update, including the landing screenshot. Credential-pattern checks found no private keys, service secrets, GitHub tokens or JWTs; detected email addresses are test/documentation examples. Confirmed `data/`, `backups/`, `materials/`, `.env.local`, `node_modules/` and `.next/` are ignored.
 - `positioning.md` records the approved short positioning plan. The app name and candidate domain are unchanged; no domain purchase is authorized.
