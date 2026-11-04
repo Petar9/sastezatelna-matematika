@@ -25,10 +25,10 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 
 | Stage | Status | Next gate |
 | --- | --- | --- |
-| 1. Host current app | cloud setup in progress; not deployed | Configure production credentials and Google OAuth |
+| 1. Host current app | HTTPS and owner login working; history import in progress | Verify imported history and cross-device resume |
 | 2. Competition paths | Олимпиада and НВО implemented for local review; publication pending | Human review of four-island Олимпиада and ten-island НВО, including the missing 2024 Olympiad official solutions |
-| 3. Five-child pilot | locally verified; hosted verification blocked | Run live OAuth, cross-device and family checks after stage 1 setup |
-| 4. Landing/invitations | locally verified; publication blocked | Owner-approved public contact, live hosted invitation check |
+| 3. Five-child pilot | Owner login and first child profile saved online | Verify history, cross-device resume and live family isolation |
+| 4. Landing/invitations | Homepage simplification ready for deployment | Verify live simplified landing and hosted invitation flow |
 
 ## Stage 1 - host the current app
 
@@ -60,10 +60,10 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 
 ## Stage 4 - landing page and invitation requests
 
-- Create a Bulgarian parent-facing page matching the app, with real screenshots and accurate supported-content descriptions.
+- Create a Bulgarian parent-facing page matching the app with accurate supported-content descriptions. The owner removed the large screenshot and personal-data section on 2026-11-04; keep the invitation consent.
 - Include Заяви покана and Вход. Collect only parent email plus submission consent; handle duplicates and basic abuse.
 - Requests are private and manually reviewed. Submission grants no access. Keep additional families waiting until the owner separately approves expansion beyond five children.
-- Include accurate contact details and concise privacy information; ask the owner for public contact identity before publication.
+- Defer the public contact/personal-data section at the owner’s request. Keep private invitation handling and explicit submission consent.
 - Acceptance: parents understand the app, can request an invitation and receive confirmation; applicants remain private and cannot self-enrol.
 
 ## Verification and release gates
@@ -461,5 +461,13 @@ This slice supersedes the earlier no-recovery policy for previously attempted pr
 - First production deployment of `395f7cc` compiled successfully, then failed in `scripts/deployment-check.mjs`: its blanket symlink rejection refused Vercel's generated `_global-error.segments/__PAGE__.segment.rsc.func` link.
 - Removed that blanket rejection for links contained within `.next`; inspect their resolved targets once and stop cycles. Links outside the build remain rejected, and standalone bundle/private-file checks remain enforced.
 - Added a regression covering Vercel function aliases, link cycles, private traced files, links outside the build and standalone symlinks. Verified 167/167 tests, TypeScript, ESLint, production build and `git diff --check`; all 69 private baseline files are unchanged.
-- Hosted rebuild and login verification remain pending; no credentials, cloud access settings, database content or learning behavior changed.
+- Fix pushed as `3a6c052`; Vercel production deployment `4wLWRKJtjBxK4RpJ5WVEZH6ar9BZ` reached Ready (47 seconds). Public HTTPS GET returned HTTP 500; Vercel runtime logs identify `Missing SUPABASE_PUBLISHABLE_KEY`. Code also requires `SUPABASE_SERVICE_ROLE_KEY` for database access. Add the production keys through Vercel, redeploy, then verify login and saved progress. No credentials, cloud access settings, database content or learning behavior changed.
 - Coordinator: gpt-6.1-sol, high reasoning; one agent.
+
+
+Homepage and first profile update, 2026-11-04:
+
+- Owner completed the hosted smoke test. Supabase Table Editor confirms the first active child profile under the approved parent; online course_progress was empty before import. Google login and child creation now work; the previous missing-key runtime blocker is resolved. Cross-device and live second-family checks remain pending.
+- Removed the large homepage screenshot and “Лични данни” section, including unused image styles. Kept the original small mascot and invitation consent.
+- Validated the local matematika-za-vseki course (revision 89, 16 attempts) through the current course projection without modifying the source. Created a byte-identical private backup and a one-row CSV for the verified parent/child IDs. Import is pending the dashboard file selection; no database progress has been overwritten. Draft competitions have no attempts and are not being imported.
+- Verification: TypeScript, ESLint, production build and private-file bundle checks passed. Coordinator: gpt-6.1-sol, high reasoning; one agent.
