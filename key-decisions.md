@@ -158,3 +158,9 @@ Adopted educational decisions for Математически открития. U
 - Island cards and focused island views show a coin with the full earned amount, without a maximum, fraction, gold-target bar or target chest. This supersedes the island-display rules in “Keep a reachable island treasure target” and “Keep gold goals visible”; distant collection totals should not obscure small achievements.
 - Keep the short adventure route and its actual task count, skill progress, earned awards, treasure celebrations and collection. No additional progress indicator or explanatory copy is added to island cards.
 - Preserve reward amounts, entitlements, wallets, historical awards and saved targets. Existing target data stays internal for compatibility; displaying earned gold never caps it at a target. No learner-history migration or recalculation.
+
+
+## 2026-11-04 - Publish all prepared competition paths for the pilot
+
+- Owner explicitly approved publishing Математика за всеки, Олимпиада and НВО together after disclosure of the existing draft gates and outstanding final human review, including the missing 2024 Olympiad official solution PDF. This supersedes the local-only holds for the invitation-only pilot; it does not assert a completed human review.
+- Keep separate progress and the same IDs, content versions, difficulty badges, gold rules and excluded underdetermined Olympiad problem. Enable the existing dropdown; do not reset learner history or broaden account access.

@@ -26,7 +26,7 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 | Stage | Status | Next gate |
 | --- | --- | --- |
 | 1. Host current app | HTTPS, owner login and history import verified | Verify cross-device resume |
-| 2. Competition paths | Олимпиада and НВО implemented for local review; publication pending | Human review of four-island Олимпиада and ten-island НВО, including the missing 2024 Olympiad official solutions |
+| 2. Competition paths | Owner approved publishing all three collections on 2026-11-04; release in progress | Verify deployment and selector; final human content review remains unconfirmed, including the missing 2024 Olympiad official solutions |
 | 3. Five-child pilot | Owner login and first child profile saved online | Verify history, cross-device resume and live family isolation |
 | 4. Landing/invitations | Landing redesign verified locally | Deploy and smoke-test hosted invitation flow |
 
@@ -549,3 +549,12 @@ Homepage and first profile update, 2026-11-04:
 - Implemented: a shared earned-only component receives no maximum and does not cap the amount. Removed obsolete island bar/chest styles and the unused progress-display option.
 - Verification: all 189 tests passed, including 43 UI tests covering all 17 original islands and four Olympiad islands, direct skill practice, retained awards, unchanged saved learning and earned totals above a former target. Typecheck, ESLint, production build, private-bundle audit and diff checks passed. Visual browser verification was attempted but blocked by the Chrome automation connection; production publication is pending.
 - Coordinator: gpt-6.1-sol, high reasoning; one agent. User approved testing and deployment after checks pass.
+
+
+## Publish all competition paths - approved 2026-11-04
+
+- Owner explicitly requests “publish everything” after being told why production hides Олимпиада and НВО and that final human review and the 2024 Olympiad official solutions remain outstanding. This supersedes their local-only publication holds for the invitation-only pilot; it does not claim a human content review occurred.
+- Publish the prepared Математика за всеки, Олимпиада and НВО paths through the existing competition dropdown, with their current difficulty badges and separate learner history. Preserve IDs, content versions, exclusions, source safeguards, rewards, saved work and authentication; no database migration or learner writes.
+- Acceptance: all three paths available in hosted mode; dropdown visible on each dashboard with three working destinations; existing history isolation and unknown-ID rejection pass; tests, typecheck, lint and production/private-bundle checks pass before release.
+- Verification: all 190 tests passed, including the three-way dropdown on each competition dashboard, hosted availability, separate history and invalid-ID rejection. Typecheck, ESLint, production build, pixel-preserving image generation, private-bundle audit and diff checks passed. Chrome automation is currently unavailable; live deployment verification remains pending.
+- Coordinator: gpt-6.1-sol, high reasoning; one agent. Production release pending.

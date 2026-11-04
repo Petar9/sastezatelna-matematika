@@ -9,7 +9,7 @@ import {newGoldGain} from "../src/core/kids-gold.ts";
 import type {CourseAction, CourseTopicView} from "../src/core/kids-course.ts";
 import {nvoCourseContent} from "../src/server/nvo-course-content.ts";
 import {olympiadCourseContent} from "../src/server/olimpiada-course-content.ts";
-import {competitions} from "../src/core/competitions.ts";
+import {competitions,publishedCompetitions} from "../src/core/competitions.ts";
 import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
 registerHooks({load(url,context,nextLoad){if(url.endsWith(".module.css"))return{format:"module",source:"export default new Proxy({}, {get:(_,key)=>String(key)});",shortCircuit:true};if(url.endsWith("/next/image.js"))return{format:"module",source:'import React from "react"; export default function Image({unoptimized, ...props}) { return React.createElement("img",props); }',shortCircuit:true};return nextLoad(url,context);}});
 const dom=parseHTML("<html><body></body></html>");
@@ -945,4 +945,25 @@ test("answering keeps Hint beside Check in the measured action bar and one compa
   assert.equal(h.host.querySelectorAll("aside li").length,1);
   assert.equal(h.record.quest!.completed,0);
  }finally{await h.cleanup();}
+});
+
+
+test("published competition dashboards keep the three-way selector visible",async()=>{
+ const choices=publishedCompetitions();
+ assert.equal(choices.length,3);
+ const catalogues=[content,olympiadCourseContent,nvoCourseContent];
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ try{
+  for(const [index,current] of choices.entries()){
+   const catalogue=catalogues[index]!;
+   await act(async()=>root.render(<KidsCoursePlayer key={current.id} competitionId={current.id} competitionChoices={choices} initialView={courseView(newKidsCourse(catalogue,now),catalogue,now)}/>));
+   const trigger=host.querySelector<HTMLButtonElement>('button[aria-label^="Избери състезание:"]');
+   assert.ok(trigger,`Missing selector on ${current.id}`);
+   assert.ok(trigger.textContent!.includes(current.title));
+   await act(async()=>trigger.click());
+   const links=host.querySelectorAll('nav[aria-label="Състезания"] a');
+   assert.equal(links.length,3);
+   for(const choice of choices)assert.ok([...links].some(link=>link.getAttribute("href")===`/?competition=${choice.id}`));
+  }
+ }finally{await act(async()=>root.unmount());host.remove();}
 });

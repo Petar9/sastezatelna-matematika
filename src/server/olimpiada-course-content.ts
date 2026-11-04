@@ -117,7 +117,7 @@ const topics: CourseTopic[] = islands.map(island => ({ id: island.id, title: isl
  skills: pack.practice.families.filter(family => family.island === island.key).map(family => ({ id: skillId(family), title: names[family.id]!,
   lesson: family.items[0]!.worked_steps_bg })) }));
 
-/** Preparation only: the public catalogue still requires an explicit publication review. */
+// Published for the owner-approved pilot; outstanding source-review notes remain below.
 export const olympiadCourseContent: KidsCourseContent = {
  version, topics, introductions: olympiadIntroductions,
  concepts: pack.practice.families.map(family => ({ id: skillId(family), title: names[family.id]!, prerequisites: [],

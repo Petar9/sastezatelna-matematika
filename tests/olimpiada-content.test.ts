@@ -65,7 +65,7 @@ test("source originals retain their wording, figures and provenance while the am
  assert.equal(all.filter(p=>p.figure).map(p=>p.figure!.src).filter((v,i,a)=>a.indexOf(v)===i).length,4);
  assert.ok(!all.some(p=>p.id.startsWith("oli-g4-municipal-2023-p3")));
  assert.deepEqual(olympiadDraftReview.missingOfficialSolutions,[2024]);
- assert.throws(()=>competitionContent("olimpiada"),{status:404});
+ assert.equal(competitionContent("olimpiada"),content);
  const price=all.find(p=>p.id==="oli-g4-municipal-2024-p3:original")!;
  assert.deepEqual(price.fields.map(f=>f.answer),["4","7","12","2","8","28"]);
  const roman=all.find(p=>p.id==="oli-g4-municipal-2025-p1:original")!;
