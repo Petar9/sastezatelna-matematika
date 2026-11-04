@@ -16,7 +16,7 @@ export function IslandGoldBar({ title, gold: { earned, total } }: { title: strin
  </div>;
 }
 
-export function KidsLearningProgress({ leaf }: { leaf: LearningSkillView }) {
+export function KidsLearningProgress({ leaf, concise = false }: { leaf: LearningSkillView; concise?: boolean }) {
  const { earned } = discoveryProgress([leaf]);
  const remaining = Math.max(0, leaf.confirmation.target - leaf.confirmation.streak);
  const goal = leaf.confirmation.revisit || !leaf.confirmation.earned
@@ -24,7 +24,7 @@ export function KidsLearningProgress({ leaf }: { leaf: LearningSkillView }) {
   : leaf.status === "review" ? "Да си припомним! Откритията ти остават." : undefined;
  const label = leaf.confirmation.revisit ? "Да затвърдим отново" : leaf.confirmation.earned ? "Вече го умея ✓" : leaf.milestones.firstCorrect ? `Първо откритие${leaf.milestones.firstCorrect === "hinted" ? " · С помощ" : ""}` : leaf.milestones.started ? "Първа стъпка ✓" : "Да открием";
  return <div className={s.detail} aria-label={`Стъпки: ${leaf.title}`}>
-  <div className={s.heading}><span>{label}</span><span>{earned}/3</span></div>
+  {!concise && <div className={s.heading}><span>{label}</span><span>{earned}/3</span></div>}
   <div className={`${s.track} ${s.skillTrack}`} role="progressbar" aria-label={`Открития за умението: ${leaf.title}`} aria-valuemin={0} aria-valuemax={3} aria-valuenow={earned} aria-valuetext={`${earned} от 3 малки открития${leaf.milestones.firstCorrect === "hinted" ? "; първият верен отговор е с помощ" : ""}`}><span style={{ width: `${earned / 3 * 100}%` }}/></div>
   {goal && <p className={s.goal}>{goal}</p>}
  </div>;

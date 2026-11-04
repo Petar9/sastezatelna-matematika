@@ -24,7 +24,7 @@ const {Leaf,leafKey,leafPhase,knowledgeGrowthKeys}=await import("../components/k
 const {IslandGoldBar,KidsLearningProgress,discoveryProgress}=await import("../components/kids-learning-progress.tsx");
 const now="2026-11-02T12:00:00.000Z";
 function button(host:HTMLElement,label:string){const b=[...host.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent===label);assert.ok(b,`Missing: ${label}`);return b;}
-function primary(host:HTMLElement,label:string){const bars=host.querySelectorAll('[aria-label="Следващо действие"]');assert.equal(bars.length,1);assert.equal(bars[0]!.querySelectorAll("button").length,1);assert.equal(bars[0]!.textContent,label);return button(host,label);}
+function primary(host:HTMLElement,label:string){const bars=host.querySelectorAll('[aria-label="Следващо действие"]');assert.equal(bars.length,1);assert.equal(bars[0]!.querySelectorAll("button").length,label==="Провери отговора"?2:1);assert.ok(bars[0]!.textContent!.includes(label));return button(host,label);}
 function islandButton(host:HTMLElement,topic:string){const b=host.querySelector<HTMLButtonElement>(`button[aria-label="${topic}"]`);assert.ok(b);return b;}
 async function practise(host:HTMLElement,topic:string){await act(async()=>islandButton(host,topic).click());await act(async()=>button(host,"Да упражним").click());}
 async function mount(topic:string|null="matches",loseResponse=false,learnerId?:string,competitionId?:string,learnerNickname?:string){
@@ -64,7 +64,7 @@ test("navigation buttons recover a stale tab in one click without losing newer p
    const label=entry==="quest"?"Започни приключение":entry==="resume"?"Продължи: Точки и мачове":"Да упражним";
    await act(async()=>button(h.host,label).click());
    assert.ok(!h.host.querySelector('[aria-label="Карта на ученето"]'),"Navigation should open the exercises");
-   assert.ok(h.host.textContent!.includes(entry==="quest"?"Стъпка 1 от 5":entry==="resume"?"Часовник и денонощия":"Пари и цени"));
+   assert.ok(h.host.textContent!.includes(entry==="quest"?"0/5 задачи":entry==="resume"?"Часовник и денонощия":"Пари и цени"));
    assert.ok(!h.host.querySelector('[role="alert"]'),"A recovered navigation should not show an error");
    assert.equal(h.record.topics.clocks!.work.core!.attempt.key,newerTask);
    assert.equal(h.record.attempts.length,0);
@@ -172,7 +172,7 @@ test("otter adventure home, three solution parts, explicit reveal and five-probl
   assert.equal(h.host.querySelectorAll('[id^="island-"]').length,17);
   assert.ok(h.host.querySelector('a[href="#learning-map"]'));
   await act(async()=>button(h.host,"Започни приключение").click());
-  assert.ok(h.host.textContent!.includes("Стъпка 1 от 5"));
+  assert.ok(h.host.textContent!.includes("0/5 задачи"));
   await act(async()=>button(h.host,"Подсказка").click());
   await act(async()=>button(h.host,"Следваща подсказка").click());
   await act(async()=>button(h.host,"Следваща подсказка").click());
@@ -221,7 +221,8 @@ test("feedback celebrates correct answers while retaining assisted and incorrect
    assert.equal(h.record.attempts[0]!.outcome,outcome);
    const feedback=h.host.querySelector('[role="status"] h3[tabindex="-1"]')!;
    assert.equal(feedback.textContent,outcome==="independent"?"Верен отговор":outcome==="hinted"?"Верен отговор с помощ":"Още не се получи");
-   assert.ok(h.host.textContent!.includes(outcome==="incorrect"?"Нова стъпка в приключението!":"Първо откритие!"));
+   assert.equal(h.host.querySelectorAll("[data-gold-gain]").length,1);
+   assert.ok(!h.host.querySelector("[data-gold-gain]")!.textContent!.includes("Първо откритие!"));
    primary(h.host,outcome==="independent"?"Следваща задача":"Продължи");
    assert.equal(h.record.attempts.length,1);
   }finally{await h.cleanup();}
@@ -333,6 +334,7 @@ test("island exploration is read-only and shows one compact island panel at a ti
   const rows=h.host.querySelectorAll<HTMLButtonElement>('button.skillRow');assert.equal(rows.length,5);
   assert.ok([...rows].every(row=>!row.hasAttribute("aria-expanded") && row.textContent!.endsWith("→")));
   assert.equal(h.host.querySelectorAll('[aria-label^="Стъпки:"]').length,0);
+  await act(async()=>button(h.host,"← Към картата").click());
   await act(async()=>islandButton(h.host,"Пари и цени").click());
   assert.equal(h.host.querySelectorAll('section[aria-label^="Умения:"]').length,1);
   assert.ok(h.host.querySelector('[aria-label="Умения: Пари и цени"]'));
@@ -373,9 +375,7 @@ test("island rows start specific skills, disable while saving and retain earned 
  const show=(busy=true)=>root.render(<LearningMap topics={[topic]} progress={{complete:false,doctors:1,professors:1,professorGoal:1}} busy={busy} act={async a=>{actions.push(a);}} seenGrowth={seen} selection={selection} select={topicId=>{selection={topicId};show();}}/>);
  try{
   await act(async()=>show());assert.equal(host.querySelectorAll('[data-growing="true"]').length,0);
-  const awards=host.querySelector('details.mapAwards')!;
-  assert.equal(awards.hasAttribute("open"),false);
-  assert.equal(awards.querySelector("summary")!.textContent,"Моите награди");
+  assert.equal(host.querySelector('details.mapAwards'),null);
   assert.equal(host.querySelectorAll('[data-earned="false"]').length,0);
   const leaves=host.querySelectorAll<HTMLButtonElement>("button.skillRow");
   assert.deepEqual([...leaves].map(b=>b.querySelector("svg")!.getAttribute("data-state")),["untried","practising","confirmed","review"]);
@@ -429,7 +429,7 @@ test("backwards island has one gold bar including fresh problems and five skill 
   assert.ok(island.querySelector("svg"));
   await act(async()=>islandButton(h.host,"Рачешки задачи").click());
   assert.equal(h.host.querySelectorAll('[aria-label="Умения: Рачешки задачи"] svg[data-state]').length,5);
-  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,18);
+  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,1);
   assert.equal(h.host.querySelectorAll('[aria-label^="Стъпки:"]').length,0);
   assert.ok(!h.host.textContent!.includes("Данни за възрастния"));assert.equal(h.actions.length,0);
  }finally{await h.cleanup();}
@@ -487,7 +487,7 @@ test("single home control retains the exact question and worked solution parts",
   await practise(h.host,"Рачешки задачи");
   const key=courseView(h.record,content,now).task!.key;
   const nav=h.host.querySelector('nav[aria-label="Навигация"]')!;
-  assert.deepEqual([...nav.querySelectorAll("button")].map(b=>b.textContent),["← Начало"]);
+  assert.deepEqual([...nav.querySelectorAll("button")].map(b=>b.textContent),["← Начало","Карта"]);
   await act(async()=>button(h.host,"Подсказка").click());
   const first=h.host.querySelector('aside li')!.textContent;
   await act(async()=>button(h.host,"← Начало").click());
@@ -519,38 +519,27 @@ test("island gold bar shows collected gold with its coin and available total",as
 });
 
 
-test("world and topic views expose every island without changing saved learning",async()=>{
+test("world and topic views expose every island in a focused view without changing saved learning",async()=>{
  const h=await mount(null);try{
   const saved=JSON.stringify(h.record);
   assert.deepEqual(content.topics.map(t=>t.id).filter(id=>!islandPlaces[id]),[]);
   assert.equal(h.host.querySelectorAll('[data-island-scenery]').length,17);
-  for(const topic of content.topics){
-   await act(async()=>islandButton(h.host,topic.title).click());
-   assert.equal(h.host.querySelectorAll('section[aria-label^="Умения:"]').length,1);
-   assert.ok(h.host.querySelector(`section[aria-label="Умения: ${topic.title}"]`));
+  for(const mode of ["Карта","Теми"]){
+   if(mode==="Теми")await act(async()=>button(h.host,"Теми").click());
+   for(const topic of content.topics){
+    const trigger=islandButton(h.host,topic.title);
+    if(mode==="Теми")assert.equal(trigger.type,"button");
+    await act(async()=>trigger.click());
+    assert.equal(h.host.querySelectorAll('section[aria-label^="Умения:"]').length,1);
+    assert.ok(h.host.querySelector(`section[aria-label="Умения: ${topic.title}"]`));
+    assert.equal(h.host.querySelector('[data-camera]'),null);
+    assert.equal(h.host.querySelector('[aria-label="Твоето приключение"]'),null);
+    assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,1);
+    await act(async()=>button(h.host,"← Към картата").click());
+    assert.equal(h.host.querySelectorAll('section[aria-label^="Умения:"]').length,0);
+    assert.ok(islandButton(h.host,topic.title));
+   }
   }
-  const last=content.topics.at(-1)!;
-  await act(async()=>button(h.host,"Теми").click());
-  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,18);
-  assert.ok(!h.host.textContent!.includes("Разгледай острова"));
-  assert.ok(!h.host.textContent!.includes("Затвори острова"));
-  for(const topic of content.topics){
-   const card=h.host.querySelector(`#island-${topic.id}`)!;
-   const trigger=islandButton(h.host,topic.title);
-   assert.equal(card.querySelectorAll("button").length,1);
-   assert.equal(trigger.type,"button");
-   assert.ok(card.querySelector('[role="progressbar"]'));
-   if(trigger.getAttribute("aria-expanded")==="true") await act(async()=>trigger.click());
-   await act(async()=>trigger.click());
-   assert.equal(trigger.getAttribute("aria-expanded"),"true");
-   assert.ok(h.host.querySelector(`section[aria-label="Умения: ${topic.title}"]`));
-   await act(async()=>trigger.click());
-   assert.equal(trigger.getAttribute("aria-expanded"),"false");
-   assert.equal(h.host.querySelectorAll('section[aria-label^="Умения:"]').length,0);
-  }
-  await act(async()=>islandButton(h.host,last.title).click());
-  await act(async()=>button(h.host,"Карта").click());
-  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,2);
   assert.equal(JSON.stringify(h.record),saved);assert.equal(h.actions.length,0);
  }finally{await h.cleanup();}
 });
@@ -562,12 +551,12 @@ test("map gestures leave island pointer activation to its button",async()=>{
   Object.defineProperty(down,"button",{value:0});
   await act(async()=>{island.dispatchEvent(down);island.click();});
   assert.equal(down.defaultPrevented,false,"Map panning must not consume island activation");
-  assert.equal(island.getAttribute("aria-expanded"),"true");
+  assert.equal(h.host.querySelector("[data-camera]"),null);
   assert.ok(h.host.querySelector('[aria-label="Умения: Рачешки задачи"]'));
  }finally{await h.cleanup();}
 });
 
-test("world camera zoom is bounded, resets to fit and centres a selected island",async()=>{
+test("world camera zoom is bounded and focused islands replace the map",async()=>{
  const h=await mount(null);try{
   const camera=()=>h.host.querySelector('[data-camera]')!.getAttribute('data-camera')!;
   const initial=camera();
@@ -580,8 +569,8 @@ test("world camera zoom is bounded, resets to fit and centres a selected island"
   for(let i=0;i<12;i++)await act(async()=>more.click());
   assert.equal(more.disabled,true);assert.ok(Number(camera().split(',')[2])<=floor*4+.002);
   await act(async()=>button(h.host,"Цялата карта").click());assert.equal(camera(),fit);
-  await act(async()=>islandButton(h.host,"Рачешки задачи").click());assert.ok(Number(camera().split(',')[2])>floor);
-  for(let i=0;i<12;i++)await act(async()=>less.click());assert.equal(less.disabled,true);
+  await act(async()=>islandButton(h.host,"Рачешки задачи").click());assert.equal(h.host.querySelector("[data-camera]"),null);
+  await act(async()=>button(h.host,"← Към картата").click());assert.equal(camera(),fit);
   assert.equal(h.actions.length,0);
  }finally{await h.cleanup();}
 });
@@ -679,6 +668,12 @@ test("both competitions open at whole-map fit and only zoom after choosing an is
    await act(async()=>render());
    const camera=()=>host.querySelector('[data-camera]')!.getAttribute('data-camera')!;
    const initial=camera();
+   const surface=()=>host.querySelector<HTMLElement>("[data-zoomed]")!;
+   assert.equal(surface().getAttribute("data-zoomed"),"false");assert.equal(surface().style.touchAction,"pan-y");
+   await act(async()=>host.querySelector<HTMLButtonElement>('[aria-label="Приближи картата"]')!.click());
+   assert.equal(surface().getAttribute("data-zoomed"),"true");assert.equal(surface().style.touchAction,"none");
+   await act(async()=>button(host,"Цялата карта").click());
+   assert.equal(surface().getAttribute("data-zoomed"),"false");assert.equal(surface().style.touchAction,"pan-y");
    assert.equal(host.querySelector<HTMLButtonElement>('[aria-label="Отдалечи картата"]')!.disabled,true);
    assert.equal(host.querySelectorAll('[data-island-scenery]').length,catalogue.topics.length);
    await act(async()=>button(host,"Цялата карта").click());assert.equal(camera(),initial);
@@ -771,7 +766,8 @@ test("numeric drafts flush before home and pause and restore after reload withou
   await act(async()=>button(h.host,"← Начало").click());
   assert.equal(h.record.attempts.length,0);assert.equal(courseView(h.record,content,now).gold,0);
   assert.deepEqual(courseView(h.record,content,now).task!.draft,["56"]);
-  assert.deepEqual(h.actions.slice(-2).map(a=>a.type),["saveDraft","dashboard"]);
+  assert.equal(h.actions.at(-1)!.type,"saveDraft");
+  assert.equal(h.actions.filter(a=>a.type==="dashboard").length,0);
   await h.reload();await act(async()=>button(h.host,`Продължи: ${content.topics.find(t=>t.id==="grids")!.title}`).click());
   assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"56");
   await act(async()=>button(h.host,"Провери отговора").click());
@@ -786,6 +782,42 @@ test("numeric drafts flush before home and pause and restore after reload withou
   assert.equal(courseView(h.record,content,now).task!.part!.index,2);
   assert.equal(h.record.attempts.length,0);
  }finally{await h.cleanup();}
+});
+
+test("Home and Map keep typed work mounted when a draft save fails, then navigate after a successful retry",async()=>{
+ for(const destination of ["← Начало","Карта"]){
+  const h=await mount("grids"),fetchCourse=globalThis.fetch;
+  let failSave=true,saveRequests=0;
+  try{
+   globalThis.fetch=async(url,init)=>{
+    if(init?.method==="POST" && JSON.parse(String(init.body)).action.type==="saveDraft"){
+     saveRequests++;
+     if(failSave) return Response.json({error:"Не успяхме да запазим. Опитай отново."},{status:503});
+    }
+    return fetchCourse(url,init);
+   };
+   await act(async()=>button(h.host,"5").click());
+   await act(async()=>button(h.host,"6").click());
+   const input=h.host.querySelector<HTMLInputElement>("input")!;
+   await act(async()=>button(h.host,destination).click());
+   assert.ok(h.host.querySelector("input")===input,"Failed saving must not unmount the question");
+   assert.equal(input.value,"56");
+   assert.ok(h.host.querySelector('[role="alert"]'));
+   assert.equal(courseView(h.record,content,now).task!.draft,undefined);
+   assert.equal(h.record.attempts.length,0);
+   failSave=false;
+   await act(async()=>button(h.host,destination).click());
+   assert.equal(saveRequests,2,"Retry must save the retained draft before navigating");
+   assert.deepEqual(courseView(h.record,content,now).task!.draft,["56"]);
+   assert.equal(h.host.querySelector("input"),null);
+   assert.equal(h.host.querySelector('[role="alert"]'),null);
+   assert.equal(h.actions.filter(a=>a.type==="dashboard").length,0);
+   if(destination==="Карта") assert.ok(h.host.querySelector('[aria-label="Умения: Правоъгълници в квадратна мрежа"]'));
+   await h.reload();
+   await act(async()=>button(h.host,`Продължи: ${content.topics.find(t=>t.id==="grids")!.title}`).click());
+   assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"56");
+  }finally{await h.cleanup();}
+ }
 });
 
 test("choice zero autosaves without submission, restores and clears when help opens",async()=>{
@@ -870,4 +902,46 @@ test("problem gold preview stays compact and uses the actual ledger amount in fe
   await act(async()=>root.render(<GoldReward gain={{amount:25,awards:[{skillId:"a",milestone:"correct",earnedAt:now}],problems:[{key:"source:hard",skillId:"a",earnedAt:now,amount:15}]}}/>));
   assert.ok(String(host.textContent).includes("Решена задача +15"));
  }finally{await act(async()=>root.unmount());}
+});
+
+
+test("Home and Map retain the selected island, view mode and exact helped task without navigation commands",async()=>{
+ const h=await mount(null);try{
+  await act(async()=>button(h.host,"Теми").click());
+  await practise(h.host,"Рачешки задачи");
+  await act(async()=>button(h.host,"Подсказка").click());
+  const key=courseView(h.record,content,now).task!.key;
+  const before=JSON.stringify(h.record),commands=h.actions.length;
+  await act(async()=>button(h.host,"Карта").click());
+  assert.ok(h.host.querySelector('[aria-label="Умения: Рачешки задачи"]'));
+  assert.equal(h.host.querySelector('[aria-label="Твоето приключение"]'),null);
+  assert.equal(h.actions.length,commands);
+  assert.equal(JSON.stringify(h.record),before);
+  await act(async()=>button(h.host,"← Към картата").click());
+  assert.equal(button(h.host,"Теми").getAttribute("aria-pressed"),"true");
+  assert.equal(h.host.querySelectorAll("section.island").length,17);
+  await practise(h.host,"Рачешки задачи");
+  assert.equal(courseView(h.record,content,now).task!.key,key);
+  assert.equal(h.host.querySelectorAll("aside li").length,1);
+  const navigationCommands=h.actions.length,afterResume=JSON.stringify(h.record);
+  await act(async()=>button(h.host,"← Начало").click());
+  assert.ok(h.host.querySelector('[aria-label="Твоето приключение"]'));
+  assert.equal(h.actions.length,navigationCommands);
+  assert.equal(JSON.stringify(h.record),afterResume);
+ }finally{await h.cleanup();}
+});
+
+test("answering keeps Hint beside Check in the measured action bar and one compact adventure count",async()=>{
+ const h=await mount(null);try{
+  await act(async()=>button(h.host,"Започни приключение").click());
+  const bar=h.host.querySelector('[aria-label="Следващо действие"]')!;
+  assert.deepEqual([...bar.querySelectorAll("button")].map(b=>b.textContent),["Подсказка","Провери отговора"]);
+  assert.equal(h.host.querySelectorAll(".questCount").length,1);
+  assert.equal(h.host.querySelectorAll(".questTrail .voyageStops").length,0);
+  assert.equal(h.host.querySelectorAll(".questTrail .voyageBoat").length,1);
+  await act(async()=>button(h.host,"Подсказка").click());
+  assert.ok(bar.contains(button(h.host,"Следваща подсказка")));
+  assert.equal(h.host.querySelectorAll("aside li").length,1);
+  assert.equal(h.record.quest!.completed,0);
+ }finally{await h.cleanup();}
 });

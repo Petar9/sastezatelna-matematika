@@ -29,6 +29,8 @@ insert into public.course_progress(child_id,parent_id,revision,course) values ('
 SQL
 "${psql[@]}" -f "$root/supabase/migrations/202611030002_competitions.sql" >/dev/null
 "${psql[@]}" -f "$root/supabase/migrations/202611030003_pilot.sql" >/dev/null
+"${psql[@]}" -f "$root/supabase/migrations/202611040001_child_logins.sql" >/dev/null
+"${psql[@]}" -f "$root/supabase/child-login-security-check.sql" >/dev/null
 "${psql[@]}" >/dev/null <<'SQL'
 do $$ begin
  if not exists (select 1 from public.course_progress where competition_id='matematika-za-vseki' and revision=7 and course='{"version":2,"revision":7,"topics":{},"attempts":[],"marker":"preserve"}'::jsonb) then raise exception 'migration changed progress'; end if;

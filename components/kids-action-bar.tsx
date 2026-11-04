@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import s from "./kids.module.css";
 
-export function KidsActionBar({ label, disabled, onClick }: { label: string; disabled: boolean; onClick: () => void }) {
+export function KidsActionBar({ label, disabled, onClick, secondary }: { label: string; disabled: boolean; onClick: () => void; secondary?: {label:string; disabled:boolean; onClick:()=>void} }) {
 	const bar = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		const element = bar.current;
@@ -31,7 +31,8 @@ export function KidsActionBar({ label, disabled, onClick }: { label: string; dis
 			shell.style.removeProperty("--kids-action-height");
 		};
 	}, []);
-	return <div ref={bar} className={s.actionBar} role="group" aria-label="Следващо действие"><div className={s.actionBarContent}>
+	return <div ref={bar} className={s.actionBar} role="group" aria-label="Следващо действие"><div className={`${s.actionBarContent} ${secondary ? s.answerActions : ""}`}>
+  {secondary && <button className={s.secondary} disabled={secondary.disabled} onClick={secondary.onClick}>{secondary.label}</button>}
 		<button className={s.button} disabled={disabled} onClick={onClick}>{label}</button>
 	</div></div>;
 }

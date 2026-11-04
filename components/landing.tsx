@@ -1,7 +1,34 @@
 import Link from "next/link";
-import {KidsOtter} from "./kids-otter";
+import {LandingIllustration} from "./landing-illustration";
 import l from "./landing.module.css";
-import s from "@/components/kids.module.css";
+
 export function Landing({request}:{request?:string}){
- return <main className={s.shell}><div className={s.content}><header className={s.header}><strong className={s.brand}>Състезателна математика</strong><Link className={s.secondary} href="/login">Вход</Link></header><section className={l.hero}><div className={l.mascot}><KidsOtter /></div><div><p className={l.eyebrow}>Състезателна математика за 4. клас</p><h1 className={s.title}>Математика като приключение</h1><p className={s.intro}>Упражнения за четвърти клас с кратки приключения, обяснения стъпка по стъпка и карта на откритията.</p><div className={s.actions}><a className={`${s.button} ${s.questButton}`} href="#invitation">Заяви покана</a></div></div></section><section className={s.card}><h2>Учене със собствено темпо</h2><p>Детето решава задачи, получава помощ и се връща към уменията, които имат нужда от упражнение. Напредъкът се запазва в отделен детски профил.</p><p>Наличният комплект е по математика за 4. клас и включва задачи от „Математика за всеки“ за 2024-2026 г.</p></section><section className={s.card} id="invitation"><h2>Заяви покана</h2><p>Пилотната група е ограничена до пет деца. Заявките се разглеждат ръчно и не дават автоматичен достъп.</p>{request==="received"?<p role="status">Получихме заявката. Благодарим!</p>:<form className={l.form} action="/api/invitations" method="post"><label className={l.email}>Имейл на родител <input name="email" type="email" maxLength={254} required autoComplete="email"/></label><p><label className={l.consent}><input name="consent" type="checkbox" value="yes" required/> Съгласен/съгласна съм имейлът ми да бъде използван за разглеждане на заявката и връзка относно поканата.</label></p><button className={`${s.button} ${s.questButton}`}>Изпрати заявка</button></form>}{request==="invalid"&&<p role="alert">Въведи валиден имейл и потвърди съгласието.</p>}{request==="unavailable"&&<p role="alert">Заявката не беше приета. Опитай отново по-късно.</p>}</section></div></main>;
+ const error=request==="invalid"||request==="unavailable";
+ return <main className={l.shell}><div className={l.content}>
+  <header className={l.header}>
+   <strong className={l.brand}>Състезателна математика</strong>
+   <Link className={l.login} href="/login">Вход</Link>
+  </header>
+  <section className={l.hero} aria-labelledby="landing-title">
+   <div className={l.heroCopy}>
+    <h1 className={l.title} id="landing-title">Подготовка за състезания, стъпка по стъпка.</h1>
+    <p className={l.intro}>Истински задачи, ясни подсказки и приключения с награди.</p>
+    <div className={l.invitation} id="invitation">
+     <p className={l.pilot}>Тестваме с група до 5 деца.</p>
+     {request==="received"?<p className={l.success} role="status">Благодарим! Получихме заявката за покана.</p>:<form className={l.form} action="/api/invitations" method="post">
+      <label className={l.email} htmlFor="invitation-email">Имейл на родител</label>
+      <div className={l.formFields}>
+       <input id="invitation-email" name="email" type="email" maxLength={254} required autoComplete="email" aria-describedby={error?"invitation-note invitation-error":"invitation-note"} aria-invalid={request==="invalid"?true:undefined}/>
+       <button className={l.button} type="submit">Заяви покана</button>
+      </div>
+      <p className={l.note} id="invitation-note">Ще използваме имейла само за поканата.</p>
+     </form>}
+     {request==="invalid"&&<p className={l.error} id="invitation-error" role="alert">Въведи валиден имейл.</p>}
+     {request==="unavailable"&&<p className={l.error} id="invitation-error" role="alert">Заявката не беше приета. Опитай отново по-късно.</p>}
+    </div>
+   </div>
+   <LandingIllustration />
+  </section>
+  <p className={l.collection}>Наличният комплект е по математика за 4. клас и включва задачи от „Математика за всеки“, Олимпиада, НВО (матура) за 2023-2026 г.</p>
+ </div></main>;
 }

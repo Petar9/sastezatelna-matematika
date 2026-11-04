@@ -23,7 +23,7 @@ export function ProblemGoldPreview({ reward }: { reward: { amount: number; multi
 export function GoldWallet({ balance }: { balance: number }) {
  return <span className={s.goldWallet} data-gold-wallet aria-label={`${balance} злато`}><GoldCoin/><strong>{balance}</strong><span>злато</span></span>;
 }
-export function GoldReward({ gain }: { gain: GoldGain }) {
+export function GoldReward({ gain, concise = false }: { gain: GoldGain; concise?: boolean }) {
  const reward = useRef<HTMLDivElement>(null), flight = useRef<HTMLDivElement>(null);
  useEffect(() => {
   if (typeof requestAnimationFrame === "undefined") return;
@@ -44,7 +44,7 @@ export function GoldReward({ gain }: { gain: GoldGain }) {
  const labels = { started: "Първа стъпка", correct: "Първи верен отговор", confirmed: "Затвърдено умение" };
  return <div ref={reward} className={s.goldReward} role="status" data-gold-gain={gain.amount}>
   <div ref={flight} className={s.coinFlight} aria-hidden="true"><GoldCoin/><GoldCoin/><GoldCoin/></div>
-  <strong>{milestone} <span>+{gain.amount} злато</span></strong>
+  <strong>{!concise && `${milestone} `}<span>+{gain.amount} злато</span></strong>
   {gain.awards.length + (gain.problems?.length ?? 0) > 1 && <details><summary>Откъде е златото?</summary><ul>{gain.awards.map(award => <li key={`${award.skillId}:${award.milestone}`}>{labels[award.milestone]} +{goldAmounts[award.milestone]}</li>)}{gain.problems?.map(award => <li key={award.key}>Решена задача +{problemAwardAmount(award)}</li>)}</ul></details>}
  </div>;
 }
@@ -63,7 +63,7 @@ export function AdventureRoute({ completed, total = 5, compact = false }: { comp
  const position = Math.min(total, completed);
  return <div className={`${s.voyage} ${compact ? s.voyageCompact : ""}`}>
   <div className={s.voyageLine} role="progressbar" aria-label="Разгледани задачи в приключението" aria-valuemin={0} aria-valuemax={total} aria-valuenow={position} aria-valuetext={`${position} от ${total} задачи, включително с помощ`}><span style={{ width: `${position / total * 100}%` }}/></div>
-  <ol className={s.voyageStops} aria-label={`${total} спирки до съкровището`} style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>{Array.from({ length: total }, (_, i) => i + 1).map(stop => <li key={stop} data-complete={stop <= position} aria-current={stop === position + 1 ? "step" : undefined}><span>{stop <= position ? "✓" : stop}</span></li>)}</ol>
+  {!compact && <ol className={s.voyageStops} aria-label={`${total} спирки до съкровището`} style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>{Array.from({ length: total }, (_, i) => i + 1).map(stop => <li key={stop} data-complete={stop <= position} aria-current={stop === position + 1 ? "step" : undefined}><span>{stop <= position ? "✓" : stop}</span></li>)}</ol>}
   <span className={s.voyageBoat} style={{ left: `calc(${position / total * 100}% - ${position / total * 34}px)` }} aria-hidden="true"><svg viewBox="0 0 60 60"><path d="M4 40h52L45 52H16Z" fill="#b87d52"/><path d="M27 38V4l25 31H30Z" fill="#fffaf0" stroke="#b9cfd0"/><path d="M23 12 7 34h16Z" fill="#4da3b9"/></svg></span>
  </div>;
 }

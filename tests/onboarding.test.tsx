@@ -11,7 +11,7 @@ const server = new URL("../src/server/index.ts", import.meta.url).href;
 const supabase = new URL("../src/server/supabase.ts", import.meta.url).href;
 registerHooks({ load(url, context, nextLoad) {
   if (url.endsWith(".module.css")) return { format: "module", source: "export default new Proxy({}, {get:(_,key)=>String(key)});", shortCircuit: true };
-  if (url === server) return { format: "module", source: `export { mode,appOrigin,parentContext,childCookie } from ${JSON.stringify(fixture)};`, shortCircuit: true };
+  if (url === server) return { format: "module", source: `export { mode,appOrigin,parentContext,accountContext,childCookie } from ${JSON.stringify(fixture)};`, shortCircuit: true };
   if (url === supabase) return { format: "module", source: `export { authClient } from ${JSON.stringify(fixture)};`, shortCircuit: true };
   return nextLoad(url, context);
 } });
@@ -36,7 +36,7 @@ test("first visit has one nickname field and a direct adventure action; existing
   assert.equal(doc.querySelector("details"), null);
   state.children = [{ id: "child-a", nickname: "Лисиче" }, { id: "child-b", nickname: "Моряк" }];
   doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({}) }));
-  assert.equal(doc.querySelectorAll('input[name="childId"]').length, 2);
+  assert.equal(doc.querySelectorAll('input[name="action"][value="select"]').length, 2);
   assert.equal(doc.querySelector("details")?.hasAttribute("open"), false);
   assert.equal(doc.querySelector('input[name="childId"]')?.getAttribute("value"), "child-a");
 });
@@ -85,7 +85,7 @@ test("OAuth callback separates cancellation, session failure, authorization deni
 test("profile creation saves trimmed nickname and selection cookie; invalid input and capacity stay recoverable", async () => {
   reset();
   const response = await profile(request({ action: "create", nickname: "  Лисиче  " }));
-  assert.equal(location(response), "https://maths.example/");
+  assert.equal(location(response), "https://maths.example/profiles?setup=created-child");
   assert.deepEqual(state.inserted, { parent_id: "parent-a", nickname: "Лисиче" });
   const cookie = response.headers.get("set-cookie")!;
   for (const value of ["maths_child=created-child", "HttpOnly", "Secure", "SameSite=lax"]) assert.ok(cookie.includes(value));
@@ -109,6 +109,53 @@ test("profile switching accepts owned IDs only and expired parent login cannot s
   response = await profile(request({ action: "select", childId: "child-a" }));
   assert.equal(location(response), "https://maths.example/login");
   assert.equal(response.headers.get("set-cookie"), null);
+});
+
+test("email link normalizes input, respects ownership and finishes setup", async () => {
+  reset(); state.children = [{ id: "child-a", nickname: "Лисиче" }];
+  assert.equal(location(await profile(request({ action: "link-email", childId: "foreign", email: "child@example.com" }))), "https://maths.example/profiles?error=missing");
+  assert.equal(state.rpcCall, undefined);
+  let response = await profile(request({ action: "link-email", childId: "child-a", email: "  CHILD@Example.COM  " }));
+  assert.equal(location(response), "https://maths.example/profiles?status=saved");
+  assert.deepEqual(state.rpcCall, { name: "set_child_login", args: { p_parent_id: "parent-a", p_child_id: "child-a", p_email: "child@example.com" } });
+  response = await profile(request({ action: "link-email", childId: "child-a", email: "child@example.com", setup: "1" }));
+  assert.equal(location(response), "https://maths.example/");
+  assert.ok(response.headers.get("set-cookie")?.includes("maths_child=child-a"));
+  const doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({ setup: "child-a" }) }));
+  assert.equal(doc.querySelector("h1")?.textContent, "Самостоятелен вход");
+  assert.equal(doc.querySelector('input[name="setup"]')?.getAttribute("value"), "1");
+  assert.ok([...doc.querySelectorAll("button")].some(button => button.textContent === "Не сега"));
+});
+
+test("email errors retain setup and unlink is scoped to parent and owned child", async () => {
+  reset(); state.children = [{ id: "child-a", nickname: "Лисиче" }];
+  assert.equal(location(await profile(request({ action: "link-email", childId: "child-a", email: "bad", setup: "1" }))), "https://maths.example/profiles?error=email&setup=child-a");
+  assert.equal(state.rpcCall, undefined);
+  state.databaseError = { code: "23505", message: "conflict" };
+  assert.equal(location(await profile(request({ action: "link-email", childId: "child-a", email: "child@example.com", setup: "1" }))), "https://maths.example/profiles?error=email-used&setup=child-a");
+  state.databaseError = null;
+  assert.equal(location(await profile(request({ action: "unlink-email", childId: "foreign" }))), "https://maths.example/profiles?error=missing");
+  assert.deepEqual(state.deleteFilters, []);
+  assert.equal(location(await profile(request({ action: "unlink-email", childId: "child-a" }))), "https://maths.example/profiles?status=removed");
+  assert.deepEqual(state.deleteFilters, [["parent_id", "parent-a"], ["child_id", "child-a"]]);
+});
+
+test("child account cannot create, select, link or unlink profiles", async () => {
+  reset(); state.role = "child"; state.children = [{ id: "child-a", nickname: "Лисиче" }];
+  const actions: Record<string, string>[] = [
+    { action: "create", nickname: "Дете" },
+    { action: "select", childId: "child-a" },
+    { action: "link-email", childId: "child-a", email: "child@example.com" },
+    { action: "unlink-email", childId: "child-a" },
+  ];
+  for (const body of actions) {
+    const response = await profile(request(body));
+    assert.equal(location(response), "https://maths.example/login?denied=1");
+    assert.equal(response.headers.get("set-cookie"), null);
+  }
+  assert.equal(state.inserted, undefined);
+  assert.equal(state.rpcCall, undefined);
+  assert.deepEqual(state.deleteFilters, []);
 });
 
 test("local mode keeps authentication routes disabled", async () => {

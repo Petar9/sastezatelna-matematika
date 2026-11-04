@@ -23,6 +23,10 @@
 .profile { justify-content: space-between; text-align: left; border: 2px solid #b8d0c4; background: #edf5ec; color: var(--foreground); }
 .profile:hover { background: #dfedde; }
 .profile span { flex-shrink: 0; color: var(--primary); }
+.loginSettings { text-align: left; font-size: 15px; }
+.loginSettings summary { padding: 8px 0; color: var(--muted); cursor: pointer; }
+.loginSettings .form { margin-top: 12px; font-size: 16px; }
+.loginSettings .textButton { font-size: 15px; }
 .additional { margin: 24px 0 0; text-align: left; font-size: 16px; }
 .additional summary { display: list-item; padding: 10px 0; cursor: pointer; color: var(--muted); }
 .additional .form { margin-top: 14px; font-size: 18px; }

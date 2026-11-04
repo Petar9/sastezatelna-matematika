@@ -6,7 +6,7 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 
 - This is the standalone app in /Users/mac/ideas/maths. Do not modify the original AI study tool.
 - Preserve data/, backups/, existing answers, solution steps, discoveries and awards. Never include these private folders, materials/ or credentials in Git or public deployment bundles.
-- Reuse the existing deterministic educational engine and the decisions in key-decisions.md. No live AI grading, leaderboards, payments, child email accounts or self-service content upload in this rollout.
+- Reuse the existing deterministic educational engine and the decisions in key-decisions.md. No live AI grading, leaderboards, payments or self-service content upload in this rollout. Child Google login is optional and parent-managed (approved 2026-11-04).
 - Parent Google login, private child nicknames, invitation-only access, five active children total.
 - Each competition has separate practice, sessions, maps, evidence and awards. All content is mathematics for grade 4. Add Олимпиада before НВО.
 - User supplies PDFs, solutions and YouTube links. Archive transcripts as Markdown; prepare, review and publish via development workflow. Never invent missing source material or publish unreviewed questions.
@@ -25,10 +25,10 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 
 | Stage | Status | Next gate |
 | --- | --- | --- |
-| 1. Host current app | HTTPS and owner login working; history import in progress | Verify imported history and cross-device resume |
+| 1. Host current app | HTTPS, owner login and history import verified | Verify cross-device resume |
 | 2. Competition paths | Олимпиада and НВО implemented for local review; publication pending | Human review of four-island Олимпиада and ten-island НВО, including the missing 2024 Olympiad official solutions |
 | 3. Five-child pilot | Owner login and first child profile saved online | Verify history, cross-device resume and live family isolation |
-| 4. Landing/invitations | Homepage simplification ready for deployment | Verify live simplified landing and hosted invitation flow |
+| 4. Landing/invitations | Landing redesign verified locally | Deploy and smoke-test hosted invitation flow |
 
 ## Stage 1 - host the current app
 
@@ -60,10 +60,10 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 
 ## Stage 4 - landing page and invitation requests
 
-- Create a Bulgarian parent-facing page matching the app with accurate supported-content descriptions. The owner removed the large screenshot and personal-data section on 2026-11-04; keep the invitation consent.
-- Include Заяви покана and Вход. Collect only parent email plus submission consent; handle duplicates and basic abuse.
+- Create a Bulgarian parent-facing page matching the app with accurate supported-content descriptions. Keep the large screenshot and personal-data section removed. Use a lightweight decorative island journey with the existing otter, cream surfaces, marine-blue landing actions and gold accents.
+- Include one Заяви покана form and a discreet Вход link. Collect only parent email; show “Ще използваме имейла само за поканата.” without a separate consent checkbox or hidden substitute. Preserve email validation, duplicate handling and the existing rate limit.
 - Requests are private and manually reviewed. Submission grants no access. Keep additional families waiting until the owner separately approves expansion beyond five children.
-- Defer the public contact/personal-data section at the owner’s request. Keep private invitation handling and explicit submission consent.
+- Defer the public contact/personal-data section at the owner’s request. Invitation submissions remain private; this owner-approved email-only flow supersedes the earlier checkbox requirement.
 - Acceptance: parents understand the app, can request an invitation and receive confirmation; applicants remain private and cannot self-enrol.
 
 ## Verification and release gates
@@ -469,5 +469,72 @@ Homepage and first profile update, 2026-11-04:
 
 - Owner completed the hosted smoke test. Supabase Table Editor confirms the first active child profile under the approved parent; online course_progress was empty before import. Google login and child creation now work; the previous missing-key runtime blocker is resolved. Cross-device and live second-family checks remain pending.
 - Removed the large homepage screenshot and “Лични данни” section, including unused image styles. Kept the original small mascot and invitation consent.
-- Validated the local matematika-za-vseki course (revision 89, 16 attempts) through the current course projection without modifying the source. Created a byte-identical private backup and a one-row CSV for the verified parent/child IDs. Import is pending the dashboard file selection; no database progress has been overwritten. Draft competitions have no attempts and are not being imported.
+- Validated the local matematika-za-vseki course (revision 89, 16 attempts) through the current course projection without modifying the source. Created a byte-identical private backup and a one-row CSV for the verified parent/child IDs. The owner imported the CSV successfully. A fresh Supabase export confirms one record for the verified child and parent, competition matematika-za-vseki, revision 89; its complete course JSON matches the local source exactly. The validated history contains 16 attempts, 210 gold and 5 confirmed skills. No existing database progress was overwritten. The readback export is stored in the private import backup folder. Draft competitions have no attempts and were not imported. Cross-device display remains unverified.
 - Verification: TypeScript, ESLint, production build and private-file bundle checks passed. Coordinator: gpt-6.1-sol, high reasoning; one agent.
+
+
+## Compact homepage - 2026-11-04
+
+- Implemented the approved shorter headline, supporting copy, three benefits, invitation section and consent. Layout styles are limited to the landing page; learning, authentication, invitation processing and learner history are unchanged.
+- Applied the owner's exact collection wording: “Наличният комплект е по математика за 4. клас и включва задачи от „Математика за всеки“, Олимпиада, НВО (матура) за 2023-2026 г.” This copy edit does not publish draft competitions. Source years differ by collection as documented on the About page; the aggregate wording is owner supplied.
+- Verification before the final copy edit: 167/167 tests, TypeScript, ESLint, production build and private-file bundle checks passed. After the final copy edit, production build, TypeScript, ESLint, private-file bundle checks and git diff --check passed; local /welcome returned HTTP 200 with the exact requested text.
+- Browser automation was unavailable; desktop/mobile visual acceptance is not claimed. Local preview uses port 3003; these changes have not been deployed.
+- Coordinator: gpt-6.1-sol, high reasoning; one agent.
+
+
+## Landing redesign - 2026-11-04
+
+- Approved: one hero with text and a single invitation form on the left, a decorative three-island journey and existing otter on the right; mobile order is text, form, illustration, collection information. Remove repeated benefits, headings, CTA and oversized framed sections.
+- Keep “Подготовка за състезания, стъпка по стъпка.”, use “Истински задачи, ясни подсказки и приключения с награди.”, retain the exact owner-supplied collection sentence below the hero, and display “Тестваме с група до 5 деца.” above the form.
+- Remove the checkbox and server-side consent=yes requirement together; no hidden consent value. Keep native email validation, private invitation RPC, duplicate success and 30/hour protection unchanged. Confirmation: “Благодарим! Получихме заявката за покана.” No database, history, collection-publication or learning-flow changes.
+- Acceptance: inspect 390/768/1440 px, 200% zoom, keyboard focus, validation and success/error states; run focused route tests, TypeScript, lint, full tests and production build. Record final evidence below. Changes remain local until deployed separately.
+- Coordinator: gpt-6.1-sol, high reasoning. Implementation: gpt-6.1-sol, high reasoning. Independent critical review: gpt-6-astra, high reasoning.
+
+- Implemented the approved layout, landing-only marine-blue CTA and lightweight SVG illustration with the existing otter. The form requests only the parent email; checkbox validation was removed from the route without changing the private RPC. Network/RPC failures retain a recoverable error state. No dependencies, database schema, learner history, shared learning styles or collection publication changed.
+- Verification: **173/173 tests passed**, TypeScript, ESLint, production build and deployment trace/private-file checks passed. Route tests cover validation, email normalization without a consent field, RPC results, network failure and local-mode behavior. Repeated-request tests mock the existing RPC; live database duplicate/rate-limit behavior was not exercised.
+- Real Chrome inspection passed at **390 × 844, 768 × 1000 and 1440 × 1000**: no horizontal overflow, mobile CTA before the illustration, one form, visible keyboard focus in login/email/CTA order, native email validation, button hover and accessible success/invalid/unavailable states. Decorative artwork is hidden from assistive technology; no browser warnings/errors were reported. Also checked 720 CSS-pixel reflow and 200% CSS magnification; the native browser zoom shortcut was unavailable, so native 200% zoom is not claimed.
+- Independent gpt-6-astra source and screenshot review found no blockers or meaningful usability defects; coordinator completed the browser interaction checks. No live invitation submissions or learner writes were made.
+- Updated production-mode local preview: **http://127.0.0.1:3003/welcome**. No commit, push or deployment in this step; hosted invitation submission and database verification remain post-deployment checks.
+
+
+## Learning app UI polish - 2026-11-04
+
+- Approved scope: compact practice header and one boat/count route; persistently reachable Hint beside Check; focused island screen replacing the dashboard/map while exploring; readable whole-map phone overview with page scrolling at fit; concise outcome, combined gold and one learning goal; correct map return and retained island/list context.
+- Preserve the cream/teal/gold palette, otter, original diagrams, three worked hint steps, learning selection, gold rules, Doctor/Professor logic, draft saves and all existing child history. No database, content-publication or deployment changes.
+- Implemented locally. Compact practice header and boat route bring the question higher; Hint and Check remain in the action bar. Exploring an island shows only that island and its selectable skills. Feedback combines gold into one amount and shows one learning goal. Returning to the map preserves the island/list context; Home/resume retains typed answers and revealed hints. Navigation waits for draft saving and remains on the question if saving fails.
+- Coordinator: gpt-6.1-sol, high reasoning. Implementation worker: gpt-6.1-sol, high reasoning. Independent critic: gpt-6-astra, high reasoning.
+
+- Verification: **176/176 tests passed**, TypeScript, ESLint, production build and deployment trace/private-file checks passed. Added navigation/save-failure and focused island regressions. Chrome checks covered 320 × 740, 390 × 844 and desktop layouts, direct skill selection, assisted answer/continue, typed answer + hint restoration after Home/resume, list return, all three competition maps and five-task treasure completion. No horizontal page overflow in the checked layouts. Tests used disposable learner data; all **13 private history/backup hashes** remain unchanged.
+- Independent gpt-6-astra review found no remaining functional blockers after correcting draft-loss handling and 320 px header overlap. Limitation: the 17-island fit overview at 320 px clips some long labels; zoom and Themes expose full names. Physical-device keyboard and touch gestures remain unverified. No push, deployment, database or learning-rule changes.
+
+
+## Optional child Google login, 2026-11-04 - implemented, rollout pending
+
+- Parents create nickname profiles, then may add a child Google email in an optional “Самостоятелен вход” step with “Не сега”. Existing profiles can add/change/remove this login later.
+- Child Google identities remain separate from parent identities. Link verified Google login to the existing child ID; child access is limited to that child, while the approved parent keeps family management.
+- A private service-only email/auth-user mapping is checked on protected requests. Enforce one login per child and one child per login, reject parent emails, and revoke access when unlinked, inactive or parent approval is removed.
+- Preserve all course JSON, revisions, awards, gold and the five-active-child cap. Link Ema’s supplied email to her existing hosted profile after backup; no duplicate profile or email invitation.
+- Coordinator owns auth/database/integration; a bounded worker owns onboarding/profile UI, followed by an independent security review. Verify UI, authorization, migration preservation, concurrent saves and build before live rollout.
+
+- Implemented the optional post-creation email step, skip, and parent-only add/change/remove controls. Confirmed Google identities resolve to the existing child profile, with no invitation email or duplicate profile.
+- Verification: **189/189 tests passed**, TypeScript, ESLint, production build, private-file deployment checks and git diff --check passed. Disposable PostgreSQL checks cover private table/function privileges, email uniqueness, identity binding, revocation, inactive/unapproved families, and unchanged seeded course JSON/revision. Existing concurrent-save and family-isolation checks pass. Independent security review found no material authorization defect.
+- Live preflight: the existing hosted course remains revision 89 with the same saved history; the child-login table is not yet present. Apply `supabase/migrations/202611040001_child_logins.sql` before deploying this code, then recheck the course fingerprint. Do not deploy ahead of this additive migration.
+- Pending: live migration, production deployment, linking the owner-supplied child email to the existing profile, and a real sign-in by the child. Chrome tab automation is currently failing; the active native Chrome window is the owner's meeting, so rollout is waiting for access to the Supabase SQL Editor. No hosted progress or login mapping has changed in this step.
+- Coordinator: **gpt-6.1-sol, high reasoning**; bounded UI implementation: gpt-6.1-terra, high reasoning; independent security review and authorization regression tests: gpt-6.1-sol, high reasoning.
+
+
+## Island gold target audit, 2026-11-04 - decision pending
+
+- Earned gold is unchanged: the imported course still projects 210 gold. Skill milestones pay 5 + 10 + 20; each newly solved distinct problem pays 10, or 15 when editorially marked hard. Repeated problems and overlapping source parts share one problem entitlement. Historical awards retain their recorded amount.
+- The imported revision-89 course has no saved island targets. Its fallback now adds every prepared practice entitlement to the skill milestones, producing the reported large denominators (1125 / 2795 / 845 / 3370 for the first four islands). This is target recalculation, not duplicated earned gold.
+- Asked the owner whether to restore legacy skill-based goals for imported courses while preserving earned gold, existing saved goals and current rewards. No reward or learner-history change made while that decision is pending.
+- Deployment remains blocked on the additive child-login migration. Chrome tab controls failed; the owner has been given the exact migration file to run in the Supabase SQL Editor. Do not push the dependent code before migration success is confirmed and verified.
+
+
+## Demo production release, 2026-11-04
+
+- Owner reports the additive child-login migration completed with “Success. No rows returned” and explicitly requests immediate production publication for the demo. This supersedes the migration rollout hold above.
+- Publish the verified landing, learning UI and optional child-login changes. Previous acceptance evidence: 189 tests, TypeScript, ESLint, production build and private-bundle checks passed.
+- Live Supabase access checks, linking the child email and real child sign-in remain follow-up verification; user explicitly requests not delaying the demo on these checks. No learner data is changed by this release.
+- Gold-target compatibility decision remains pending; this release preserves the audited reward calculations and earned history.
+- Coordinator: gpt-6.1-sol, high reasoning; release executed by one agent.

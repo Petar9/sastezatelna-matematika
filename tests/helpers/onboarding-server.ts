@@ -1,5 +1,9 @@
+import { KidsError } from "../../src/core/kids.ts";
 export const state = {
   deployment: "hosted",
+  role: "parent" as "parent" | "child",
+  rpcCall: undefined as unknown,
+  deleteFilters: [] as [string, unknown][],
   children: [] as { id: string; nickname: string }[],
   parentError: undefined as unknown,
   authError: false,
@@ -11,7 +15,7 @@ export const state = {
   databaseError: null as null | { code: string; message: string },
 };
 export function reset() {
-  Object.assign(state, { deployment: "hosted", children: [], parentError: undefined, authError: false, exchangeError: false,
+  Object.assign(state, { deployment: "hosted", role: "parent", rpcCall: undefined, deleteFilters: [], children: [], parentError: undefined, authError: false, exchangeError: false,
     throws: false, signedOut: false, oauthOptions: undefined, inserted: undefined, databaseError: null });
 }
 export const childCookie = "maths_child";
@@ -25,13 +29,35 @@ export async function authClient() {
     async signOut() { state.signedOut = true; },
   } };
 }
-export async function parentContext() {
+export async function accountContext() {
   if (state.parentError) throw state.parentError;
-  return { parentId: "parent-a", children: state.children, db: { from(table: string) {
-    if (table !== "child_profiles") throw new Error("Unexpected table");
-    return { insert(value: unknown) {
-      state.inserted = value;
-      return { select() { return { async single() { return { data: { id: "created-child" }, error: state.databaseError }; } }; } };
-    } };
-  } } };
+  const db = {
+    rpc(name: string, args: unknown) {
+      state.rpcCall = { name, args };
+      return Promise.resolve({ error: state.databaseError });
+    },
+    from(table: string) {
+      if (table === "child_profiles") return { insert(value: unknown) {
+        state.inserted = value;
+        return { select() { return { async single() { return { data: { id: "created-child" }, error: state.databaseError }; } }; } };
+      } };
+      if (table === "child_profile_logins") return { delete() {
+        state.deleteFilters = [];
+        return { eq(key: string, value: unknown) {
+          state.deleteFilters.push([key, value]);
+          return { async eq(key: string, value: unknown) {
+            state.deleteFilters.push([key, value]);
+            return { error: state.databaseError };
+          } };
+        } };
+      } };
+      throw new Error("Unexpected table");
+    },
+  };
+  return { role: state.role, parentId: "parent-a", children: state.children, db };
+}
+export async function parentContext() {
+  const account = await accountContext();
+  if (account.role !== "parent") throw new KidsError("Parent only", 403);
+  return account;
 }

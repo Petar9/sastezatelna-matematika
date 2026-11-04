@@ -76,11 +76,11 @@ export function IslandLandmark({ topicId, golden = false }: { topicId: string; g
  return <svg viewBox="-60 -55 120 105" width="86" height="76" aria-hidden="true">{shapes[({ "oli-numbers": "digits", "oli-geometry": "perimeters", "oli-stories": "money", "oli-logic": "counting", "nvo-numbers": "sequences", "nvo-addition": "totals", "nvo-multiplication": "counting", "nvo-expressions": "backwards", "nvo-fractions": "fractions", "nvo-measures": "units", "nvo-geometry": "perimeters", "nvo-areas": "areas", "nvo-data": "grids", "nvo-stories": "money" } as Record<string, string>)[topicId] ?? topicId] ?? shapes.counting}</svg>;
 }
 
-function SkillDiscoveries({ topic }: { topic: CourseTopicView }) {
- return <g>{(topic.leaves ?? []).map((skill, i, skills) => <g key={skill.id} data-skill-marker={skill.id} data-phase={leafPhase(skill) ?? "untried"} transform={`translate(${(i-(skills.length-1)/2)*32-15} 19)`}><svg width="30" height="30" viewBox="0 0 64 64"><DiscoveryMarkerArt phase={leafPhase(skill)}/></svg></g>)}</g>;
+function SkillDiscoveries({ topic, detailed }: { topic: CourseTopicView; detailed: boolean }) {
+ return <g>{(topic.leaves ?? []).map((skill, i, skills) => <g key={skill.id} data-skill-marker={skill.id} data-overview-hidden={!detailed && !leafPhase(skill) || undefined} data-phase={leafPhase(skill) ?? "untried"} transform={`translate(${(i-(skills.length-1)/2)*32-15} 19)`}><svg width="30" height="30" viewBox="0 0 64 64"><DiscoveryMarkerArt phase={leafPhase(skill)}/></svg></g>)}</g>;
 }
 
-export function IslandScenery({ topic, variant, seen }: { topic: CourseTopicView; variant: number; seen: Set<string> }) {
+export function IslandScenery({ topic, variant, seen, detailed = true }: { topic: CourseTopicView; variant: number; seen: Set<string>; detailed?: boolean }) {
  const keys = knowledgeGrowthKeys([topic]);
  const [fresh] = useState(() => keys.some(key => !seen.has(key)));
  useEffect(() => { for (const key of keys) seen.add(key); }, [keys, seen]);
@@ -91,7 +91,7 @@ export function IslandScenery({ topic, variant, seen }: { topic: CourseTopicView
   <path d={shores[variant % shores.length]} transform="scale(.85 .78) translate(0 -7)" fill={variant % 2 ? "#699b74" : "#78aa7d"}/>
   <path d="M-62 16q22-14 45-8t43-6" fill="none" stroke="#d8ca8d" strokeWidth="8" strokeLinecap="round" opacity=".6"/>
   <ellipse cx="-65" cy="-23" rx="12" ry="8" fill="#afbf9a"/><ellipse cx="64" cy="28" rx="9" ry="6" fill="#b3c39e"/>
-  <SkillDiscoveries topic={topic}/>
+  <SkillDiscoveries topic={topic} detailed={detailed}/>
   <g transform="translate(-43 -60)"><IslandLandmark topicId={topic.id} golden={topic.professor}/></g>
   {topic.doctor && <g data-scenery="doctor-flag" transform="translate(58 -35)"><path d="M0 25v-63" stroke="#f4dfb0" strokeWidth="4"/><path d="M2-38h30l-7 11 7 11H2Z" fill="#89cde5"/><path d="m15-34 2 5 6 1-4 4 1 5-5-3-4 3 1-5-4-4 5-1Z" fill="#fff2cb"/></g>}
   {topic.professor && <g data-scenery="professor-gold" transform="translate(0 -67)" fill="#ffe1a0"><path d="m0-12 3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/><circle cx="26" cy="7" r="3"/><circle cx="-30" cy="4" r="3"/></g>}
@@ -115,6 +115,7 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
  const [size, setSize] = useState({ w: 720, h: 560 });
  const [camera, setCamera] = useState<Viewport>(() => fitGraphView(world, size, fitZoomFor(world, size)));
  const floor = fitZoomFor(world, size);
+ const zoomed = camera.zoom > floor + .001;
  useEffect(() => {
   const node = surface.current;
   if (!node) return;
@@ -122,7 +123,7 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
   const fit = fitZoomFor(world, viewport);
   const z = zoom<HTMLDivElement, unknown>().extent([[0, 0], [viewport.w, viewport.h]])
    .translateExtent([[0, 0], [world.w, world.h]]).scaleExtent([fit, fit * 4])
-   .filter(event => event.type !== "wheel" && event.type !== "dblclick" && !event.button && !event.target?.closest?.("button"))
+   .filter(event => event.type !== "wheel" && event.type !== "dblclick" && !event.button && !event.target?.closest?.("button") && (event.type !== "touchstart" || node.dataset.zoomed === "true"))
    .touchable(() => true).clickDistance(8)
    .on("zoom", ({ transform }) => setCamera({ x: transform.x, y: transform.y, zoom: transform.k }));
   behavior.current = z;
@@ -153,14 +154,14 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
  }
  return <div className={s.world}>
   <div className={s.toolbar}>{viewControls}<div className={s.tools} role="group" aria-label="Изглед на картата"><button aria-label="Приближи картата" disabled={camera.zoom >= floor * 4 - .001} onClick={() => changeZoom(1.4)}>+</button><button aria-label="Отдалечи картата" disabled={camera.zoom <= floor + .001} onClick={() => changeZoom(1 / 1.4)}>−</button><button onClick={reset}>Цялата карта</button></div></div>
-  <div ref={surface} className={s.surface} onPointerDownCapture={() => { pointerNavigation.current = true; }} onKeyDownCapture={() => { pointerNavigation.current = false; }} aria-label="Морето с островите" aria-describedby={`${id}-help`} data-camera={`${camera.x.toFixed(2)},${camera.y.toFixed(2)},${camera.zoom.toFixed(3)}`}>
+  <div ref={surface} className={s.surface} data-zoomed={zoomed} style={{ touchAction: zoomed ? "none" : "pan-y" }} onPointerDownCapture={() => { pointerNavigation.current = true; }} onKeyDownCapture={() => { pointerNavigation.current = false; }} aria-label="Морето с островите" aria-describedby={`${id}-help`} data-camera={`${camera.x.toFixed(2)},${camera.y.toFixed(2)},${camera.zoom.toFixed(3)}`}>
    <svg className={s.sea} width="100%" height="100%" aria-hidden="true">
     <defs><pattern id={`${id}-waves`} width="100" height="90" patternUnits="userSpaceOnUse"><path d="M12 30q9-6 18 0t18 0m17 35q7-5 14 0t14 0" fill="none" stroke="#45838c" strokeWidth="2" opacity=".16"/></pattern><radialGradient id={`${id}-water`}><stop stopColor="#c6e8ea"/><stop offset="1" stopColor="#e3f3f4"/></radialGradient></defs>
     <rect width="100%" height="100%" fill={`url(#${id}-water)`}/><rect width="100%" height="100%" fill={`url(#${id}-waves)`}/>
     <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.zoom})`}>
      <g fill="none" stroke="#9bd0c4" strokeWidth="2" opacity=".45"><path d="M40 310q12-14 24 0 12-14 24 0M710 860q12-14 24 0 12-14 24 0M510 60q12-14 24 0 12-14 24 0"/></g>
      <g transform={`translate(${world === defaultWorld ? 1020 : world.w - 65} ${world === defaultWorld ? 900 : world.h - 65})`} fill="none" stroke="#53898c" opacity=".6"><circle r="31"/><path d="M0-43V43M-43 0H43m-15-28L28 28m-56 0 56-56"/><path d="M0-32 8 0 0 32-8 0Z" fill="#53898c"/><text y="-49" textAnchor="middle" fill="#53898c" stroke="none" fontSize="17">С</text></g>
-     {topics.map((topic, i) => { const place = islandPlaces[topic.id]; return place && <g key={topic.id} transform={`translate(${place.x} ${place.y})`}><IslandScenery topic={topic} variant={i} seen={seen}/></g>; })}
+     {topics.map((topic, i) => { const place = islandPlaces[topic.id]; return place && <g key={topic.id} transform={`translate(${place.x} ${place.y})`}><IslandScenery topic={topic} variant={i} seen={seen} detailed={camera.zoom >= .45}/></g>; })}
     </g>
    </svg>
    {topics.map(topic => {
@@ -168,6 +169,6 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
     return <button key={topic.id} id={`island-${topic.id}`} ref={node => { if (node) buttons.current.set(topic.id, node); else buttons.current.delete(topic.id); }} className={s.islandTarget} data-compact={camera.zoom < .32} title={`${topic.title}${topic.professor ? " · Професор" : topic.doctor ? " · Доктор" : ""}`} style={{ left: camera.x + place.x * camera.zoom, top: camera.y + place.y * camera.zoom, width: Math.max(44, 222 * camera.zoom), height: Math.max(44, 150 * camera.zoom), fontSize: Math.max(13, Math.min(18, 24 * camera.zoom)) }} aria-label={topic.title} aria-expanded={selectedId === topic.id} aria-controls={selectedId === topic.id ? panelId : undefined} data-selected={selectedId === topic.id} onFocus={() => { if (!pointerNavigation.current && surface.current && behavior.current) select(surface.current).call(behavior.current.translateTo, place.x, place.y); }} onClick={() => onSelect(topic.id)}><span>{camera.zoom < .32 ? compactNames[topic.id] ?? place.name : place.name}</span></button>;
    })}
   </div>
-  <p id={`${id}-help`} className={s.help}>Докосни остров и го разгледай. Премести морето с пръст или мишка.</p>
+  <p id={`${id}-help`} className={s.help}>Докосни остров и го разгледай. {zoomed ? "Премести морето с пръст или мишка." : "Приближи с + за повече подробности."}</p>
  </div>;
 }

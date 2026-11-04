@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authClient } from "@/src/server/supabase";
-import { mode, appOrigin, parentContext } from "@/src/server";
+import { mode, appOrigin, accountContext } from "@/src/server";
 import { KidsError } from "@/src/core";
 export async function GET(request: Request) {
   if (mode() !== "hosted") return new Response(null, { status: 404 });
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const { error } = await client.auth.exchangeCodeForSession(code);
     if (error) return login("error=unavailable");
     try {
-      await parentContext();
+      await accountContext();
       return NextResponse.redirect(`${appOrigin()}/`, 303);
     } catch (error) {
       await client.auth.signOut();

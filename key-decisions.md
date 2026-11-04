@@ -135,3 +135,19 @@ Adopted educational decisions for Математически открития. U
 - One source original, its parts and scaffolds share one entitlement. Replays/reloads cannot farm gold. An old award without amount still pays exactly 5; new records persist the paid amount. Existing history and per-child island targets remain unchanged; new targets sum weighted unique problem rewards plus unchanged 5/10/20 skill milestones.
 - Owner chose reward-only differentiation: do not increase hard-task frequency or change five-task adventures, adaptive selection, confirmation or Doctor/Professor criteria for this multiplier. Preview only the available problem reward, with coin and 10 or 15 · ×1,5.
 - Ratings are provisional editorial judgements to test with the pilot children, not measured difficulty or publication approval. See docs/problem-difficulty-review.md and docs/content-workflow.md.
+
+
+## 2026-11-04 - Focused exploration and reachable help
+
+- Selecting an island opens its compact skill view; the adventure dashboard and whole map return when leaving that island. Keep the selected island and map/list choice available when returning from practice.
+- Navigation to Home or Map is a client view change, not a learning action. Preserve task, draft answer, hints and outcome; map links must land at the map.
+- Show one compact adventure route/count and keep Подсказка beside Провери отговора. Feedback uses one outcome, combined earned gold and one next learning goal; assisted work remains clearly labelled.
+- The whole-map phone view keeps all islands accessible and permits normal vertical page scrolling. Zoomed-in maps allow dragging; earned discoveries and awards remain visible without untried decorative circles crowding the overview. Educational and reward criteria are unchanged.
+
+
+## 2026-11-04 - Optional child Google access
+
+- The parent creates a nickname profile first. Adding the child's Google email is optional during onboarding, with “Не сега”, and remains available in Profiles.
+- Child login reuses the existing child ID and saved competition history. It never creates another learner or sends an invitation email. Parents retain family management; children can access only their own learner profile.
+- Link only a confirmed Google identity through a private server-only mapping. One child per email and one Google identity per child; changing or removing the email revokes the old access. Inactive children and families without parent approval cannot sign in.
+- Preserve course JSON, revisions, earned gold, awards and the five-active-child limit. Apply the additive login migration before deploying dependent code.
