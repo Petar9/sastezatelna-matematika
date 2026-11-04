@@ -454,3 +454,12 @@ This slice supersedes the earlier no-recovery policy for previously attempted pr
 - Learner history, backups, source PDF/transcript archives and environment credentials remain excluded; macOS `.DS_Store` is not included.
 - This publishes source only. Production deployment, hosted OAuth/cross-device verification, content publication approval and public contact remain the release gates above.
 - Coordinator: gpt-6.1-sol, high reasoning; one agent.
+
+
+## Vercel build repair - 2026-11-04
+
+- First production deployment of `395f7cc` compiled successfully, then failed in `scripts/deployment-check.mjs`: its blanket symlink rejection refused Vercel's generated `_global-error.segments/__PAGE__.segment.rsc.func` link.
+- Removed that blanket rejection for links contained within `.next`; inspect their resolved targets once and stop cycles. Links outside the build remain rejected, and standalone bundle/private-file checks remain enforced.
+- Added a regression covering Vercel function aliases, link cycles, private traced files, links outside the build and standalone symlinks. Verified 167/167 tests, TypeScript, ESLint, production build and `git diff --check`; all 69 private baseline files are unchanged.
+- Hosted rebuild and login verification remain pending; no credentials, cloud access settings, database content or learning behavior changed.
+- Coordinator: gpt-6.1-sol, high reasoning; one agent.

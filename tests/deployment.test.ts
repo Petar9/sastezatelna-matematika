@@ -31,3 +31,32 @@ test("Vercel Preview denies hosted data access even if credentials are present",
  try {process.env.VERCEL_ENV="preview";assert.throws(assertHostedDataAccess,/disabled/);assert.throws(database,/disabled/);await assert.rejects(authClient(),/disabled/);process.env.VERCEL_ENV="production";assert.doesNotThrow(assertHostedDataAccess);}
  finally {if(previous===undefined)delete process.env.VERCEL_ENV;else process.env.VERCEL_ENV=previous;}
 });
+
+
+test("deployment verification accepts contained Vercel function links without allowing escapes",()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),"maths-deploy-links-"));
+ try {
+  const next=path.join(root,".next"), bundle=path.join(next,"standalone");
+  const functions=path.join(next,"output/functions"), target=path.join(functions,"shared.func");
+  fs.mkdirSync(bundle,{recursive:true});fs.mkdirSync(target,{recursive:true});
+  const trace=path.join(target,"server.nft.json");
+  fs.writeFileSync(trace,JSON.stringify({files:[]}));
+  fs.symlinkSync("shared.func",path.join(functions,"page.segment.rsc.func"),"dir");
+  fs.symlinkSync(".",path.join(functions,"cycle"),"dir");
+  verifyDeployment(root);
+  fs.writeFileSync(trace,JSON.stringify({files:[path.relative(target,path.join(root,"data/kids/course.json"))]}));
+  assert.throws(()=>verifyDeployment(root),/Private file in deployment trace/);
+  fs.writeFileSync(trace,JSON.stringify({files:[]}));
+  const privateDirectory=path.join(root,"data");fs.mkdirSync(privateDirectory);
+  const escape=path.join(functions,"private.func");fs.symlinkSync(privateDirectory,escape,"dir");
+  assert.throws(()=>verifyDeployment(root),/Refusing symlink/);
+  fs.unlinkSync(escape);
+  const sibling=path.join(root,".next-other");fs.mkdirSync(sibling);
+  fs.symlinkSync(sibling,escape,"dir");
+  assert.throws(()=>verifyDeployment(root),/Refusing symlink/);
+  fs.unlinkSync(escape);
+  fs.writeFileSync(path.join(bundle,"safe.js"),"export {};");
+  fs.symlinkSync("safe.js",path.join(bundle,"alias.js"));
+  assert.throws(()=>verifyDeployment(root),/Refusing symlink/);
+ } finally {fs.rmSync(root,{recursive:true,force:true});}
+});
