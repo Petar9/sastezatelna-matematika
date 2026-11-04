@@ -1,4 +1,4 @@
-import {competitionContent,requirePublishedCompetition} from "./competitions.ts";
+import {competitionContent,requireAvailableCompetition} from "./competitions.ts";
 import {cookies,headers} from "next/headers";
 import {KidsError} from "../core/kids.ts";
 import {mode,isLoopbackHost} from "./config.ts";
@@ -19,13 +19,13 @@ export async function parentContext(){
 }
 export function selectedChild(children:{id:string;nickname:string}[],selected:string|undefined){return children.find(child=>child.id===selected)??(children.length===1?children[0]:undefined);}
 export async function learnerContext(request?:{childId?:string;competitionId?:string;api:boolean}){
- const competitionId=requirePublishedCompetition(request?.competitionId).id;
+ const competitionId=requireAvailableCompetition(request?.competitionId).id;
  const content=competitionContent(competitionId);
  if(mode()==="local"){
   if(!isLoopbackHost((await headers()).get("host")))throw new KidsError("Локалният режим е достъпен само на този компютър.",403);
-  const stores=localStores(competitionId);return {courseStore:stores.kidsCourseStore,legacyStore:stores.kidsStore,childId:undefined,competitionId,content};
+  const stores=localStores(competitionId);return {courseStore:stores.kidsCourseStore,legacyStore:stores.kidsStore,childId:undefined,childNickname:undefined,competitionId,content};
  }
  const parent=await parentContext();const child=request?.api ? parent.children.find(child=>child.id===request.childId) : selectedChild(parent.children,(await cookies()).get(childCookie)?.value);
  if(!child)throw new KidsError("Избери детски профил.",428);
- return {courseStore:createSupabaseCourseStore(parent.db,parent.parentId,child.id,competitionId),legacyStore:undefined,childId:child.id,competitionId,content};
+ return {courseStore:createSupabaseCourseStore(parent.db,parent.parentId,child.id,competitionId),legacyStore:undefined,childId:child.id,childNickname:child.nickname,competitionId,content};
 }

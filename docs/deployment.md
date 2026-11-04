@@ -53,3 +53,7 @@ Invitation requests appear only in the private `invitation_requests` table. Revi
 Parents select child profiles at `/profiles`, view their own summary at `/parent`, and can report the latest completed problem there. Reports remain private in `problem_reports`. A child can be archived by an authorized operator setting that exact profile's `active` to false; preserve the profile and course instead of deleting history. Archived children cannot be selected or mutated through the app. Reactivation also respects the five-child cap.
 
 Requests above the available capacity stay in the waiting list. To revoke access, remove the exact parent email from the allowlist; no data deletion is implied. Handle email correction or deletion requests manually after verifying the requesting parent. Publish the real owner contact before inviting public testers.
+
+## Public image assets
+
+`npm run build` generates lossless, content-hashed images from unchanged PNG sources in `assets/images/`. Local development also runs this step. Commit the sources, `src/generated/public-images.json` and generated `public/assets/images/` files together. Original source PNGs are excluded from deployment traces; source PDFs remain private in `materials/`. Old PNG URLs redirect to the current optimized file. Hashed images use a one-year immutable cache; lesson SVGs revalidate on each use. Personalized pages, auth and APIs retain `no-store`.

@@ -4,7 +4,7 @@ import {test} from "node:test";
 import type {SupabaseClient} from "@supabase/supabase-js";
 import {createSupabaseCourseStore} from "../src/store/supabase-course.ts";
 import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
-import {newKidsCourse} from "../src/core/kids-course.ts";
+import {applyCourseAction,newKidsCourse} from "../src/core/kids-course.ts";
 import {approvedGoogleUser,selectedChild} from "../src/server/context.ts";
 import {mode,mutationAllowed,isLoopbackHost} from "../src/server/config.ts";
 
@@ -14,6 +14,7 @@ function fakeDatabase(initial:Row[]=[]){
  return {rows,filters,client:{from(table:string){assert.equal(table,"course_progress");let operation="read",value:Partial<Row>={};const conditions:Record<string,unknown>[]=[];
  const chain={select(){return chain;},eq(key:string,v:unknown){conditions.push({[key]:v});return chain;},update(v:Partial<Row>){operation="update";value=v;return chain;},
  async insert(row:Row){await Promise.resolve();if(rows.some(r=>r.child_id===row.child_id&&r.competition_id===row.competition_id))return {error:{code:"23505"}};rows.push({...structuredClone(row),competition_id:row.competition_id??DEFAULT_COMPETITION_ID});return {error:null};},
+ then(resolve:(value:unknown)=>unknown){filters.push(conditions);return Promise.resolve({data:structuredClone(rows.filter(r=>conditions.every(c=>Object.entries(c).every(([k,v])=>r[k as keyof Row]===v)))),error:null}).then(resolve);},
  async maybeSingle(){filters.push(conditions);const row=rows.find(r=>conditions.every(c=>Object.entries(c).every(([k,v])=>r[k as keyof Row]===v)));if(operation==="update"&&row)Object.assign(row,structuredClone(value));return {data:row?structuredClone(row):null,error:null};}};return chain;}} as unknown as SupabaseClient};
 }
 const now="2026-11-03T10:00:00Z";
@@ -73,4 +74,52 @@ test("same child has separate competition revisions, work and evidence",async()=
  const forged=createSupabaseCourseStore(db.client,"parent-b","child-a","olimpiada-fixture");
  assert.equal(await forged.read(alternateContent),null);
  for(const query of db.filters)assert.ok(query.some(c=>typeof c.competition_id==="string"));
+});
+
+
+test("gold wallet sums competitions once and isolates both parent and child",async()=>{
+ const started=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"matches"},now);
+ const work=started.topics.matches!.work.core!.attempt;
+ const earned=applyCourseAction(started,content,{type:"answer",taskKey:work.key,answers:work.problem.fields.map(f=>f.answer)},now);
+ const row=(parent_id:string,child_id:string,competition_id:string)=>({parent_id,child_id,competition_id,revision:earned.revision,course:earned});
+ const db=fakeDatabase([row("p","c",DEFAULT_COMPETITION_ID),row("p","c","other"),row("p","other",DEFAULT_COMPETITION_ID),row("other","c",DEFAULT_COMPETITION_ID)]);
+ const store=createSupabaseCourseStore(db.client,"p","c");
+ assert.equal(await store.goldBalance!(earned),50);
+ assert.equal(db.rows.length,4);
+ for(const query of db.filters){assert.ok(query.some(c=>c.parent_id==="p"));assert.ok(query.some(c=>c.child_id==="c"));}
+});
+
+test("concurrent gold awards use course CAS and cannot duplicate a milestone",async()=>{
+ const db=fakeDatabase();const store=createSupabaseCourseStore(db.client,"p","c");
+ const started=await store.update(0,{type:"selectTopic",topicId:"matches"},content);
+ const attempt=started.topics.matches!.work.core!.attempt;
+ const action={type:"answer",taskKey:attempt.key,answers:attempt.problem.fields.map(f=>f.answer)} as const;
+ const results=await Promise.allSettled([store.update(started.revision,action,content),store.update(started.revision,action,content)]);
+ assert.equal(results.filter(r=>r.status==="fulfilled").length,1);
+ const saved=(await store.read(content))!;
+ assert.equal(saved.attempts.length,1);assert.equal(saved.goldAwards!.length,2);assert.equal(saved.problemGoldAwards!.length,1);
+ assert.equal(await store.goldBalance!(saved),25);
+});
+
+
+test("simultaneous rewards in different competitions both survive without a shared-wallet overwrite",async()=>{
+ const db=fakeDatabase();const a=createSupabaseCourseStore(db.client,"p","c");const b=createSupabaseCourseStore(db.client,"p","c","other");
+ const [first,second]=await Promise.all([a.update(0,{type:"selectTopic",topicId:"matches"},content),b.update(0,{type:"selectTopic",topicId:"matches"},content)]);
+ const answer=(course:typeof first)=>{const attempt=course.topics.matches!.work.core!.attempt;return{type:"answer",taskKey:attempt.key,answers:attempt.problem.fields.map(f=>f.answer)} as const;};
+ const [savedA,savedB]=await Promise.all([a.update(first.revision,answer(first),content),b.update(second.revision,answer(second),content)]);
+ assert.equal(await a.goldBalance!(savedA),50);assert.equal(await b.goldBalance!(savedB),50);
+ assert.equal(db.rows.length,2);assert.ok(db.rows.every(row=>(row.course as typeof first).goldAwards!.length===2));
+});
+
+
+test("saved drafts sync between devices and stay isolated by parent, child, competition and revision",async()=>{
+ const db=fakeDatabase();const first=createSupabaseCourseStore(db.client,"p","c");const second=createSupabaseCourseStore(db.client,"p","c");
+ const started=await first.update(0,{type:"selectTopic",topicId:"grids"},content);const key=started.topics.grids!.work.core!.attempt.key;
+ const action={type:"saveDraft" as const,taskKey:key,partIndex:0,answers:["56"]};
+ const saved=await first.update(started.revision,action,content);
+ assert.deepEqual((await second.read(content))!.topics.grids!.work.core!.attempt.draft,{partIndex:0,answers:["56"]});
+ await assert.rejects(async()=>second.update(started.revision,{...action,answers:["99"]},content),{status:409});
+ assert.deepEqual((await first.read(content))!.topics.grids!.work.core!.attempt.draft!.answers,["56"]);
+ for(const other of [createSupabaseCourseStore(db.client,"other","c"),createSupabaseCourseStore(db.client,"p","other"),createSupabaseCourseStore(db.client,"p","c","other")])assert.equal(await other.read(content),null);
+ assert.equal(saved.attempts.length,0);assert.equal(saved.goldAwards!.length,0);
 });

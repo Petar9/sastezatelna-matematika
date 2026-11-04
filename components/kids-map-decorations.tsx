@@ -24,22 +24,22 @@ function useFreshGrowth(earned: boolean, growthKey: string, seen: Set<string>) {
  return fresh;
 }
 
-export function leafPhase(concept: Pick<LearningSkillView, "status" | "milestones">) {
- return concept.status === "confirmed" || concept.status === "review" ? "confirmed" : concept.milestones?.firstCorrect ? "correct" : concept.milestones?.started ? "started" : undefined;
+export function leafPhase(concept: Pick<LearningSkillView, "status" | "milestones"> & { confirmation?: LearningSkillView["confirmation"] }) {
+ return concept.confirmation?.earned || concept.status === "confirmed" || concept.status === "review" ? "confirmed" : concept.milestones?.firstCorrect ? "correct" : concept.milestones?.started ? "started" : undefined;
 }
-export function Leaf({ status, milestones, growthKey, seen, animate = true }: { status: LearningSkillView["status"]; milestones?: LearningSkillView["milestones"]; growthKey: string; seen: Set<string>; animate?: boolean }) {
- const phase = leafPhase({ status, milestones: milestones ?? { started: false } });
+export function DiscoveryMarkerArt({ phase }: { phase?: "started" | "correct" | "confirmed" }) {
+ return phase === "confirmed" ? <><circle cx="32" cy="32" r="25" fill="#f2cc72" stroke="#a57b30" strokeWidth="3"/><circle cx="32" cy="32" r="18" fill="none" stroke="#fff1b9" strokeWidth="2"/><path d="m20 32 8 8 17-19" fill="none" stroke="#76551c" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></>
+ : phase === "correct" ? <><circle cx="32" cy="32" r="25" fill="#d0efeb" stroke="#3a918c" strokeWidth="2"/><path d="m32 10 6 15 16 7-16 6-6 16-6-16-16-6 16-7Z" fill="#318d89"/><circle cx="32" cy="32" r="5" fill="#f2d58b"/></>
+ : phase === "started" ? <><circle cx="32" cy="32" r="25" fill="#e0f0f8" stroke="#6ca7c5" strokeWidth="2"/><path d="M20 51V14h29l-7 10 7 10H21" fill="#3184ac" stroke="#246581" strokeWidth="3" strokeLinejoin="round"/></>
+ : <circle cx="32" cy="32" r="23" fill="#fffaf0" fillOpacity=".7" stroke="#809f9f" strokeWidth="2" strokeDasharray="4 4"/>;
+}
+export function DiscoveryMarker({ status, milestones, confirmed, growthKey, seen, animate = true }: { status: LearningSkillView["status"]; milestones?: LearningSkillView["milestones"]; confirmed?: boolean; growthKey: string; seen: Set<string>; animate?: boolean }) {
+ const phase = confirmed ? "confirmed" : leafPhase({ status, milestones: milestones ?? { started: false } });
  const fresh = useFreshGrowth(animate && !!phase, `${growthKey}:${phase}`, seen);
- return <svg className={s.leaf} data-state={status} data-first-correct={!!milestones?.firstCorrect || undefined} data-growing={fresh || undefined} viewBox="0 0 64 64" aria-hidden="true">
-  {status === "untried" ? <><path d="M31 55V31" className={s.stem}/><path d="M32 36C13 33 18 15 31 9C44 19 48 33 32 36Z" className={s.bud}/></> : <>
-   <path d={status === "practising" ? "M15 51C5 27 29 11 46 14C50 34 39 51 15 51Z" : "M12 53C0 19 28 5 55 9C57 38 42 59 12 53Z"} className={s.leafBody}/>
-   <path d="M9 59 43 23M22 45l-1-16m10 7 15-1" className={s.stem}/>
-   {status === "confirmed" && <path d="m28 27 6 6 12-13" className={s.check}/>}
-   {status === "review" && <path d="M49 34c0 0-10 12-10 18a10 10 0 0 0 20 0c0-6-10-18-10-18Z" fill="#a8d7f3" stroke="#254f63" strokeWidth="2"/>}
-  </>}
-  {milestones?.firstCorrect && <path d="m51 2 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z" className={s.sparkle}/>}
- </svg>;
+ return <svg className={s.marker} data-state={status} data-phase={phase ?? "untried"} data-first-correct={!!milestones?.firstCorrect || undefined} data-growing={fresh || undefined} viewBox="0 0 64 64" aria-hidden="true"><DiscoveryMarkerArt phase={phase}/></svg>;
 }
+// Kept for older component consumers; the visual is now a discovery marker.
+export const Leaf = DiscoveryMarker;
 
 export function Award({ rank, earned, topicId, seen }: { rank: "doctor" | "professor"; earned: boolean; topicId: string; seen: Set<string> }) {
  const fresh = useFreshGrowth(earned, awardKey(topicId, rank), seen);

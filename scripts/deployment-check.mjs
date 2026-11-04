@@ -5,7 +5,7 @@ function privatePath(root, filename) {
  const relative=path.relative(root, filename);
  if(relative.startsWith(`..${path.sep}`)||path.isAbsolute(relative)) return false;
  const parts=relative.split(path.sep);
- return ["data","backups","materials"].includes(parts[0]) || parts.some(part=>part.startsWith(".env"));
+ return ["data","backups","materials","assets"].includes(parts[0]) || parts.some(part=>part.startsWith(".env"));
 }
 function walk(directory, visit) {
  if(!fs.existsSync(directory)) return;

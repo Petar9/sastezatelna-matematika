@@ -3,6 +3,8 @@ import path from "node:path";
 import {spawnSync} from "node:child_process";
 import {verifyDeployment} from "./deployment-check.mjs";
 const root=process.cwd(),bundle=path.join(root,".next/standalone");
+const assets=spawnSync(process.execPath,["scripts/optimize-images.mjs"],{stdio:"inherit"});
+if(assets.status!==0)process.exit(assets.status??1);
 fs.rmSync(bundle,{recursive:true,force:true});
 const result=spawnSync(process.execPath,["node_modules/next/dist/bin/next","build"],{stdio:"inherit"});
 if(result.status!==0)process.exit(result.status??1);

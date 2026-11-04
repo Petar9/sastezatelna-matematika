@@ -31,7 +31,7 @@ test("three-year catalog matches official keys and keeps all source diagrams and
    assert.equal(skill.lesson.length,3);
    assert.ok(fs.statSync(path.join("public",skill.illustration!.src)).size > 300);
    if (row.figure) {
-    const bytes = fs.readFileSync(path.join("public",p.figure!.src));
+    const bytes = fs.readFileSync(path.join("assets/images",p.figure!.src));
     assert.equal(bytes.toString("hex",0,8),"89504e470d0a1a0a");
     assert.ok(bytes.readUInt32BE(16) >= 170 && bytes.readUInt32BE(20) >= 100,p.id);
    }
@@ -93,6 +93,37 @@ test("migration preserves pending task snapshots, assistance, lesson steps, awar
  migrated = act(migrated,"pause"); migrated = act(migrated,"resume");
  assert.deepEqual(courseView(migrated,content,now).lesson,lesson);
  assert.equal(migrateKidsCourse(migrated,content,now),migrated);
+});
+
+test("revised solutions refresh saved matching questions without rewriting history or trusting changed keys", () => {
+ const record = applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"digits"},now);
+ const attempt = record.topics.digits!.work.core!.attempt;
+ const current = content.problem("2026-M1-16",0,false)!;
+ attempt.problem = structuredClone(current);
+ attempt.problem.solution![0].paragraphs = ["Предишно обяснение"];
+ attempt.hintUsed = true; attempt.hintLevel = 1;
+ attempt.reasoning = "Започвам с най-малките цифри";
+ const snapshot = structuredClone(record);
+ const view = courseView(record,content,now);
+ assert.deepEqual(view.task?.solutionParts,current.solution!.slice(0,1));
+ assert.equal(view.task?.hintLevel,1);
+ assert.equal(view.task?.reasoning,attempt.reasoning);
+ assert.deepEqual(record,snapshot);
+
+ for (const change of ["question","answer"] as const) {
+  const changed = structuredClone(record);
+  const saved = changed.topics.digits!.work.core!.attempt.problem;
+  if(change === "question") saved.text += " Друго условие.";
+  else saved.fields[0]!.answer = "999";
+  const before = structuredClone(changed);
+  assert.deepEqual(courseView(changed,content,now).task?.solutionParts,saved.solution!.slice(0,1));
+  assert.deepEqual(changed,before);
+ }
+
+ attempt.outcome = "hinted"; attempt.answers = ["865"];
+ const answered = structuredClone(record);
+ assert.deepEqual(courseView(record,content,now).task?.explanation,current.solution!.flatMap(part=>part.paragraphs));
+ assert.deepEqual(record,answered);
 });
 
 test("added skills reopen exhausted topics and old badges cannot complete the expanded course", () => {

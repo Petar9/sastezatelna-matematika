@@ -9,13 +9,7 @@
 .award[data-earned="true"] .ribbon { fill: #d79a56; stroke: #ffd38b; }
 .award[data-earned="true"] .blossom { fill: #b69ae7; stroke: #e2cfff; }
 .award[data-earned="true"] .flowerCentre { fill: #f8d782; }
-.leaf { width: 44px; height: 48px; flex-shrink: 0; overflow: visible; }
-.stem { fill: none; stroke: #91aa74; stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
-.bud { fill: #3c5e49; stroke: #b2c29e; stroke-width: 2px; }
-.leafBody { fill: #e0bb68; stroke: #f3da95; stroke-width: 2px; }
-.leaf[data-state="confirmed"] .leafBody, .leaf[data-state="review"] .leafBody { fill: #8ac69a; stroke: #c9eac2; }
-.leaf[data-state="confirmed"] .stem, .leaf[data-state="review"] .stem { stroke: #3b7049; }
-.check { fill: none; stroke: #244e32; stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; }
-.leaf[data-growing="true"], .award[data-growing="true"] { animation: unfurl 650ms ease-out; transform-origin: 20% 90%; }
-@keyframes unfurl { from { opacity: .3; transform: scale(.35) rotate(-18deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
-@media (prefers-reduced-motion: reduce) { .leaf[data-growing="true"], .award[data-growing="true"] { animation: none; } }
+.marker { width: 40px; height: 40px; flex-shrink: 0; overflow: visible; }
+.marker[data-growing="true"], .award[data-growing="true"] { animation: discovery-pop 500ms ease-out; transform-origin: center; }
+@keyframes discovery-pop { from { opacity: .4; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .marker[data-growing="true"], .award[data-growing="true"] { animation: none; } }

@@ -6,6 +6,7 @@ import path from "node:path";
 import { applyCourseAction, courseView, newKidsCourse, normalizeCourseNumber, parseCourseCommand } from "../src/core/kids-course.ts";
 import type { CourseAction, KidsCourse, KidsCourseContent, CourseProblem } from "../src/core/kids-course.ts";
 import { kidsCourseContent as content } from "../src/server/kids-course-content.ts";
+import { olympiadCourseContent } from "../src/server/olimpiada-course-content.ts";
 import { createKidsCourseStore } from "../src/store/kids-course.ts";
 
 const now = "2026-11-02T12:00:00.000Z";
@@ -13,7 +14,10 @@ function harness(material: KidsCourseContent = content) {
  let record = newKidsCourse(material, now);
  const view = (date = now) => courseView(record, material, date);
  const go = (action: CourseAction, date = now) => { record = applyCourseAction(record, material, action, date); return view(date); };
- const work = () => record.topics[record.active!.topicId]!.work[record.active!.mode]!;
+ const work = () => {
+  const p=record.topics[record.active!.topicId]!;
+  return record.journey==="quest" ? record.quest!.work! : record.active!.skillId ? p.skillWork![record.active!.skillId]! : p.work[record.active!.mode]!;
+ };
  const correct = () => go({ type: "answer", taskKey: work().attempt.key, answers: work().attempt.problem.fields.map(f => f.answer) });
  const wrong = () => go({ type: "answer", taskKey: work().attempt.key, answers: work().attempt.problem.fields.map(f => String(work().attempt.problem.options ? (Number(f.answer)+1)%work().attempt.problem.options!.length : Number(f.answer)+1)) });
  const hint = () => go({ type: "dontKnow", taskKey: work().attempt.key });
@@ -37,7 +41,7 @@ test("all 78 source objectives have original choices, reviewed numeric answers a
  assert.deepEqual(content.problem("M2-2a",0,false)!.fields.map(f=>f.answer), ["56","66","4"]);
  for (const id of ["M1-09","M1-10","M1-11","M1-14","M2-2a","M2-2b"]) {
   const p = content.problem(id,0,false)!;
-  assert.ok(p.figure?.alt); assert.ok(fs.statSync(path.join(process.cwd(),"public",p.figure!.src)).size > 1000);
+  assert.ok(p.figure?.alt); assert.ok(fs.statSync(path.join(process.cwd(),"assets/images",p.figure!.src)).size > 1000);
  }
 });
 
@@ -202,4 +206,78 @@ test("generated grade equations and grid extrema have unique, feasible mathemati
    assert.equal(b,Math.min(...feasible),p.id);
   }
  }
+});
+
+
+test("every subtopic in both competitions selects only that skill, including following problems",()=>{
+ for(const material of [content,olympiadCourseContent]) for(const topic of material.topics) for(const skill of topic.skills){
+  const h=harness(material);
+  h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id});
+  assert.equal(h.view().task!.skillId,skill.id);
+  const first=h.view().task!.key;
+  h.correct();h.next();
+  assert.equal(h.view().task!.skillId,skill.id);
+  assert.notEqual(h.view().task!.key,first);
+  h.correct();h.next();
+  if(!h.view().exhausted) assert.equal(h.view().task!.skillId,skill.id);
+ }
+});
+
+test("scoped work persists alongside whole-island and quest work, hints, lessons and history",()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),"maths-subtopics-"));
+ try{
+  const h=harness(),topic=content.topics.find(t=>t.id==="backwards")!,a=topic.skills[1]!,b=topic.skills[2]!;
+  h.go({type:"selectTopic",topicId:topic.id});h.hint();
+  const island=structuredClone(h.work());
+  h.go({type:"selectTopic",topicId:topic.id,skillId:a.id});h.hint();
+  const scoped=structuredClone(h.work());
+  h.go({type:"selectTopic",topicId:topic.id,skillId:b.id});h.correct();
+  const history=structuredClone(h.record.attempts),awards=structuredClone(h.record.awards);
+  h.go({type:"startQuest"});const quest=structuredClone(h.work());
+  h.go({type:"selectTopic",topicId:topic.id,skillId:a.id});assert.deepEqual(h.work(),scoped);
+  h.work().lessonStep=0;h.go({type:"lessonNext"});const lesson=structuredClone(h.work());
+  h.go({type:"selectTopic",topicId:topic.id});assert.deepEqual(h.work(),island);
+  h.go({type:"startQuest"});assert.deepEqual(h.work(),quest);
+  h.go({type:"selectTopic",topicId:topic.id,skillId:a.id});assert.deepEqual(h.work(),lesson);
+  fs.writeFileSync(path.join(dir,"course-v2.json"),JSON.stringify(h.record));
+  const store=createKidsCourseStore(dir),restored=store.read(content)!;
+  assert.deepEqual(courseView(restored,content,now),h.view());
+  assert.deepEqual(restored.attempts,history);assert.deepEqual(restored.awards,awards);
+  const paused=store.update(restored.revision,{type:"pause"},content);
+  assert.deepEqual(createKidsCourseStore(dir).read()!.topics,paused.topics);
+  assert.throws(()=>store.update(restored.revision,{type:"resume"},content));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test("selected skills never fall back on exhaustion and reject invalid or cross-island selection",()=>{
+ const topic=content.topics.find(t=>t.id==="backwards")!,skill=topic.skills[1]!;
+ const limited={...content,problem:(id:string,index:number,harder:boolean)=>index===0?content.problem(id,index,harder):null};
+ const h=harness(limited);
+ h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id});h.correct();h.next();
+ assert.equal(h.view().exhausted,true);assert.equal(h.view().active!.skillId,skill.id);
+ h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id});assert.equal(h.view().exhausted,true);
+ const saved=JSON.stringify(h.record);
+ for(const skillId of ["missing",content.topics[0]!.skills[0]!.id,""]){
+  assert.throws(()=>h.go({type:"selectTopic",topicId:topic.id,skillId}));
+  assert.equal(JSON.stringify(h.record),saved);
+ }
+ assert.throws(()=>h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id,review:true}));
+ for(const skillId of [4,"",[],"x".repeat(101)]) assert.throws(()=>parseCourseCommand({revision:0,action:{type:"selectTopic",topicId:topic.id,skillId}}));
+ const parsed=parseCourseCommand({revision:0,action:{type:"selectTopic",topicId:topic.id,skillId:skill.id}});
+ assert.equal(parsed.action.type==="selectTopic"&&parsed.action.skillId,skill.id);
+});
+
+test("direct skill practice earns Doctor and distinct-skill Professor with retained skill milestones plus fresh problem gold",()=>{
+ const h=harness(),topic=content.topics.find(t=>t.id==="backwards")!;
+ for(const skill of topic.skills){
+  h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id});h.correct();h.next();h.correct();
+ }
+ assert.equal(h.record.awards.filter(a=>a.rank==="doctor").length,1);
+ assert.equal(h.view().gold,295);
+ assert.equal(h.record.awards.filter(a=>a.rank==="professor").length,0);
+ h.next();assert.equal(h.view().active!.mode,"challenge");h.correct();h.next();h.correct();
+ assert.equal(h.record.awards.filter(a=>a.rank==="professor").length,0,"One repeated skill cannot earn Professor");
+ h.go({type:"selectTopic",topicId:topic.id,skillId:topic.skills[0]!.id});h.next();h.correct();
+ assert.equal(h.record.awards.filter(a=>a.rank==="professor").length,1);
+ assert.equal(h.view().reward!.rank,"professor");assert.equal(h.view().gold,335);
 });

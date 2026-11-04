@@ -6,13 +6,14 @@ import { test } from "node:test";
 import { applyCourseAction, courseView, migrateKidsCourse, newKidsCourse, parseCourseCommand } from "../src/core/kids-course.ts";
 import type { CourseAction, KidsCourse, KidsCourseContent } from "../src/core/kids-course.ts";
 import { kidsCourseContent as content } from "../src/server/kids-course-content.ts";
+import { isCompetitionProblem, teachingMethod } from "../src/core/kids-selection.ts";
 import { createKidsCourseStore } from "../src/store/kids-course.ts";
 const now = "2026-11-02T12:00:00.000Z";
 function harness(material = content, initial = newKidsCourse(material, now)) {
  let record = initial;
  const view = () => courseView(record, material, now);
  const go = (a: CourseAction) => { record = applyCourseAction(record, material, a, now); return view(); };
- const work = () => record.journey === "quest" ? record.quest!.work! : record.topics[record.active!.topicId]!.work[record.active!.mode]!;
+ const work = () => record.journey === "quest" ? record.quest!.work! : (record.active!.skillId ? record.topics[record.active!.topicId]!.skillWork![record.active!.skillId] : record.topics[record.active!.topicId]!.work[record.active!.mode])!;
  const answer = (right = true) => go({ type: "answer", taskKey: work().attempt.key, answers: work().attempt.problem.fields.map(f => right ? f.answer : String(work().attempt.problem.options ? (Number(f.answer) + 1) % work().attempt.problem.options!.length : Number(f.answer) + 1)) });
  const next = () => { go({ type: "nextQuestion" }); while (view().stage === "lesson") go({ type: "lessonNext" }); return view(); };
  return { get record() { return record; }, view, go, work, answer, next };
@@ -40,11 +41,11 @@ test("first quest diagnoses with at most three originals inside five, saves one 
  const h = harness(); h.go({ type: "startQuest" });
  for (let i = 0; i < 5; i++) {
   assert.equal(h.view().quest!.step, i + 1);
-  if (i < 3) assert.ok(h.work().attempt.problem.id.endsWith(":original"));
+  if (h.record.quest!.steps.at(-1)!.kind === "diagnostic") assert.ok(isCompetitionProblem(h.work().attempt.problem));
   h.answer(); assert.equal(h.record.quest!.completed, i + 1); h.next();
  }
  assert.equal(h.record.quest!.steps.length, 5); assert.equal(h.view().stage, "questComplete");
- assert.equal(h.record.quest!.steps.filter(s => s.kind === "diagnostic").length, 3);
+ assert.equal(h.record.quest!.steps.filter(s => s.kind === "diagnostic").length, 1);
  assert.equal(h.record.stamps!.length, 1); assert.match(h.view().quest!.achievement!, /5 задачи самостоятелно/);
  assert.equal(h.view().task, undefined);
  assert.throws(() => h.go({ type: "nextQuestion" }));
@@ -53,7 +54,7 @@ test("first quest diagnoses with at most three originals inside five, saves one 
  assert.equal(h.record.quest!.diagnostic, false); assert.equal(h.record.stamps!.length, 1);
 });
 
-test("the balanced quest chooses two familiar, two gap and one ready stretch when all are available", () => {
+test("the quest pairs fresh applications then mixes methods without a forced hard fifth", () => {
  const initial = newKidsCourse(content, now); initial.diagnostics!.initialDone = true;
  for (const id of ["matches", "digits"]) {
   initial.topics[id]!.doctorAt = now;
@@ -65,8 +66,9 @@ test("the balanced quest chooses two familiar, two gap and one ready stretch whe
  }
  const h = harness(content, initial); h.go({ type: "startQuest" });
  for (let i = 0; i < 5; i++) { h.answer(); h.next(); }
- assert.deepEqual(h.record.quest!.steps.map(s => s.kind), ["familiar", "gap", "familiar", "gap", "stretch"]);
- assert.notEqual(h.record.quest!.steps[0]!.topicId, h.record.quest!.steps[1]!.topicId);
+ const methods = h.record.quest!.steps.map(s => teachingMethod(content,s.skillId));
+ assert.equal(methods[0],methods[1]);assert.notEqual(methods[1],methods[2]);assert.equal(methods[2],methods[3]);
+ assert.notEqual(h.record.attempts.at(-1)!.mode,"challenge");
 });
 
 test("three worked parts expose only requested help and reveal works without any part", () => {
@@ -90,7 +92,7 @@ test("help and mistakes still allow a completion stamp, never an unearned academ
  const h = harness(); h.go({ type: "startQuest" });
  for (let i = 0; i < 5; i++) { h.go({ type: "reveal", taskKey: h.view().task!.key }); h.next(); }
  assert.equal(h.record.stamps!.length, 1); assert.equal(h.record.awards.length, 0);
- assert.match(h.record.stamps![0]!.achievement, /Разгледа пет задачи/);
+ assert.match(h.record.stamps![0]!.achievement, /Разгледа 5 задачи/);
  assert.equal(h.record.quest!.steps.filter(s => s.kind === "diagnostic").length, 1);
 });
 
@@ -110,8 +112,7 @@ test("switching modes and reload preserve separate pending work, hints and lesso
 });
 
 test("a multi-concept failure does not assign a failure to associated concepts", () => {
- const h = harness(); h.go({ type: "selectTopic", topicId: "perimeters" }); h.answer(); h.next(); h.answer(); h.next();
- assert.equal(h.view().task!.skillId, "M1-10"); h.answer(false);
+ const h = harness(); h.go({ type: "selectTopic", topicId: "perimeters", skillId: "M1-10" }); h.answer(false);
  const map = h.view().topics.flatMap(t => t.concepts ?? []);
  assert.ok(map.filter(c => c.id === "boundary").some(c => c.evidence.incorrect === 1));
  assert.ok(map.filter(c => c.id === "area").every(c => c.evidence.incorrect === 0 && c.status === "untried"));
@@ -123,7 +124,6 @@ test("quest outcomes preserve an unfinished manual lesson in the same topic", ()
  const pending = structuredClone(h.record.topics.matches!.work.core);
  h.record.diagnostics!.initialDone = true; h.go({ type: "startQuest" });
  for (let i = 0; i < 5; i++) { h.answer(); h.next(); }
- assert.ok(h.record.quest!.steps.some(s => s.topicId === "matches"));
  assert.deepEqual(h.record.topics.matches!.work.core, pending);
  h.go({ type: "selectTopic", topicId: "matches" });
  assert.equal(h.view().stage, "lesson"); assert.equal(h.view().lesson!.steps.length, 2);
@@ -139,12 +139,13 @@ test("diagnostics reuse existing evidence, trigger after repeated unresolved dif
  h.go({ type: "startQuest" }); assert.equal(h.record.quest!.diagnostic, false);
 });
 
-test("finite content never repeats completed or reserved material or grants an incomplete stamp", () => {
+test("finite content completes a shorter final adventure once without repeating material", () => {
  const base = content.problem("M1-03", 0, false)!;
  const small: KidsCourseContent = { version: "small", topics: [{ id: "matches", title: "Тест", rewardName: "тест", skills: [{ id: base.skillId, title: "Тест", lesson: ["Идея"] }] }], problem: (_id, index, hard) => !hard && index === 0 ? base : null };
  const h = harness(small); h.go({ type: "startQuest" }); h.answer(); h.next();
- assert.equal(h.view().quest!.exhausted, true); assert.equal(h.record.stamps!.length, 0); assert.equal(h.record.attempts.length, 1);
- h.go({ type: "startQuest" }); assert.equal(h.view().quest!.exhausted, true); assert.equal(h.record.attempts.length, 1);
+ assert.equal(h.view().quest!.total, 1); assert.equal(h.view().quest!.finished, true);
+ assert.equal(h.record.stamps!.length, 1); assert.equal(h.record.attempts.length, 1); assert.equal(h.view().questAvailable, false);
+ h.go({ type: "startQuest" }); assert.equal(h.view().quest!.finished, true); assert.equal(h.record.attempts.length, 1); assert.equal(h.record.stamps!.length, 1);
 });
 
 test("legacy upgrade projects without writes and preserves pending single-hint content and awards", () => {

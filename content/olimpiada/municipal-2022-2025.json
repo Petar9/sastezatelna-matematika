@@ -1,0 +1,3654 @@
+{
+  "originals": {
+    "schema_version": 1,
+    "collection": "olimpiada",
+    "grade": 4,
+    "round": "municipal",
+    "publication_status": "draft",
+    "review_scope": "PDF and mathematics checked independently; four full tutor transcripts archived; human review still required, including missing 2024 official solutions.",
+    "islands": {
+      "numbers-calculation": "Числови загадки",
+      "geometry": "Геометрични открития",
+      "word-problems": "Истории с числа",
+      "logic": "Логически загадки"
+    },
+    "transcription_policy": "Original Bulgarian problem statements, mathematical signs and punctuation preserved where practical; PDF line breaks normalized. Administrative headers, point allocations and exam instructions stored in source PDFs, not repeated in original_text_bg. Learning prompts are explicitly authored subpart prompts, not claimed verbatim source headings.",
+    "sources": [
+      {
+        "id": "2025-solution",
+        "filename": "OLI-1-Общински кръг-2025-4 кл-sol.pdf",
+        "sha256": "c737426296ff675e4d5d2917ae18451a9c43e1b55267bb07694188b0b30a977a",
+        "pages": 1,
+        "issuer": "РУО София-град / Министерство на образованието и науката",
+        "grade": 4,
+        "round": "Общински кръг",
+        "review": "Complete PDF text and every rendered page inspected; 2025-problems manually transcribed from scan."
+      },
+      {
+        "id": "2025-problems",
+        "filename": "OLI-1-Общински кръг-2025-4 кл-probs.pdf",
+        "sha256": "45541e07d5e56e1bb632d7133c13dda2dac54552e49a4990d13e174bf9c8bac5",
+        "pages": 1,
+        "issuer": "РУО София-град / Министерство на образованието и науката",
+        "grade": 4,
+        "round": "Общински кръг",
+        "review": "Complete PDF text and every rendered page inspected; 2025-problems manually transcribed from scan."
+      },
+      {
+        "id": "2022-solution",
+        "filename": "OLI-1-Общински кръг-2022-4 кл-sol.pdf",
+        "sha256": "20b5563a4c193cae0202cb56a8c7a0ff921bb4e24ed6be3650c49114d7ae5459",
+        "pages": 2,
+        "issuer": "РУО София-град / Министерство на образованието и науката",
+        "grade": 4,
+        "round": "Общински кръг",
+        "review": "Complete PDF text and every rendered page inspected; 2025-problems manually transcribed from scan."
+      },
+      {
+        "id": "2022-problems",
+        "filename": "OLI-1-Общински кръг-2022-4 кл-probs.pdf",
+        "sha256": "cf5220a0a9aac0be476e1911a2823641f8039548b70efd3a2b43f5632c4fd2ee",
+        "pages": 1,
+        "issuer": "РУО София-град / Министерство на образованието и науката",
+        "grade": 4,
+        "round": "Общински кръг",
+        "review": "Complete PDF text and every rendered page inspected; 2025-problems manually transcribed from scan."
+      },
+      {
+        "id": "2023-problems",
+        "filename": "OLI-1-Общински кръг-2023-4 кл-probs.pdf",
+        "sha256": "fe761ce6e89fe098a59decac667bfe6bfae06a56566118caf46cb99b22c0e73e",
+        "pages": 1,
+        "issuer": "РУО София-град / Министерство на образованието и науката",
+        "grade": 4,
+        "round": "Общински кръг",
+        "review": "Complete PDF text and every rendered page inspected; 2025-problems manually transcribed from scan."
+      },
+      {
+        "id": "2023-solution",
+        "filename": "OLI-1-Общински кръг-2023-4 кл-sol.pdf",
+        "sha256": "ef148d6048ed4a9979a1603880a5653ae358328779d54e8cf3db04b2b5390d76",
+        "pages": 2,
+        "issuer": "РУО София-град / Министерство на образованието и науката",
+        "grade": 4,
+        "round": "Общински кръг",
+        "review": "Complete PDF text and every rendered page inspected; 2025-problems manually transcribed from scan."
+      },
+      {
+        "id": "2024-problems",
+        "filename": "OLI-1-Общински кръг-2024-4 кл-probs.pdf",
+        "sha256": "df32e385b8ffc7566af61a3d9b410387b05259863810ca13613c5e12f9651617",
+        "pages": 1,
+        "issuer": "РУО София-град / Министерство на образованието и науката",
+        "grade": 4,
+        "round": "Общински кръг",
+        "review": "Complete PDF text and every rendered page inspected; 2025-problems manually transcribed from scan."
+      }
+    ],
+    "originals": [
+      {
+        "id": "oli-g4-municipal-2022-p1",
+        "year": 2022,
+        "problem": 1,
+        "original_text_bg": "За числата А, В и С знаем, че:\nА = 3 . 7386 . 3 – 7381 . 9 + 2022 . 12 . 0 + 3628 . 8 – 4 . 2 . 3621\nВ е неизвестното число ( 101 . 5 + 964 : 4 ) – В = 328 : 8\nС е най-голямото четно четирицифрено число, записано с различни цифри.\nНамерете сбора на цифрите на стотиците на числата А, В и С.",
+        "source": {
+          "problems": "2022-problems",
+          "page": 1,
+          "solution": "2022-solution",
+          "solution_pages": [
+            1
+          ]
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2022-p1-a",
+            "original_problem_id": "oli-g4-municipal-2022-p1",
+            "subpart": "a",
+            "learning_prompt_bg": "Намери числото А.",
+            "shared_original_context": "oli-g4-municipal-2022-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Рационално пресмятане на произведения и разлики",
+            "fields": [
+              {
+                "id": "a",
+                "label_bg": "А",
+                "type": "number",
+                "answer": 101
+              }
+            ],
+            "worked_steps_bg": [
+              "Пресметни 3 . 3 = 9 и 4 . 2 = 8. Произведението 2022 . 12 . 0 е 0.",
+              "В първите две произведения има общ множител 9: (7386 – 7381) . 9 = 5 . 9 = 45. В последните две има общ множител 8: (3628 – 3621) . 8 = 7 . 8 = 56.",
+              "Събери двете части: А = 45 + 56 = 101."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2022-p1-b",
+            "original_problem_id": "oli-g4-municipal-2022-p1",
+            "subpart": "b",
+            "learning_prompt_bg": "Намери числото В.",
+            "shared_original_context": "oli-g4-municipal-2022-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Неизвестно число при изваждане",
+            "fields": [
+              {
+                "id": "b",
+                "label_bg": "В",
+                "type": "number",
+                "answer": 705
+              }
+            ],
+            "worked_steps_bg": [
+              "Пресметни 101 . 5 = 505 и 964 : 4 = 241. В скобите получаваш 505 + 241 = 746.",
+              "Пресметни 328 : 8 = 41. Равенството вече е 746 – В = 41.",
+              "Намери В = 746 – 41 = 705. Провери: 746 – 705 = 41."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2022-p1-hundreds-sum",
+            "original_problem_id": "oli-g4-municipal-2022-p1",
+            "subpart": "hundreds-sum",
+            "learning_prompt_bg": "Намери сбора на цифрите на стотиците на А, В и С.",
+            "shared_original_context": "oli-g4-municipal-2022-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Разряден състав и най-голямо число при условия",
+            "fields": [
+              {
+                "id": "hundredsSum",
+                "label_bg": "Сбор на цифрите на стотиците",
+                "type": "number",
+                "answer": 16
+              }
+            ],
+            "worked_steps_bg": [
+              "Най-голямото четно четирицифрено число с различни цифри е С = 9876: избираш поред 9, 8, 7 и най-голямата останала четна цифра 6.",
+              "Използвай А = 101 и В = 705. Цифрите на стотиците в 101, 705 и 9876 са съответно 1, 7 и 8.",
+              "Събери тези цифри: 1 + 7 + 8 = 16."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2022-p1-a",
+              "oli-g4-municipal-2022-p1-b"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2022-p2",
+        "year": 2022,
+        "problem": 2,
+        "original_text_bg": "За последните два месеца на 2021 г. джуджетата в работилницата на Дядо Коледа в Лапландия произвели и опаковали 184 чифта детски ръкавички с 5 пръста, което е 4 пъти по-малко от произведените чифтове ръкавички с апликация на елф и със 105 по-малко от чифтовете бебешки ръкавички с един пръст.\nА) Намерете колко броя ръкавички общо са произвели джуджетата. (*в един чифт има два броя ръкавици);\nБ) По колко броя ръкавички са произвели джуджетата през всеки от двата месеца, ако през месец ноември произведените ръкавички са с 1870 броя повече?",
+        "source": {
+          "problems": "2022-problems",
+          "page": 1,
+          "solution": "2022-solution",
+          "solution_pages": [
+            1
+          ]
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2022-p2-a",
+            "original_problem_id": "oli-g4-municipal-2022-p2",
+            "subpart": "a",
+            "learning_prompt_bg": "Колко броя ръкавички общо са произведени?",
+            "shared_original_context": "oli-g4-municipal-2022-p2",
+            "island": "word-problems",
+            "primary_skill": "Сравнения и превръщане на чифтове в бройки",
+            "fields": [
+              {
+                "id": "totalGloves",
+                "label_bg": "Общо ръкавички",
+                "type": "number",
+                "answer": 2418,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Намери чифтовете с елф: 184 . 4 = 736 чифта. Бебешките са 184 + 105 = 289 чифта.",
+              "Събери всички чифтове: 184 + 736 + 289 = 1209 чифта.",
+              "Във всеки чифт има 2 ръкавички, затова общо са 1209 . 2 = 2418 броя."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2022-p2-b",
+            "original_problem_id": "oli-g4-municipal-2022-p2",
+            "subpart": "b",
+            "learning_prompt_bg": "Колко броя ръкавички са произведени през ноември и през декември?",
+            "shared_original_context": "oli-g4-municipal-2022-p2",
+            "island": "word-problems",
+            "primary_skill": "Две количества с известни сбор и разлика",
+            "fields": [
+              {
+                "id": "novemberGloves",
+                "label_bg": "През ноември",
+                "type": "number",
+                "answer": 2144,
+                "unit_bg": "броя"
+              },
+              {
+                "id": "decemberGloves",
+                "label_bg": "През декември",
+                "type": "number",
+                "answer": 274,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Общо са 2418 ръкавички. Извади разликата между двата месеца: 2418 – 1870 = 548.",
+              "Остават две равни части, всяка колкото произведените през декември ръкавички. Раздели на 2: 548 : 2 = 274 ръкавички през декември.",
+              "За ноември получаваш 274 + 1870 = 2144. Провери: 2144 + 274 = 2418 и 2144 – 274 = 1870."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2022-p2-a"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2022-p3",
+        "year": 2022,
+        "problem": 3,
+        "original_text_bg": "Цветна градина е разделена на седем квадратни площи, както е показано на фигурата. Ако обиколката на малкия сив квадрат е 40 дециметра, намерете сбора от всички обиколки на квадратните площи в градината в метри.",
+        "source": {
+          "problems": "2022-problems",
+          "page": 1,
+          "solution": "2022-solution",
+          "solution_pages": [
+            2
+          ]
+        },
+        "diagram_required": true,
+        "diagram": {
+          "source_page": 1,
+          "description_bg": "Седем квадрата: три еднакви малки, наредени хоризонтално (средният е сив); квадрат под тях; квадрат вдясно от тях и долния квадрат; квадрат над тази група; най-голям квадрат вдясно. След изчисляване страните са 1, 1, 1, 3, 4, 7, 11 метра.",
+          "display_requirement": "Use exact unaltered source diagram on white panel; text alone does not determine relationships."
+        },
+        "review_status": "draft-human-review-required",
+        "uncertainties": [],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2022-p3-perimeter-sum",
+            "original_problem_id": "oli-g4-municipal-2022-p3",
+            "subpart": "perimeter-sum",
+            "learning_prompt_bg": "Намери сбора на обиколките на седемте квадрата в метри.",
+            "shared_original_context": "oli-g4-municipal-2022-p3",
+            "island": "geometry",
+            "primary_skill": "Обиколки на свързани квадрати и мерни единици",
+            "fields": [
+              {
+                "id": "perimeterSum",
+                "label_bg": "Сбор на обиколките",
+                "type": "number",
+                "answer": 112,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Превърни 40 дм = 4 м. Страната на сивия квадрат е 4 : 4 = 1 м. Трите малки квадрата имат еднакви страни по 1 м.",
+              "По чертежа намери другите страни: 3 . 1 = 3 м; 3 + 1 = 4 м; 4 + 3 = 7 м; 7 + 4 = 11 м.",
+              "Обиколката на всеки квадрат е 4 пъти страната му. Сборът е 4 . (1 + 1 + 1 + 3 + 4 + 7 + 11) = 4 . 28 = 112 м."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2023-p1",
+        "year": 2023,
+        "problem": 1,
+        "original_text_bg": "Да се пресметне стойността на израза: (B : 5 – A . 11) + C, ако\nA = (3125 : 5 – 2125 : 5 + 120 : 2 + 1080 : 2) : 100 ;\nB е неизвестното число в равенството: 1445 - □ = (2023 . 12 . 0 + 255 : 3) . 6\nC e най-голямото четно шестцифрено число с цифра на хилядите 7.",
+        "source": {
+          "problems": "2023-problems",
+          "page": 1,
+          "solution": "2023-solution",
+          "solution_pages": [
+            1
+          ]
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2023-p1-a",
+            "original_problem_id": "oli-g4-municipal-2023-p1",
+            "subpart": "a",
+            "learning_prompt_bg": "Намери числото A.",
+            "shared_original_context": "oli-g4-municipal-2023-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Рационално пресмятане на частни",
+            "fields": [
+              {
+                "id": "a",
+                "label_bg": "A",
+                "type": "number",
+                "answer": 8
+              }
+            ],
+            "worked_steps_bg": [
+              "Първите две деления са на 5. Намери разликата на частните: (3125 – 2125) : 5 = 1000 : 5 = 200.",
+              "Следващите две деления са на 2. Намери сбора на частните: (120 + 1080) : 2 = 1200 : 2 = 600.",
+              "Събери 200 + 600 = 800 и раздели на 100: A = 800 : 100 = 8."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2023-p1-b",
+            "original_problem_id": "oli-g4-municipal-2023-p1",
+            "subpart": "b",
+            "learning_prompt_bg": "Намери числото B в празното квадратче.",
+            "shared_original_context": "oli-g4-municipal-2023-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Неизвестно число при изваждане",
+            "fields": [
+              {
+                "id": "b",
+                "label_bg": "B",
+                "type": "number",
+                "answer": 935
+              }
+            ],
+            "worked_steps_bg": [
+              "Пресметни 2023 . 12 . 0 = 0 и 255 : 3 = 85.",
+              "Дясната страна е (0 + 85) . 6 = 510, затова 1445 – B = 510.",
+              "Намери B = 1445 – 510 = 935. Провери: 1445 – 935 = 510."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2023-p1-c",
+            "original_problem_id": "oli-g4-municipal-2023-p1",
+            "subpart": "c",
+            "learning_prompt_bg": "Намери най-голямото четно шестцифрено число с цифра на хилядите 7.",
+            "shared_original_context": "oli-g4-municipal-2023-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Най-голямо число с условие за разряд",
+            "fields": [
+              {
+                "id": "c",
+                "label_bg": "C",
+                "type": "number",
+                "answer": 997998
+              }
+            ],
+            "worked_steps_bg": [
+              "Запиши 9 като цифра на стотиците хиляди и на десетиците хиляди. Цифрата на хилядите трябва да е 7. Получаваш 997□□□.",
+              "За да е числото най-голямо, постави 9 на стотиците и на десетиците: 99799□. Цифрите могат да се повтарят.",
+              "Последната цифра трябва да е четна. Най-голямата четна цифра е 8, затова C = 997998."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2023-p1-expression",
+            "original_problem_id": "oli-g4-municipal-2023-p1",
+            "subpart": "expression",
+            "learning_prompt_bg": "Пресметни (B : 5 – A . 11) + C.",
+            "shared_original_context": "oli-g4-municipal-2023-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Ред на действията в числов израз",
+            "fields": [
+              {
+                "id": "expression",
+                "label_bg": "Стойност на израза",
+                "type": "number",
+                "answer": 998097
+              }
+            ],
+            "worked_steps_bg": [
+              "Замести A = 8, B = 935 и C = 997998: (935 : 5 – 8 . 11) + 997998.",
+              "Първо пресметни делението и умножението: 935 : 5 = 187 и 8 . 11 = 88. В скобите остава 187 – 88 = 99.",
+              "Прибави C: 99 + 997998 = 998097."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2023-p1-a",
+              "oli-g4-municipal-2023-p1-b",
+              "oli-g4-municipal-2023-p1-c"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2023-p2",
+        "year": 2023,
+        "problem": 2,
+        "original_text_bg": "Правоъгълно дворно място е разделено на две градини с форми на квадрат и на правоъгълник с обща страна, както е показано на чертежа. Обиколката на правоъгълната градина е 256 метра.\nа) Намерете дължините на страните на правоъгълната градина, ако се знае, че ширината е три пъти по-малка от дължината;\nб) Намерете обиколката на градината с форма на квадрат;\nв) Колко метра мрежа е необходима да се огради дворното място, ако на една от страните е монтирана дворна врата с дължина 3 метра?",
+        "source": {
+          "problems": "2023-problems",
+          "page": 1,
+          "solution": "2023-solution",
+          "solution_pages": [
+            1
+          ]
+        },
+        "diagram_required": true,
+        "diagram": {
+          "source_page": 1,
+          "description_bg": "Квадрат вляво и правоъгълник вдясно, с обща цяла страна; заедно образуват правоъгълно дворно място.",
+          "display_requirement": "Preserve source diagram; no added dimensions in original."
+        },
+        "review_status": "draft-human-review-required",
+        "uncertainties": [],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2023-p2-a",
+            "original_problem_id": "oli-g4-municipal-2023-p2",
+            "subpart": "a",
+            "learning_prompt_bg": "Намери ширината и дължината на правоъгълната градина.",
+            "shared_original_context": "oli-g4-municipal-2023-p2",
+            "island": "geometry",
+            "primary_skill": "Страни на правоъгълник по обиколка и отношение",
+            "fields": [
+              {
+                "id": "width",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 32,
+                "unit_bg": "м"
+              },
+              {
+                "id": "length",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 96,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Дължината е три пъти по-голяма от ширината. Ако ширината е една част, дължината е три такива части. Обиколката съдържа 3 + 3 + 1 + 1 = 8 равни части.",
+              "Една част е ширината: 256 : 8 = 32 м.",
+              "Дължината е 32 . 3 = 96 м. Провери обиколката: 2 . (96 + 32) = 256 м."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2023-p2-b",
+            "original_problem_id": "oli-g4-municipal-2023-p2",
+            "subpart": "b",
+            "learning_prompt_bg": "Намери обиколката на квадратната градина.",
+            "shared_original_context": "oli-g4-municipal-2023-p2",
+            "island": "geometry",
+            "primary_skill": "Обиколка на квадрат с обща страна",
+            "fields": [
+              {
+                "id": "squarePerimeter",
+                "label_bg": "Обиколка на квадрата",
+                "type": "number",
+                "answer": 128,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Ширината на правоъгълната градина е 32 м.",
+              "Чертежът показва, че тази страна е обща с квадрата. Следователно всяка страна на квадрата е 32 м.",
+              "Събери четирите равни страни: 4 . 32 = 128 м."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2023-p2-a"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2023-p2-c",
+            "original_problem_id": "oli-g4-municipal-2023-p2",
+            "subpart": "c",
+            "learning_prompt_bg": "Колко метра мрежа са необходими за двора с врата с ширина 3 м?",
+            "shared_original_context": "oli-g4-municipal-2023-p2",
+            "island": "geometry",
+            "primary_skill": "Външна обиколка и изваждане на отвор",
+            "fields": [
+              {
+                "id": "fence",
+                "label_bg": "Необходима мрежа",
+                "type": "number",
+                "answer": 317,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Дворът има ширина 32 м и дължина 96 + 32 = 128 м, защото квадратът и правоъгълникът са един до друг.",
+              "Намери външната обиколка: 2 . (128 + 32) = 2 . 160 = 320 м.",
+              "На мястото на вратата не е нужна мрежа. Извади 3 м: 320 – 3 = 317 м."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2023-p2-a"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2023-p3",
+        "year": 2023,
+        "problem": 3,
+        "original_text_bg": "Четвъртокласниците от едно училище се записали за участие в Софийски математически турнир, Олимпиада по математика и Коледно математическо състезание. 29 ученици не участват в математически състезания и олимпиада. В Софийския математически турнир участвали 37 деца, а два пъти повече от тях – в Олимпиадата по математика. Записаните за Коледното математическо състезание са с 38 по-малко от тези в Олимпиадата. Петнадесет ученици се записали за Софийски математически турнир и Олимпиада, а с 9 ученици повече – в Олимпиадата и Коледното математическо състезание. Няма ученици, които участват и в трите математически състезания. Колко са всички четвъртокласници в това училище?",
+        "source": {
+          "problems": "2023-problems",
+          "page": 1,
+          "solution": "2023-solution",
+          "solution_pages": [
+            2
+          ]
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [
+          "The overlap between Sofia tournament and Christmas contest is unspecified. If its size is x, the total is 137−x with integer 0≤x≤12, hence 125..137. Original asks for exact total and is underdetermined.",
+          "Official solution page 2 calls 137 a maximum and explicitly grants 7 points to every pupil. Do not silently add x=0 or change question to maximum."
+        ],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2023-p3-total-underdetermined",
+            "original_problem_id": "oli-g4-municipal-2023-p3",
+            "subpart": "total-underdetermined",
+            "learning_prompt_bg": "Колко са всички четвъртокласници? (Оригиналът е с липсващо условие.)",
+            "shared_original_context": "oli-g4-municipal-2023-p3",
+            "island": "logic",
+            "primary_skill": "Броене на групи с общи участници",
+            "fields": [
+              {
+                "id": "total",
+                "label_bg": "Всички четвъртокласници",
+                "type": "text",
+                "answer": "Не може да се определи еднозначно"
+              }
+            ],
+            "worked_steps_bg": [
+              "В Олимпиадата участват 37 . 2 = 74 деца, а в Коледното състезание - 74 – 38 = 36. И в Олимпиадата, и в Коледното състезание участват 15 + 9 = 24 деца.",
+              "Събери 37 + 74 + 36 + 29 = 176. Извади повторно преброените 15 и 24: 176 – 15 – 24 = 137.",
+              "Не е казано колко деца участват и в Софийския турнир, и в Коледното състезание. За всяко такова дете извади още 1 от 137. Затова общият брой може да е от 125 до 137 деца. Условието не е достатъчно, за да намерим точния брой."
+            ],
+            "depends_on": [],
+            "answer_review": "blocked-source-underdetermined",
+            "uncertainties": [
+              "Draft explanation only; exclude from deterministic exact-answer diagnosis/practice until human resolves source policy."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2024-p1",
+        "year": 2024,
+        "problem": 1,
+        "original_text_bg": "Намерете:\nа) Числото b = 823 . 6 + 13 248 – 925 : 5\nб) Числото а, за което е изпълнено: (2041 + 503 . 8) – a = 5987 – 1789\nв) Сбора на числата c и d, ако c има 5 единици, 8 десетици, 9 стотици и 7 хиляди, а второто число d е равно на частното на най-голямото трицифрено число с цифра на единиците 2 и най-голямото четно едноцифрено число.",
+        "source": {
+          "problems": "2024-problems",
+          "page": 1,
+          "solution": null,
+          "solution_pages": []
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [
+          "Official solution PDF not supplied; arithmetic checked independently, tutor/human comparison pending."
+        ],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2024-p1-a",
+            "original_problem_id": "oli-g4-municipal-2024-p1",
+            "subpart": "a",
+            "learning_prompt_bg": "Намери b = 823 . 6 + 13248 – 925 : 5.",
+            "shared_original_context": "oli-g4-municipal-2024-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Ред на действията",
+            "fields": [
+              {
+                "id": "b",
+                "label_bg": "b",
+                "type": "number",
+                "answer": 18001
+              }
+            ],
+            "worked_steps_bg": [
+              "Първо пресметни умножението: 823 . 6 = 4938.",
+              "Пресметни делението: 925 : 5 = 185. Изразът става 4938 + 13248 – 185.",
+              "Събери 4938 + 13248 = 18186, после извади 185: b = 18001."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-no-official-solution",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2024-p1-b",
+            "original_problem_id": "oli-g4-municipal-2024-p1",
+            "subpart": "b",
+            "learning_prompt_bg": "Намери неизвестното a.",
+            "shared_original_context": "oli-g4-municipal-2024-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Неизвестно число при изваждане",
+            "fields": [
+              {
+                "id": "a",
+                "label_bg": "a",
+                "type": "number",
+                "answer": 1867
+              }
+            ],
+            "worked_steps_bg": [
+              "Пресметни скобите: 503 . 8 = 4024 и 2041 + 4024 = 6065.",
+              "Пресметни дясната страна: 5987 – 1789 = 4198. Получаваш 6065 – a = 4198.",
+              "Намери a = 6065 – 4198 = 1867. Провери: 6065 – 1867 = 4198."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-no-official-solution",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2024-p1-c",
+            "original_problem_id": "oli-g4-municipal-2024-p1",
+            "subpart": "c",
+            "learning_prompt_bg": "Намери сбора на c и d.",
+            "shared_original_context": "oli-g4-municipal-2024-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Разряден състав и частно на числа при условия",
+            "fields": [
+              {
+                "id": "sum",
+                "label_bg": "c + d",
+                "type": "number",
+                "answer": 8109
+              }
+            ],
+            "worked_steps_bg": [
+              "Запиши c = 7000 + 900 + 80 + 5 = 7985.",
+              "Най-голямото трицифрено число с последна цифра 2 е 992. Най-голямото четно едноцифрено число е 8. Значи d = 992 : 8 = 124.",
+              "Събери c и d: 7985 + 124 = 8109."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-no-official-solution",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2024-p2",
+        "year": 2024,
+        "problem": 2,
+        "original_text_bg": "Дядо Иван има две градини с правоъгълна форма – зеленчукова и овощна. Зеленчуковата градина има обиколка 304 метра. Дължината ѝ е със 76 метра по-голяма от нейната ширина. Овощната градина е с ширина четири пъти по-голяма от ширината на зеленчуковата градина и е с дължина, два пъти по-голяма от дължината на зеленчуковата градина.\nа) Намерете дължините на страните на зеленчуковата градина.\nб) Намерете обиколката на овощната градина.",
+        "source": {
+          "problems": "2024-problems",
+          "page": 1,
+          "solution": null,
+          "solution_pages": []
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [
+          "Official solution PDF not supplied; arithmetic checked independently, tutor/human comparison pending."
+        ],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2024-p2-a",
+            "original_problem_id": "oli-g4-municipal-2024-p2",
+            "subpart": "a",
+            "learning_prompt_bg": "Намери ширината и дължината на зеленчуковата градина.",
+            "shared_original_context": "oli-g4-municipal-2024-p2",
+            "island": "geometry",
+            "primary_skill": "Страни на правоъгълник по обиколка и разлика",
+            "fields": [
+              {
+                "id": "vegetableWidth",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 38,
+                "unit_bg": "м"
+              },
+              {
+                "id": "vegetableLength",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 114,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Половината обиколка е сборът на дължината и ширината: 304 : 2 = 152 м.",
+              "Дължината е със 76 м по-голяма от ширината. Извади разликата: 152 – 76 = 76 м. Остават две равни части, всяка колкото ширината. Значи ширината е 76 : 2 = 38 м.",
+              "Дължината е 38 + 76 = 114 м. Провери: 2 . (114 + 38) = 304 м."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-no-official-solution",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2024-p2-b",
+            "original_problem_id": "oli-g4-municipal-2024-p2",
+            "subpart": "b",
+            "learning_prompt_bg": "Намери обиколката на овощната градина.",
+            "shared_original_context": "oli-g4-municipal-2024-p2",
+            "island": "geometry",
+            "primary_skill": "Промяна на страни и обиколка на правоъгълник",
+            "fields": [
+              {
+                "id": "orchardPerimeter",
+                "label_bg": "Обиколка на овощната градина",
+                "type": "number",
+                "answer": 760,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Ширината на овощната градина е четири пъти по-голяма от ширината на зеленчуковата: 38 . 4 = 152 м.",
+              "Дължината на овощната градина е два пъти по-голяма от дължината на зеленчуковата: 114 . 2 = 228 м.",
+              "Събери съседните страни и умножи по 2: 2 . (152 + 228) = 2 . 380 = 760 м."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2024-p2-a"
+            ],
+            "answer_review": "math-checked-no-official-solution",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2024-p3",
+        "year": 2024,
+        "problem": 3,
+        "original_text_bg": "Ники обича да слуша аудиокниги и си изтеглил приложение за това. Прочел, че предварително се закупува достъп до приложението за няколко дни. Крайната цена включва такса за ползване, която е една и съща независимо от броя дни на достъпа. Освен това се заплаща за всеки ден една и съща сума пари. За достъп над 9 дни наведнъж се получава отстъпка (намаление на крайната цена), която е десетинката на крайната цена.\nНики си закупил достъп до приложението три пъти. Първият път бил от 28 ноември 2023 г. до 1 декември 2023 г. (включително) и платил 4 лв. 40 ст. Вторият път бил от 27 декември 2023 г. до 2 януари 2024 г. (включително) и платил 6 лв. 20 ст. Третият път бил от 26 февруари 2024 г. до 8 март 2024 г. (включително)\nа) Колко дни Ники е имал достъп до приложението във всеки от трите пъти?\nб) Колко лева е таксата за ползване на приложението?\nв) Колко лв. и ст. Ники е платил последния път?",
+        "source": {
+          "problems": "2024-problems",
+          "page": 1,
+          "solution": null,
+          "solution_pages": []
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [
+          "Official solution PDF missing; tutor/human comparison pending.",
+          "The price result assumes the ordinary intended meaning: subtract one tenth of the fee-plus-days price before discount. The phrase „десетинката на крайната цена“ uses final price loosely; preserve wording and confirm tutor interpretation before publication."
+        ],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2024-p3-a",
+            "original_problem_id": "oli-g4-municipal-2024-p3",
+            "subpart": "a",
+            "learning_prompt_bg": "За колко дни е бил достъпът при всяко от трите закупувания?",
+            "shared_original_context": "oli-g4-municipal-2024-p3",
+            "island": "word-problems",
+            "primary_skill": "Броене на календарни дни включително във високосна година",
+            "fields": [
+              {
+                "id": "firstDays",
+                "label_bg": "Първи път",
+                "type": "number",
+                "answer": 4,
+                "unit_bg": "дни"
+              },
+              {
+                "id": "secondDays",
+                "label_bg": "Втори път",
+                "type": "number",
+                "answer": 7,
+                "unit_bg": "дни"
+              },
+              {
+                "id": "thirdDays",
+                "label_bg": "Трети път",
+                "type": "number",
+                "answer": 12,
+                "unit_bg": "дни"
+              }
+            ],
+            "worked_steps_bg": [
+              "Брой и началния, и крайния ден. Първият път: 28, 29, 30 ноември и 1 декември - общо 4 дни.",
+              "Вторият път: 27, 28, 29, 30, 31 декември са 5 дни; 1 и 2 януари са още 2. Общо 5 + 2 = 7 дни.",
+              "2024 г. е високосна и февруари има 29 дни. От 26 до 29 февруари са 4 дни, а от 1 до 8 март са 8. Общо 4 + 8 = 12 дни."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-no-official-solution",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2024-p3-b",
+            "original_problem_id": "oli-g4-municipal-2024-p3",
+            "subpart": "b",
+            "learning_prompt_bg": "Колко лева е еднократната такса за ползване?",
+            "shared_original_context": "oli-g4-municipal-2024-p3",
+            "island": "word-problems",
+            "primary_skill": "Постоянна такса и еднаква цена за ден",
+            "fields": [
+              {
+                "id": "fixedFeeLeva",
+                "label_bg": "Такса за ползване",
+                "type": "number",
+                "answer": 2,
+                "unit_bg": "лв."
+              }
+            ],
+            "worked_steps_bg": [
+              "Първите два пъти Ники е платил за 4 и за 7 дни, без отстъпка. Втория път дните са със 7 – 4 = 3 повече, а платената сума е с 620 – 440 = 180 ст. по-голяма.",
+              "За трите допълнителни дни са платени 180 ст. Значи един ден струва 180 : 3 = 60 ст. Четирите дни от първото закупуване струват 4 . 60 = 240 ст.",
+              "Извади цената на дните от платеното: 440 – 240 = 200 ст. = 2 лв. Това е таксата."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2024-p3-a"
+            ],
+            "answer_review": "math-checked-no-official-solution",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2024-p3-c",
+            "original_problem_id": "oli-g4-municipal-2024-p3",
+            "subpart": "c",
+            "learning_prompt_bg": "Колко лева и стотинки е платил Ники последния път?",
+            "shared_original_context": "oli-g4-municipal-2024-p3",
+            "island": "word-problems",
+            "primary_skill": "Цена с еднократна такса и отстъпка една десета",
+            "fields": [
+              {
+                "id": "lastPriceLeva",
+                "label_bg": "Лева",
+                "type": "number",
+                "answer": 8,
+                "unit_bg": "лв."
+              },
+              {
+                "id": "lastPriceStotinki",
+                "label_bg": "Стотинки",
+                "type": "number",
+                "answer": 28,
+                "unit_bg": "ст."
+              }
+            ],
+            "worked_steps_bg": [
+              "Достъпът за 12 дни струва 12 . 60 = 720 ст. Прибави таксата от 200 ст.: 720 + 200 = 920 ст. преди отстъпката.",
+              "Достъпът е за повече от 9 дни, затова има отстъпка. Една десета от 920 ст. е 920 : 10 = 92 ст.",
+              "Извади отстъпката: 920 – 92 = 828 ст. = 8 лв. 28 ст."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2024-p3-a",
+              "oli-g4-municipal-2024-p3-b"
+            ],
+            "answer_review": "math-checked-interpretation-needs-tutor",
+            "uncertainties": [
+              "Discount is computed from pre-discount total; confirm against tutor before publication."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2025-p1",
+        "year": 2025,
+        "problem": 1,
+        "original_text_bg": "Ако за числата А, В и С знаем, че:\nА е неизвестното число в (658 : 7) . 3 – А = (26 . 2 + 5 . 26 + 26 . 3) – (1000 – 844),\nВ е сборът на 13 стот. + 53 дес. + 17 ед., а С = А + В, запишете стойността на С с римски цифри.",
+        "source": {
+          "problems": "2025-problems",
+          "page": 1,
+          "solution": "2025-solution",
+          "solution_pages": [
+            1
+          ]
+        },
+        "diagram_required": false,
+        "diagram": null,
+        "review_status": "draft-human-review-required",
+        "uncertainties": [
+          "Problem PDF is a scan; manual transcription checked against full rendered page. Uppercase Latin/Cyrillic variable glyphs are visually identical."
+        ],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2025-p1-a",
+            "original_problem_id": "oli-g4-municipal-2025-p1",
+            "subpart": "a",
+            "learning_prompt_bg": "Намери неизвестното А.",
+            "shared_original_context": "oli-g4-municipal-2025-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Неизвестно число и рационално пресмятане",
+            "fields": [
+              {
+                "id": "a",
+                "label_bg": "А",
+                "type": "number",
+                "answer": 178
+              }
+            ],
+            "worked_steps_bg": [
+              "Вляво пресметни 658 : 7 = 94 и 94 . 3 = 282.",
+              "Вдясно 26 . 2 + 5 . 26 + 26 . 3 = 26 . (2 + 5 + 3) = 260. Другите скоби дават 1000 – 844 = 156, затова вдясно остава 260 – 156 = 104.",
+              "Получаваш 282 – А = 104, следователно А = 282 – 104 = 178. Провери: 282 – 178 = 104."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2025-p1-b",
+            "original_problem_id": "oli-g4-municipal-2025-p1",
+            "subpart": "b",
+            "learning_prompt_bg": "Намери В = 13 стотици + 53 десетици + 17 единици.",
+            "shared_original_context": "oli-g4-municipal-2025-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Разряден състав с повече от девет единици в разряд",
+            "fields": [
+              {
+                "id": "b",
+                "label_bg": "В",
+                "type": "number",
+                "answer": 1847
+              }
+            ],
+            "worked_steps_bg": [
+              "13 стотици са 13 . 100 = 1300.",
+              "53 десетици са 53 . 10 = 530, а 17 единици са 17.",
+              "Събери: В = 1300 + 530 + 17 = 1847."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2025-p1-c-roman",
+            "original_problem_id": "oli-g4-municipal-2025-p1",
+            "subpart": "c-roman",
+            "learning_prompt_bg": "Запиши С = А + В с римски цифри.",
+            "shared_original_context": "oli-g4-municipal-2025-p1",
+            "island": "numbers-calculation",
+            "primary_skill": "Римски цифри и разряден състав",
+            "fields": [
+              {
+                "id": "cRoman",
+                "label_bg": "С с римски цифри",
+                "type": "text",
+                "answer": "MMXXV"
+              }
+            ],
+            "worked_steps_bg": [
+              "Намери С = 178 + 1847 = 2025.",
+              "Представи 2025 като сбор: 2000 + 20 + 5. Запиши всяка част с римски цифри: 2000 = MM, 20 = XX, 5 = V.",
+              "Запиши частите една след друга: С = MMXXV. Провери: 1000 + 1000 + 10 + 10 + 5 = 2025."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2025-p1-a",
+              "oli-g4-municipal-2025-p1-b"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2025-p2",
+        "year": 2025,
+        "problem": 2,
+        "original_text_bg": "Правоъгълникът ABCD е съставен от един голям квадрат, два еднакви по-малки квадрата и три еднакви правоъгълника. Обиколката на големия квадрат е 18 дм и е с 40 см по-голяма от обиколката на малкия квадрат. Намерете сбора от обиколките на геометричните фигури в милиметри, съставящи правоъгълника ABCD – големия квадрат, двата еднакви по-малки квадрата и трите еднакви правоъгълника.",
+        "source": {
+          "problems": "2025-problems",
+          "page": 1,
+          "solution": "2025-solution",
+          "solution_pages": [
+            1
+          ]
+        },
+        "diagram_required": true,
+        "diagram": {
+          "source_page": 1,
+          "description_bg": "ABCD: A долу вляво, B долу вдясно, C горе вдясно, D горе вляво. Един голям квадрат горе вляво, три еднакви тесни правоъгълника един до друг под него и два еднакви по-малки квадрата един над друг вдясно. Изведени размери: голям квадрат 45 см, малки квадрати 35 см, правоъгълници 15 на 25 см.",
+          "display_requirement": "Use exact source diagram on white panel; faint pencil marks in scan are not given dimensions."
+        },
+        "review_status": "draft-human-review-required",
+        "uncertainties": [],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2025-p2-perimeter-sum",
+            "original_problem_id": "oli-g4-municipal-2025-p2",
+            "subpart": "perimeter-sum",
+            "learning_prompt_bg": "Намери сбора на обиколките на шестте фигури в милиметри.",
+            "shared_original_context": "oli-g4-municipal-2025-p2",
+            "island": "geometry",
+            "primary_skill": "Съставна фигура, обиколки и мерни единици",
+            "fields": [
+              {
+                "id": "perimeterSumMm",
+                "label_bg": "Сбор на обиколките",
+                "type": "number",
+                "answer": 7000,
+                "unit_bg": "мм"
+              }
+            ],
+            "worked_steps_bg": [
+              "Превърни 18 дм = 180 см. Малкият квадрат има обиколка 180 – 40 = 140 см и страна 140 : 4 = 35 см. Големият има страна 180 : 4 = 45 см.",
+              "Двата малки квадрата са един над друг, затова общата височина е 35 + 35 = 70 см. Под големия квадрат остават 70 – 45 = 25 см. Трите еднакви правоъгълника заедно са широки колкото големия квадрат. Всеки е широк 45 : 3 = 15 см и има обиколка 2 . (25 + 15) = 80 см.",
+              "Събери обиколките на всичките шест фигури: 180 + 2 . 140 + 3 . 80 = 700 см. Превърни в милиметри: 700 . 10 = 7000 мм."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      },
+      {
+        "id": "oli-g4-municipal-2025-p3",
+        "year": 2025,
+        "problem": 3,
+        "original_text_bg": "В магическата звезда зад буквите n, p, a и b са скрити числа. Сборът на четирите числа в кръгчетата по всяка права е един и същ. В две кръгчета има едно и също число n, а зад буквите a, b и p са скрити различни числа.\nа) Намерете числото n.\nб) Намерете сбора на числата по всяка права.\nв) Намерете числата, скрити зад p, a и b.",
+        "source": {
+          "problems": "2025-problems",
+          "page": 1,
+          "solution": "2025-solution",
+          "solution_pages": [
+            1
+          ]
+        },
+        "diagram_required": true,
+        "diagram": {
+          "source_page": 1,
+          "description_bg": "Шестлъчева звезда с 12 кръгчета. Шестте прави с по четири кръгчета са: [n,21,87,123], [n,n,55,86], [110,n,21,p], [p,87,45,a], [110,55,b,a], [123,45,b,86].",
+          "lines": [
+            [
+              "n",
+              "21",
+              "87",
+              "123"
+            ],
+            [
+              "n",
+              "n",
+              "55",
+              "86"
+            ],
+            [
+              "110",
+              "n",
+              "21",
+              "p"
+            ],
+            [
+              "p",
+              "87",
+              "45",
+              "a"
+            ],
+            [
+              "110",
+              "55",
+              "b",
+              "a"
+            ],
+            [
+              "123",
+              "45",
+              "b",
+              "86"
+            ]
+          ],
+          "display_requirement": "Exact star and repeated n labels required; do not replace with an incomplete text diagram."
+        },
+        "review_status": "draft-human-review-required",
+        "uncertainties": [
+          "Official marking labels subpart c as 4 points, so listed subtotals 3+1+4=8 conflict with the problem’s printed 7 points; mathematical answers agree."
+        ],
+        "units": [
+          {
+            "id": "oli-g4-municipal-2025-p3-a",
+            "original_problem_id": "oli-g4-municipal-2025-p3",
+            "subpart": "a",
+            "learning_prompt_bg": "Намери числото n в двете кръгчета.",
+            "shared_original_context": "oli-g4-municipal-2025-p3",
+            "island": "logic",
+            "primary_skill": "Равни сборове в магическа фигура",
+            "fields": [
+              {
+                "id": "n",
+                "label_bg": "n",
+                "type": "number",
+                "answer": 90
+              }
+            ],
+            "worked_steps_bg": [
+              "По горната права сборът е n + 21 + 87 + 123 = n + 231. По наклонената права, която минава през двете кръгчета с n, сборът е n + n + 55 + 86 = n + n + 141.",
+              "Двата сбора са равни. Махни по едно n от всеки: 231 = n + 141.",
+              "Намери n = 231 – 141 = 90. Провери: 90 + 231 = 90 + 90 + 141 = 321."
+            ],
+            "depends_on": [],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2025-p3-b",
+            "original_problem_id": "oli-g4-municipal-2025-p3",
+            "subpart": "b",
+            "learning_prompt_bg": "Намери общия сбор по всяка права.",
+            "shared_original_context": "oli-g4-municipal-2025-p3",
+            "island": "logic",
+            "primary_skill": "Сбор на четири числа по права",
+            "fields": [
+              {
+                "id": "lineSum",
+                "label_bg": "Сбор по всяка права",
+                "type": "number",
+                "answer": 321
+              }
+            ],
+            "worked_steps_bg": [
+              "Използвай намереното n = 90. По горната права са 90, 21, 87 и 123.",
+              "Събери по двойки: 90 + 21 = 111 и 87 + 123 = 210.",
+              "Общият сбор е 111 + 210 = 321. Той е еднакъв за всяка права."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2025-p3-a"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          },
+          {
+            "id": "oli-g4-municipal-2025-p3-c",
+            "original_problem_id": "oli-g4-municipal-2025-p3",
+            "subpart": "c",
+            "learning_prompt_bg": "Намери числата p, a и b.",
+            "shared_original_context": "oli-g4-municipal-2025-p3",
+            "island": "logic",
+            "primary_skill": "Попълване на магическа фигура по равни сборове",
+            "fields": [
+              {
+                "id": "p",
+                "label_bg": "p",
+                "type": "number",
+                "answer": 100
+              },
+              {
+                "id": "a",
+                "label_bg": "a",
+                "type": "number",
+                "answer": 89
+              },
+              {
+                "id": "b",
+                "label_bg": "b",
+                "type": "number",
+                "answer": 67
+              }
+            ],
+            "worked_steps_bg": [
+              "По правата 110, 90, 21, p сборът е 321: p = 321 – (110 + 90 + 21) = 100.",
+              "По правата p, 87, 45, a получаваш a = 321 – (100 + 87 + 45) = 89.",
+              "По долната права 110, 55, b, 89 получаваш b = 321 – (110 + 55 + 89) = 67. Провери и останалата права: 123 + 45 + 67 + 86 = 321."
+            ],
+            "depends_on": [
+              "oli-g4-municipal-2025-p3-a",
+              "oli-g4-municipal-2025-p3-b"
+            ],
+            "answer_review": "math-checked-against-official",
+            "uncertainties": []
+          }
+        ]
+      }
+    ]
+  },
+  "practice": {
+    "schema_version": 1,
+    "collection": "olimpiada",
+    "publication_status": "draft",
+    "origin": "New authored practice; not original competition statements.",
+    "response_policy": "Numeric answer fields; Roman numerals use an explicitly labelled authored choice. Exactly3worked steps per item.",
+    "families": [
+      {
+        "id": "order-actions",
+        "island": "numbers-calculation",
+        "skill_bg": "Ред на действията и удобно пресмятане",
+        "original_unit_ids": [
+          "oli-g4-municipal-2022-p1-a",
+          "oli-g4-municipal-2023-p1-a",
+          "oli-g4-municipal-2023-p1-expression",
+          "oli-g4-municipal-2024-p1-a"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-order-actions-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Пресметни 36 . 4 + 180 : 6.",
+            "fields": [
+              {
+                "id": "value",
+                "label_bg": "Стойност",
+                "type": "number",
+                "answer": 174
+              }
+            ],
+            "worked_steps_bg": [
+              "Първо умножи: 36 . 4 = 144.",
+              "Раздели: 180 : 6 = 30.",
+              "Събери получените числа: 144 + 30 = 174."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-a",
+              "oli-g4-municipal-2023-p1-a",
+              "oli-g4-municipal-2023-p1-expression",
+              "oli-g4-municipal-2024-p1-a"
+            ],
+            "verification": {
+              "kind": "order",
+              "params": [
+                36,
+                4,
+                180,
+                6
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-order-actions-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Пресметни 48 . 3 + 240 : 8.",
+            "fields": [
+              {
+                "id": "value",
+                "label_bg": "Стойност",
+                "type": "number",
+                "answer": 174
+              }
+            ],
+            "worked_steps_bg": [
+              "Първо умножи: 48 . 3 = 144.",
+              "Раздели: 240 : 8 = 30.",
+              "Събери получените числа: 144 + 30 = 174."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-a",
+              "oli-g4-municipal-2023-p1-a",
+              "oli-g4-municipal-2023-p1-expression",
+              "oli-g4-municipal-2024-p1-a"
+            ],
+            "verification": {
+              "kind": "order",
+              "params": [
+                48,
+                3,
+                240,
+                8
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-order-actions-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Пресметни 125 . 2 + 360 : 9.",
+            "fields": [
+              {
+                "id": "value",
+                "label_bg": "Стойност",
+                "type": "number",
+                "answer": 290
+              }
+            ],
+            "worked_steps_bg": [
+              "Първо умножи: 125 . 2 = 250.",
+              "Раздели: 360 : 9 = 40.",
+              "Събери получените числа: 250 + 40 = 290."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-a",
+              "oli-g4-municipal-2023-p1-a",
+              "oli-g4-municipal-2023-p1-expression",
+              "oli-g4-municipal-2024-p1-a"
+            ],
+            "verification": {
+              "kind": "order",
+              "params": [
+                125,
+                2,
+                360,
+                9
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-order-actions-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Пресметни 127 . 6 – 122 . 6 + 45.",
+            "fields": [
+              {
+                "id": "value",
+                "label_bg": "Стойност",
+                "type": "number",
+                "answer": 75
+              }
+            ],
+            "worked_steps_bg": [
+              "Двете произведения имат множител 6: 127 . 6 – 122 . 6 = (127 – 122) . 6.",
+              "Извади 127 – 122 = 5 и умножи 5 . 6 = 30.",
+              "Прибави 45: 30 + 45 = 75."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-a",
+              "oli-g4-municipal-2023-p1-a",
+              "oli-g4-municipal-2023-p1-expression",
+              "oli-g4-municipal-2024-p1-a"
+            ],
+            "verification": {
+              "kind": "direct",
+              "expression": "127*6-122*6+45",
+              "expected": 75
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-order-actions-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Пресметни (84 : 4 + 96 : 4) . 3.",
+            "fields": [
+              {
+                "id": "value",
+                "label_bg": "Стойност",
+                "type": "number",
+                "answer": 135
+              }
+            ],
+            "worked_steps_bg": [
+              "Двете числа в скобите се делят на 4: 84 : 4 + 96 : 4 = (84 + 96) : 4.",
+              "Събери 84 + 96 = 180 и раздели 180 : 4 = 45.",
+              "Умножи резултата от скобите по 3: 45 . 3 = 135."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-a",
+              "oli-g4-municipal-2023-p1-a",
+              "oli-g4-municipal-2023-p1-expression",
+              "oli-g4-municipal-2024-p1-a"
+            ],
+            "verification": {
+              "kind": "direct",
+              "expression": "(84//4+96//4)*3",
+              "expected": 135
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "unknown-subtrahend",
+        "island": "numbers-calculation",
+        "skill_bg": "Намиране на неизвестно число при изваждане",
+        "original_unit_ids": [
+          "oli-g4-municipal-2022-p1-b",
+          "oli-g4-municipal-2023-p1-b",
+          "oli-g4-municipal-2024-p1-b",
+          "oli-g4-municipal-2025-p1-a"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-unknown-subtrahend-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Намери x: 340 – x = 125.",
+            "fields": [
+              {
+                "id": "x",
+                "label_bg": "x",
+                "type": "number",
+                "answer": 215
+              }
+            ],
+            "worked_steps_bg": [
+              "От 340 изваждаме x и получаваме 125. Значи x и 125 заедно дават 340.",
+              "За да намериш x, извади 125 от 340: x = 340 – 125 = 215.",
+              "Провери с намереното число: 340 – 215 = 125."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-b",
+              "oli-g4-municipal-2023-p1-b",
+              "oli-g4-municipal-2024-p1-b",
+              "oli-g4-municipal-2025-p1-a"
+            ],
+            "verification": {
+              "kind": "unknown",
+              "minuend": 340,
+              "remainder": 125
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-unknown-subtrahend-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Намери x: 520 – x = 207.",
+            "fields": [
+              {
+                "id": "x",
+                "label_bg": "x",
+                "type": "number",
+                "answer": 313
+              }
+            ],
+            "worked_steps_bg": [
+              "От 520 изваждаме x и получаваме 207. Значи x и 207 заедно дават 520.",
+              "За да намериш x, извади 207 от 520: x = 520 – 207 = 313.",
+              "Провери с намереното число: 520 – 313 = 207."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-b",
+              "oli-g4-municipal-2023-p1-b",
+              "oli-g4-municipal-2024-p1-b",
+              "oli-g4-municipal-2025-p1-a"
+            ],
+            "verification": {
+              "kind": "unknown",
+              "minuend": 520,
+              "remainder": 207
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-unknown-subtrahend-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Намери x: 810 – x = 316.",
+            "fields": [
+              {
+                "id": "x",
+                "label_bg": "x",
+                "type": "number",
+                "answer": 494
+              }
+            ],
+            "worked_steps_bg": [
+              "От 810 изваждаме x и получаваме 316. Значи x и 316 заедно дават 810.",
+              "За да намериш x, извади 316 от 810: x = 810 – 316 = 494.",
+              "Провери с намереното число: 810 – 494 = 316."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-b",
+              "oli-g4-municipal-2023-p1-b",
+              "oli-g4-municipal-2024-p1-b",
+              "oli-g4-municipal-2025-p1-a"
+            ],
+            "verification": {
+              "kind": "unknown",
+              "minuend": 810,
+              "remainder": 316
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-unknown-subtrahend-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Намери x: (240 + 18 . 5) – x = 360 : 6.",
+            "fields": [
+              {
+                "id": "x",
+                "label_bg": "x",
+                "type": "number",
+                "answer": 270
+              }
+            ],
+            "worked_steps_bg": [
+              "Пресметни скобите: 18 . 5 = 90; 240 + 90 = 330.",
+              "Пресметни дясната страна: 360 : 6 = 60. Получаваш 330 – x = 60.",
+              "Намери x = 330 – 60 = 270. Провери: 330 – 270 = 60."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-b",
+              "oli-g4-municipal-2023-p1-b",
+              "oli-g4-municipal-2024-p1-b",
+              "oli-g4-municipal-2025-p1-a"
+            ],
+            "verification": {
+              "kind": "unknown",
+              "minuend": 330,
+              "remainder": 60,
+              "original_params": [
+                240,
+                18,
+                5,
+                360,
+                6
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-unknown-subtrahend-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Намери x: (315 + 24 . 4) – x = 420 : 7.",
+            "fields": [
+              {
+                "id": "x",
+                "label_bg": "x",
+                "type": "number",
+                "answer": 351
+              }
+            ],
+            "worked_steps_bg": [
+              "Пресметни скобите: 24 . 4 = 96; 315 + 96 = 411.",
+              "Пресметни дясната страна: 420 : 7 = 60. Получаваш 411 – x = 60.",
+              "Намери x = 411 – 60 = 351. Провери: 411 – 351 = 60."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-b",
+              "oli-g4-municipal-2023-p1-b",
+              "oli-g4-municipal-2024-p1-b",
+              "oli-g4-municipal-2025-p1-a"
+            ],
+            "verification": {
+              "kind": "unknown",
+              "minuend": 411,
+              "remainder": 60,
+              "original_params": [
+                315,
+                24,
+                4,
+                420,
+                7
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "place-value-constraints",
+        "island": "numbers-calculation",
+        "skill_bg": "Разряден състав и най-голямо число при условия",
+        "original_unit_ids": [
+          "oli-g4-municipal-2022-p1-hundreds-sum",
+          "oli-g4-municipal-2023-p1-c",
+          "oli-g4-municipal-2024-p1-c",
+          "oli-g4-municipal-2025-p1-b"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-place-value-constraints-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Кое число е сборът на 13 стотици, 24 десетици и 8 единици?",
+            "fields": [
+              {
+                "id": "number",
+                "label_bg": "Число",
+                "type": "number",
+                "answer": 1548
+              }
+            ],
+            "worked_steps_bg": [
+              "13 стотици са 13 . 100 = 1300.",
+              "24 десетици са 24 . 10 = 240, а 8 единици са 8.",
+              "Събери: 1300 + 240 + 8 = 1548."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-hundreds-sum",
+              "oli-g4-municipal-2023-p1-c",
+              "oli-g4-municipal-2024-p1-c",
+              "oli-g4-municipal-2025-p1-b"
+            ],
+            "verification": {
+              "kind": "place",
+              "params": [
+                13,
+                24,
+                8
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-place-value-constraints-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Кое число е сборът на 16 стотици, 32 десетици и 7 единици?",
+            "fields": [
+              {
+                "id": "number",
+                "label_bg": "Число",
+                "type": "number",
+                "answer": 1927
+              }
+            ],
+            "worked_steps_bg": [
+              "16 стотици са 16 . 100 = 1600.",
+              "32 десетици са 32 . 10 = 320, а 7 единици са 7.",
+              "Събери: 1600 + 320 + 7 = 1927."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-hundreds-sum",
+              "oli-g4-municipal-2023-p1-c",
+              "oli-g4-municipal-2024-p1-c",
+              "oli-g4-municipal-2025-p1-b"
+            ],
+            "verification": {
+              "kind": "place",
+              "params": [
+                16,
+                32,
+                7
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-place-value-constraints-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Кое число е сборът на 21 стотици, 45 десетици и 9 единици?",
+            "fields": [
+              {
+                "id": "number",
+                "label_bg": "Число",
+                "type": "number",
+                "answer": 2559
+              }
+            ],
+            "worked_steps_bg": [
+              "21 стотици са 21 . 100 = 2100.",
+              "45 десетици са 45 . 10 = 450, а 9 единици са 9.",
+              "Събери: 2100 + 450 + 9 = 2559."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-hundreds-sum",
+              "oli-g4-municipal-2023-p1-c",
+              "oli-g4-municipal-2024-p1-c",
+              "oli-g4-municipal-2025-p1-b"
+            ],
+            "verification": {
+              "kind": "place",
+              "params": [
+                21,
+                45,
+                9
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-place-value-constraints-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Намери най-голямото четно четирицифрено число с различни цифри и цифра на стотиците 5.",
+            "fields": [
+              {
+                "id": "number",
+                "label_bg": "Число",
+                "type": "number",
+                "answer": 9586
+              }
+            ],
+            "worked_steps_bg": [
+              "Запиши 9 като цифра на хилядите и 5 като цифра на стотиците, както е по условие: 95□□.",
+              "На десетиците постави най-голямата неизползвана цифра 8: 958□.",
+              "Последната цифра трябва да е четна и различна от 9, 5 и 8. Най-голямата възможна е 6, затова числото е 9586."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-hundreds-sum",
+              "oli-g4-municipal-2023-p1-c",
+              "oli-g4-municipal-2024-p1-c",
+              "oli-g4-municipal-2025-p1-b"
+            ],
+            "verification": {
+              "kind": "max-four-distinct",
+              "hundreds": 5
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-place-value-constraints-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Намери най-голямото четно шестцифрено число с цифра на хилядите 4. Цифрите могат да се повтарят.",
+            "fields": [
+              {
+                "id": "number",
+                "label_bg": "Число",
+                "type": "number",
+                "answer": 994998
+              }
+            ],
+            "worked_steps_bg": [
+              "Запиши 9 като цифра на стотиците хиляди и на десетиците хиляди, а 4 като цифра на хилядите: 994□□□.",
+              "На стотиците и десетиците постави 9: 99499□.",
+              "Най-голямата четна цифра е 8. Постави я на единиците: 994998."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p1-hundreds-sum",
+              "oli-g4-municipal-2023-p1-c",
+              "oli-g4-municipal-2024-p1-c",
+              "oli-g4-municipal-2025-p1-b"
+            ],
+            "verification": {
+              "kind": "max-six",
+              "thousands": 4
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "roman",
+        "island": "numbers-calculation",
+        "skill_bg": "Записване на числа с римски цифри",
+        "original_unit_ids": [
+          "oli-g4-municipal-2025-p1-c-roman"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-roman-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Избери правилния запис на 14 с римски цифри.",
+            "fields": [
+              {
+                "id": "romanOption",
+                "label_bg": "Учебен избор на отговор",
+                "type": "choice",
+                "answer": 1,
+                "options": [
+                  "XVI",
+                  "XIV",
+                  "XIX",
+                  "XXIV"
+                ],
+                "answer_convention": "zero-based option index"
+              }
+            ],
+            "worked_steps_bg": [
+              "Представи 14 като сбор: 14 = 10 + 4.",
+              "Запиши частите с римски цифри: X и IV.",
+              "Запиши частите една след друга в този ред: XIV."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p1-c-roman"
+            ],
+            "verification": {
+              "kind": "roman",
+              "number": 14,
+              "correct_roman": "XIV"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-roman-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Избери правилния запис на 27 с римски цифри.",
+            "fields": [
+              {
+                "id": "romanOption",
+                "label_bg": "Учебен избор на отговор",
+                "type": "choice",
+                "answer": 2,
+                "options": [
+                  "XVII",
+                  "XXIV",
+                  "XXVII",
+                  "XXIX"
+                ],
+                "answer_convention": "zero-based option index"
+              }
+            ],
+            "worked_steps_bg": [
+              "Представи 27 като сбор: 27 = 20 + 7.",
+              "Запиши частите с римски цифри: XX и VII.",
+              "Запиши частите една след друга в този ред: XXVII."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p1-c-roman"
+            ],
+            "verification": {
+              "kind": "roman",
+              "number": 27,
+              "correct_roman": "XXVII"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-roman-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Избери правилния запис на 46 с римски цифри.",
+            "fields": [
+              {
+                "id": "romanOption",
+                "label_bg": "Учебен избор на отговор",
+                "type": "choice",
+                "answer": 3,
+                "options": [
+                  "LXIV",
+                  "XLIV",
+                  "XLIX",
+                  "XLVI"
+                ],
+                "answer_convention": "zero-based option index"
+              }
+            ],
+            "worked_steps_bg": [
+              "Представи 46 като сбор: 46 = 40 + 6.",
+              "Запиши частите с римски цифри: XL и VI.",
+              "Запиши частите една след друга в този ред: XLVI."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p1-c-roman"
+            ],
+            "verification": {
+              "kind": "roman",
+              "number": 46,
+              "correct_roman": "XLVI"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-roman-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Пресметни 1328 + 698 и избери записа на сбора с римски цифри.",
+            "fields": [
+              {
+                "id": "romanOption",
+                "label_bg": "Учебен избор на отговор",
+                "type": "choice",
+                "answer": 2,
+                "options": [
+                  "MMXVI",
+                  "MMXXIV",
+                  "MMXXVI",
+                  "MMXXXVI"
+                ],
+                "answer_convention": "zero-based option index"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери 1328 + 698 = 2026. Представи сбора като 2000 + 20 + 6.",
+              "Запиши частите с римски цифри: MM, XX и VI.",
+              "Запиши частите една след друга в този ред: MMXXVI."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p1-c-roman"
+            ],
+            "verification": {
+              "kind": "roman",
+              "number": 2026,
+              "correct_roman": "MMXXVI"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-roman-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Пресметни 1700 – 51 и избери записа на разликата с римски цифри.",
+            "fields": [
+              {
+                "id": "romanOption",
+                "label_bg": "Учебен избор на отговор",
+                "type": "choice",
+                "answer": 0,
+                "options": [
+                  "MDCXLIX",
+                  "MDCLIX",
+                  "MDCXLI",
+                  "MDCCXLIX"
+                ],
+                "answer_convention": "zero-based option index"
+              }
+            ],
+            "worked_steps_bg": [
+              "Извади 1700 – 51 = 1649. Представи разликата като 1000 + 600 + 40 + 9.",
+              "Запиши частите с римски цифри: M, DC, XL и IX.",
+              "Запиши частите една след друга в този ред: MDCXLIX."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p1-c-roman"
+            ],
+            "verification": {
+              "kind": "roman",
+              "number": 1649,
+              "correct_roman": "MDCXLIX"
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "rectangle-ratio",
+        "island": "geometry",
+        "skill_bg": "Страни на правоъгълник по обиколка и отношение",
+        "original_unit_ids": [
+          "oli-g4-municipal-2023-p2-a",
+          "oli-g4-municipal-2023-p2-b",
+          "oli-g4-municipal-2023-p2-c"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-rectangle-ratio-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Правоъгълник има обиколка 96 м. Дължината му е 3 пъти по-голяма от ширината. Намери двете страни.",
+            "fields": [
+              {
+                "id": "width",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 12,
+                "unit_bg": "м"
+              },
+              {
+                "id": "length",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 36,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Представи ширината като една част, а дължината - като 3 такива части. Обиколката съдържа 3 + 3 + 1 + 1 = 8 равни части.",
+              "Ширината е 96 : 8 = 12 м.",
+              "Дължината е 12 . 3 = 36 м. Провери: 2 . (12 + 36) = 96 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p2-a",
+              "oli-g4-municipal-2023-p2-b",
+              "oli-g4-municipal-2023-p2-c"
+            ],
+            "verification": {
+              "kind": "rectangle-ratio",
+              "perimeter": 96,
+              "ratio": 3
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-ratio-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Правоъгълник има обиколка 120 м. Дължината му е 2 пъти по-голяма от ширината. Намери двете страни.",
+            "fields": [
+              {
+                "id": "width",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 20,
+                "unit_bg": "м"
+              },
+              {
+                "id": "length",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 40,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Представи ширината като една част, а дължината - като 2 такива части. Обиколката съдържа 2 + 2 + 1 + 1 = 6 равни части.",
+              "Ширината е 120 : 6 = 20 м.",
+              "Дължината е 20 . 2 = 40 м. Провери: 2 . (20 + 40) = 120 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p2-a",
+              "oli-g4-municipal-2023-p2-b",
+              "oli-g4-municipal-2023-p2-c"
+            ],
+            "verification": {
+              "kind": "rectangle-ratio",
+              "perimeter": 120,
+              "ratio": 2
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-ratio-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Правоъгълник има обиколка 160 м. Дължината му е 3 пъти по-голяма от ширината. Намери двете страни.",
+            "fields": [
+              {
+                "id": "width",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 20,
+                "unit_bg": "м"
+              },
+              {
+                "id": "length",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 60,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Представи ширината като една част, а дължината - като 3 такива части. Обиколката съдържа 3 + 3 + 1 + 1 = 8 равни части.",
+              "Ширината е 160 : 8 = 20 м.",
+              "Дължината е 20 . 3 = 60 м. Провери: 2 . (20 + 60) = 160 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p2-a",
+              "oli-g4-municipal-2023-p2-b",
+              "oli-g4-municipal-2023-p2-c"
+            ],
+            "verification": {
+              "kind": "rectangle-ratio",
+              "perimeter": 160,
+              "ratio": 3
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-ratio-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Правоъгълна градина има обиколка 144 м и дължина 2 пъти по-голяма от ширината. До нея е долепена квадратна градина. Една от страните на квадрата съвпада с цялата къса страна на правоъгълника. Двете градини образуват правоъгълен двор. Колко метра мрежа са необходими за външната ограда, ако се остави място за врата с ширина 4 м?",
+            "fields": [
+              {
+                "id": "fence",
+                "label_bg": "Мрежа",
+                "type": "number",
+                "answer": 188,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Обиколката съдържа 6 ширини. Ширината е 144 : 6 = 24 м, а дължината е 24 . 2 = 48 м.",
+              "Страната на квадрата е 24 м. Целият двор е с дължина 48 + 24 = 72 м и ширина 24 м.",
+              "Външната обиколка е 2 . (72 + 24) = 192 м. Извади ширината на вратата: 192 – 4 = 188 м мрежа."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p2-a",
+              "oli-g4-municipal-2023-p2-b",
+              "oli-g4-municipal-2023-p2-c"
+            ],
+            "verification": {
+              "kind": "rectangle-ratio-fence",
+              "perimeter": 144,
+              "ratio": 2,
+              "gate": 4
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-ratio-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Правоъгълна градина има обиколка 200 м и дължина 4 пъти по-голяма от ширината. До нея е долепена квадратна градина. Една от страните на квадрата съвпада с цялата къса страна на правоъгълника. Двете градини образуват правоъгълен двор. Колко метра мрежа са необходими за външната ограда, ако се остави място за врата с ширина 6 м?",
+            "fields": [
+              {
+                "id": "fence",
+                "label_bg": "Мрежа",
+                "type": "number",
+                "answer": 234,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Обиколката съдържа 10 ширини. Ширината е 200 : 10 = 20 м, а дължината е 20 . 4 = 80 м.",
+              "Страната на квадрата е 20 м. Целият двор е с дължина 80 + 20 = 100 м и ширина 20 м.",
+              "Външната обиколка е 2 . (100 + 20) = 240 м. Извади ширината на вратата: 240 – 6 = 234 м мрежа."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p2-a",
+              "oli-g4-municipal-2023-p2-b",
+              "oli-g4-municipal-2023-p2-c"
+            ],
+            "verification": {
+              "kind": "rectangle-ratio-fence",
+              "perimeter": 200,
+              "ratio": 4,
+              "gate": 6
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "rectangle-difference",
+        "island": "geometry",
+        "skill_bg": "Страни по обиколка и разлика; обиколка след промяна",
+        "original_unit_ids": [
+          "oli-g4-municipal-2024-p2-a",
+          "oli-g4-municipal-2024-p2-b"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-rectangle-difference-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Правоъгълник има обиколка 120 м. Дължината е с 20 м по-голяма от ширината. Намери страните.",
+            "fields": [
+              {
+                "id": "width",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 20,
+                "unit_bg": "м"
+              },
+              {
+                "id": "length",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 40,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Дължината и ширината заедно са 120 : 2 = 60 м.",
+              "Извади разликата между дължината и ширината: 60 – 20 = 40 м. Остават две равни части. Ширината е 40 : 2 = 20 м.",
+              "Дължината е 20 + 20 = 40 м. Провери: 2 . (20 + 40) = 120 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p2-a",
+              "oli-g4-municipal-2024-p2-b"
+            ],
+            "verification": {
+              "kind": "rectangle-difference",
+              "perimeter": 120,
+              "difference": 20
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-difference-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Правоъгълник има обиколка 168 м. Дължината е с 28 м по-голяма от ширината. Намери страните.",
+            "fields": [
+              {
+                "id": "width",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 28,
+                "unit_bg": "м"
+              },
+              {
+                "id": "length",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 56,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Дължината и ширината заедно са 168 : 2 = 84 м.",
+              "Извади разликата между дължината и ширината: 84 – 28 = 56 м. Остават две равни части. Ширината е 56 : 2 = 28 м.",
+              "Дължината е 28 + 28 = 56 м. Провери: 2 . (28 + 56) = 168 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p2-a",
+              "oli-g4-municipal-2024-p2-b"
+            ],
+            "verification": {
+              "kind": "rectangle-difference",
+              "perimeter": 168,
+              "difference": 28
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-difference-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Правоъгълник има обиколка 200 м. Дължината е с 30 м по-голяма от ширината. Намери страните.",
+            "fields": [
+              {
+                "id": "width",
+                "label_bg": "Ширина",
+                "type": "number",
+                "answer": 35,
+                "unit_bg": "м"
+              },
+              {
+                "id": "length",
+                "label_bg": "Дължина",
+                "type": "number",
+                "answer": 65,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Дължината и ширината заедно са 200 : 2 = 100 м.",
+              "Извади разликата между дължината и ширината: 100 – 30 = 70 м. Остават две равни части. Ширината е 70 : 2 = 35 м.",
+              "Дължината е 35 + 30 = 65 м. Провери: 2 . (35 + 65) = 200 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p2-a",
+              "oli-g4-municipal-2024-p2-b"
+            ],
+            "verification": {
+              "kind": "rectangle-difference",
+              "perimeter": 200,
+              "difference": 30
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-difference-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Зеленчукова градина има обиколка 240 м. Дължината е с 40 м по-голяма от ширината. Овощна градина има 3 пъти по-голяма ширина и 2 пъти по-голяма дължина от зеленчуковата. Намери обиколката на овощната градина.",
+            "fields": [
+              {
+                "id": "perimeter",
+                "label_bg": "Обиколка",
+                "type": "number",
+                "answer": 560,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Сборът на дължината и ширината е 240 : 2 = 120 м. Ширината е (120 – 40) : 2 = 40 м, а дължината е 40 + 40 = 80 м.",
+              "Овощната градина има ширина 40 . 3 = 120 м и дължина 80 . 2 = 160 м.",
+              "Обиколката ѝ е 2 . (120 + 160) = 2 . 280 = 560 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p2-a",
+              "oli-g4-municipal-2024-p2-b"
+            ],
+            "verification": {
+              "kind": "rectangle-difference-scaled",
+              "perimeter": 240,
+              "difference": 40,
+              "width_factor": 3,
+              "length_factor": 2
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-rectangle-difference-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Зеленчукова градина има обиколка 360 м. Дължината е с 60 м по-голяма от ширината. Овощна градина има 4 пъти по-голяма ширина и 2 пъти по-голяма дължина от зеленчуковата. Намери обиколката на овощната градина.",
+            "fields": [
+              {
+                "id": "perimeter",
+                "label_bg": "Обиколка",
+                "type": "number",
+                "answer": 960,
+                "unit_bg": "м"
+              }
+            ],
+            "worked_steps_bg": [
+              "Сборът на дължината и ширината е 360 : 2 = 180 м. Ширината е (180 – 60) : 2 = 60 м, а дължината е 60 + 60 = 120 м.",
+              "Овощната градина има ширина 60 . 4 = 240 м и дължина 120 . 2 = 240 м.",
+              "Обиколката ѝ е 2 . (240 + 240) = 2 . 480 = 960 м."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p2-a",
+              "oli-g4-municipal-2024-p2-b"
+            ],
+            "verification": {
+              "kind": "rectangle-difference-scaled",
+              "perimeter": 360,
+              "difference": 60,
+              "width_factor": 4,
+              "length_factor": 2
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "composite-perimeters",
+        "island": "geometry",
+        "skill_bg": "Сбор на отделни обиколки и мерни единици",
+        "original_unit_ids": [
+          "oli-g4-municipal-2022-p3-perimeter-sum",
+          "oli-g4-municipal-2025-p2-perimeter-sum"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-composite-perimeters-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Два квадрата имат страни 3 см и 5 см. Намери сбора на техните обиколки.",
+            "fields": [
+              {
+                "id": "sum",
+                "label_bg": "Сбор на обиколките",
+                "type": "number",
+                "answer": 32,
+                "unit_bg": "см"
+              }
+            ],
+            "worked_steps_bg": [
+              "Първият квадрат има обиколка 4 . 3 = 12 см.",
+              "Вторият квадрат има обиколка 4 . 5 = 20 см.",
+              "Събери двете обиколки: 12 + 20 = 32 см."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p3-perimeter-sum",
+              "oli-g4-municipal-2025-p2-perimeter-sum"
+            ],
+            "verification": {
+              "kind": "square-sum",
+              "sides": [
+                3,
+                5
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-composite-perimeters-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Два квадрата имат страни 4 см и 7 см. Намери сбора на техните обиколки.",
+            "fields": [
+              {
+                "id": "sum",
+                "label_bg": "Сбор на обиколките",
+                "type": "number",
+                "answer": 44,
+                "unit_bg": "см"
+              }
+            ],
+            "worked_steps_bg": [
+              "Първият квадрат има обиколка 4 . 4 = 16 см.",
+              "Вторият квадрат има обиколка 4 . 7 = 28 см.",
+              "Събери двете обиколки: 16 + 28 = 44 см."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p3-perimeter-sum",
+              "oli-g4-municipal-2025-p2-perimeter-sum"
+            ],
+            "verification": {
+              "kind": "square-sum",
+              "sides": [
+                4,
+                7
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-composite-perimeters-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Два квадрата имат страни 6 см и 8 см. Намери сбора на техните обиколки.",
+            "fields": [
+              {
+                "id": "sum",
+                "label_bg": "Сбор на обиколките",
+                "type": "number",
+                "answer": 56,
+                "unit_bg": "см"
+              }
+            ],
+            "worked_steps_bg": [
+              "Първият квадрат има обиколка 4 . 6 = 24 см.",
+              "Вторият квадрат има обиколка 4 . 8 = 32 см.",
+              "Събери двете обиколки: 24 + 32 = 56 см."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p3-perimeter-sum",
+              "oli-g4-municipal-2025-p2-perimeter-sum"
+            ],
+            "verification": {
+              "kind": "square-sum",
+              "sides": [
+                6,
+                8
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-composite-perimeters-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Седем квадрата имат следните страни: три от квадратите имат страни по 2 см, а останалите са 6 см, 8 см, 14 см и 22 см. Намери сбора на обиколките им в милиметри.",
+            "fields": [
+              {
+                "id": "sumMm",
+                "label_bg": "Сбор на обиколките",
+                "type": "number",
+                "answer": 2240,
+                "unit_bg": "мм"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери страните на всички седем квадрата: 2 + 2 + 2 + 6 + 8 + 14 + 22 = 56 см.",
+              "Обиколката на всеки квадрат е четири пъти дължината на страната му, затова сборът на обиколките е 4 . 56 = 224 см.",
+              "В 1 см има 10 мм. Превърни: 224 . 10 = 2240 мм."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p3-perimeter-sum",
+              "oli-g4-municipal-2025-p2-perimeter-sum"
+            ],
+            "verification": {
+              "kind": "square-sum-mm",
+              "sides": [
+                2,
+                2,
+                2,
+                6,
+                8,
+                14,
+                22
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-composite-perimeters-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Правоъгълен двор е разделен така: вляво горе има квадрат със страна 36 см, а под него има три еднакви правоъгълника, наредени един до друг. Вдясно има два квадрата със страна 28 см, поставени един над друг по цялата височина на двора. Намери сбора на обиколките на шестте фигури в милиметри.",
+            "fields": [
+              {
+                "id": "sumMm",
+                "label_bg": "Сбор на обиколките",
+                "type": "number",
+                "answer": 5600,
+                "unit_bg": "мм"
+              }
+            ],
+            "worked_steps_bg": [
+              "Височината на двора е 28 + 28 = 56 см. Под големия квадрат остават 56 – 36 = 20 см. Ширината на всеки от трите правоъгълника е 36 : 3 = 12 см.",
+              "Всеки малък правоъгълник има обиколка 2 . (20 + 12) = 64 см. Квадратите имат обиколки 4 . 36 = 144 см и по 4 . 28 = 112 см.",
+              "Събери: 144 + 2 . 112 + 3 . 64 = 560 см. Превърни: 560 . 10 = 5600 мм."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p3-perimeter-sum",
+              "oli-g4-municipal-2025-p2-perimeter-sum"
+            ],
+            "verification": {
+              "kind": "composite",
+              "large_side": 36,
+              "small_side": 28,
+              "rectangles": 3
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "pairs-to-items",
+        "island": "word-problems",
+        "skill_bg": "Превръщане на чифтове в отделни бройки",
+        "original_unit_ids": [
+          "oli-g4-municipal-2022-p2-a"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-pairs-to-items-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "В кутия има 24 чифта сини ръкавички и 18 чифта червени. Колко отделни ръкавички има общо?",
+            "fields": [
+              {
+                "id": "gloves",
+                "label_bg": "Ръкавички",
+                "type": "number",
+                "answer": 84,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери чифтовете: 24 + 18 = 42 чифта.",
+              "Всеки чифт има 2 ръкавички: 42 . 2 = 84 ръкавички.",
+              "Провери, като преброиш ръкавичките от всеки цвят поотделно: 24 . 2 + 18 . 2 = 48 + 36 = 84."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-a"
+            ],
+            "verification": {
+              "kind": "pairs",
+              "pairs": [
+                24,
+                18
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-pairs-to-items-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "В кутия има 35 чифта сини ръкавички и 27 чифта червени. Колко отделни ръкавички има общо?",
+            "fields": [
+              {
+                "id": "gloves",
+                "label_bg": "Ръкавички",
+                "type": "number",
+                "answer": 124,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери чифтовете: 35 + 27 = 62 чифта.",
+              "Всеки чифт има 2 ръкавички: 62 . 2 = 124 ръкавички.",
+              "Провери, като преброиш ръкавичките от всеки цвят поотделно: 35 . 2 + 27 . 2 = 70 + 54 = 124."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-a"
+            ],
+            "verification": {
+              "kind": "pairs",
+              "pairs": [
+                35,
+                27
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-pairs-to-items-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "В кутия има 48 чифта сини ръкавички и 36 чифта червени. Колко отделни ръкавички има общо?",
+            "fields": [
+              {
+                "id": "gloves",
+                "label_bg": "Ръкавички",
+                "type": "number",
+                "answer": 168,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери чифтовете: 48 + 36 = 84 чифта.",
+              "Всеки чифт има 2 ръкавички: 84 . 2 = 168 ръкавички.",
+              "Провери, като преброиш ръкавичките от всеки цвят поотделно: 48 . 2 + 36 . 2 = 96 + 72 = 168."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-a"
+            ],
+            "verification": {
+              "kind": "pairs",
+              "pairs": [
+                48,
+                36
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-pairs-to-items-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "Работилница произвела 25 чифта сини ръкавички, 3 пъти толкова червени и с 12 чифта повече зелени от сините. Колко отделни ръкавички са произведени общо?",
+            "fields": [
+              {
+                "id": "gloves",
+                "label_bg": "Ръкавички",
+                "type": "number",
+                "answer": 274,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Червените са 25 . 3 = 75 чифта, а зелените са 25 + 12 = 37 чифта.",
+              "Всички чифтове са 25 + 75 + 37 = 137.",
+              "Умножи броя на чифтовете по 2, за да намериш броя на ръкавичките: 137 . 2 = 274 броя."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-a"
+            ],
+            "verification": {
+              "kind": "pairs",
+              "pairs": [
+                25,
+                75,
+                37
+              ],
+              "params": [
+                25,
+                3,
+                12
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-pairs-to-items-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "Работилница произвела 36 чифта сини ръкавички, 4 пъти толкова червени и с 15 чифта повече зелени от сините. Колко отделни ръкавички са произведени общо?",
+            "fields": [
+              {
+                "id": "gloves",
+                "label_bg": "Ръкавички",
+                "type": "number",
+                "answer": 462,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Червените са 36 . 4 = 144 чифта, а зелените са 36 + 15 = 51 чифта.",
+              "Всички чифтове са 36 + 144 + 51 = 231.",
+              "Умножи броя на чифтовете по 2, за да намериш броя на ръкавичките: 231 . 2 = 462 броя."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-a"
+            ],
+            "verification": {
+              "kind": "pairs",
+              "pairs": [
+                36,
+                144,
+                51
+              ],
+              "params": [
+                36,
+                4,
+                15
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "sum-difference",
+        "island": "word-problems",
+        "skill_bg": "Две количества с известни сбор и разлика",
+        "original_unit_ids": [
+          "oli-g4-municipal-2022-p2-b"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-sum-difference-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "В две кутии има общо 80 молива. В първата има с 12 повече от втората. Колко молива има във всяка кутия?",
+            "fields": [
+              {
+                "id": "first",
+                "label_bg": "В първата",
+                "type": "number",
+                "answer": 46,
+                "unit_bg": "молива"
+              },
+              {
+                "id": "second",
+                "label_bg": "Във втората",
+                "type": "number",
+                "answer": 34,
+                "unit_bg": "молива"
+              }
+            ],
+            "worked_steps_bg": [
+              "Извади допълнителните 12 молива от общия брой: 80 – 12 = 68.",
+              "Раздели остатъка на две равни части: 68 : 2 = 34 молива във втората кутия.",
+              "В първата има 34 + 12 = 46. Провери: 46 + 34 = 80."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-b"
+            ],
+            "verification": {
+              "kind": "sum-difference",
+              "total": 80,
+              "difference": 12
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-sum-difference-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "В две кутии има общо 126 молива. В първата има с 18 повече от втората. Колко молива има във всяка кутия?",
+            "fields": [
+              {
+                "id": "first",
+                "label_bg": "В първата",
+                "type": "number",
+                "answer": 72,
+                "unit_bg": "молива"
+              },
+              {
+                "id": "second",
+                "label_bg": "Във втората",
+                "type": "number",
+                "answer": 54,
+                "unit_bg": "молива"
+              }
+            ],
+            "worked_steps_bg": [
+              "Извади допълнителните 18 молива от общия брой: 126 – 18 = 108.",
+              "Раздели остатъка на две равни части: 108 : 2 = 54 молива във втората кутия.",
+              "В първата има 54 + 18 = 72. Провери: 72 + 54 = 126."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-b"
+            ],
+            "verification": {
+              "kind": "sum-difference",
+              "total": 126,
+              "difference": 18
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-sum-difference-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "В две кутии има общо 180 молива. В първата има с 32 повече от втората. Колко молива има във всяка кутия?",
+            "fields": [
+              {
+                "id": "first",
+                "label_bg": "В първата",
+                "type": "number",
+                "answer": 106,
+                "unit_bg": "молива"
+              },
+              {
+                "id": "second",
+                "label_bg": "Във втората",
+                "type": "number",
+                "answer": 74,
+                "unit_bg": "молива"
+              }
+            ],
+            "worked_steps_bg": [
+              "Извади допълнителните 32 молива от общия брой: 180 – 32 = 148.",
+              "Раздели остатъка на две равни части: 148 : 2 = 74 молива във втората кутия.",
+              "В първата има 74 + 32 = 106. Провери: 106 + 74 = 180."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-b"
+            ],
+            "verification": {
+              "kind": "sum-difference",
+              "total": 180,
+              "difference": 32
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-sum-difference-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "За два дни са ушити общо 150 чифта ръкавици. През първия ден са ушити с 80 отделни ръкавици повече от втория. Колко отделни ръкавици са ушити през всеки ден?",
+            "fields": [
+              {
+                "id": "first",
+                "label_bg": "Първи ден",
+                "type": "number",
+                "answer": 190,
+                "unit_bg": "броя"
+              },
+              {
+                "id": "second",
+                "label_bg": "Втори ден",
+                "type": "number",
+                "answer": 110,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Превърни чифтовете в бройки: 150 . 2 = 300 ръкавици общо.",
+              "Извади разликата и раздели на 2: (300 – 80) : 2 = 110 ръкавици през втория ден.",
+              "През първия ден са 110 + 80 = 190. Провери: 190 + 110 = 300 и 190 – 110 = 80."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-b"
+            ],
+            "verification": {
+              "kind": "sum-difference",
+              "total": 300,
+              "difference": 80,
+              "pairs": 150
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-sum-difference-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "За два дни са ушити общо 130 чифта ръкавици. През първия ден са ушити с 64 отделни ръкавици повече от втория. Колко отделни ръкавици са ушити през всеки ден?",
+            "fields": [
+              {
+                "id": "first",
+                "label_bg": "Първи ден",
+                "type": "number",
+                "answer": 162,
+                "unit_bg": "броя"
+              },
+              {
+                "id": "second",
+                "label_bg": "Втори ден",
+                "type": "number",
+                "answer": 98,
+                "unit_bg": "броя"
+              }
+            ],
+            "worked_steps_bg": [
+              "Превърни чифтовете в бройки: 130 . 2 = 260 ръкавици общо.",
+              "Извади разликата и раздели на 2: (260 – 64) : 2 = 98 ръкавици през втория ден.",
+              "През първия ден са 98 + 64 = 162. Провери: 162 + 98 = 260 и 162 – 98 = 64."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2022-p2-b"
+            ],
+            "verification": {
+              "kind": "sum-difference",
+              "total": 260,
+              "difference": 64,
+              "pairs": 130
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "dates-fees",
+        "island": "word-problems",
+        "skill_bg": "Включително броене на дни, постоянна такса и отстъпка",
+        "original_unit_ids": [
+          "oli-g4-municipal-2024-p3-a",
+          "oli-g4-municipal-2024-p3-b",
+          "oli-g4-municipal-2024-p3-c"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-dates-fees-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Достъпът до приложение е от 3 май до 8 май 2025 г., включително. Колко дни е това?",
+            "fields": [
+              {
+                "id": "days",
+                "label_bg": "Дни",
+                "type": "number",
+                "answer": 6,
+                "unit_bg": "дни"
+              }
+            ],
+            "worked_steps_bg": [
+              "Разликата между датите е 8 – 3 = 5 дни.",
+              "Броим и началния ден 3 май, затова прибавяме 1: 5 + 1 = 6 дни.",
+              "Провери чрез изброяване: 3, 4, 5, 6, 7 и 8 май са 6 дни."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p3-a",
+              "oli-g4-municipal-2024-p3-b",
+              "oli-g4-municipal-2024-p3-c"
+            ],
+            "verification": {
+              "kind": "dates",
+              "start": "2025-05-03",
+              "end": "2025-05-08"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-dates-fees-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Достъпът до приложение е от 11 юни до 19 юни 2025 г., включително. Колко дни е това?",
+            "fields": [
+              {
+                "id": "days",
+                "label_bg": "Дни",
+                "type": "number",
+                "answer": 9,
+                "unit_bg": "дни"
+              }
+            ],
+            "worked_steps_bg": [
+              "Разликата между датите е 19 – 11 = 8 дни.",
+              "Броим и началния ден 11 юни, затова прибавяме 1: 8 + 1 = 9 дни.",
+              "Провери: от 11 до 15 юни са 5 дни, а от 16 до 19 юни са още 4. Общо 5 + 4 = 9."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p3-a",
+              "oli-g4-municipal-2024-p3-b",
+              "oli-g4-municipal-2024-p3-c"
+            ],
+            "verification": {
+              "kind": "dates",
+              "start": "2025-06-11",
+              "end": "2025-06-19"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-dates-fees-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Достъпът до приложение е от 27 февруари до 2 март 2024 г., включително. Колко дни е това?",
+            "fields": [
+              {
+                "id": "days",
+                "label_bg": "Дни",
+                "type": "number",
+                "answer": 5,
+                "unit_bg": "дни"
+              }
+            ],
+            "worked_steps_bg": [
+              "2024 г. е високосна. През февруари броим 27, 28 и 29 - общо 3 дни.",
+              "През март броим 1 и 2 - още 2 дни.",
+              "Събери дните от двата месеца: 3 + 2 = 5 дни."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p3-a",
+              "oli-g4-municipal-2024-p3-b",
+              "oli-g4-municipal-2024-p3-c"
+            ],
+            "verification": {
+              "kind": "dates",
+              "start": "2024-02-27",
+              "end": "2024-03-02"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-dates-fees-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "При всяко закупуване на достъп до приложение се плаща постоянна такса и една и съща сума за всеки ден. За 4 дни се плащат 320 ст., а за 7 дни - 440 ст. При достъп за повече от 9 дни има намаление, равно на една десета от общата цена преди намалението. Колко лева и стотинки струва достъп от 28 февруари до 8 март 2024 г., включително?",
+            "fields": [
+              {
+                "id": "leva",
+                "label_bg": "Лева",
+                "type": "number",
+                "answer": 5,
+                "unit_bg": "лв."
+              },
+              {
+                "id": "stotinki",
+                "label_bg": "Стотинки",
+                "type": "number",
+                "answer": 4,
+                "unit_bg": "ст."
+              }
+            ],
+            "worked_steps_bg": [
+              "2024 г. е високосна. От 28 до 29 февруари са 2 дни; с 8 дни през март стават 10. Един ден струва (440 – 320) : (7 – 4) = 40 ст.",
+              "Таксата е 320 – 4 . 40 = 160 ст. За 10 дни цената преди намалението е 160 + 10 . 40 = 560 ст.",
+              "Намалението е 560 : 10 = 56 ст. Плащат се 560 – 56 = 504 ст. = 5 лв. 4 ст."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p3-a",
+              "oli-g4-municipal-2024-p3-b",
+              "oli-g4-municipal-2024-p3-c"
+            ],
+            "verification": {
+              "kind": "fees",
+              "days1": 4,
+              "price1": 320,
+              "days2": 7,
+              "price2": 440,
+              "start": "2024-02-28",
+              "end": "2024-03-08"
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-dates-fees-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "При всяко закупуване на достъп до приложение се плаща постоянна такса и една и съща сума за всеки ден. За 5 дни се плащат 550 ст., а за 8 дни - 700 ст. При достъп за повече от 9 дни има намаление, равно на една десета от общата цена преди намалението. Колко лева и стотинки струва достъп от 26 февруари до 8 март 2024 г., включително?",
+            "fields": [
+              {
+                "id": "leva",
+                "label_bg": "Лева",
+                "type": "number",
+                "answer": 8,
+                "unit_bg": "лв."
+              },
+              {
+                "id": "stotinki",
+                "label_bg": "Стотинки",
+                "type": "number",
+                "answer": 10,
+                "unit_bg": "ст."
+              }
+            ],
+            "worked_steps_bg": [
+              "2024 г. е високосна. От 26 до 29 февруари са 4 дни; с 8 дни през март стават 12. Един ден струва (700 – 550) : (8 – 5) = 50 ст.",
+              "Таксата е 550 – 5 . 50 = 300 ст. За 12 дни цената преди намалението е 300 + 12 . 50 = 900 ст.",
+              "Намалението е 900 : 10 = 90 ст. Плащат се 900 – 90 = 810 ст. = 8 лв. 10 ст."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2024-p3-a",
+              "oli-g4-municipal-2024-p3-b",
+              "oli-g4-municipal-2024-p3-c"
+            ],
+            "verification": {
+              "kind": "fees",
+              "days1": 5,
+              "price1": 550,
+              "days2": 8,
+              "price2": 700,
+              "start": "2024-02-26",
+              "end": "2024-03-08"
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      },
+      {
+        "id": "overlap-groups",
+        "island": "logic",
+        "skill_bg": "Броене на групи без повторно броене",
+        "original_unit_ids": [
+          "oli-g4-municipal-2023-p3-total-underdetermined"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-overlap-groups-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "В клуб по четене участват 18 деца, а в клуб по математика - 15. И в двата клуба едновременно участват 6 деца. Всяко дете участва в поне един от двата клуба. Колко са всички деца?",
+            "fields": [
+              {
+                "id": "total",
+                "label_bg": "Всички деца",
+                "type": "number",
+                "answer": 27,
+                "unit_bg": "деца"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери броя на участниците в двата клуба: 18 + 15 = 33.",
+              "6 деца са преброени по два пъти. Извади ги веднъж: 33 – 6 = 27 различни участници.",
+              "Всяко дете участва в поне един от клубовете. Няма други деца за прибавяне, затова общо са 27."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p3-total-underdetermined"
+            ],
+            "verification": {
+              "kind": "groups",
+              "counts": [
+                18,
+                15
+              ],
+              "intersections": [
+                6
+              ],
+              "triple": 0,
+              "none": 0
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-overlap-groups-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "В клуб по четене участват 22 деца, а в клуб по математика - 17. И в двата клуба едновременно участват 7 деца. Всяко дете участва в поне един от двата клуба. Колко са всички деца?",
+            "fields": [
+              {
+                "id": "total",
+                "label_bg": "Всички деца",
+                "type": "number",
+                "answer": 32,
+                "unit_bg": "деца"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери броя на участниците в двата клуба: 22 + 17 = 39.",
+              "7 деца са преброени по два пъти. Извади ги веднъж: 39 – 7 = 32 различни участници.",
+              "Всяко дете участва в поне един от клубовете. Няма други деца за прибавяне, затова общо са 32."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p3-total-underdetermined"
+            ],
+            "verification": {
+              "kind": "groups",
+              "counts": [
+                22,
+                17
+              ],
+              "intersections": [
+                7
+              ],
+              "triple": 0,
+              "none": 0
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-overlap-groups-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "В клуб по четене участват 26 деца, а в клуб по математика - 20. И в двата клуба едновременно участват 8 деца. Още 5 деца не участват в нито един от двата клуба. Колко са всички деца?",
+            "fields": [
+              {
+                "id": "total",
+                "label_bg": "Всички деца",
+                "type": "number",
+                "answer": 43,
+                "unit_bg": "деца"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери броя на участниците в двата клуба: 26 + 20 = 46.",
+              "8 деца са преброени по два пъти. Извади ги веднъж: 46 – 8 = 38 различни участници.",
+              "Прибави децата извън клубовете: 38 + 5 = 43 деца общо."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p3-total-underdetermined"
+            ],
+            "verification": {
+              "kind": "groups",
+              "counts": [
+                26,
+                20
+              ],
+              "intersections": [
+                8
+              ],
+              "triple": 0,
+              "none": 5
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-overlap-groups-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "В три клуба има съответно 30, 40 и 28 деца. В първия и втория участват 8 деца, във втория и третия - 10, а в първия и третия - 6. Никое дете не участва и в трите клуба. Още 12 деца не са в нито един клуб. Колко са всички деца?",
+            "fields": [
+              {
+                "id": "total",
+                "label_bg": "Всички деца",
+                "type": "number",
+                "answer": 86,
+                "unit_bg": "деца"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери броя на участниците в трите клуба: 30 + 40 + 28 = 98.",
+              "Децата в по два клуба са преброени два пъти. Извади веднъж 8 + 10 + 6 = 24: 98 – 24 = 74 различни участници.",
+              "Прибави 12 деца извън клубовете: 74 + 12 = 86 деца общо."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p3-total-underdetermined"
+            ],
+            "verification": {
+              "kind": "groups",
+              "counts": [
+                30,
+                40,
+                28
+              ],
+              "intersections": [
+                8,
+                10,
+                6
+              ],
+              "triple": 0,
+              "none": 12
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-overlap-groups-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "В три клуба има съответно 45, 38 и 32 деца. В първия и втория участват 12 деца, във втория и третия - 9, а в първия и третия - 8. Сред участниците във всяка от тези двойки клубове са и едни и същи 4 деца, които участват и в трите клуба. Още 7 деца не са в нито един клуб. Колко са всички деца?",
+            "fields": [
+              {
+                "id": "total",
+                "label_bg": "Всички деца",
+                "type": "number",
+                "answer": 97,
+                "unit_bg": "деца"
+              }
+            ],
+            "worked_steps_bg": [
+              "Събери броя на участниците в трите клуба: 45 + 38 + 32 = 115.",
+              "Извади броя на децата, които участват и в двата клуба от всяка двойка: 115 – (12 + 9 + 8) = 86. Четирите деца от трите клуба са преброени по три пъти, а после извадени по три пъти, затова сега липсват.",
+              "Прибави отново тези 4 деца и прибави 7 извън клубовете: 86 + 4 + 7 = 97 деца общо."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2023-p3-total-underdetermined"
+            ],
+            "verification": {
+              "kind": "groups",
+              "counts": [
+                45,
+                38,
+                32
+              ],
+              "intersections": [
+                12,
+                9,
+                8
+              ],
+              "triple": 4,
+              "none": 7
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ],
+        "source_warning": "Source original is underdetermined and blocked; these authored problems explicitly specify every needed intersection."
+      },
+      {
+        "id": "magic-lines",
+        "island": "logic",
+        "skill_bg": "Равни сборове по прави в магическа фигура",
+        "original_unit_ids": [
+          "oli-g4-municipal-2025-p3-a",
+          "oli-g4-municipal-2025-p3-b",
+          "oli-g4-municipal-2025-p3-c"
+        ],
+        "items": [
+          {
+            "id": "oli-practice-magic-lines-e1",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 1,
+            "statement_bg": "Две редици имат равни сборове: [n, 12, 18] и [n, n, 10]. Еднаквата буква означава едно и също число. Намери n.",
+            "fields": [
+              {
+                "id": "n",
+                "label_bg": "n",
+                "type": "number",
+                "answer": 20
+              }
+            ],
+            "worked_steps_bg": [
+              "Първата редица има сбор n + 30, защото 12 + 18 = 30. Втората има сбор n + n + 10.",
+              "Махни по едно n от двата равни сбора: 30 = n + 10. Значи n = 30 – 10 = 20.",
+              "Провери: 20 + 12 + 18 = 50 и 20 + 20 + 10 = 50."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p3-a",
+              "oli-g4-municipal-2025-p3-b",
+              "oli-g4-municipal-2025-p3-c"
+            ],
+            "verification": {
+              "kind": "magic-easy",
+              "params": [
+                12,
+                18,
+                10
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-magic-lines-e2",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 2,
+            "statement_bg": "Две редици имат равни сборове: [n, 15, 25] и [n, n, 12]. Еднаквата буква означава едно и също число. Намери n.",
+            "fields": [
+              {
+                "id": "n",
+                "label_bg": "n",
+                "type": "number",
+                "answer": 28
+              }
+            ],
+            "worked_steps_bg": [
+              "Първата редица има сбор n + 40, защото 15 + 25 = 40. Втората има сбор n + n + 12.",
+              "Махни по едно n от двата равни сбора: 40 = n + 12. Значи n = 40 – 12 = 28.",
+              "Провери: 28 + 15 + 25 = 68 и 28 + 28 + 12 = 68."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p3-a",
+              "oli-g4-municipal-2025-p3-b",
+              "oli-g4-municipal-2025-p3-c"
+            ],
+            "verification": {
+              "kind": "magic-easy",
+              "params": [
+                15,
+                25,
+                12
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-magic-lines-e3",
+            "origin": "authored-practice",
+            "difficulty": "core",
+            "sequence": 3,
+            "statement_bg": "Две редици имат равни сборове: [n, 21, 19] и [n, n, 16]. Еднаквата буква означава едно и също число. Намери n.",
+            "fields": [
+              {
+                "id": "n",
+                "label_bg": "n",
+                "type": "number",
+                "answer": 24
+              }
+            ],
+            "worked_steps_bg": [
+              "Първата редица има сбор n + 40, защото 21 + 19 = 40. Втората има сбор n + n + 16.",
+              "Махни по едно n от двата равни сбора: 40 = n + 16. Значи n = 40 – 16 = 24.",
+              "Провери: 24 + 21 + 19 = 64 и 24 + 24 + 16 = 64."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p3-a",
+              "oli-g4-municipal-2025-p3-b",
+              "oli-g4-municipal-2025-p3-c"
+            ],
+            "verification": {
+              "kind": "magic-easy",
+              "params": [
+                21,
+                19,
+                16
+              ]
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-magic-lines-h1",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 1,
+            "statement_bg": "В магическа фигура всяка от шестте прави съдържа четири числа и има един и същ сбор. Правите са: [n, 31, 97, 133]; [n, n, 65, 96]; [120, n, 31, p]; [p, 97, 55, a]; [120, 65, b, a]; [133, 55, b, 96]. Еднаквите букви означават еднакви числа. Намери n, p, a и b.",
+            "fields": [
+              {
+                "id": "n",
+                "label_bg": "n",
+                "type": "number",
+                "answer": 100
+              },
+              {
+                "id": "p",
+                "label_bg": "p",
+                "type": "number",
+                "answer": 110
+              },
+              {
+                "id": "a",
+                "label_bg": "a",
+                "type": "number",
+                "answer": 99
+              },
+              {
+                "id": "b",
+                "label_bg": "b",
+                "type": "number",
+                "answer": 77
+              }
+            ],
+            "worked_steps_bg": [
+              "Сравни първите две прави и махни по едно n: 261 = n + 161. Получаваш n = 261 – 161 = 100. Общият сбор е 100 + 31 + 97 + 133 = 361.",
+              "От третата права p = 361 – (120 + 100 + 31) = 110. От четвъртата a = 361 – (110 + 97 + 55) = 99.",
+              "От петата права b = 361 – (120 + 65 + 99) = 77. Провери шестата: 133 + 55 + 77 + 96 = 361."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p3-a",
+              "oli-g4-municipal-2025-p3-b",
+              "oli-g4-municipal-2025-p3-c"
+            ],
+            "verification": {
+              "kind": "magic-full",
+              "lines": [
+                [
+                  "n",
+                  31,
+                  97,
+                  133
+                ],
+                [
+                  "n",
+                  "n",
+                  65,
+                  96
+                ],
+                [
+                  120,
+                  "n",
+                  31,
+                  "p"
+                ],
+                [
+                  "p",
+                  97,
+                  55,
+                  "a"
+                ],
+                [
+                  120,
+                  65,
+                  "b",
+                  "a"
+                ],
+                [
+                  133,
+                  55,
+                  "b",
+                  96
+                ]
+              ],
+              "common_sum": 361
+            },
+            "review_status": "draft-human-review-required"
+          },
+          {
+            "id": "oli-practice-magic-lines-h2",
+            "origin": "authored-practice",
+            "difficulty": "hard",
+            "sequence": 2,
+            "statement_bg": "В магическа фигура всяка от шестте прави съдържа четири числа и има един и същ сбор. Правите са: [n, 42, 174, 246]; [n, n, 110, 172]; [220, n, 42, p]; [p, 174, 90, a]; [220, 110, b, a]; [246, 90, b, 172]. Еднаквите букви означават еднакви числа. Намери n, p, a и b.",
+            "fields": [
+              {
+                "id": "n",
+                "label_bg": "n",
+                "type": "number",
+                "answer": 180
+              },
+              {
+                "id": "p",
+                "label_bg": "p",
+                "type": "number",
+                "answer": 200
+              },
+              {
+                "id": "a",
+                "label_bg": "a",
+                "type": "number",
+                "answer": 178
+              },
+              {
+                "id": "b",
+                "label_bg": "b",
+                "type": "number",
+                "answer": 134
+              }
+            ],
+            "worked_steps_bg": [
+              "Сравни първите две прави и махни по едно n: 462 = n + 282. Получаваш n = 462 – 282 = 180. Общият сбор е 180 + 42 + 174 + 246 = 642.",
+              "От третата права p = 642 – (220 + 180 + 42) = 200. От четвъртата a = 642 – (200 + 174 + 90) = 178.",
+              "От петата права b = 642 – (220 + 110 + 178) = 134. Провери шестата: 246 + 90 + 134 + 172 = 642."
+            ],
+            "diagram_required": false,
+            "source_unit_ids": [
+              "oli-g4-municipal-2025-p3-a",
+              "oli-g4-municipal-2025-p3-b",
+              "oli-g4-municipal-2025-p3-c"
+            ],
+            "verification": {
+              "kind": "magic-full",
+              "lines": [
+                [
+                  "n",
+                  42,
+                  174,
+                  246
+                ],
+                [
+                  "n",
+                  "n",
+                  110,
+                  172
+                ],
+                [
+                  220,
+                  "n",
+                  42,
+                  "p"
+                ],
+                [
+                  "p",
+                  174,
+                  90,
+                  "a"
+                ],
+                [
+                  220,
+                  110,
+                  "b",
+                  "a"
+                ],
+                [
+                  246,
+                  90,
+                  "b",
+                  172
+                ]
+              ],
+              "common_sum": 642
+            },
+            "review_status": "draft-human-review-required"
+          }
+        ]
+      }
+    ]
+  }
+}

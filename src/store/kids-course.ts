@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { courseGoldBalance } from "../core/kids-gold.ts";
 import { KidsError } from "../core/kids.ts";
 import { applyCourseAction, migrateKidsCourse, newKidsCourse } from "../core/kids-course.ts";
 import type { KidsCourse, KidsCourseStore } from "../core/kids-course.ts";
 
-export function createKidsCourseStore(directory: string): KidsCourseStore {
+export function createKidsCourseStore(directory: string, walletDirectory = directory): KidsCourseStore {
 	const file = path.join(directory, "course-v2.json");
 	function read(content?: Parameters<KidsCourseStore["update"]>[2]): KidsCourse | null {
 		let text: string;
@@ -18,6 +19,17 @@ export function createKidsCourseStore(directory: string): KidsCourseStore {
 	}
 	return {
 		read,
+  goldBalance(current) {
+   const directories = [walletDirectory];
+   const competitions = path.join(walletDirectory, "competitions");
+   if (fs.existsSync(competitions)) for (const item of fs.readdirSync(competitions, { withFileTypes: true })) {
+    if (item.isDirectory() && !item.isSymbolicLink()) directories.push(path.join(competitions, item.name));
+   }
+   return courseGoldBalance(current) + directories.filter(dir => path.resolve(dir) !== path.resolve(directory)).reduce((sum, dir) => {
+    const course = createKidsCourseStore(dir).read();
+    return sum + (course ? courseGoldBalance(course) : 0);
+   }, 0);
+  },
 		update(revision, action, content) {
 			const record = read(content) ?? newKidsCourse(content, new Date().toISOString());
 			if (record.revision !== revision) throw new KidsError("Напредъкът е променен в друг прозорец. Показваме последния запис.", 409);

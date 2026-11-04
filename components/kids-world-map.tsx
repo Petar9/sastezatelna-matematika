@@ -5,12 +5,28 @@ import { select } from "d3-selection";
 import { zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
 import type { CourseTopicView } from "@/src/core";
 import { fitGraphView, fitZoomFor, type Viewport } from "./pan-zoom";
-import { knowledgeGrowthKeys } from "./kids-map-decorations";
+import { DiscoveryMarkerArt, leafPhase, knowledgeGrowthKeys } from "./kids-map-decorations";
 import s from "./kids-world-map.module.css";
 
-const world = { w: 1100, h: 1060 };
+const defaultWorld = { w: 1100, h: 1060 };
+const olympiadWorld = { w: 720, h: 500 };
+const nvoWorld = { w: 1100, h: 710 };
 // Positions belong to topic IDs, not course order or current attainment.
 export const islandPlaces: Record<string, { x: number; y: number; name: string }> = {
+ "nvo-numbers": { x: 190, y: 135, name: "Числа и редици" },
+ "nvo-addition": { x: 550, y: 135, name: "Събиране и изваждане" },
+ "nvo-multiplication": { x: 910, y: 135, name: "Умножение и деление" },
+ "nvo-expressions": { x: 190, y: 350, name: "Неизвестни числа и изрази" },
+ "nvo-fractions": { x: 550, y: 350, name: "Части от цяло" },
+ "nvo-measures": { x: 910, y: 350, name: "Мерки и време" },
+ "nvo-geometry": { x: 145, y: 565, name: "Фигури и ъгли" },
+ "nvo-areas": { x: 415, y: 565, name: "Обиколки и лица" },
+ "nvo-data": { x: 690, y: 565, name: "Таблици и схеми" },
+ "nvo-stories": { x: 950, y: 565, name: "Текстови задачи" },
+ "oli-numbers": { x: 190, y: 145, name: "Числови загадки" },
+ "oli-geometry": { x: 525, y: 145, name: "Геометрични открития" },
+ "oli-stories": { x: 190, y: 365, name: "Истории с числа" },
+ "oli-logic": { x: 525, y: 365, name: "Логически загадки" },
  digits: { x: 145, y: 125, name: "Цифри и векове" },
  backwards: { x: 415, y: 160, name: "Рачешки задачи" },
  matches: { x: 690, y: 115, name: "Точки и мачове" },
@@ -29,7 +45,7 @@ export const islandPlaces: Record<string, { x: number; y: number; name: string }
  motion: { x: 490, y: 945, name: "Движение" },
  sets: { x: 830, y: 950, name: "Групи и общи елементи" },
 };
-const compactNames: Record<string, string> = { digits: "Цифри", backwards: "Рачешки", matches: "Точки", money: "Пари", totals: "Брой и възрасти", pieces: "Разрези", perimeters: "Обиколки", areas: "Лица", clocks: "Часовник", constraints: "Най-малко / най-много", sequences: "Редици", counting: "Броим", grids: "Мрежа", fractions: "Части", units: "Мерки", motion: "Движение", sets: "Групи" };
+const compactNames: Record<string, string> = { "nvo-numbers": "Числа", "nvo-addition": "Събиране и изваждане", "nvo-multiplication": "Умножение и деление", "nvo-expressions": "Неизвестни числа", "nvo-fractions": "Части", "nvo-measures": "Мерки и време", "nvo-geometry": "Фигури и ъгли", "nvo-areas": "Обиколки и лица", "nvo-data": "Таблици и схеми", "nvo-stories": "Текстови задачи", digits: "Цифри", backwards: "Рачешки", matches: "Точки", money: "Пари", totals: "Брой и възрасти", pieces: "Разрези", perimeters: "Обиколки", areas: "Лица", clocks: "Часовник", constraints: "Най-малко / най-много", sequences: "Редици", counting: "Броим", grids: "Мрежа", fractions: "Части", units: "Мерки", motion: "Движение", sets: "Групи" };
 const shores = [
  "M-108 14C-126-18-91-59-56-57C-36-84 3-65 31-66C75-80 113-45 105-16C139 16 98 59 61 54C28 80-9 63-43 66C-80 76-116 48-108 14Z",
  "M-109-6C-110-47-70-66-34-58C-4-81 29-60 58-65C100-63 127-26 111 4C123 41 83 67 49 60C15 79-12 57-48 63C-86 61-122 32-109-6Z",
@@ -57,19 +73,11 @@ export function IslandLandmark({ topicId, golden = false }: { topicId: string; g
   motion: <><path d="M-44 15h88L28 33h-56Z" fill={coral}/><path d="M0 15v-65l39 53H5Z" fill={stone}/><path d="m-6-36-30 39h30Z" fill={blue}/><path d="M-50 39q13-9 26 0t26 0t26 0t26 0" fill="none" stroke={blue} strokeWidth="3"/></>,
   sets: <><circle cx="-15" r="29" fill={blue} fillOpacity=".8" stroke={stone} strokeWidth="3"/><circle cx="15" r="29" fill={coral} fillOpacity=".7" stroke={stone} strokeWidth="3"/><circle r="6" fill={stone}/><circle cx="-28" r="4" fill={stone}/><circle cx="28" r="4" fill={stone}/></>,
  };
- return <svg viewBox="-60 -55 120 105" width="86" height="76" aria-hidden="true">{shapes[topicId] ?? shapes.counting}</svg>;
+ return <svg viewBox="-60 -55 120 105" width="86" height="76" aria-hidden="true">{shapes[({ "oli-numbers": "digits", "oli-geometry": "perimeters", "oli-stories": "money", "oli-logic": "counting", "nvo-numbers": "sequences", "nvo-addition": "totals", "nvo-multiplication": "counting", "nvo-expressions": "backwards", "nvo-fractions": "fractions", "nvo-measures": "units", "nvo-geometry": "perimeters", "nvo-areas": "areas", "nvo-data": "grids", "nvo-stories": "money" } as Record<string, string>)[topicId] ?? topicId] ?? shapes.counting}</svg>;
 }
 
-function SkillGarden({ topic }: { topic: CourseTopicView }) {
- return <g>{(topic.leaves ?? []).map((leaf, i, leaves) => {
-  const angle = Math.PI * 2 * i / leaves.length;
-  const x = Math.cos(angle) * 78, y = Math.sin(angle) * 40 + 8;
-  return <g key={leaf.id} data-skill-garden={leaf.id} transform={`translate(${x} ${y})`}>
-   {leaf.milestones.started && <g data-scenery="sprout" stroke="#315d45" strokeWidth="2" strokeLinecap="round"><path d="M-8 8V-3"/><path d="M-8 0q-14 0-10-9 11-1 10 9m0-3q1-11 11-9 1 9-11 9" fill="#a4d68b"/></g>}
-   {leaf.milestones.firstCorrect && <g data-scenery="flowers" transform="translate(6 4)" fill="#f2baab"><circle cx="-4" cy="-2" r="4"/><circle cx="4" cy="-2" r="4"/><circle cy="-8" r="4"/><circle cy="3" r="4"/><circle r="3" fill="#ffe7a0"/></g>}
-   {leaf.confirmation.earned && <g data-scenery="tree" transform="translate(14 -15)"><path d="M0 16V-2" stroke="#a87b51" strokeWidth="4"/><path d="M-14 5-7-5h-5L0-24 12-5H7L14 5Z" fill="#317c58" stroke="#a2c98b" strokeWidth="1.5"/></g>}
-  </g>;
- })}</g>;
+function SkillDiscoveries({ topic }: { topic: CourseTopicView }) {
+ return <g>{(topic.leaves ?? []).map((skill, i, skills) => <g key={skill.id} data-skill-marker={skill.id} data-phase={leafPhase(skill) ?? "untried"} transform={`translate(${(i-(skills.length-1)/2)*32-15} 19)`}><svg width="30" height="30" viewBox="0 0 64 64"><DiscoveryMarkerArt phase={leafPhase(skill)}/></svg></g>)}</g>;
 }
 
 export function IslandScenery({ topic, variant, seen }: { topic: CourseTopicView; variant: number; seen: Set<string> }) {
@@ -78,12 +86,12 @@ export function IslandScenery({ topic, variant, seen }: { topic: CourseTopicView
  useEffect(() => { for (const key of keys) seen.add(key); }, [keys, seen]);
  return <g className={s.scenery} data-island-scenery={topic.id} data-new-growth={fresh || undefined}>
   <ellipse cy="28" rx="118" ry="57" fill="#8dd0cd" opacity=".12"/>
-  <path d={shores[variant % shores.length]} transform="translate(0 8)" fill="#c3b78a" stroke="#437f83" strokeWidth="14"/>
+  <path d={shores[variant % shores.length]} transform="translate(0 8)" fill="#c3b78a" stroke="#91c8c5" strokeWidth="14"/>
   <path d={shores[variant % shores.length]} fill="#ead6a0"/>
   <path d={shores[variant % shores.length]} transform="scale(.85 .78) translate(0 -7)" fill={variant % 2 ? "#699b74" : "#78aa7d"}/>
   <path d="M-62 16q22-14 45-8t43-6" fill="none" stroke="#d8ca8d" strokeWidth="8" strokeLinecap="round" opacity=".6"/>
   <ellipse cx="-65" cy="-23" rx="12" ry="8" fill="#afbf9a"/><ellipse cx="64" cy="28" rx="9" ry="6" fill="#b3c39e"/>
-  <SkillGarden topic={topic}/>
+  <SkillDiscoveries topic={topic}/>
   <g transform="translate(-43 -60)"><IslandLandmark topicId={topic.id} golden={topic.professor}/></g>
   {topic.doctor && <g data-scenery="doctor-flag" transform="translate(58 -35)"><path d="M0 25v-63" stroke="#f4dfb0" strokeWidth="4"/><path d="M2-38h30l-7 11 7 11H2Z" fill="#89cde5"/><path d="m15-34 2 5 6 1-4 4 1 5-5-3-4 3 1-5-4-4 5-1Z" fill="#fff2cb"/></g>}
   {topic.professor && <g data-scenery="professor-gold" transform="translate(0 -67)" fill="#ffe1a0"><path d="m0-12 3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/><circle cx="26" cy="7" r="3"/><circle cx="-30" cy="4" r="3"/></g>}
@@ -100,6 +108,7 @@ type Props = {
  onSelect: (topicId: string) => void;
 };
 export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSelect, viewControls }: Props) {
+ const world = topics.length > 0 && topics.every(topic => topic.id.startsWith("oli-")) ? olympiadWorld : topics.length > 0 && topics.every(topic => topic.id.startsWith("nvo-")) ? nvoWorld : defaultWorld;
  const id = useId().replace(/:/g, "");
  const pointerNavigation = useRef(false);
  const surface = useRef<HTMLDivElement>(null), behavior = useRef<ZoomBehavior<HTMLDivElement, unknown> | null>(null);
@@ -113,7 +122,7 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
   const fit = fitZoomFor(world, viewport);
   const z = zoom<HTMLDivElement, unknown>().extent([[0, 0], [viewport.w, viewport.h]])
    .translateExtent([[0, 0], [world.w, world.h]]).scaleExtent([fit, fit * 4])
-   .filter(event => event.type !== "wheel" && event.type !== "dblclick" && !event.button)
+   .filter(event => event.type !== "wheel" && event.type !== "dblclick" && !event.button && !event.target?.closest?.("button"))
    .touchable(() => true).clickDistance(8)
    .on("zoom", ({ transform }) => setCamera({ x: transform.x, y: transform.y, zoom: transform.k }));
   behavior.current = z;
@@ -129,12 +138,12 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
   const observer = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(reset);
   observer?.observe(node);
   return () => { observer?.disconnect(); selection.on(".zoom", null); behavior.current = null; };
- }, []);
+ }, [world]);
  useEffect(() => {
   const place = selectedId ? islandPlaces[selectedId] : undefined;
   if (!place || !surface.current || !behavior.current) return;
   const selection = select(surface.current), z = behavior.current;
-  selection.call(z.scaleTo, floor * 2.2).call(z.translateTo, place.x, place.y);
+  selection.call(z.scaleTo, floor * 3).call(z.translateTo, place.x, place.y);
  }, [selectedId, floor]);
  function changeZoom(factor: number) { if (surface.current && behavior.current) select(surface.current).call(behavior.current.scaleBy, factor); }
  function reset() {
@@ -146,17 +155,17 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
   <div className={s.toolbar}>{viewControls}<div className={s.tools} role="group" aria-label="Изглед на картата"><button aria-label="Приближи картата" disabled={camera.zoom >= floor * 4 - .001} onClick={() => changeZoom(1.4)}>+</button><button aria-label="Отдалечи картата" disabled={camera.zoom <= floor + .001} onClick={() => changeZoom(1 / 1.4)}>−</button><button onClick={reset}>Цялата карта</button></div></div>
   <div ref={surface} className={s.surface} onPointerDownCapture={() => { pointerNavigation.current = true; }} onKeyDownCapture={() => { pointerNavigation.current = false; }} aria-label="Морето с островите" aria-describedby={`${id}-help`} data-camera={`${camera.x.toFixed(2)},${camera.y.toFixed(2)},${camera.zoom.toFixed(3)}`}>
    <svg className={s.sea} width="100%" height="100%" aria-hidden="true">
-    <defs><pattern id={`${id}-waves`} width="100" height="90" patternUnits="userSpaceOnUse"><path d="M12 30q9-6 18 0t18 0m17 35q7-5 14 0t14 0" fill="none" stroke="#82c5c7" strokeWidth="2" opacity=".16"/></pattern><radialGradient id={`${id}-water`}><stop stopColor="#397b85"/><stop offset="1" stopColor="#204b5c"/></radialGradient></defs>
+    <defs><pattern id={`${id}-waves`} width="100" height="90" patternUnits="userSpaceOnUse"><path d="M12 30q9-6 18 0t18 0m17 35q7-5 14 0t14 0" fill="none" stroke="#45838c" strokeWidth="2" opacity=".16"/></pattern><radialGradient id={`${id}-water`}><stop stopColor="#c6e8ea"/><stop offset="1" stopColor="#e3f3f4"/></radialGradient></defs>
     <rect width="100%" height="100%" fill={`url(#${id}-water)`}/><rect width="100%" height="100%" fill={`url(#${id}-waves)`}/>
     <g transform={`translate(${camera.x} ${camera.y}) scale(${camera.zoom})`}>
      <g fill="none" stroke="#9bd0c4" strokeWidth="2" opacity=".45"><path d="M40 310q12-14 24 0 12-14 24 0M710 860q12-14 24 0 12-14 24 0M510 60q12-14 24 0 12-14 24 0"/></g>
-     <g transform="translate(1020 900)" fill="none" stroke="#a4c6be" opacity=".6"><circle r="31"/><path d="M0-43V43M-43 0H43m-15-28L28 28m-56 0 56-56"/><path d="M0-32 8 0 0 32-8 0Z" fill="#cfdbb6"/><text y="-49" textAnchor="middle" fill="#cfdbb6" stroke="none" fontSize="17">С</text></g>
+     <g transform={`translate(${world === defaultWorld ? 1020 : world.w - 65} ${world === defaultWorld ? 900 : world.h - 65})`} fill="none" stroke="#53898c" opacity=".6"><circle r="31"/><path d="M0-43V43M-43 0H43m-15-28L28 28m-56 0 56-56"/><path d="M0-32 8 0 0 32-8 0Z" fill="#53898c"/><text y="-49" textAnchor="middle" fill="#53898c" stroke="none" fontSize="17">С</text></g>
      {topics.map((topic, i) => { const place = islandPlaces[topic.id]; return place && <g key={topic.id} transform={`translate(${place.x} ${place.y})`}><IslandScenery topic={topic} variant={i} seen={seen}/></g>; })}
     </g>
    </svg>
    {topics.map(topic => {
     const place = islandPlaces[topic.id]; if (!place) return null;
-    return <button key={topic.id} id={`island-${topic.id}`} ref={node => { if (node) buttons.current.set(topic.id, node); else buttons.current.delete(topic.id); }} className={s.islandTarget} data-compact={camera.zoom < .32} title={`${topic.title}${topic.professor ? " · Професор" : topic.doctor ? " · Доктор" : ""}`} style={{ left: camera.x + place.x * camera.zoom, top: camera.y + place.y * camera.zoom, width: Math.max(44, 222 * camera.zoom), height: Math.max(44, 150 * camera.zoom), fontSize: Math.max(10, Math.min(16, 24 * camera.zoom)) }} aria-label={topic.title} aria-expanded={selectedId === topic.id} aria-controls={selectedId === topic.id ? panelId : undefined} data-selected={selectedId === topic.id} onFocus={() => { if (!pointerNavigation.current && surface.current && behavior.current) select(surface.current).call(behavior.current.translateTo, place.x, place.y); }} onClick={() => onSelect(topic.id)}><span>{camera.zoom < .32 ? compactNames[topic.id] ?? place.name : place.name}</span></button>;
+    return <button key={topic.id} id={`island-${topic.id}`} ref={node => { if (node) buttons.current.set(topic.id, node); else buttons.current.delete(topic.id); }} className={s.islandTarget} data-compact={camera.zoom < .32} title={`${topic.title}${topic.professor ? " · Професор" : topic.doctor ? " · Доктор" : ""}`} style={{ left: camera.x + place.x * camera.zoom, top: camera.y + place.y * camera.zoom, width: Math.max(44, 222 * camera.zoom), height: Math.max(44, 150 * camera.zoom), fontSize: Math.max(13, Math.min(18, 24 * camera.zoom)) }} aria-label={topic.title} aria-expanded={selectedId === topic.id} aria-controls={selectedId === topic.id ? panelId : undefined} data-selected={selectedId === topic.id} onFocus={() => { if (!pointerNavigation.current && surface.current && behavior.current) select(surface.current).call(behavior.current.translateTo, place.x, place.y); }} onClick={() => onSelect(topic.id)}><span>{camera.zoom < .32 ? compactNames[topic.id] ?? place.name : place.name}</span></button>;
    })}
   </div>
   <p id={`${id}-help`} className={s.help}>Докосни остров и го разгледай. Премести морето с пръст или мишка.</p>

@@ -17,6 +17,10 @@ test("deployment verification rejects private standalone and traced files",()=>{
   assert.throws(()=>verifyDeployment(root),/Private file in deployment trace/);
   fs.writeFileSync(trace,JSON.stringify({files:["../.env.local"]}));
   assert.throws(()=>verifyDeployment(root),/Private file in deployment trace/);
+  fs.writeFileSync(trace,JSON.stringify({files:["../assets/images/original.png"]}));
+  assert.throws(()=>verifyDeployment(root),/Private file in deployment trace/);
+  fs.writeFileSync(trace,JSON.stringify({files:["../public/assets/images/versioned.webp"]}));
+  verifyDeployment(root);
   fs.writeFileSync(trace,JSON.stringify({files:[]}));
   fs.mkdirSync(path.join(next,"standalone","backups"));fs.writeFileSync(path.join(next,"standalone","backups","course.json"),"{}");
   assert.throws(()=>verifyDeployment(root),/Private file in standalone/);

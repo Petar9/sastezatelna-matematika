@@ -45,14 +45,14 @@ test("child can request a hint and solution through persistent buttons without a
 		assert.equal(host.querySelectorAll('[aria-pressed="true"]').length, 0);
 		assert.equal(button(host, "Провери отговора").disabled, true);
 		assert.ok(!host.textContent!.includes(profile.problems["M1-03"]!.explanation[0]!));
-		await act(async () => button(host, "Не знам").click());
+		await act(async () => button(host, "Подсказка").click());
 		assert.ok(host.textContent!.includes(profile.problems["M1-03"]!.hint));
 		assert.equal(actions.length, 1);
 		assert.equal(record.rounds[0]!.tasks[0]!.outcome, undefined);
 		assert.equal(host.querySelectorAll('[aria-pressed="true"]').length, 0);
-		assert.equal(button(host, "Не знам").disabled, false);
+		assert.equal(button(host, "Следваща подсказка").disabled, false);
 		assert.ok(!host.textContent!.includes(profile.problems["M1-03"]!.explanation[0]!));
-		await act(async () => button(host, "Не знам").click());
+		await act(async () => button(host, "Следваща подсказка").click());
 		assert.ok(host.textContent!.includes(profile.problems["M1-03"]!.explanation[0]!));
 		assert.equal(record.rounds[0]!.tasks[0]!.outcome, "revealed");
 		assert.equal(record.rounds[0]!.tasks[0]!.choice, undefined);
@@ -60,7 +60,8 @@ test("child can request a hint and solution through persistent buttons without a
 		await act(async () => button(host, "Към втората задача").click());
 		assert.ok(host.textContent!.includes("Задача 2 от 2"));
 		assert.equal(host.querySelectorAll('[aria-pressed="true"]').length, 0);
-		assert.equal(host.querySelector("textarea")!.getAttribute("required"), null);
+		assert.equal(host.querySelector("textarea"), null);
+		assert.ok(!host.textContent!.includes("Как мислиш"));
 	} finally {
 		await act(async () => root.unmount()); host.remove(); globalThis.fetch = oldFetch;
 	}
@@ -80,7 +81,7 @@ test("a hinted answer is visibly assisted and recap cannot silently start anothe
 		await act(async () => root.render(<KidsPlayer initialView={kidsView(record, profile)} />));
 		await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Отговори"] button')!.click());
 		await act(async () => button(host, "Провери отговора").click());
-		assert.ok(host.textContent!.includes("Верен отговор с подсказка"));
+		assert.ok(host.textContent!.includes("Верен отговор с помощ"));
 		await act(async () => button(host, "Завърши засега").click());
 		assert.ok(host.textContent!.includes("За този кръг стига!"));
 		assert.ok(button(host, "Още един кръг"));

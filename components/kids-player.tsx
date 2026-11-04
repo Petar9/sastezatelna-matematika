@@ -3,13 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { KidsAction, KidsOutcome, KidsView } from "@/src/core";
+import {competitions, DEFAULT_COMPETITION_ID} from "@/src/core/competitions";
 import s from "./kids.module.css";
+
+const competition = competitions.find(item => item.id === DEFAULT_COMPETITION_ID)!;
 
 export const kidsOutcomeLabels: Record<KidsOutcome, string> = {
 	independent: "Верен отговор",
-	hinted: "Верен отговор с подсказка",
+	hinted: "Верен отговор с помощ",
 	incorrect: "Още не се получи",
-	revealed: "Да разгледаме решението 🦉",
+	revealed: "Да разгледаме решението",
 };
 
 export function KidsPlayer({ initialView }: { initialView: KidsView }) {
@@ -44,7 +47,7 @@ export function KidsPlayer({ initialView }: { initialView: KidsView }) {
 	return <main lang="bg" className={s.shell} aria-busy={busy}>
 		<div className={s.content}>
 			<header className={s.header}>
-				<span className={s.brand}>Математически открития</span>
+				<div className={s.brand}>Състезателна математика<span className={s.competitionTitle}>{competition.title} · {competition.grade}. клас</span></div>
 				{!view.paused && <button className={s.secondary} disabled={busy} onClick={() => void act({ type: "pause" })}>Почивка</button>}
 			</header>
 			<p className={s.small}>Кръг {view.roundNumber}</p>
@@ -97,7 +100,7 @@ export function KidsPlayer({ initialView }: { initialView: KidsView }) {
 
 function KidsQuestion({ task, busy, onAction }: { task: NonNullable<KidsView["task"]>; busy: boolean; onAction: (action: KidsAction) => Promise<void> }) {
 	const [selected, setSelected] = useState<number>();
-	const [reasoning, setReasoning] = useState(task.reasoning ?? "");
+	const reasoning = task.reasoning ?? "";
 	const done = Boolean(task.outcome);
 	useEffect(() => { setSelected(undefined); }, [task.hint]);
 	return <>
@@ -107,17 +110,15 @@ function KidsQuestion({ task, busy, onAction }: { task: NonNullable<KidsView["ta
 				aria-pressed={done ? task.choice === index : selected === index} disabled={busy || done}
 				onClick={() => setSelected(index)}><span className={s.letter}>{["А", "Б", "В", "Г"][index]})</span> {option}</button>)}
 		</div>
-		{task.hint && <aside className={s.hint} role="status"><h3>Малка подсказка</h3><p>{task.hint}</p></aside>}
-		{!done && <details className={s.reasoning}><summary>Искаш ли да обясниш как мислиш? (по желание)</summary>
-			<textarea aria-label="Как мислиш?" maxLength={500} value={reasoning} disabled={busy} onChange={event => setReasoning(event.target.value)} placeholder="Можеш и да обясниш на глас." />
-		</details>}
+		{task.hint && <aside className={s.hint} role="status"><h3>Подсказка</h3><p>{task.hint}</p></aside>}
+
 		<div className={s.actions}>
 			{!done && <button className={s.button} disabled={busy || selected === undefined} onClick={() => {
 				if (selected !== undefined) void onAction({ type: "answer", taskKey: task.key, choice: selected, reasoning });
 			}}>Провери отговора</button>}
-			<button type="button" className={s.secondary} disabled={busy || done} onClick={() => { setSelected(undefined); void onAction({ type: "dontKnow", taskKey: task.key, reasoning }); }}>Не знам</button>
+			<button type="button" className={s.secondary} disabled={busy || done} onClick={() => { setSelected(undefined); void onAction({ type: "dontKnow", taskKey: task.key, reasoning }); }}>{task.hint ? "Следваща подсказка" : "Подсказка"}</button>
 		</div>
-		{!done && <p className={s.small}>{task.hint ? "Още е трудно? Второто „Не знам“ ще покаже цялото решение." : "„Не знам“ ще покаже малка подсказка."}</p>}
+		{!done && <p className={s.small}>{task.hint ? "Още е трудно? „Следваща подсказка“ ще покаже цялото решение." : "„Подсказка“ ще ти помогне да започнеш."}</p>}
 		{task.outcome && <div className={s.feedback} role="status">
 			<h3>{kidsOutcomeLabels[task.outcome]}</h3>
 			{task.outcome === "independent" || task.outcome === "hinted" ? <details className={s.reasoning}><summary>Виж решението стъпка по стъпка</summary><Explanation steps={task.explanation ?? []} /></details>

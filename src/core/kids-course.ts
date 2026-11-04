@@ -1,4 +1,6 @@
+import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
+import { chooseSkillProblem, isCompetitionProblem, overlaps, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
 import { chooseQuestProblem, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
 
 export type CourseMode = "core" | "challenge" | "review" | "practice";
@@ -6,11 +8,13 @@ export interface CourseField { label: string; answer: string }
 export interface CourseSolutionPart { title: string; paragraphs: string[] }
 export type CourseSolution = [CourseSolutionPart, CourseSolutionPart, CourseSolutionPart];
 export interface CourseProblem {
+ difficulty?: { level: "standard" | "hard"; rationale: string };
 	id: string; skillId: string; text: string; source: string; options?: string[];
 	fields: CourseField[]; hint: string; hints?: [string, string, string]; explanation: string[]; solution?: CourseSolution;
 	figure?: { src: string; alt: string };
-	provenance?: { year: number; objective: string; page: number; video: string };
+	provenance?: { year: number; objective: string; page: number; video?: string };
 	teachingFigure?: { src: string; alt: string };
+ archive?: { sourceId: string; kind: "original" | "part" | "scaffold"; covers: string[] };
 }
 export interface CourseSkill { id: string; title: string; lesson: string[]; illustration?: CourseProblem["figure"] }
 export interface CourseTopic { id: string; title: string; rewardName: string; skills: CourseSkill[] }
@@ -22,7 +26,7 @@ export interface CourseObjectiveMap { primary: string; related: string[] }
 export type QuestKind = "familiar" | "gap" | "stretch" | "diagnostic";
 export interface CourseQuest {
  id: string; startedAt: string; steps: { key: string; topicId: string; skillId: string; kind: QuestKind }[];
- completed: number; diagnostic: boolean; diagnosticFor?: string; work?: CourseWork;
+ completed: number; total?: number; diagnostic: boolean; diagnosticFor?: string; work?: CourseWork;
  completedAt?: string; exhausted?: boolean;
 }
 export interface QuestStamp { questId: string; earnedAt: string; achievement: string }
@@ -37,34 +41,41 @@ export interface LearningSkillView extends Omit<LearningConceptView, "objectives
  confirmation: { earned: boolean; streak: number; target: number; revisit: boolean };
 }
 export interface KidsCourseContent {
-	version: string; topics: CourseTopic[]; concepts?: CourseConcept[]; objectiveMap?: Record<string, CourseObjectiveMap>;
+	version: string; topics: CourseTopic[]; introductions?: Record<string, { problemId?: string; rationale: string }>; concepts?: CourseConcept[]; objectiveMap?: Record<string, CourseObjectiveMap>;
 	problem(skillId: string, index: number, harder: boolean): CourseProblem | null;
  solutionFor?(problem: CourseProblem): CourseSolution | undefined;
 }
 export interface CourseAttempt {
 	key: string; problem: CourseProblem; mode: CourseMode; hintUsed: boolean; hintLevel?: number; questId?: string;
 	answers?: string[]; reasoning?: string; outcome?: KidsOutcome; completedAt?: string;
+ draft?: { partIndex: number; answers: string[] };
+ partIndex?: number; partOutcome?: KidsOutcome; partIncorrect?: boolean; freshEvidence?: boolean;
 }
 export interface CourseSkillProgress {
 	streak: number; target: number; confirmedAt?: string; gap: boolean; revisit: boolean;
-	nextCore: number; nextHard: number;
+	nextCore: number; nextHard: number; reviewDueAt?: string; lastReviewAt?: string;
 }
 export interface CourseWork { attempt: CourseAttempt; lessonStep?: number }
 export interface CourseTopicProgress {
 	skills: Record<string, CourseSkillProgress>; work: Partial<Record<CourseMode, CourseWork>>;
 	learningMode?: Exclude<CourseMode, "review">;
+	skillWork?: Record<string, CourseWork>;
 	challengeStreak: number; reviewStreak: number; doctorAt?: string; professorAt?: string;
 	reviewDueAt?: string; lastReviewAt?: string; challengeNext: number; reviewNext: number;
 }
 export interface KidsCourse {
+ goldAwards?: GoldAward[];
+ problemGoldAwards?: ProblemGoldAward[];
+ islandGoldTargets?: Record<string, number>;
 	version: 2; questVersion?: 1; journey?: "quest" | "topic"; quest?: CourseQuest; stamps?: QuestStamp[]; diagnostics?: { initialDone: boolean; checked: Record<string, number> }; contentVersion: string; revision: number; createdAt: string; updatedAt: string;
-	paused: boolean; active?: { topicId: string; mode: CourseMode }; topics: Record<string, CourseTopicProgress>;
+	paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string }; topics: Record<string, CourseTopicProgress>;
 	attempts: CourseAttempt[]; awards: { topicId: string; rank: "doctor" | "professor"; earnedAt: string; taskKey: string }[];
 	completedAt?: string;
 	previousCompletions?: { contentVersion: string; completedAt: string }[];
 }
 export type CourseAction =
-	| { type: "selectTopic"; topicId: string; review?: boolean }
+	| { type: "selectTopic"; topicId: string; review?: boolean; skillId?: string }
+	| { type: "saveDraft"; taskKey: string; partIndex: number; answers: string[] }
 	| { type: "answer"; taskKey: string; answers: string[]; reasoning?: string }
 	| { type: "dontKnow"; taskKey: string; reasoning?: string }
 	| { type: "hint"; taskKey: string; reasoning?: string }
@@ -72,6 +83,7 @@ export type CourseAction =
 	| { type: "startQuest" }
 	| { type: "nextQuestion" | "lessonNext" | "pause" | "resume" | "dashboard" };
 export interface CourseTopicView {
+ gold: { earned: number; total: number };
 	id: string; title: string; rewardName: string; doctor: boolean; professor: boolean;
 	confirmed: number; total: number; reviewDue: boolean; reviewDueAt?: string; needsPractice: boolean;
 	concepts?: LearningConceptView[];
@@ -79,33 +91,37 @@ export interface CourseTopicView {
 	skills: { id: string; title: string; confirmed: boolean; streak: number; target: number; revisit: boolean }[];
 }
 export interface KidsCourseView {
-	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode };
+ gold: number; goldGain?: GoldGain; lastTopicId?: string;
+	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string };
 	topics: CourseTopicView[]; doctors: number; professors: number; professorGoal: number; complete: boolean; previouslyCompleted?: boolean;
-	quest?: { id: string; completed: number; total: 5; step: number; finished: boolean; exhausted: boolean; achievement?: string };
- stamps?: QuestStamp[]; inQuest?: boolean;
+	quest?: { id: string; completed: number; total: number; step: number; finished: boolean; exhausted: boolean; achievement?: string };
+ stamps?: QuestStamp[]; inQuest?: boolean; questAvailable?: boolean; nextReviewAt?: string;
  stage: "dashboard" | "question" | "lesson" | "questComplete"; streak?: number; target?: number; exhausted?: boolean;
-	task?: { key: string; skillId: string; text: string; source: string; options?: string[];
-		fields: { label: string }[]; figure?: CourseProblem["figure"]; hint?: string; hints?: string[]; hintLevel?: number; solutionParts?: CourseSolutionPart[];
-		outcome?: KidsOutcome; answers?: string[]; explanation?: string[]; reasoning?: string; teachingFigure?: CourseProblem["figure"] };
+	task?: { goldReward?: { amount: number; multiplier: 1 | 1.5 }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; options?: string[];
+		fields: { label: string }[]; part?: { index: number; total: number; completed: boolean }; figure?: CourseProblem["figure"]; hint?: string; hints?: string[]; hintLevel?: number; solutionParts?: CourseSolutionPart[];
+		draft?: string[]; outcome?: KidsOutcome; answers?: string[]; explanation?: string[]; reasoning?: string; teachingFigure?: CourseProblem["figure"] };
 	lesson?: { title: string; steps: string[]; total: number; illustration?: CourseProblem["figure"] };
 	reward?: { rank: "doctor" | "professor"; topic: string };
 }
 export interface KidsCourseStore {
+ goldBalance?(current: KidsCourse): number;
 	read(content?: KidsCourseContent): KidsCourse | null;
 	update(revision: number, action: CourseAction, content: KidsCourseContent): KidsCourse;
 }
 
 export function newKidsCourse(content: KidsCourseContent, now: string): KidsCourse {
-	return { version: 2, questVersion: 1, journey: "topic", stamps: [], diagnostics: { initialDone: false, checked: {} }, contentVersion: content.version, revision: 0, createdAt: now, updatedAt: now,
+	const course: KidsCourse = { version: 2, questVersion: 1, journey: "topic", stamps: [], diagnostics: { initialDone: false, checked: {} }, contentVersion: content.version, revision: 0, createdAt: now, updatedAt: now,
 		paused: false, attempts: [], awards: [], topics: Object.fromEntries(content.topics.map(topic => [topic.id, {
 			skills: Object.fromEntries(topic.skills.map(skill => [skill.id, { streak: 0, target: 2, gap: false, revisit: false, nextCore: 0, nextHard: 0 }])),
 			work: {}, challengeStreak: 0, reviewStreak: 0, challengeNext: 0, reviewNext: 0,
 		}])) };
+ course.islandGoldTargets = islandGoldTargets(course, content);
+ return course;
 }
 
 export function migrateKidsCourse(record: KidsCourse, content: KidsCourseContent, now: string): KidsCourse {
 	if (record.contentVersion === content.version) {
-  if (record.questVersion === 1) return record;
+  if (record.questVersion === 1) return refreshUntriedPractice(record, content, now);
   const upgraded = structuredClone(record);
   upgraded.questVersion = 1; upgraded.journey = "topic"; upgraded.stamps = [];
   upgraded.diagnostics = { initialDone: record.attempts.length > 0, checked: {} };
@@ -113,7 +129,7 @@ export function migrateKidsCourse(record: KidsCourse, content: KidsCourseContent
    if (work) work.attempt.hintLevel = work.attempt.hintUsed ? 1 : 0;
   }
   upgraded.revision++; upgraded.updatedAt = now;
-  return upgraded;
+  return refreshUntriedPractice(upgraded, content, now);
  }
 	if (record.contentVersion !== "bg4-2024-v1" || content.version !== "bg4-2024-2026-v2") throw new KidsError("Учебният комплект е от несъвместима версия.", 409);
 	const course = structuredClone(record), fresh = newKidsCourse(content, now);
@@ -135,7 +151,37 @@ export function migrateKidsCourse(record: KidsCourse, content: KidsCourseContent
  course.questVersion = 1; course.journey ??= "topic"; course.stamps ??= [];
  course.diagnostics ??= { initialDone: course.attempts.length > 0, checked: {} };
  course.revision++; course.updatedAt = now;
-	return course;
+	return refreshUntriedPractice(course, content, now);
+}
+
+function refreshUntriedPractice(record: KidsCourse, content: KidsCourseContent, now: string): KidsCourse {
+ const course = structuredClone(record);
+ let changed = false;
+ const replace = (work: CourseWork | undefined, slot: string) => {
+  if (!work) return;
+  const a = work.attempt;
+  if (isCompetitionProblem(a.problem) || a.outcome || a.completedAt || a.hintUsed || a.hintLevel || a.answers?.length || a.draft || a.reasoning || a.partIndex || a.partOutcome || a.partIncorrect || work.lessonStep !== undefined) return;
+  const chosen = chooseSkillProblem(course, content, a.problem.skillId, a.mode === "challenge", now, a.mode === "review", a.key);
+  if (!chosen || !isCompetitionProblem(chosen.problem)) return;
+  const problem = structuredClone(chosen.problem);
+  const key = `${record.revision + 1}:archive:${slot}:${problem.id}`;
+  work.attempt = { key, problem, mode: a.mode, hintUsed: false, hintLevel: 0,
+   ...(a.questId ? { questId: a.questId } : {}),
+   ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) };
+  if (a.questId) for (const step of course.quest?.steps ?? []) if (step.key === a.key) step.key = key;
+  changed = true;
+ };
+ // Honour the visible task first when multiple saved slots need the same source.
+ const active = course.active && course.topics[course.active.topicId];
+ if (active && course.active) replace(activeWork(course, active, course.active.mode), "active");
+ for (const [topicId, topic] of Object.entries(course.topics)) {
+  for (const [mode, work] of Object.entries(topic.work)) replace(work, `${topicId}:${mode}`);
+  for (const [skill, work] of Object.entries(topic.skillWork ?? {})) replace(work, `${topicId}:${skill}`);
+ }
+ replace(course.quest?.work, "quest");
+ if (!changed) return record;
+ course.revision++; course.updatedAt = now;
+ return course;
 }
 
 function allSkillsConfirmed(course: KidsCourse, content: KidsCourseContent) {
@@ -156,25 +202,64 @@ function selection(course: KidsCourse, content: KidsCourseContent) {
 
 function nextWork(course: KidsCourse, content: KidsCourseContent, preferredSkill?: string): CourseWork | undefined {
 	const { topic, progress, mode } = selection(course, content);
-	let skill: CourseSkill;
-	if (mode === "core") skill = topic.skills.find(s => s.id === preferredSkill && content.problem(s.id, progress.skills[s.id]!.nextCore, false)) ?? topic.skills.find(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit)!;
-	else {
-		const cursor = mode === "challenge" ? progress.challengeNext : progress.reviewNext;
-		skill = topic.skills[cursor % topic.skills.length]!;
-	}
-	if (!skill) return;
-	const state = progress.skills[skill.id]!;
-	const harder = mode === "challenge";
-	const cursor = harder ? state.nextHard : state.nextCore;
-	const problem = content.problem(skill.id, cursor, harder);
-	if (!problem) return;
-	if (harder) { state.nextHard++; progress.challengeNext++; }
-	else { state.nextCore++; if (mode !== "core") progress.reviewNext++; }
-	return { attempt: { key: `${course.revision + 1}:${topic.id}:${mode}:${problem.id}`, problem: structuredClone(problem), mode, hintUsed: false } };
+ let harder = mode === "challenge";
+ const eligible = course.active?.skillId ? topic.skills.filter(s => s.id === course.active!.skillId)
+  : mode === "core" ? topic.skills.filter(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit)
+  : mode === "review" ? topic.skills.filter(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit) : [...topic.skills];
+ const rotation = mode === "challenge" ? progress.challengeNext : progress.reviewNext;
+ if (mode !== "core" && eligible.length) eligible.push(...eligible.splice(0, rotation % eligible.length));
+ if (preferredSkill) eligible.sort((a, b) => Number(b.id === preferredSkill) - Number(a.id === preferredSkill));
+ let candidates = eligible.flatMap(skill => {
+  const chosen = chooseSkillProblem(course, content, skill.id, harder, course.updatedAt, mode === "review");
+  return chosen ? [{ skill, chosen }] : [];
+ });
+ if (!candidates.length && mode === "practice" && topic.skills.every(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit)) {
+  harder = true;
+  candidates = eligible.filter(skill => skillPrerequisitesReady(course, content, skill.id)).flatMap(skill => {
+   const chosen = chooseSkillProblem(course, content, skill.id, true, course.updatedAt);
+   return chosen ? [{ skill, chosen }] : [];
+  });
+ }
+ // Keep challenge rotation across skills and focused recovery; otherwise prefer the archive.
+ if (!harder) candidates.sort((a, b) => Number(b.skill.id === preferredSkill) - Number(a.skill.id === preferredSkill) || b.chosen.rank - a.chosen.rank);
+ for (const { skill, chosen } of candidates) {
+  const state = progress.skills[skill.id]!;
+  if (harder) { state.nextHard = Math.max(state.nextHard, chosen.cursor + 1); progress.challengeNext++; }
+  else { state.nextCore = Math.max(state.nextCore, chosen.cursor + 1); if (mode !== "core") progress.reviewNext++; }
+  const problem = structuredClone(chosen.problem);
+  return { attempt: { key: `${course.revision + 1}:${topic.id}:${mode}:${problem.id}`, problem, mode, hintUsed: false,
+   ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) } };
+ }
 }
 
 function activeWork(course: KidsCourse, progress: CourseTopicProgress, mode: CourseMode) {
- return course.journey === "quest" ? course.quest?.work : progress.work[mode];
+ return course.journey === "quest" ? course.quest?.work : course.active?.skillId ? progress.skillWork?.[course.active.skillId] : progress.work[mode];
+}
+
+function selectedSkillMode(progress: CourseTopicProgress, skillId: string, now: string): CourseMode {
+ const skill = progress.skills[skillId]!;
+ const due = skill.reviewDueAt ?? (skill.confirmedAt ? dueDate(skill.lastReviewAt ?? skill.confirmedAt) : undefined);
+ return !skill.confirmedAt || skill.revisit ? "core" : due && due <= now ? "review" : progress.doctorAt && !progress.professorAt ? "challenge" : "practice";
+}
+
+function advanceTopicWork(course: KidsCourse, content: KidsCourseContent, preferredSkill?: string) {
+ const { topic, progress, mode } = selection(course, content);
+ const skillId = course.active!.skillId;
+ if (skillId) {
+  delete progress.skillWork![skillId];
+  course.active!.mode = selectedSkillMode(progress, skillId, course.updatedAt);
+  const next = nextWork(course, content);
+  if (next) progress.skillWork![skillId] = next;
+ } else {
+  const previousSkill = progress.work[mode]?.attempt.problem.skillId;
+  const previousState = previousSkill ? progress.skills[previousSkill] : undefined;
+  if (!preferredSkill && previousState?.streak && (!previousState.confirmedAt || previousState.revisit)) preferredSkill = previousSkill;
+  delete progress.work[mode];
+  const recovery = topic.skills.some(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit);
+  course.active!.mode = recovery ? "core" : progress.professorAt ? "practice" : "challenge";
+  progress.learningMode = course.active!.mode;
+  progress.work[course.active!.mode] ??= nextWork(course, content, preferredSkill);
+ }
 }
 
 function assignQuestWork(course: KidsCourse, content: KidsCourseContent, now: string, preferredSkill?: string) {
@@ -186,13 +271,20 @@ function assignQuestWork(course: KidsCourse, content: KidsCourseContent, now: st
   return;
  }
  const chosen = chooseQuestProblem(course, content, now, preferredSkill);
- if (!chosen) { quest.exhausted = true; delete quest.work; return; }
+ if (!chosen) {
+  delete quest.work;
+  if (quest.completed > 0) {
+   quest.total = quest.completed; quest.completedAt = now;
+   if (!(course.stamps ??= []).some(s => s.questId === quest.id)) course.stamps.push({ questId: quest.id, earnedAt: now, achievement: questAchievement(course) });
+  } else quest.exhausted = true;
+  return;
+ }
  const { topicId, skillId, mode, problem, kind, cursor } = chosen;
  const progress = course.topics[topicId]!, state = progress.skills[skillId]!;
  if (mode === "challenge") { state.nextHard = cursor + 1; progress.challengeNext++; }
  else state.nextCore = cursor + 1;
  course.active = { topicId, mode };
- quest.work = { attempt: { key: `${course.revision + 1}:quest:${problem.id}`, problem: structuredClone(problem), mode, hintUsed: false, hintLevel: 0, questId: quest.id } };
+ quest.work = { attempt: { key: `${course.revision + 1}:quest:${problem.id}`, problem: structuredClone(problem), mode, hintUsed: false, hintLevel: 0, questId: quest.id, ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) } };
  quest.steps.push({ key: quest.work.attempt.key, topicId, skillId, kind });
 }
 
@@ -210,23 +302,25 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 	const { topic, progress, mode } = selection(course, content);
 	const skill = progress.skills[attempt.problem.skillId]!;
 	const independent = attempt.outcome === "independent";
+ const fresh = !course.attempts.some(a => overlaps(a.problem, attempt.problem, content));
+ attempt.freshEvidence = fresh;
 	if (!independent) progress.challengeStreak = 0;
 	// An outcome in another mode supersedes old feedback, never an unanswered task.
 	for (const other of ["core", "challenge", "review", "practice"] as const) {
-		if (course.journey !== "quest" && other !== mode && progress.work[other]?.attempt.outcome && progress.work[other]?.lessonStep === undefined) delete progress.work[other];
+		if (course.journey !== "quest" && !course.active?.skillId && other !== mode && progress.work[other]?.attempt.outcome && progress.work[other]?.lessonStep === undefined) delete progress.work[other];
 	}
 	if (mode === "core" || mode === "practice") {
-		if (independent) {
+		if (independent && fresh) {
 			skill.streak++;
-			if (skill.streak >= skill.target) { skill.confirmedAt ??= now; skill.revisit = false; }
-		} else {
+			if (skill.streak >= skill.target) { skill.confirmedAt ??= now; skill.revisit = false; skill.reviewDueAt = dueDate(now); }
+		} else if (!independent) {
 			skill.streak = 0;
 			if (attempt.outcome !== "hinted") skill.gap = true;
 			skill.target = skill.gap ? 2 : 1;
 			skill.revisit = true;
 		}
 	} else if (mode === "challenge") {
-		progress.challengeStreak = independent ? progress.challengeStreak + 1 : 0;
+		progress.challengeStreak = independent && fresh ? progress.challengeStreak + 1 : 0;
 		if (!independent) {
 			skill.revisit = true; skill.streak = 0;
 			skill.gap ||= attempt.outcome !== "hinted"; skill.target = skill.gap ? 2 : 1;
@@ -235,6 +329,7 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 		progress.reviewStreak = independent ? progress.reviewStreak + 1 : 0;
 		if (independent) {
 			progress.lastReviewAt = now; progress.reviewDueAt = dueDate(now);
+   skill.lastReviewAt = now; skill.reviewDueAt = dueDate(now);
 		} else {
 			skill.streak = 0; skill.target = attempt.outcome === "hinted" && !skill.gap ? 1 : 2;
 			skill.gap ||= attempt.outcome !== "hinted"; skill.revisit = true;
@@ -243,13 +338,14 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 		}
 	}
 	attempt.completedAt = now;
+ awardProblemGold(course, content, attempt, now);
 	course.attempts.push(structuredClone(attempt));
  if (course.journey === "quest" && course.quest?.work?.attempt.key === attempt.key) course.quest.completed++;
 	if (!progress.doctorAt && topic.skills.every(s => progress.skills[s.id]!.confirmedAt)) {
 		progress.doctorAt = now; progress.reviewDueAt = dueDate(now);
 		course.awards.push({ topicId: topic.id, rank: "doctor", earnedAt: now, taskKey: attempt.key });
 	}
-	const recentChallenges = course.attempts.filter(a => a.mode === "challenge" && topic.skills.some(s => s.id === a.problem.skillId)).slice(-2);
+	const recentChallenges = course.attempts.filter(a => a.mode === "challenge" && a.freshEvidence !== false && topic.skills.some(s => s.id === a.problem.skillId)).slice(-2);
  if (mode === "challenge" && progress.doctorAt && !progress.professorAt && progress.challengeStreak >= 2 && topic.skills.every(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit)
   && (topic.skills.length === 1 || new Set(recentChallenges.map(a => a.problem.skillId)).size === 2)) {
 		progress.professorAt = now;
@@ -262,9 +358,16 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 export function applyCourseAction(record: KidsCourse, content: KidsCourseContent, action: CourseAction, now: string): KidsCourse {
 	if (record.contentVersion !== content.version) throw new KidsError("Учебният комплект е променен. Нужна е съвместима версия.", 409);
 	const course = structuredClone(record);
+ course.goldAwards = courseGoldAwards(record);
+ course.islandGoldTargets = islandGoldTargets(record, content);
+ course.updatedAt = now;
 	if (action.type === "startQuest") {
   course.journey = "quest"; course.paused = false;
-  if (!course.quest || course.quest.completedAt || course.quest.exhausted) {
+  if (course.quest?.exhausted && !course.quest.completedAt && course.quest.completed > 0) {
+   delete course.quest.exhausted;
+   assignQuestWork(course, content, now);
+  } else if (!course.quest || course.quest.completedAt || course.quest.exhausted) {
+   const previousQuest = course.quest;
    const diagnostics = course.diagnostics ??= { initialDone: course.attempts.length > 0, checked: {} };
    const unclear = content.topics.flatMap(t => t.skills).find(s => {
     const recent = course.attempts.filter(a => a.problem.skillId === s.id && (a.outcome === "incorrect" || a.outcome === "revealed"));
@@ -276,6 +379,7 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
    if (unclear) diagnostics.checked[unclear.id] = course.attempts.filter(a => a.problem.skillId === unclear.id && (a.outcome === "incorrect" || a.outcome === "revealed")).length;
    diagnostics.initialDone = true;
    assignQuestWork(course, content, now);
+   if (course.quest.exhausted && previousQuest?.completedAt) course.quest = previousQuest;
   } else if (course.quest.work) {
    const a = course.quest.work.attempt;
    course.active = { topicId: content.topics.find(t => t.skills.some(s => s.id === a.problem.skillId))!.id, mode: a.mode };
@@ -287,20 +391,33 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
 		const topic = content.topics.find(t => t.id === action.topicId);
 		if (!topic) throw new KidsError("Тази тема не е достъпна.");
 		const progress = course.topics[topic.id]!;
-		if (action.review && !progress.doctorAt) throw new KidsError("Първо завърши основните умения.");
+		if (action.review && !topic.skills.some(s => progress.skills[s.id]!.confirmedAt)) throw new KidsError("Първо затвърди едно умение.");
+		if (action.skillId !== undefined && (action.review || !topic.skills.some(s => s.id === action.skillId))) throw new KidsError("Тази подтема не е достъпна в избрания остров.");
 		const recovery = topic.skills.some(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit);
-		const mode: CourseMode = action.review ? "review" : progress.learningMode ?? (recovery ? "core" : !progress.professorAt ? "challenge" : "practice");
-		course.active = { topicId: topic.id, mode }; course.journey = "topic"; course.paused = false;
-		if (mode !== "review") progress.learningMode = mode;
-		progress.work[mode] ??= nextWork(course, content);
+		const mode: CourseMode = action.skillId ? progress.skillWork?.[action.skillId]?.attempt.mode ?? selectedSkillMode(progress, action.skillId, now)
+   : action.review ? "review" : progress.learningMode ?? (recovery ? "core" : !progress.professorAt ? "challenge" : "practice");
+		course.active = { topicId: topic.id, mode, ...(action.skillId ? { skillId: action.skillId } : {}) }; course.journey = "topic"; course.paused = false;
+  if (action.skillId) {
+   const work = progress.skillWork ??= {};
+   const next = work[action.skillId] ?? nextWork(course, content);
+   if (next) work[action.skillId] = next;
+  } else {
+   if (mode !== "review") progress.learningMode = mode;
+   progress.work[mode] ??= nextWork(course, content);
+  }
 	} else {
 		if (course.paused) throw new KidsError("Първо продължи заниманието.", 409);
 		const { topic, progress, mode } = selection(course, content);
 		const work = activeWork(course, progress, mode);
 		if (!work) throw new KidsError("Подготвените задачи за тази стъпка свършиха. Избери друга тема.", 409);
 		const attempt = work.attempt;
-		if (action.type === "answer" || action.type === "dontKnow" || action.type === "hint" || action.type === "reveal") {
-			if (attempt.outcome || work.lessonStep !== undefined || action.taskKey !== attempt.key) throw new KidsError("Тази задача вече не очаква отговор.", 409);
+		if (action.type === "saveDraft") {
+   if (action.taskKey !== attempt.key || action.partIndex !== (attempt.partIndex ?? 0) || attempt.outcome || attempt.partOutcome || work.lessonStep !== undefined) throw new KidsError("Задачата е променена. Черновата не е записана.", 409);
+   const fields = attempt.partIndex !== undefined ? 1 : attempt.problem.fields.length;
+   if (attempt.problem.options ? action.answers.length !== 1 || !/^(|\d+)$/.test(action.answers[0]!) || (action.answers[0] !== "" && !attempt.problem.options[Number(action.answers[0])]) : action.answers.length !== fields || action.answers.some(a => !/^[\d.,]{0,12}$/.test(a))) throw new KidsError("Невалидна чернова.");
+   attempt.draft = { partIndex: action.partIndex, answers: [...action.answers] };
+  } else if (action.type === "answer" || action.type === "dontKnow" || action.type === "hint" || action.type === "reveal") {
+			if (attempt.outcome || attempt.partOutcome || work.lessonStep !== undefined || action.taskKey !== attempt.key) throw new KidsError("Тази задача вече не очаква отговор.", 409);
 			if (action.reasoning !== undefined) attempt.reasoning = action.reasoning.trim() || undefined;
 			if (action.type === "reveal") { attempt.outcome = "revealed"; }
    else if (action.type === "dontKnow" || action.type === "hint") {
@@ -309,50 +426,58 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
      const level = attempt.hintLevel ?? (attempt.hintUsed ? 1 : 0);
      if (level >= 3) throw new KidsError("Всички стъпки от решението вече са показани.", 409);
      attempt.hintUsed = true; attempt.hintLevel = level + 1;
+     if (attempt.problem.options) delete attempt.draft;
     }
    } else {
 				const answers = action.answers;
 				if (attempt.problem.options) {
 					if (answers.length !== 1 || !/^\d+$/.test(answers[0]!) || !attempt.problem.options[Number(answers[0])]) throw new KidsError("Избери един от показаните отговори.");
-				} else if (answers.length !== attempt.problem.fields.length || answers.some(a => normalizeCourseNumber(a) === null)) {
+				} else if ((answers.length !== attempt.problem.fields.length && !(attempt.partIndex !== undefined && answers.length === 1)) || answers.some(a => normalizeCourseNumber(a) === null)) {
 					throw new KidsError("Попълни всеки числов отговор. Използвай цифри и запетая при нужда.");
 				}
-				attempt.answers = answers;
+				if (attempt.partIndex !== undefined && answers.length === 1 && attempt.problem.fields.length > 1) {
+     const index = attempt.partIndex;
+     (attempt.answers ??= [])[index] = answers[0]!;
+     const correct = normalizeCourseNumber(answers[0]!) === normalizeCourseNumber(attempt.problem.fields[index]!.answer);
+     attempt.partIncorrect ||= !correct;
+     if (index < attempt.problem.fields.length - 1) attempt.partOutcome = correct ? attempt.hintUsed ? "hinted" : "independent" : "incorrect";
+     else attempt.outcome = attempt.partIncorrect ? "incorrect" : attempt.hintUsed ? "hinted" : "independent";
+    } else {
+    attempt.answers = answers;
 				const correct = answers.every((answer, i) => attempt.problem.options ? answer === attempt.problem.fields[i]!.answer
 					: normalizeCourseNumber(answer) === normalizeCourseNumber(attempt.problem.fields[i]!.answer));
-				attempt.outcome = correct ? attempt.hintUsed ? "hinted" : "independent" : "incorrect";
+				attempt.outcome = correct && !attempt.partIncorrect ? attempt.hintUsed ? "hinted" : "independent" : "incorrect";
+    }
 			}
+			if (attempt.outcome || attempt.partOutcome) delete attempt.draft;
 			if (attempt.outcome) recordOutcome(course, content, attempt, now);
 		} else if (action.type === "lessonNext") {
 			if (work.lessonStep === undefined) throw new KidsError("Сега не сме в обяснението.", 409);
 			const skill = topic.skills.find(s => s.id === attempt.problem.skillId)!;
 			if (work.lessonStep + 1 < skill.lesson.length) work.lessonStep++;
 			else if (course.journey === "quest") finishQuestStep(course, content, now);
-   else {
-				delete progress.work[mode];
-				const recovery = topic.skills.some(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit);
-				course.active!.mode = recovery ? "core" : progress.professorAt ? "practice" : "challenge";
-				progress.learningMode = course.active!.mode;
-				progress.work[course.active!.mode] ??= nextWork(course, content);
-			}
+   else advanceTopicWork(course, content);
 		} else if (action.type === "nextQuestion") {
-			if (!attempt.outcome || work.lessonStep !== undefined) throw new KidsError("Първо опитай задачата.", 409);
+			if (attempt.partOutcome && !attempt.outcome) {
+    attempt.partIndex = (attempt.partIndex ?? 0) + 1;
+    delete attempt.partOutcome;
+    delete attempt.draft;
+    course.updatedAt = now; course.revision++;
+    return course;
+   }
+   if (!attempt.outcome || work.lessonStep !== undefined) throw new KidsError("Първо опитай задачата.", 409);
 			if (course.journey === "quest") finishQuestStep(course, content, now);
-   else {
-				delete progress.work[mode];
-				const recovery = topic.skills.some(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit);
-				course.active!.mode = recovery ? "core" : !progress.professorAt ? "challenge" : "practice";
-				progress.learningMode = course.active!.mode;
-				progress.work[course.active!.mode] ??= nextWork(course, content, attempt.outcome !== "independent" ? attempt.problem.skillId : undefined);
-			}
+   else advanceTopicWork(course, content, attempt.outcome !== "independent" ? attempt.problem.skillId : undefined);
 		}
 	}
+ course.goldAwards = courseGoldAwards(course);
 	course.updatedAt = now; course.revision++;
 	return course;
 }
 
 function solutionFor(problem: CourseProblem, content: KidsCourseContent): CourseSolution {
- return problem.solution ?? content.solutionFor?.(problem) ?? [
+ // Use revised wording only when the content provider matches the saved question and answers.
+ return content.solutionFor?.(problem) ?? problem.solution ?? [
   { title: "Първата стъпка", paragraphs: [problem.explanation[0] ?? problem.hint] },
   { title: "Продължаваме заедно", paragraphs: problem.explanation.slice(1) },
   { title: "Отговор и проверка", paragraphs: problem.fields.map(f => `${f.label}: ${problem.options ? problem.options[Number(f.answer)] : f.answer}.`) },
@@ -360,24 +485,34 @@ function solutionFor(problem: CourseProblem, content: KidsCourseContent): Course
 }
 
 export function courseView(course: KidsCourse, content: KidsCourseContent, now: string): KidsCourseView {
+ const goldAwards = courseGoldAwards(course);
+ const targets = islandGoldTargets(course, content);
 	const topics: CourseTopicView[] = content.topics.map(t => {
 		const p = course.topics[t.id]!;
-		return { id: t.id, title: t.title, rewardName: t.rewardName, doctor: !!p.doctorAt, professor: !!p.professorAt,
+  const skillIds = new Set(t.skills.map(skill => skill.id));
+  const problemGold = topicProblemGold(course, content, t.id);
+  const gold = { earned: goldAwards.filter(award => skillIds.has(award.skillId)).reduce((sum, award) => sum + goldAmounts[award.milestone], 0) + problemGold.earned, total: targets[t.id]! };
+		return { id: t.id, title: t.title, gold, rewardName: t.rewardName, doctor: !!p.doctorAt, professor: !!p.professorAt,
 			confirmed: t.skills.filter(s => p.skills[s.id]!.confirmedAt).length, total: t.skills.length,
-			reviewDue: !!p.reviewDueAt && p.reviewDueAt <= now, reviewDueAt: p.reviewDueAt,
+			reviewDue: t.skills.some(s => { const due = skillReviewDue(course, t.id, s.id); return !!due && due <= now; }), reviewDueAt: t.skills.map(s => skillReviewDue(course, t.id, s.id)).filter((due): due is string => !!due).sort()[0],
 			needsPractice: t.skills.some(s => p.skills[s.id]!.revisit || (!!p.doctorAt && !p.skills[s.id]!.confirmedAt)),
 			concepts: learningMapView(course, content, t.id, now),
 			leaves: learningSkillView(course, content, t.id, now),
    skills: t.skills.map(s => ({ id: s.id, title: s.title, confirmed: !!p.skills[s.id]!.confirmedAt,
 				streak: p.skills[s.id]!.streak, target: p.skills[s.id]!.target, revisit: p.skills[s.id]!.revisit })) };
 	});
-	const view: KidsCourseView = { revision: course.revision, paused: course.paused, active: course.active,
+	const lastSkillId = course.attempts.at(-1)?.problem.skillId;
+ const view: KidsCourseView = { gold: courseGoldBalance(course), lastTopicId: content.topics.find(t => t.skills.some(s => s.id === lastSkillId))?.id ?? course.active?.topicId, revision: course.revision, paused: course.paused, active: course.active,
 		topics, doctors: topics.filter(t => t.doctor).length, professors: topics.filter(t => t.professor).length,
 		professorGoal: Math.ceil(topics.length / 2), complete: !!course.completedAt, previouslyCompleted: !!course.previousCompletions?.length, stage: "dashboard" };
 	view.inQuest = course.journey === "quest";
  view.stamps = course.stamps ?? [];
- if (course.quest) view.quest = { id: course.quest.id, completed: course.quest.completed, total: 5,
-  step: Math.min(course.quest.steps.length, 5), finished: !!course.quest.completedAt, exhausted: !!course.quest.exhausted,
+ const preview = structuredClone(course);
+ preview.quest = { id: "preview", startedAt: now, steps: [], completed: 0, diagnostic: false };
+ view.questAvailable = !!chooseQuestProblem(preview, content, now, undefined, true);
+ view.nextReviewAt = topics.map(t => t.reviewDueAt).filter((date): date is string => !!date && date > now).sort()[0];
+ if (course.quest) view.quest = { id: course.quest.id, completed: course.quest.completed, total: course.quest.total ?? 5,
+  step: Math.min(course.quest.steps.length, course.quest.total ?? 5), finished: !!course.quest.completedAt, exhausted: !!course.quest.exhausted,
   achievement: course.stamps?.find(s => s.questId === course.quest!.id)?.achievement };
  if (!course.active || course.paused) return view;
  if (view.inQuest && course.quest?.completedAt) { view.stage = "questComplete"; return view; }
@@ -392,12 +527,15 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
 		view.stage = "lesson"; view.lesson = { title: skill.title, steps: skill.lesson.slice(0, work.lessonStep + 1), total: skill.lesson.length, illustration: skill.illustration };
 	} else {
 		view.stage = "question";
-		view.task = { key: a.key, skillId: p.skillId, text: p.text, source: p.source, options: p.options,
-			fields: p.fields.map(f => ({ label: f.label })), figure: p.figure,
+		view.task = { goldReward: problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, sourceYear: isCompetitionProblem(p) ? p.provenance?.year : undefined, sourceProblemId: isCompetitionProblem(p) || p.archive ? p.archive ? `${p.archive.sourceId}:original` : p.id : undefined, options: p.options,
+			fields: (a.partIndex !== undefined ? [p.fields[a.partIndex]!] : p.fields).map(f => ({ label: f.label })), figure: p.figure,
+   ...(a.partIndex !== undefined ? { part: { index: a.partIndex + 1, total: p.fields.length, completed: !!a.partOutcome && !a.outcome } } : {}),
+   ...(a.partOutcome && !a.outcome ? { outcome: a.partOutcome, answers: [a.answers![a.partIndex!]!], explanation: [`${p.fields[a.partIndex!]!.label}: ${p.fields[a.partIndex!]!.answer}.`] } : {}),
+   draft: a.draft?.partIndex === (a.partIndex ?? 0) ? a.draft.answers : undefined,
    hintLevel: a.hintLevel ?? (a.hintUsed ? 1 : 0),
    ...(a.hintUsed ? { solutionParts: solutionFor(a.problem, content).slice(0, a.hintLevel ?? 1) } : {}),
    ...(a.reasoning ? { reasoning: a.reasoning } : {}),
-   ...(a.outcome ? { outcome: a.outcome, answers: a.answers,
+   ...(a.outcome ? { outcome: a.outcome, answers: a.partIndex !== undefined && a.answers ? [a.answers[a.partIndex]!] : a.answers,
     explanation: solutionFor(a.problem, content).flatMap(part => part.paragraphs), teachingFigure: p.teachingFigure } : {}) };
 		const award = course.awards.findLast(award => award.taskKey === a.key);
 		if (a.outcome && award) view.reward = { rank: award.rank, topic: topic.rewardName };
@@ -410,7 +548,11 @@ export function parseCourseCommand(body: unknown): { revision: number; action: C
 	const { revision, action } = body as Record<string, unknown>;
 	if (!Number.isSafeInteger(revision) || (revision as number) < 0 || !action || typeof action !== "object") throw new KidsError("Невалидна заявка.");
 	const a = action as Record<string, unknown>;
-	if (a.type === "selectTopic" && typeof a.topicId === "string" && (a.review === undefined || typeof a.review === "boolean")) return { revision: revision as number, action: { type: a.type, topicId: a.topicId, review: a.review as boolean | undefined } };
+	if (a.type === "selectTopic" && typeof a.topicId === "string" && (a.review === undefined || typeof a.review === "boolean") && (a.skillId === undefined || (typeof a.skillId === "string" && a.skillId.length > 0 && a.skillId.length <= 100))) return { revision: revision as number, action: { type: a.type, topicId: a.topicId, review: a.review as boolean | undefined, skillId: a.skillId as string | undefined } };
+ if (a.type === "saveDraft") {
+  if (typeof a.taskKey !== "string" || a.taskKey.length > 200 || !Number.isSafeInteger(a.partIndex) || (a.partIndex as number) < 0 || !Array.isArray(a.answers) || a.answers.length > 12 || a.answers.some(n => typeof n !== "string" || n.length > 12)) throw new KidsError("Невалидна чернова.");
+  return { revision: revision as number, action: { type: "saveDraft", taskKey: a.taskKey, partIndex: a.partIndex as number, answers: a.answers as string[] } };
+ }
 	if (a.type === "answer" || a.type === "dontKnow" || a.type === "hint" || a.type === "reveal") {
 		if (typeof a.taskKey !== "string" || a.taskKey.length > 200 || (a.reasoning !== undefined && (typeof a.reasoning !== "string" || a.reasoning.length > 500))) throw new KidsError("Невалиден отговор.");
 		if (a.type === "dontKnow" || a.type === "hint" || a.type === "reveal") return { revision: revision as number, action: { type: a.type, taskKey: a.taskKey, reasoning: a.reasoning as string | undefined } };
