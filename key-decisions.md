@@ -151,3 +151,10 @@ Adopted educational decisions for Математически открития. U
 - Child login reuses the existing child ID and saved competition history. It never creates another learner or sends an invitation email. Parents retain family management; children can access only their own learner profile.
 - Link only a confirmed Google identity through a private server-only mapping. One child per email and one Google identity per child; changing or removing the email revokes the old access. Inactive children and families without parent approval cannot sign in.
 - Preserve course JSON, revisions, earned gold, awards and the five-active-child limit. Apply the additive login migration before deploying dependent code.
+
+
+## 2026-11-04 - Earned gold and short adventure goals
+
+- Island cards and focused island views show a coin with the full earned amount, without a maximum, fraction, gold-target bar or target chest. This supersedes the island-display rules in “Keep a reachable island treasure target” and “Keep gold goals visible”; distant collection totals should not obscure small achievements.
+- Keep the short adventure route and its actual task count, skill progress, earned awards, treasure celebrations and collection. No additional progress indicator or explanatory copy is added to island cards.
+- Preserve reward amounts, entitlements, wallets, historical awards and saved targets. Existing target data stays internal for compatibility; displaying earned gold never caps it at a target. No learner-history migration or recalculation.

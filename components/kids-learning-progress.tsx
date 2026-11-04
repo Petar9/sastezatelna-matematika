@@ -1,6 +1,6 @@
-import type { CourseTopicView, LearningSkillView } from "@/src/core";
+import type { LearningSkillView } from "@/src/core";
 import s from "./kids-learning-progress.module.css";
-import { GoldCoin, Treasure } from "./kids-adventure";
+import { GoldCoin } from "./kids-adventure";
 
 export const learningStates = { untried: "Да открием", practising: "Откриваме заедно", confirmed: "Вече го умея", review: "Да си припомним" };
 
@@ -8,11 +8,9 @@ export function discoveryProgress(leaves: LearningSkillView[]) {
  return { earned: leaves.reduce((count, leaf) => count + Number(leaf.milestones.started) + Number(!!leaf.milestones.firstCorrect) + Number(leaf.confirmation.earned), 0), total: leaves.length * 3 };
 }
 
-export function IslandGoldBar({ title, gold: { earned, total } }: { title: string; gold: CourseTopicView["gold"] }) {
- const progress = Math.min(earned, total);
- return <div className={`${s.discovery} ${s.gold}`}>
-  <div className={s.heading}><span className={s.goldAmount} aria-label={`${progress} от ${total} злато`}><GoldCoin/>{progress}/{total}</span></div>
-  <div className={s.islandTrack}><div className={s.track} role="progressbar" aria-label={`Злато: ${title}`} aria-valuemin={0} aria-valuemax={total} aria-valuenow={progress} aria-valuetext={`${progress} от ${total} злато`}><span style={{ width: `${total ? progress / total * 100 : 0}%` }}/></div><span className={s.chest} role="img" aria-label={progress >= total ? "Съкровището е открито" : "Съкровище в края на острова"} data-open={progress >= total}><Treasure open={progress >= total}/></span></div>
+export function IslandGoldTotal({ title, earned }: { title: string; earned: number }) {
+ return <div className={s.gold}>
+  <span className={s.goldAmount} aria-label={`${title}: ${earned} злато`}><GoldCoin/>{earned}</span>
  </div>;
 }
 

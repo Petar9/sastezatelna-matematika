@@ -21,7 +21,7 @@ const {KidsActionBar}=await import("../components/kids-action-bar.tsx");
 const {IslandScenery,islandPlaces,KidsWorldMap}=await import("../components/kids-world-map.tsx");
 const {LearningMap,adventureAchievement}=await import("../components/kids-quest-map.tsx");
 const {Leaf,leafKey,leafPhase,knowledgeGrowthKeys}=await import("../components/kids-map-decorations.tsx");
-const {IslandGoldBar,KidsLearningProgress,discoveryProgress}=await import("../components/kids-learning-progress.tsx");
+const {IslandGoldTotal,KidsLearningProgress,discoveryProgress}=await import("../components/kids-learning-progress.tsx");
 const now="2026-11-02T12:00:00.000Z";
 function button(host:HTMLElement,label:string){const b=[...host.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent===label);assert.ok(b,`Missing: ${label}`);return b;}
 function primary(host:HTMLElement,label:string){const bars=host.querySelectorAll('[aria-label="Следващо действие"]');assert.equal(bars.length,1);assert.equal(bars[0]!.querySelectorAll("button").length,label==="Провери отговора"?2:1);assert.ok(bars[0]!.textContent!.includes(label));return button(host,label);}
@@ -382,9 +382,8 @@ test("island rows start specific skills, disable while saving and retain earned 
   assert.equal(host.querySelectorAll('[data-rank="professor"][data-earned="true"]').length,1);
   assert.ok([...leaves].every(b=>b.disabled));
   await act(async()=>leaves[1]!.click());assert.equal(actions.length,0);
-  assert.equal(host.querySelectorAll('[role="progressbar"]').length,1);
-  assert.equal(host.querySelector('[role="progressbar"]')!.getAttribute("aria-valuemax"),"140");
-  assert.equal(host.querySelector('[role="progressbar"]')!.getAttribute("aria-valuenow"),"50");
+  assert.equal(host.querySelectorAll('[role="progressbar"]').length,0);
+  assert.equal(host.querySelector(`[aria-label="${topic.title}: 50 злато"]`)!.textContent,"50");
   assert.equal(host.querySelectorAll('[aria-label^="Стъпки:"]').length,0);
   assert.ok(!host.textContent!.includes("Моите малки открития"));
   assert.ok(!host.textContent!.includes("Как да стана"));
@@ -418,18 +417,18 @@ test("discoveries distinguish effort, helped correctness and retained confirmati
  }finally{await act(async()=>root.unmount());host.remove();}
 });
 
-test("backwards island has one gold bar including fresh problems and five skill markers",async()=>{
+test("backwards island shows earned gold without a target and retains five skill markers",async()=>{
  const h=await mount(null);try{
   await act(async()=>button(h.host,"Теми").click());
   const island=h.host.querySelector('#island-backwards')!;
-  assert.equal(island.querySelectorAll('[role="progressbar"]').length,1);
-  assert.equal(island.querySelector('[role="progressbar"]')!.getAttribute("aria-valuemax"),String(courseView(h.record,content,now).topics.find(t=>t.id==="backwards")!.gold.total));
+  assert.equal(island.querySelectorAll('[role="progressbar"]').length,0);
+  assert.equal(island.querySelector('[aria-label="Рачешки задачи: 0 злато"]')!.textContent,"0");
   assert.ok(!island.textContent!.includes("Събрано злато"));
   assert.ok(!island.textContent!.includes("Моите малки открития"));
   assert.ok(island.querySelector("svg"));
   await act(async()=>islandButton(h.host,"Рачешки задачи").click());
   assert.equal(h.host.querySelectorAll('[aria-label="Умения: Рачешки задачи"] svg[data-state]').length,5);
-  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,1);
+  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,0);
   assert.equal(h.host.querySelectorAll('[aria-label^="Стъпки:"]').length,0);
   assert.ok(!h.host.textContent!.includes("Данни за възрастния"));assert.equal(h.actions.length,0);
  }finally{await h.cleanup();}
@@ -500,21 +499,20 @@ test("single home control retains the exact question and worked solution parts",
  }finally{await h.cleanup();}
 });
 
-test("island gold bar shows collected gold with its coin and available total",async()=>{
+test("island gold shows the full earned amount without a target or clamping",async()=>{
  const topic=islandTopic();topic.gold={earned:0,total:35};
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
- const show=()=>root.render(<IslandGoldBar title={topic.title} gold={topic.gold}/>);
- const progress=()=>host.querySelector<HTMLElement>('[role="progressbar"]')!;
+ const show=()=>root.render(<IslandGoldTotal title={topic.title} earned={topic.gold.earned}/>);
  try{
-  await act(async()=>show());assert.equal(progress().getAttribute("aria-valuenow"),"0");assert.equal(progress().firstElementChild!.getAttribute("style"),"width:0%");
-  for(const earned of [5,15,35]){
-   topic.gold.earned=earned;await act(async()=>show());
-   assert.equal(progress().getAttribute("aria-valuenow"),String(earned));
-   assert.equal(progress().getAttribute("aria-valuetext"),`${earned} от 35 злато`);
+  for(const earned of [0,5,15,35,70,3370]){
+   topic.gold.earned=earned;const saved=JSON.stringify(topic);
+   await act(async()=>show());
+   assert.equal(host.querySelector('[role="progressbar"]'),null);
+   assert.equal(host.querySelector(`[aria-label="${topic.title}: ${earned} злато"]`)!.textContent,String(earned));
+   assert.ok(host.querySelector(".goldAmount svg"));
+   assert.equal(host.textContent,String(earned));
+   assert.equal(JSON.stringify(topic),saved);
   }
-  assert.equal((progress().firstElementChild as HTMLElement).style.width,"100%");
-  assert.equal(progress().getAttribute("aria-valuemax"),"35");
-  assert.ok(host.querySelector(".goldAmount svg"));assert.equal(host.querySelector(".goldAmount")!.textContent,"35/35");assert.ok(!host.textContent!.includes("Събрано злато"));
  }finally{await act(async()=>root.unmount());host.remove();}
 });
 
@@ -534,7 +532,8 @@ test("world and topic views expose every island in a focused view without changi
     assert.ok(h.host.querySelector(`section[aria-label="Умения: ${topic.title}"]`));
     assert.equal(h.host.querySelector('[data-camera]'),null);
     assert.equal(h.host.querySelector('[aria-label="Твоето приключение"]'),null);
-    assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,1);
+    assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,0);
+    assert.ok(h.host.querySelector(`[aria-label="${topic.title}: ${courseView(h.record,content,now).topics.find(t=>t.id===topic.id)!.gold.earned} злато"]`));
     await act(async()=>button(h.host,"← Към картата").click());
     assert.equal(h.host.querySelectorAll('section[aria-label^="Умения:"]').length,0);
     assert.ok(islandButton(h.host,topic.title));
@@ -643,7 +642,8 @@ test("draft Olympiad map shows exactly four islands and opens each island's skil
   for(const topic of view.topics){
    await act(async()=>islandButton(host,topic.title).click());
    assert.equal(host.querySelectorAll('button.skillRow').length,topic.skills.length);
-   assert.equal(host.querySelector('[role="progressbar"]')!.getAttribute("aria-valuemax"),String(topic.gold.total));
+   assert.equal(host.querySelector('[role="progressbar"]'),null);
+   assert.ok(host.querySelector(`[aria-label="${topic.title}: ${topic.gold.earned} злато"]`));
    for(const skill of topic.skills){
     await act(async()=>host.querySelector<HTMLButtonElement>(`button[aria-label="Упражнения: ${skill.title}"]`)!.click());
     assert.deepEqual(actions.at(-1),{type:"selectTopic",topicId:topic.id,skillId:skill.id});
@@ -652,7 +652,8 @@ test("draft Olympiad map shows exactly four islands and opens each island's skil
    await act(async()=>button(host,"← Към картата").click());
   }
   await act(async()=>button(host,"Теми").click());assert.equal(host.querySelectorAll('section.island').length,4);
-  assert.equal(host.querySelectorAll('[role="progressbar"]').length,4);
+  assert.equal(host.querySelectorAll('[role="progressbar"]').length,0);
+  assert.equal(host.querySelectorAll('.goldAmount').length,4);
  }finally{await act(async()=>root.unmount());host.remove();}
 });
 

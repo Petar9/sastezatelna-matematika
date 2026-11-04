@@ -5,7 +5,7 @@ import { IslandLandmark, KidsWorldMap } from "./kids-world-map";
 import { AdventureRoute, AdventureSouvenir, souvenirs, Treasure } from "./kids-adventure";
 import { KidsOtter } from "./kids-otter";
 import { Award, DiscoveryMarker, leafKey, leafPhase } from "./kids-map-decorations";
-import { IslandGoldBar, learningStates } from "./kids-learning-progress";
+import { IslandGoldTotal, learningStates } from "./kids-learning-progress";
 import s from "./kids.module.css";
 
 export { Treasure } from "./kids-adventure";
@@ -48,9 +48,9 @@ type MapProps = {
  setViewMode?: (mode: "world" | "topics") => void;
 };
 
-function IslandDetails({ topic, busy, act, seenGrowth, close, panelId, showProgress = true }: {
+function IslandDetails({ topic, busy, act, seenGrowth, close, panelId }: {
  topic: CourseTopicView; busy: boolean; act: MapProps["act"]; seenGrowth: Set<string>;
- close: () => void; panelId: string; showProgress?: boolean;
+ close: () => void; panelId: string;
 }) {
  const heading = useRef<HTMLHeadingElement>(null);
  useEffect(() => { heading.current?.focus({ preventScroll: true }); heading.current?.closest("section")?.scrollIntoView?.({ block: "nearest", behavior: "instant" }); }, []);
@@ -58,7 +58,7 @@ function IslandDetails({ topic, busy, act, seenGrowth, close, panelId, showProgr
   <button className={s.quiet} onClick={close}>← Към картата</button>
   <div className={s.focusedIslandArt} aria-hidden="true"><svg viewBox="-110 -65 220 140" focusable="false"><ellipse cy="29" rx="104" ry="40" fill="#d6ebeb"/><path d="M-85 20C-100-7-54-35-22-27 5-47 47-30 65-14c47 12 40 41 15 53-29 19-55 8-83 13-35 6-83-6-82-32Z" fill="#a9c7a9"/><IslandLandmark topicId={topic.id} golden={topic.professor}/></svg></div>
   <div className={s.islandPanelHeading}><KidsOtter small/><h3 ref={heading} tabIndex={-1}>{topic.title}</h3><button className={s.practiceIsland} disabled={busy} onClick={() => void act({ type: "selectTopic", topicId: topic.id })}>Да упражним</button></div>
-  {showProgress && <IslandGoldBar title={topic.title} gold={topic.gold}/>}
+  <IslandGoldTotal title={topic.title} earned={topic.gold.earned}/>
   {(topic.doctor || topic.professor) && <div className={s.islandAwards} aria-label="Моите награди">{(["doctor", "professor"] as const).filter(rank => topic[rank]).map(rank => <span key={rank} data-earned="true"><Award rank={rank} earned topicId={topic.id} seen={seenGrowth}/><strong>{rank === "doctor" ? "Доктор" : "Професор"} ✓</strong></span>)}</div>}
   <ul className={s.skillRows}>{topic.leaves?.map(leaf => <li key={leaf.id}>
    <button className={s.skillRow} disabled={busy} aria-label={`Упражнения: ${leaf.title}`} onClick={() => void act({ type: "selectTopic", topicId: topic.id, skillId: leaf.id })}>
@@ -86,7 +86,7 @@ export function LearningMap({ topics, progress, busy, act, seenGrowth, selection
    {mode === "world" ? <KidsWorldMap viewControls={viewControls} topics={topics} panelId={`${id}-panel`} seen={seenGrowth} buttons={islands} onSelect={topicId => select(topicId)}/> : <>
     {viewControls}<div className={s.islandGrid}>{topics.map(topic => <section key={topic.id} className={s.island} id={`island-${topic.id}`} data-state={topicStatus(topic)}>
      <button ref={element => { if (element) islands.current.set(topic.id, element); else islands.current.delete(topic.id); }} type="button" className={s.islandSelect} aria-label={topic.title} onClick={() => select(topic.id)}><h3>{topic.title}</h3></button>
-     <IslandGoldBar title={topic.title} gold={topic.gold}/>
+     <IslandGoldTotal title={topic.title} earned={topic.gold.earned}/>
     </section>)}</div>
    </>}
   </>}

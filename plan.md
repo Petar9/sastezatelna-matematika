@@ -540,3 +540,12 @@ Homepage and first profile update, 2026-11-04:
 - Coordinator: gpt-6.1-sol, high reasoning; release executed by one agent.
 
 - Production published: commit `d548e08`; Vercel deployment `ASWJY8z3H6o7G2xHK2Ko7PWWQs78` reported success. HTTPS `/welcome` and `/login` returned 200; the live welcome page contains the new landing copy and invitation field without a consent checkbox. Authenticated child sign-in and live database privilege checks remain unverified.
+
+
+## Earned island gold - approved 2026-11-04
+
+- Replace island gold-target fractions and bars with a coin and earned amount on both topic cards and focused islands. Keep the short adventure route/count and existing skill progress, earned awards and celebrations.
+- Supersedes the pending target-display decision in the audit above. Preserve all reward calculations, stored targets, learner history and database records; this slice changes presentation only.
+- Implemented: a shared earned-only component receives no maximum and does not cap the amount. Removed obsolete island bar/chest styles and the unused progress-display option.
+- Verification: all 189 tests passed, including 43 UI tests covering all 17 original islands and four Olympiad islands, direct skill practice, retained awards, unchanged saved learning and earned totals above a former target. Typecheck, ESLint, production build, private-bundle audit and diff checks passed. Visual browser verification was attempted but blocked by the Chrome automation connection; production publication is pending.
+- Coordinator: gpt-6.1-sol, high reasoning; one agent. User approved testing and deployment after checks pass.
