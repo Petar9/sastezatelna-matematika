@@ -538,3 +538,5 @@ Homepage and first profile update, 2026-11-04:
 - Live Supabase access checks, linking the child email and real child sign-in remain follow-up verification; user explicitly requests not delaying the demo on these checks. No learner data is changed by this release.
 - Gold-target compatibility decision remains pending; this release preserves the audited reward calculations and earned history.
 - Coordinator: gpt-6.1-sol, high reasoning; release executed by one agent.
+
+- Production published: commit `d548e08`; Vercel deployment `ASWJY8z3H6o7G2xHK2Ko7PWWQs78` reported success. HTTPS `/welcome` and `/login` returned 200; the live welcome page contains the new landing copy and invitation field without a consent checkbox. Authenticated child sign-in and live database privilege checks remain unverified.
