@@ -30,6 +30,36 @@ SQL
 "${psql[@]}" -f "$root/supabase/migrations/202611030002_competitions.sql" >/dev/null
 "${psql[@]}" -f "$root/supabase/migrations/202611030003_pilot.sql" >/dev/null
 "${psql[@]}" -f "$root/supabase/migrations/202611040001_child_logins.sql" >/dev/null
+"${psql[@]}" >/dev/null <<'SQL'
+insert into public.problem_reports(parent_id,child_id,competition_id,problem_id,description)
+values ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000003','matematika-za-vseki','saved-task','preserve report');
+SQL
+"${psql[@]}" -f "$root/supabase/migrations/202611050001_general_feedback.sql" >/dev/null
+"${psql[@]}" >/dev/null <<'SQL'
+do $$ begin
+ if not exists (select 1 from public.problem_reports where description='preserve report' and submitted_by='parent' and problem_id='saved-task') then raise exception 'existing report changed'; end if;
+ if not (select relrowsecurity from pg_class where oid='public.problem_reports'::regclass) then raise exception 'feedback RLS disabled'; end if;
+ if has_table_privilege('anon','public.problem_reports','insert') or has_table_privilege('authenticated','public.problem_reports','insert') then raise exception 'feedback direct write exposed'; end if;
+end $$;
+set role service_role;
+insert into public.problem_reports(parent_id,description,submitted_by) values ('10000000-0000-4000-8000-000000000001','general parent feedback','parent');
+insert into public.problem_reports(parent_id,child_id,description,submitted_by) values ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000003','general child feedback','child');
+do $$ begin
+ begin
+  insert into public.problem_reports(parent_id,child_id,description,submitted_by) values ('10000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000003','wrong family','child');
+  raise exception 'foreign family accepted';
+ exception when foreign_key_violation then null; end;
+ begin
+  insert into public.problem_reports(parent_id,description,submitted_by) values ('10000000-0000-4000-8000-000000000001','missing child','child');
+  raise exception 'child report without child accepted';
+ exception when check_violation then null; end;
+ begin
+  insert into public.problem_reports(parent_id,problem_id,description) values ('10000000-0000-4000-8000-000000000001','missing-context','missing context');
+  raise exception 'task report without context accepted';
+ exception when check_violation then null; end;
+end $$;
+reset role;
+SQL
 "${psql[@]}" -f "$root/supabase/child-login-security-check.sql" >/dev/null
 "${psql[@]}" >/dev/null <<'SQL'
 do $$ begin
@@ -77,4 +107,4 @@ do $$ begin
  begin update public.child_profiles set active=true where id='10000000-0000-4000-8000-000000000003'; raise exception 'reactivation exceeded cap'; exception when raise_exception then if sqlerrm <> 'active_child_limit' then raise; end if; end;
 end $$;
 SQL
-printf '%s\n' 'PASS: migrations preserve progress; security checks, invitation privacy/rate limit; concurrent global cap and reactivation'
+printf '%s\n' 'PASS: migrations preserve progress and reports; feedback privacy and family checks; invitation privacy/rate limit; concurrent global cap and reactivation'

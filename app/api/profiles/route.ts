@@ -6,10 +6,12 @@ export async function POST(request: Request) {
   if (mode() !== "hosted") return new Response(null, { status: 404 });
   const retry = (query: string) => NextResponse.redirect(`${appOrigin()}/profiles?${query}`, 303);
   let setup: string | undefined;
+  let failedAction = "unavailable";
   const linkRetry = (query: string) => retry(`${query}${setup ? `&setup=${encodeURIComponent(setup)}` : ""}`);
   try {
     const parent = await parentContext();
     const body = await request.formData();
+    failedAction = ({ "link-email": "save-email-unavailable", "unlink-email": "remove-email-unavailable", create: "create-unavailable", select: "select-unavailable" } as Record<string, string>)[String(body.get("action"))] ?? "unavailable";
     let childId: string;
     if (body.get("action") === "link-email" || body.get("action") === "unlink-email") {
       const child = parent.children.find(child => child.id === body.get("childId"));
@@ -49,6 +51,6 @@ export async function POST(request: Request) {
     if (error instanceof KidsError && (error.status === 401 || error.status === 403)) {
       return NextResponse.redirect(`${appOrigin()}/login${error.status === 403 ? "?denied=1" : ""}`, 303);
     }
-    return linkRetry("error=unavailable");
+    return linkRetry(`error=${failedAction}`);
   }
 }

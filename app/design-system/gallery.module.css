@@ -1,0 +1,11 @@
+.gallery { font-size: var(--text-body); line-height: var(--line-body); }
+.header, .catalog { width: min(100% - 32px, 1040px); margin: var(--space-6) auto; min-width: 0; }
+.header h1 { font-size: var(--text-title); margin: 0; }
+.header p, .form p { color: var(--muted); margin: 0; }
+.row { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+.catalog { display: grid; gap: var(--space-6); }
+.section { padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); min-width: 0; overflow-wrap: anywhere; }
+.section h2 { margin-top: 0; font-size: var(--text-heading); }
+.form, .stack { display: grid; gap: var(--space-3); min-width: 0; }
+.form { max-width: 540px; }
+.notice { margin: var(--space-4); }

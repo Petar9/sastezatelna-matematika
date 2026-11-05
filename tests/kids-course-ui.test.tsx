@@ -26,7 +26,7 @@ const now="2026-11-02T12:00:00.000Z";
 function button(host:HTMLElement,label:string){const b=[...host.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent===label);assert.ok(b,`Missing: ${label}`);return b;}
 function primary(host:HTMLElement,label:string){const bars=host.querySelectorAll('[aria-label="Следващо действие"]');assert.equal(bars.length,1);assert.equal(bars[0]!.querySelectorAll("button").length,label==="Провери отговора"?2:1);assert.ok(bars[0]!.textContent!.includes(label));return button(host,label);}
 function islandButton(host:HTMLElement,topic:string){const b=host.querySelector<HTMLButtonElement>(`button[aria-label="${topic}"]`);assert.ok(b);return b;}
-async function practise(host:HTMLElement,topic:string){await act(async()=>islandButton(host,topic).click());await act(async()=>button(host,"Да упражним").click());}
+async function practise(host:HTMLElement,topic:string){await act(async()=>islandButton(host,topic).click());await act(async()=>button(host,"Към задачите").click());}
 async function mount(topic:string|null="matches",loseResponse=false,learnerId?:string,competitionId?:string,learnerNickname?:string){
  let record=topic ? applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:topic},now) : newKidsCourse(content,now);
  const originalFetch=globalThis.fetch;const actions:CourseAction[]=[];const requestHeaders:Headers[]=[];
@@ -61,7 +61,7 @@ test("navigation buttons recover a stale tab in one click without losing newer p
    }
    h.advance({type:"selectTopic",topicId:"clocks"});
    const newerTask=courseView(h.record,content,now).task!.key;
-   const label=entry==="quest"?"Започни приключение":entry==="resume"?"Продължи: Точки и мачове":"Да упражним";
+   const label=entry==="quest"?"Започни приключение":entry==="resume"?"Продължи: Точки и мачове":"Към задачите";
    await act(async()=>button(h.host,label).click());
    assert.ok(!h.host.querySelector('[aria-label="Карта на ученето"]'),"Navigation should open the exercises");
    assert.ok(h.host.textContent!.includes(entry==="quest"?"0/5 задачи":entry==="resume"?"Часовник и денонощия":"Пари и цени"));
@@ -349,7 +349,7 @@ test("a topic panel opens its island exercises without selecting a competence fi
  const h=await mount(null);try{
   await act(async()=>h.host.querySelector<HTMLButtonElement>('button[aria-label="Най-малко и най-много"]')!.click());
   assert.equal(h.host.querySelectorAll('[aria-label^="Моите малки открития:"]').length,0);
-  await act(async()=>button(h.host,"Да упражним").click());
+  await act(async()=>button(h.host,"Към задачите").click());
   assert.equal(courseView(h.record,content,now).active!.topicId,"constraints");
   assert.ok(h.host.querySelector('h1')!.textContent!.includes("Най-малко и най-много"));
   primary(h.host,"Провери отговора");
@@ -387,8 +387,8 @@ test("island rows start specific skills, disable while saving and retain earned 
   assert.equal(host.querySelectorAll('[aria-label^="Стъпки:"]').length,0);
   assert.ok(!host.textContent!.includes("Моите малки открития"));
   assert.ok(!host.textContent!.includes("Как да стана"));
-  assert.equal(button(host,"Да упражним").disabled,true);
-  await act(async()=>show(false));await act(async()=>button(host,"Да упражним").click());
+  assert.equal(button(host,"Към задачите").disabled,true);
+  await act(async()=>show(false));await act(async()=>button(host,"Към задачите").click());
   await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label="Упражнения: Идея 1"]')!.click());
   assert.deepEqual(actions,[{type:"selectTopic",topicId:topic.id},{type:"selectTopic",topicId:topic.id,skillId:"concept-1"}]);assert.equal(JSON.stringify(topic),before);
  }finally{await act(async()=>root.unmount());host.remove();}
@@ -406,10 +406,10 @@ test("discoveries distinguish effort, helped correctness and retained confirmati
   leaf.milestones.firstCorrect="hinted";leaf.confirmation.target=1;
   await act(async()=>show());assert.equal(value(),2);
   assert.ok(host.textContent!.includes("С помощ"));
-  assert.ok(host.textContent!.includes("Още 1 верен отговор самостоятелно."));
+  assert.ok(host.textContent!.includes("Реши самостоятелно още 1 различна задача подред."));
   leaf.confirmation={earned:true,streak:0,target:2,revisit:true};
   await act(async()=>show());assert.equal(value(),3);
-  assert.ok(host.textContent!.includes("Да затвърдим: още 2 верни отговора самостоятелно."));
+  assert.ok(host.textContent!.includes("Да затвърдим: реши самостоятелно още 2 различни задачи подред."));
   leaf.confirmation.revisit=false;leaf.status="review";
   await act(async()=>show());assert.equal(value(),3);
   assert.ok(host.textContent!.includes("Да си припомним!"));
@@ -648,7 +648,7 @@ test("draft Olympiad map shows exactly four islands and opens each island's skil
     await act(async()=>host.querySelector<HTMLButtonElement>(`button[aria-label="Упражнения: ${skill.title}"]`)!.click());
     assert.deepEqual(actions.at(-1),{type:"selectTopic",topicId:topic.id,skillId:skill.id});
    }
-   await act(async()=>button(host,"Да упражним").click());assert.deepEqual(actions.at(-1),{type:"selectTopic",topicId:topic.id});
+   await act(async()=>button(host,"Към задачите").click());assert.deepEqual(actions.at(-1),{type:"selectTopic",topicId:topic.id});
    await act(async()=>button(host,"← Към картата").click());
   }
   await act(async()=>button(host,"Теми").click());assert.equal(host.querySelectorAll('section.island').length,4);
@@ -862,7 +862,7 @@ test("exhausted exact-subtopic practice returns to its island", async () => {
   await act(async () => root.render(<KidsCoursePlayer initialView={view}/>));
   await act(async () => button(host,"Продължи: Точки и мачове").click());
   await act(async () => primary(host,"Към острова").click());
-  assert.ok(button(host,"Да упражним"));
+  assert.ok(button(host,"Към задачите"));
   assert.ok(button(host,"← Към картата"));
  } finally {
   await act(async () => root.unmount()); host.remove(); globalThis.fetch = originalFetch;
@@ -966,4 +966,66 @@ test("published competition dashboards keep the three-way selector visible",asyn
    for(const choice of choices)assert.ok([...links].some(link=>link.getAttribute("href")===`/?competition=${choice.id}`));
   }
  }finally{await act(async()=>root.unmount());host.remove();}
+});
+
+
+test("feedback modal keeps typed exercise work mounted, preserves failed message and prevents duplicate sends", async () => {
+ const h = await mount("grids", false, "child-a"), fetchCourse = globalThis.fetch;
+ let fail = true, reports = 0; const bodies: Record<string, unknown>[] = [];
+ try {
+  globalThis.fetch = async (url, init) => {
+   if (url === "/api/reports") { reports++; bodies.push(JSON.parse(String(init?.body))); return Response.json({}, { status: fail ? 503 : 200 }); }
+   return fetchCourse(url, init);
+  };
+  const modal = h.host.querySelector<HTMLDialogElement>("dialog")!;
+  modal.showModal = () => { modal.setAttribute("open", ""); };
+  modal.close = () => { modal.removeAttribute("open"); modal.dispatchEvent(new dom.window.Event("close")); };
+  await act(async () => button(h.host, "5").click());
+  await act(async () => button(h.host, "6").click());
+  const input = h.host.querySelector<HTMLInputElement>("input")!, taskKey = courseView(h.record, content, now).task!.key;
+  await act(async () => button(h.host, "Подай обратна връзка").click());
+  const textarea = modal.querySelector<HTMLTextAreaElement>("textarea")!;
+  await act(async () => {
+   Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value")!.set!.call(textarea, "Подсказката не е ясна.");
+   textarea.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  });
+  assert.equal(button(modal, "Изпрати").disabled, false);
+  await act(async () => modal.querySelector("form")!.dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })));
+  assert.equal(reports, 1); assert.ok(modal.querySelector('[role="alert"]'));
+  assert.equal(textarea.value, "Подсказката не е ясна.");
+  assert.equal(h.host.querySelector("input"), input); assert.equal(input.value, "56");
+  assert.deepEqual(bodies[0], { childId: "child-a", competitionId: "matematika-za-vseki", taskKey, description: "Подсказката не е ясна." });
+  fail = false;
+  await act(async () => {
+   const form = modal.querySelector("form")!;
+   form.dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
+   form.dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
+  });
+  assert.equal(reports, 2); assert.ok(modal.textContent!.includes("Благодарим! Получихме съобщението."));
+  assert.equal(h.host.querySelector("input"), input); assert.equal(input.value, "56");
+  assert.equal(h.record.attempts.length, 0); assert.equal(h.record.goldAwards?.length ?? 0, 0);
+  assert.ok(!h.actions.some(action => ["answer", "selectTopic", "dashboard"].includes(action.type)));
+  await act(async () => button(modal, "Затвори").click());
+  await act(async () => button(h.host, "Подай обратна връзка").click());
+  assert.equal(modal.querySelector<HTMLTextAreaElement>("textarea")!.value, "");
+ } finally { await h.cleanup(); }
+});
+
+test("technical draft and version errors offer reload without resetting or resubmitting an answer", async () => {
+ for (const error of ["Невалидна чернова", "Нужна е съвместима версия"]) {
+  const h = await mount(), fetchCourse = globalThis.fetch;
+  try {
+   globalThis.fetch = async (url, init) => init?.method === "POST" ? Response.json({ error }, { status: 400 }) : fetchCourse(url, init);
+   const before = JSON.stringify(h.record), actionCount = h.actions.length;
+   await act(async () => button(h.host, "Подсказка").click());
+   assert.ok(h.host.querySelector('[role="alert"]')!.textContent!.includes("Не успяхме да продължим. Презареди страницата."));
+   assert.ok(!h.host.textContent!.includes(error));
+   let reloaded = false;
+   const priorLocation = window.location;
+   Object.defineProperty(window, "location", { configurable: true, value: { reload() { reloaded = true; } } });
+   try { await act(async () => button(h.host, "Презареди страницата").click()); assert.equal(reloaded, true); }
+   finally { Object.defineProperty(window, "location", { configurable: true, value: priorLocation }); }
+   assert.equal(JSON.stringify(h.record), before); assert.equal(h.actions.length, actionCount);
+  } finally { await h.cleanup(); }
+ }
 });

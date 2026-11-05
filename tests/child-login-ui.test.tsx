@@ -15,7 +15,7 @@ const children = [{ id: "one", nickname: "Лисиче", loginEmail: "child@exam
 
 test("setup offers an independent skip form and only renders an owned child", () => {
   const doc = documentFor(<ChildProfiles children={children} setup="one" issue="email-used" />);
-  assert.equal(doc.querySelector("h1")?.textContent, "Самостоятелен вход");
+  assert.equal(doc.querySelector("h1")?.textContent, "Google имейл на детето");
   const email = doc.querySelector('input[name="email"]')!;
   assert.equal(email.getAttribute("aria-invalid"), "true");
   assert.equal(email.closest("form")?.querySelector('input[name="setup"]')?.getAttribute("value"), "1");

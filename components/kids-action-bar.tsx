@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "./ui/button";
+
 import { useEffect, useRef } from "react";
 import s from "./kids.module.css";
 
@@ -32,7 +34,7 @@ export function KidsActionBar({ label, disabled, onClick, secondary }: { label: 
 		};
 	}, []);
 	return <div ref={bar} className={s.actionBar} role="group" aria-label="Следващо действие"><div className={`${s.actionBarContent} ${secondary ? s.answerActions : ""}`}>
-  {secondary && <button className={s.secondary} disabled={secondary.disabled} onClick={secondary.onClick}>{secondary.label}</button>}
-		<button className={s.button} disabled={disabled} onClick={onClick}>{label}</button>
+  {secondary && <Button variant="secondary" className={s.secondary} disabled={secondary.disabled} onClick={secondary.onClick}>{secondary.label}</Button>}
+		<Button variant="primary" className={s.button} disabled={disabled} onClick={onClick}>{label}</Button>
 	</div></div>;
 }

@@ -18,7 +18,7 @@ export function KidsLearningProgress({ leaf, concise = false }: { leaf: Learning
  const { earned } = discoveryProgress([leaf]);
  const remaining = Math.max(0, leaf.confirmation.target - leaf.confirmation.streak);
  const goal = leaf.confirmation.revisit || !leaf.confirmation.earned
-  ? `${leaf.confirmation.revisit ? "Да затвърдим: о" : "О"}ще ${remaining} ${remaining === 1 ? "верен отговор" : "верни отговора"} самостоятелно.`
+  ? `${leaf.confirmation.revisit ? "Да затвърдим: р" : "Р"}еши самостоятелно още ${remaining} ${remaining === 1 ? "различна задача" : "различни задачи"} подред.`
   : leaf.status === "review" ? "Да си припомним! Откритията ти остават." : undefined;
  const label = leaf.confirmation.revisit ? "Да затвърдим отново" : leaf.confirmation.earned ? "Вече го умея ✓" : leaf.milestones.firstCorrect ? `Първо откритие${leaf.milestones.firstCorrect === "hinted" ? " · С помощ" : ""}` : leaf.milestones.started ? "Първа стъпка ✓" : "Да открием";
  return <div className={s.detail} aria-label={`Стъпки: ${leaf.title}`}>

@@ -1,3 +1,4 @@
+import { Button } from "./ui/button";
 import { useEffect, useRef, type RefObject } from "react";
 import type { GoldGain, KidsCourseView } from "@/src/core";
 import { goldAmounts, problemAwardAmount } from "@/src/core/kids-gold";
@@ -76,8 +77,8 @@ export function AdventureHome({ view, nickname, busy, start, resumeTopic, headin
   <div className={s.hero}><KidsOtter/><div><h1 ref={headingRef} tabIndex={-1} className={s.title}>{nickname ? `Здравей, ${nickname}!` : "На път за съкровища!"}</h1><p>{pending ? `Вече разгледа ${completed} от ${total} задачи. Хайде нататък!` : available ? "До пет задачи. Нови открития. Твое съкровище." : "Разгледа всички задачи за момента! Можеш да се върнеш към островите."}</p></div></div>
   {available && <AdventureRoute completed={completed} total={total}/>}
   {available && <div className={s.treasurePreview}><AdventureSouvenir index={view.stamps?.length ?? 0}/><div><small>В следващото съкровище</small><strong>{souvenirs[(view.stamps?.length ?? 0) % souvenirs.length]}</strong></div><span aria-hidden="true">✦</span></div>}
-  <button className={`${s.button} ${s.questButton}`} disabled={busy || !available} onClick={start}>{pending ? "Продължи приключението" : available ? "Започни приключение" : "Всички спирки са разгледани"}</button>
-  <div className={s.homeSecondary}><a className={s.quiet} href="#learning-map">Избери тема →</a>{view.active && !view.inQuest && <details><summary>Започната тема</summary><button className={s.quiet} disabled={busy} onClick={resumeTopic}>Продължи: {view.topics.find(t => t.id === view.active?.topicId)?.title}</button></details>}</div>
+  <Button variant="primary" className={`${s.button} ${s.questButton}`} disabled={busy || !available} onClick={start}>{pending ? "Продължи приключението" : available ? "Започни приключение" : "Всички спирки са разгледани"}</Button>
+  <div className={s.homeSecondary}><a className={s.quiet} href="#learning-map">Избери тема →</a>{view.active && !view.inQuest && <details><summary>Започната тема</summary><Button variant="quiet" className={s.quiet} disabled={busy} onClick={resumeTopic}>Продължи: {view.topics.find(t => t.id === view.active?.topicId)?.title}</Button></details>}</div>
   {!available && view.nextReviewAt && <p className={s.small}>Нова проверка на запомненото: {new Date(view.nextReviewAt).toLocaleDateString("bg-BG")}.</p>}
  </section>;
 }

@@ -60,7 +60,7 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 
 ## Stage 4 - landing page and invitation requests
 
-- Create a Bulgarian parent-facing page matching the app with accurate supported-content descriptions. Keep the large screenshot and personal-data section removed. Use a lightweight decorative island journey with the existing otter, cream surfaces, marine-blue landing actions and gold accents.
+- Create a Bulgarian parent-facing page matching the app with accurate supported-content descriptions. Keep the large screenshot and personal-data section removed. Use a lightweight decorative island journey with the existing otter, cream surfaces, dark-teal shared actions and gold accents.
 - Include one Заяви покана form and a discreet Вход link. Collect only parent email; show “Ще използваме имейла само за поканата.” without a separate consent checkbox or hidden substitute. Preserve email validation, duplicate handling and the existing rate limit.
 - Requests are private and manually reviewed. Submission grants no access. Keep additional families waiting until the owner separately approves expansion beyond five children.
 - Defer the public contact/personal-data section at the owner’s request. Invitation submissions remain private; this owner-approved email-only flow supersedes the earlier checkbox requirement.
@@ -586,3 +586,43 @@ Homepage and first profile update, 2026-11-04:
 - Local verification: 194/194 tests, TypeScript, ESLint, production build, private-bundle audit and diff checks passed. All 70 image assets retained identical decoded pixels. All 13 private history/backup files remained byte-for-byte unchanged.
 - Visually checked the isolated production About page at 1440px and 390px: three columns on desktop, stacked cards on mobile, no horizontal overflow. The owner-approved competition paragraph is unchanged. Chrome control bridge failed; isolated headless Chrome provided successful screenshots and layout measurements.
 - Published: application commit `ed7f10c` pushed to `main`; Vercel deployment `JDrMaQQmxf4DN4kioN9bHnhczvV9` reported success. Live `/about` contains the exact approved competition paragraph, four-year wording and ongoing teacher-review wording; legacy detailed copy is absent. `/about`, `/welcome`, `/login` and the new 2023 M1-08 source figure returned HTTP 200. Signed-in production learning was not exercised in this copy release; automated compatibility and feedback tests passed. No database or learner-data changes.
+
+
+## Bulgarian UI copy and feedback - approved 2026-11-05
+
+- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and verification.
+- Apply the approved copy audit, preserving “Откриваме заедно”, “Неприпокриващи се случаи” and “Гаранция чрез най-лош случай”. Use “Google имейл на детето” and “За момента няма следваща задача в тази подтема.”
+- Replace the parent report action with a read-only last-task statement: current saved task first, completed attempt second; verify parent ownership and expose no answers or solutions.
+- Add a permanent signed-in footer feedback action opening a short accessible modal without navigating or replacing the exercise. Accept authenticated parent/child feedback with optional validated task context and retained text on failure.
+- Replace technical draft/version errors with a reload action; retain all concurrency guards. Preserve learner records, gold, educational rules and original statements.
+- Add an additive service-only reports migration. Verify authorization, statement projection, feedback failure/retry, UI focus and mobile layout, full tests, TypeScript, lint, production build and private-bundle checks. Production rollout is outside this slice; migration must precede release.
+
+- Implemented all approved copy changes; the three owner-preserved phrases remain unchanged. Parent last-task viewing is read-only and family-scoped, using saved snapshots without grading data. Feedback stays in the mounted exercise and retains failed messages; technical recovery offers an explicit reload without replaying answers.
+- Verification: 203/203 tests passed; TypeScript, ESLint, production build, private-bundle audit and diff checks passed. The disposable PostgreSQL migration/security harness passed, including preserved legacy reports, service-only access and family constraints. All 70 images retained identical decoded pixels and all 13 private history/backup files remained byte-for-byte unchanged.
+- Real-browser verification used an isolated fixture with the actual feedback component: initial textarea focus, Escape and trigger-focus restoration, native modal keyboard behavior, retained text after failure, duplicate-send prevention, success focus and clearing passed. The 390px mobile viewport had no horizontal overflow. Integrated player tests separately verified that typed exercise work remains mounted and no answers/gold are submitted by feedback. No live signed-in session was exercised.
+- Not deployed. Apply `supabase/migrations/202611050001_general_feedback.sql` before publishing this slice; live Supabase migration and production verification remain pending.
+
+
+## Compact design system - approved 2026-11-05
+
+- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and final verification. No publication in this slice.
+- [x] Preserve cream/otter/islands and make existing dark teal the primary action color across landing/app; retain blue learning progress and gold rewards.
+- [x] Add semantic tokens and native shared buttons/links, inputs/textarea, messages, badges and modal; migrate landing, onboarding/profiles, feedback and generic learning actions without changing educational behavior.
+- [x] Preserve mobile fixed actions, native form semantics, keyboard focus and feedback recovery. Keep domain map/skill/answer controls specialized.
+- [x] Add `docs/design-system.md`, AGENTS reuse/extend/create rules and development-only `/design-system` catalogue with real components and safe synthetic previews.
+- [x] Complete tests, typecheck, lint, production/private-bundle checks and desktop/mobile/keyboard/reduced-motion verification. Confirm production catalogue 404 and unchanged private history.
+- Scope: a shared foundation and gradual migration when touched; no broad page redesign, new dependency, database changes or automatic deployment. Prior feedback migration remains required before its future production release.
+
+- Final verification: 207/207 tests passed; TypeScript, ESLint, production build, private-bundle audit and diff checks passed. All 70 image assets retained identical decoded pixels, and all 13 private history/backup files remained byte-for-byte unchanged.
+- Browser checks passed at 1440px desktop and 390/320px mobile: catalogue, actual landing/login/profile previews, long labels, visible focus, native dialog initial focus/containment/Escape/trigger restoration, and reduced-motion control/progress styles. An isolated local production player opened a real adventure and progressive hints; both fixed actions remained visible at 390×844 and 320×640 without horizontal overflow or runtime exceptions. Primary text contrast is 6.78:1; input boundaries are 3.45:1 against the card surface.
+- Development catalogue: http://127.0.0.1:3034/design-system; production `/design-system` returned HTTP 404. Browser fixtures and the isolated player use disposable data. No live Supabase session or physical mobile software keyboard was exercised; viewport emulation and existing keyboard-inset behavior were checked without changing that behavior.
+- Not pushed or deployed. No database change is required by the design system. The preceding feedback slice still requires `supabase/migrations/202611050001_general_feedback.sql` before a combined production release.
+
+
+## Combined production release - approved 2026-11-05
+
+- Owner approved the shared 48px controls, will perform the physical-phone smoke test, and authorized release of the copy/feedback and design-system slices above. Coordinator: gpt-6.1-sol, high reasoning; one agent.
+- Applied `202611050001_general_feedback.sql` in the production Supabase SQL Editor before publication. Read-only verification confirmed optional report context, required submitter, both new context constraints, the family foreign key, RLS enabled and no anonymous/authenticated table grants.
+- Existing progress row count remains 1, reports remain 0, and the progress fingerprint matches the pre-migration value. No learner history was imported, reset or modified.
+- Release acceptance: prior 207/207 tests, TypeScript, ESLint, production build, private-bundle checks, pixel equality and isolated desktop/mobile/keyboard checks passed. Only release documentation changed after those checks.
+- Publication and live HTTP verification follow below; physical-phone keyboard and signed-in family flows remain the owner's smoke test.

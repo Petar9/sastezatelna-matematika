@@ -122,7 +122,7 @@ test("email link normalizes input, respects ownership and finishes setup", async
   assert.equal(location(response), "https://maths.example/");
   assert.ok(response.headers.get("set-cookie")?.includes("maths_child=child-a"));
   const doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({ setup: "child-a" }) }));
-  assert.equal(doc.querySelector("h1")?.textContent, "Самостоятелен вход");
+  assert.equal(doc.querySelector("h1")?.textContent, "Google имейл на детето");
   assert.equal(doc.querySelector('input[name="setup"]')?.getAttribute("value"), "1");
   assert.ok([...doc.querySelectorAll("button")].some(button => button.textContent === "Не сега"));
 });
@@ -172,11 +172,28 @@ if (process.env.MATHS_UI_PROOF_DIR) {
   const dir = process.env.MATHS_UI_PROOF_DIR;
   await fs.mkdir(dir, { recursive: true });
   const css = await fs.readFile(new URL("../components/onboarding.module.css", import.meta.url), "utf8");
+  const shared = await fs.readFile(new URL("../components/ui/ui.module.css", import.meta.url), "utf8");
   const theme = await fs.readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   for (const [name, node] of Object.entries({ login: <LoginWelcome />, nickname: <ChildProfiles children={[]} />,
     profiles: <ChildProfiles children={[{ id: "test-one", nickname: "Звездоброец" }, { id: "test-two", nickname: "Мореплавател" }]} />,
     denied: <LoginWelcome issue="denied" />, full: <ChildProfiles children={[]} issue="full" /> })) {
-    const html = `<!doctype html><html lang="bg"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onboarding layout check</title><style>*{box-sizing:border-box}body{--font-sans3:Arial,sans-serif;margin:0;font-family:Arial,sans-serif}a{color:inherit}${theme}${css}</style>${renderToStaticMarkup(node)}</html>`;
+    const html = `<!doctype html><html lang="bg"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onboarding layout check</title><style>*{box-sizing:border-box}body{--font-sans3:Arial,sans-serif;margin:0;font-family:Arial,sans-serif}a{color:inherit}${theme}${shared}${css}</style>${renderToStaticMarkup(node)}</html>`;
     await fs.writeFile(path.join(dir, `${name}.html`), html);
   }
 }
+
+
+test("profile failures name the action that failed and leave the relevant form available", async () => {
+ const actions = [
+  [{ action: "create", nickname: "Дете" }, "create-unavailable", "създадем профила"],
+  [{ action: "link-email", childId: "child-a", email: "child@example.com" }, "save-email-unavailable", "запазим имейла"],
+  [{ action: "unlink-email", childId: "child-a" }, "remove-email-unavailable", "премахнем имейла"],
+ ] as const;
+ for (const [body, issue, text] of actions) {
+  reset(); state.children = [{ id: "child-a", nickname: "Лисиче" }]; state.databaseError = { code: "503", message: "Database offline" };
+  assert.equal(location(await profile(request(body))), `https://maths.example/profiles?error=${issue}`);
+  const doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({ error: issue }) }));
+  assert.ok(doc.querySelector('[role="alert"]')?.textContent?.includes(text));
+  assert.ok(doc.querySelector("details[open]"));
+ }
+});

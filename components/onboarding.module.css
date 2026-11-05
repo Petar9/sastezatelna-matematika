@@ -1,26 +1,20 @@
 .shell { min-height: 100dvh; padding: 24px 20px; background: radial-gradient(ellipse at 50% 0, var(--sea), var(--background) 75%); color: var(--foreground); font: 18px/1.5 var(--font-sans3), sans-serif; }
 .content { width: 100%; max-width: 480px; min-width: 0; margin: 0 auto; }
 .brand { display: block; width: fit-content; margin: 0 auto 24px; font-size: 20px; font-weight: 700; text-align: center; color: inherit; text-decoration: none; }
-.island { position: relative; padding: 24px 28px 28px; border: 1px solid var(--border); border-radius: 32px; background: var(--card); box-shadow: 0 5px 0 #c9ddd1, 0 18px 45px #426b6710; text-align: center; overflow-wrap: anywhere; }
+.island { position: relative; padding: 24px 28px 28px; border: 1px solid var(--border); border-radius: var(--radius-island); background: var(--card); box-shadow: var(--shadow-island); text-align: center; overflow-wrap: anywhere; }
 .mascot { width: 88px; height: 94px; margin: 0 auto 12px; }
 .mascot svg { display: block; width: 100%; height: 100%; }
 .eyebrow { margin: 0 0 8px; color: var(--muted); font-size: 15px; }
 .island h1 { margin: 0; font-size: clamp(26px, 4vw, 32px); line-height: 1.15; font-weight: 700; }
 .intro { margin: 14px 0 22px; color: var(--muted); }
 .form { display: grid; gap: 10px; text-align: left; }
-.primary, .profile { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 50px; padding: 10px 16px; font: inherit; font-weight: 700; border-radius: 14px; cursor: pointer; overflow-wrap: anywhere; }
-.primary { border: 2px solid var(--primary); background: var(--primary); color: white; box-shadow: 0 4px 0 #0f4d47; transition: background 120ms, transform 120ms; }
-.primary:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
-.primary:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #0f4d47; }
-.primary:disabled { opacity: .55; cursor: default; }
+.primary, .profile { width: 100%; }
 .note { margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.45; }
 .form .note { margin: 0 0 8px; }
 .label { font-weight: 600; }
-.input { box-sizing: border-box; min-width: 0; width: 100%; height: 50px; padding: 10px 12px; border: 2px solid #93b2ac; border-radius: 12px; background: white; color: var(--foreground); font: inherit; }
-.input[aria-invalid="true"] { border-color: #a9513e; }
-.notice { margin: 0 0 20px; padding: 12px; border: 1px solid #dfc585; border-radius: 12px; background: var(--celebration); color: #70541f; text-align: left; font-size: 16px; }
+.notice { margin: 0 0 var(--space-5); text-align: left; }
 .profiles { display: grid; gap: 12px; }
-.profile { justify-content: space-between; text-align: left; border: 2px solid #b8d0c4; background: #edf5ec; color: var(--foreground); }
+.profile { justify-content: space-between; text-align: left; background: var(--success-surface); }
 .profile:hover { background: #dfedde; }
 .profile span { flex-shrink: 0; color: var(--primary); }
 .loginSettings { text-align: left; font-size: 15px; }
@@ -33,7 +27,7 @@
 .home { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; color: var(--muted); font-size: 16px; }
 .footer { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 20px; margin-top: 22px; font-size: 15px; color: var(--muted); }
 .footer a, .textButton { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
-.textButton { background: transparent; border: 0; padding: 8px; font: inherit; text-decoration: underline; cursor: pointer; }
+.textButton { padding: var(--space-2); font: inherit; text-decoration: underline; }
 .shell a:focus-visible, .shell button:focus-visible, .shell input:focus-visible, .shell summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
 @media (max-width: 540px) {
  .shell { padding: 20px 16px; }

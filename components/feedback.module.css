@@ -1,0 +1,6 @@
+.link { padding: var(--space-3) 0; text-decoration: underline; text-underline-offset: 4px; font: inherit; }
+.help { color: var(--muted); font-size: var(--text-small); line-height: var(--line-body); }
+.message { margin: var(--space-4) 0; }
+
+.confirmation { display: grid; justify-items: start; gap: var(--space-4); }
+.error { margin-bottom: var(--space-4); }
