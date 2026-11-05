@@ -279,5 +279,6 @@ test("direct skill practice earns Doctor and distinct-skill Professor with retai
  assert.equal(h.record.awards.filter(a=>a.rank==="professor").length,0,"One repeated skill cannot earn Professor");
  h.go({type:"selectTopic",topicId:topic.id,skillId:topic.skills[0]!.id});h.next();h.correct();
  assert.equal(h.record.awards.filter(a=>a.rank==="professor").length,1);
- assert.equal(h.view().reward!.rank,"professor");assert.equal(h.view().gold,335);
+ // The last fresh challenge is now a reviewed hard 2023 original (15 gold).
+ assert.equal(h.view().reward!.rank,"professor");assert.equal(h.view().gold,340);
 });

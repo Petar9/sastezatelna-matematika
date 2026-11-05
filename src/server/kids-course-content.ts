@@ -1,3 +1,4 @@
+import { active2023Rows, original2023 } from "./kids-course-2023.ts";
 import { mathsDifficulty } from "./problem-difficulty.ts";
 import { mathsIntroductions } from "./kids-teaching-introductions.ts";
 import { workedSolution } from "./kids-worked-solutions.ts";
@@ -308,6 +309,14 @@ for (const [skillId, pool] of pools) {
   p.solution = workedSolution(p, expansionRows.find(row => row.id === skillId)?.family);
   p.difficulty = mathsDifficulty(p);
  }
+}
+// Append archival problems without changing existing pool indexes or skill identities.
+for (const row of active2023Rows) {
+ const pool = pools.get(row.skillId);
+ if (!pool || !courseTopics.find(topic => topic.id === row.topic)?.skills.some(skill => skill.id === row.skillId)) {
+  throw new Error(`Invalid 2023 skill mapping: ${row.id}`);
+ }
+ pool[row.difficulty === "hard" ? "hard" : "core"].push(original2023(row));
 }
 export const kidsCourseContent: KidsCourseContent = {
 	version: "bg4-2024-2026-v2", topics: courseTopics, introductions: mathsIntroductions, concepts: learningConcepts, objectiveMap,

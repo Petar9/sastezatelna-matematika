@@ -11,7 +11,7 @@ const competition = competitions.find(item => item.id === DEFAULT_COMPETITION_ID
 export const kidsOutcomeLabels: Record<KidsOutcome, string> = {
 	independent: "Верен отговор",
 	hinted: "Верен отговор с помощ",
-	incorrect: "Още не се получи",
+	incorrect: "Грешен отговор",
 	revealed: "Да разгледаме решението",
 };
 

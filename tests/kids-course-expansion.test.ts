@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { applyCourseAction, courseView, migrateKidsCourse, newKidsCourse } from "../src/core/kids-course.ts";
 import type { KidsCourse, KidsCourseContent } from "../src/core/kids-course.ts";
 import { kidsCourseContent as content } from "../src/server/kids-course-content.ts";
+import { isCompetitionProblem } from "../src/core/kids-selection.ts";
 import { expansionRows } from "../src/server/kids-course-expansion.ts";
 import { createKidsCourseStore } from "../src/store/kids-course.ts";
 
@@ -54,6 +55,7 @@ test("fresh practice excludes original tasks even when their wording changes", (
   const [pattern,parameter]=original,seen=new Set<number>();
   for(const hard of [false,true]) for(let i=hard?0:1;;i++) {
    const p=content.problem(row.id,i,hard); if(!p)break;
+   if(isCompetitionProblem(p))continue;
    const value=Number(p.text.match(pattern)![1]);
    assert.notEqual(value,parameter,p.id); assert.ok(!seen.has(value),p.id); seen.add(value);
   }

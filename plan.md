@@ -559,3 +559,30 @@ Homepage and first profile update, 2026-11-04:
 - Verification: all 190 tests passed, including the three-way dropdown on each competition dashboard, hosted availability, separate history and invalid-ID rejection. Typecheck, ESLint, production build, pixel-preserving image generation, private-bundle audit and diff checks passed. The dropdown was exercised for all three dashboards in UI tests. Chrome automation is unavailable, so a signed-in live visual check could not be completed.
 - Release: `d9e8730` pushed to `main`; Vercel deployment `7GcKNWSMVPqQxZLATDo41CkhnT88` reported success. Production URLs for all three competition IDs, `/welcome` and `/login` returned HTTP 200 without an application-error screen. These unauthenticated checks validate availability, not signed-in dashboard rendering. No learner data was changed.
 - Coordinator: gpt-6.1-sol, high reasoning; one agent.
+
+
+## Математика за всеки 2023 source expansion - approved 2026-11-04
+
+- Coordinator: gpt-6.1-sol, high reasoning. Bounded content/answer review worker: gpt-6.1-sol, high; source-crop worker: gpt-6-luna, medium. Coordinator owns integration, final tests and acceptance; no deployment in this slice.
+- [x] Retain the existing 17 islands, 78 skill IDs, content version, learning model and saved history; append real 2023 tasks to existing pools. Approved row-to-island grouping is retained.
+- [x] Prepare all 22 full originals as 26 tasks/subconditions from the private problem and official solution PDFs. Independently verify all answers and three concrete worked parts; preserve original statements/options and ordered multi-answer fields.
+- [x] Integrate six original figure crops through the pixel-preserving image pipeline; keep PDFs and full transcripts private.
+- [x] Preserve 10/15 problem gold, 5/10/20 skill milestones, shared parent entitlement for Module 2 parts, old paid amounts and saved island targets. No reward redesign or learner-data writes.
+- [x] Verify catalogue reachability with exhausted old cursors, retained pool indexes and saved work, progressive hints/drafts, ordered subanswers and source-statement safety.
+- [ ] Resolve M1-06 and M1-17 clarifications with the owner. Their original rows/official answers are prepared but excluded from selection and grading until resolved; 24 new rows are currently active, bringing the collection to 102 active tasks/subconditions.
+- Transcript deferred by owner: supplied video aYay8vowt3w has no Bulgarian captions. No invented transcript or tutor-derived explanation; official PDFs and independent solving support the added solutions.
+- Review record: [docs/maths-2023-review.md](docs/maths-2023-review.md). Final build and browser evidence follows below. Human content review/publication remain separate.
+
+- Final verification: 194/194 tests, TypeScript, ESLint, production build, private-bundle audit and diff checks passed. The image generator verified decoded-pixel equality for all 70 images.
+- Refreshed the owner preview at http://127.0.0.1:3002 with the new build. Saved local course history was byte-for-byte unchanged before/after restart. An isolated temporary learner record served the 2023 M1-08 task, its source figure, a multipart original-source page and updated About copy successfully over HTTP.
+- Browser automation was attempted through Chrome CLI and CUA but both failed at the browser-control layer; desktop/mobile visual and interactive browser checks remain unverified. Progressive help, drafts, selection, source safety and history compatibility passed automated tests. No push or deployment performed.
+
+
+## About copy and 2023 content release - approved 2026-11-05
+
+- Coordinator: gpt-6.1-sol, high reasoning; one agent. Implement the approved Bulgarian About copy as a short introduction and three responsive competition cards, preserving the owner-approved Математика за всеки paragraph verbatim.
+- Replace the shared incorrect-answer label with “Грешен отговор”; retain grading, awards and saved history. Teacher review is described as ongoing, as confirmed by the owner. Use the owner-requested “последните четири години”.
+- Release includes the already approved 2023 content slice above. Exclude private files and unrelated local artifacts. No database migration or progress import is needed.
+- Local verification: 194/194 tests, TypeScript, ESLint, production build, private-bundle audit and diff checks passed. All 70 image assets retained identical decoded pixels. All 13 private history/backup files remained byte-for-byte unchanged.
+- Visually checked the isolated production About page at 1440px and 390px: three columns on desktop, stacked cards on mobile, no horizontal overflow. The owner-approved competition paragraph is unchanged. Chrome control bridge failed; isolated headless Chrome provided successful screenshots and layout measurements.
+- GitHub publication and Vercel production verification are pending.

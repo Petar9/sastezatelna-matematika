@@ -527,7 +527,7 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
 		view.stage = "lesson"; view.lesson = { title: skill.title, steps: skill.lesson.slice(0, work.lessonStep + 1), total: skill.lesson.length, illustration: skill.illustration };
 	} else {
 		view.stage = "question";
-		view.task = { goldReward: problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, sourceYear: isCompetitionProblem(p) ? p.provenance?.year : undefined, sourceProblemId: isCompetitionProblem(p) || p.archive ? p.archive ? `${p.archive.sourceId}:original` : p.id : undefined, options: p.options,
+		view.task = { goldReward: problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, sourceYear: isCompetitionProblem(p) ? p.provenance?.year : undefined, sourceProblemId: isCompetitionProblem(p) || p.archive ? p.archive?.kind === "scaffold" ? `${p.archive.sourceId}:original` : p.id : undefined, options: p.options,
 			fields: (a.partIndex !== undefined ? [p.fields[a.partIndex]!] : p.fields).map(f => ({ label: f.label })), figure: p.figure,
    ...(a.partIndex !== undefined ? { part: { index: a.partIndex + 1, total: p.fields.length, completed: !!a.partOutcome && !a.outcome } } : {}),
    ...(a.partOutcome && !a.outcome ? { outcome: a.partOutcome, answers: [a.answers![a.partIndex!]!], explanation: [`${p.fields[a.partIndex!]!.label}: ${p.fields[a.partIndex!]!.answer}.`] } : {}),

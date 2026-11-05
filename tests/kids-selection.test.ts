@@ -147,7 +147,7 @@ test("original statement lookup whitelists content and cannot expose solutions, 
  for (const content of [kidsCourseContent, olympiadCourseContent]) {
   for (const topic of content.topics) for (const skill of topic.skills) for (const p of catalogue(content, skill.id)) {
    const original = originalStatement(content, p.id);
-   const expected = p.archive ? p.archive.kind === "original" : p.id.endsWith(":original");
+   const expected = p.archive ? p.archive.kind !== "scaffold" : p.id.endsWith(":original");
    assert.equal(!!original, expected, p.id);
    if (original) { assert.deepEqual(Object.keys(original).sort(), ["figure", "id", ...(p.options ? ["options"] : []), "source", "text"]); assert.equal(original.text, p.text); assert.deepEqual(original.options, p.options); }
   }

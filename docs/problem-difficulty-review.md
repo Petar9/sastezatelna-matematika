@@ -6,9 +6,11 @@ Ordinary distinct successful problems pay 10 gold; reviewed hard ones pay 15 (×
 
 | Competition | Gradable originals | Ordinary | Hard |
 | --- | ---: | ---: | ---: |
-| Математика за всеки | 78 | 17 | 61 |
+| Математика за всеки | 102 | 25 | 77 |
 | Олимпиада | 11 | 1 | 10 |
 | НВО | 100 | 82 | 18 |
+
+The Математика за всеки count includes gradable subconditions, not just full source originals. The 2023 addition has 22 full originals / 26 prepared rows; 24 rows are active and M1-06/M1-17 remain excluded pending clarification approval.
 
 The ambiguous 2023 Olympiad problem 3 remains excluded from grading. Its recorded hard rating does not enable it. Full Olympiad originals can be in a challenge selection pool while still ordinary for rewards (2024 problem 1). NVO has hard problems earlier than its final question, while some later questions remain direct applications.
 
@@ -221,3 +223,37 @@ Olympiad: 16 of 60 authored exercises are hard. Hard families combine ratios, di
 - Source/part and identical-template entitlements must have consistent rates; audit all canonical catalogues.
 - Existing per-child island targets stay fixed; newly created targets sum weighted unique entitlements. The wallet may continue earning beyond a fixed target.
 - Verify ordinary/hard reward previews, supported success, reveal, repeat prevention, mixed-ledger JSON reload and no reward replay. Use disposable learners; do not grade against real child history.
+
+
+## Математика за всеки 2023 addition
+
+Ratings are editorial and source-based; no change to reward rates, old paid amounts or selection balance. Module 2 parts share their parent source entitlement. Both unresolved rows retain ratings for review but cannot be selected or graded.
+
+| Row | Rating | Status | Reason |
+| --- | --- | --- | --- |
+| 2023-M1-01 | standard | active | Разряден запис и сравняване с две съседни степени на 10. |
+| 2023-M1-02 | standard | active | Две кратки вериги от обратни действия и сравнение. |
+| 2023-M1-03 | hard | active | Изключване на по-малките кандидати и съчетаване на четност, различни цифри и сбор. |
+| 2023-M1-04 | hard | active | Съчетава брой на цифрите, междинните места и срещанията на една цифра. |
+| 2023-M1-05 | standard | active | Намиране на страни на квадрати и изваждане на две лица. |
+| 2023-M1-06 | hard | pending clarification | Изисква долна граница и пример, който я достига. |
+| 2023-M1-07 | hard | active | Изключване на възможности по няколко зависимости за реда. |
+| 2023-M1-08 | hard | active | Свързване на размери от завъртени еднакви части и преминаване от лице към обиколка. |
+| 2023-M1-09 | standard | active | Две последователни премахвания на еднакви покупки. |
+| 2023-M1-10 | standard | active | Намиране на възраст от отношение и разлика, после промяна на общата възраст. |
+| 2023-M1-11 | standard | active | Замяна на два вида предмети по известен общ брой и сбор. |
+| 2023-M1-12 | hard | active | Извеждане на вътрешната страна от обща дължина и превръщане на мерни единици за лице. |
+| 2023-M1-13 | hard | active | Съчетава допустим часов запис, разместване на повтаряща се цифра и преминаване през полунощ. |
+| 2023-M1-14 | hard | active | Пълно изброяване по брой избрани клечки без повторно броене на размествания. |
+| 2023-M1-15 | hard | active | Свързва обединение на групи с част от едната група. |
+| 2023-M1-16 | standard | active | Разпознаване на един и същ общ сбор и едно обратно действие. |
+| 2023-M1-17 | hard | pending clarification | Доказване кои подредби са възможни и броене по седем групи цифри. |
+| 2023-M1-18 | standard | active | Две последователни деления според отношение и равен брой видове. |
+| 2023-M1-19 | hard | active | Най-лош случай с пълно изброяване на най-малките сборове и доказване на гаранцията. |
+| 2023-M1-20 | hard | active | Разпознаване на равен брой преходи между две групи в затворен кръг. |
+| 2023-M2-1a | hard | active | Подусловието е с постоянна стъпка и двойки с равен сбор; наследява hard от целия оригинал M2-1, чиито б) и в) изискват зависими обратни действия и доказване на минимум. |
+| 2023-M2-1b | hard | active | Две зависими връщания на част от остатък, недостиг на място и последващо преместване. |
+| 2023-M2-1c | hard | active | Доказва невъзможност за двата по-малки броя и построява допустим оптимален пример. |
+| 2023-M2-2a | hard | active | Свързва общи размери и обиколки, после проследява сложна външна граница. |
+| 2023-M2-2b | hard | active | Пълно изследване на цели размери под две свързани ограничения и намиране на общо лице. |
+| 2023-M2-2c | hard | active | Съчетава независимо броене с зависими избори според съседството на правоъгълниците. |

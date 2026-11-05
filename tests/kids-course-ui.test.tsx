@@ -220,7 +220,7 @@ test("feedback celebrates correct answers while retaining assisted and incorrect
    await act(async()=>primary(h.host,"Провери отговора").click());
    assert.equal(h.record.attempts[0]!.outcome,outcome);
    const feedback=h.host.querySelector('[role="status"] h3[tabindex="-1"]')!;
-   assert.equal(feedback.textContent,outcome==="independent"?"Верен отговор":outcome==="hinted"?"Верен отговор с помощ":"Още не се получи");
+   assert.equal(feedback.textContent,outcome==="independent"?"Верен отговор":outcome==="hinted"?"Верен отговор с помощ":"Грешен отговор");
    assert.equal(h.host.querySelectorAll("[data-gold-gain]").length,1);
    assert.ok(!h.host.querySelector("[data-gold-gain]")!.textContent!.includes("Първо откритие!"));
    primary(h.host,outcome==="independent"?"Следваща задача":"Продължи");
