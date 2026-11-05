@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { SkipChildEmailForm } from "./skip-child-email-form";
 import { ProfileNameForm } from "./profile-name-form";
 import { FeedbackButton } from "./feedback";
 import { KidsOtter } from "./kids-otter";
@@ -60,7 +61,7 @@ const profileMessages: Record<ProfileIssue, string> = {
 function NicknameForm({ issue }: { issue?: ProfileIssue }) {
   return <form action="/api/profiles" method="post" className={o.form}>
     <input type="hidden" name="action" value="create" />
-    <label className={o.label} htmlFor="nickname">Твоят прякор</label>
+    <label className={o.label} htmlFor="nickname">Име на детето</label>
     <Input id="nickname" name="nickname" required minLength={1} maxLength={40}
       autoComplete="off" spellCheck={false} aria-describedby="nickname-help"
       aria-invalid={issue === "nickname" ? true : undefined} />
@@ -96,14 +97,10 @@ export function ChildProfiles({ children, issue, setup, status }: { children: Ch
     <p className={o.intro}>По желание добави Google имейла на {setupChild.nickname}, за да влиза самостоятелно. Можеш да го добавиш и по-късно.</p>
     {issue && <Message className={o.notice} tone="warning" role="alert">{profileMessages[issue]}</Message>}
     <EmailForm child={setupChild} setup issue={issue} />
-    <form action="/api/profiles" method="post">
-      <input type="hidden" name="action" value="select" />
-      <input type="hidden" name="childId" value={setupChild.id} />
-      <Button type="submit" variant="quiet" className={o.textButton}>Не сега</Button>
-    </form>
+    <SkipChildEmailForm childId={setupChild.id} />
   </OnboardingFrame>;
   return <OnboardingFrame footer={<ProfileFooter />}>
-    <h1>{firstVisit ? "Как да те наричаме?" : "Кой ще открива днес?"}</h1>
+    <h1>{firstVisit ? "Име на детето:" : "Кой ще открива днес?"}</h1>
     <p className={o.intro}>{firstVisit ? "Видрата те очаква. Да направим ново откритие!" : "Избери своя профил и продължи приключението."}</p>
     {issue && <Message className={o.notice} tone="warning" role="alert">{profileMessages[issue]}</Message>}
     {status && <Message className={o.notice} tone="success" role="status">{status === "saved" ? "Имейлът е запазен." : status === "renamed" ? "Името е запазено." : "Самостоятелният вход е премахнат."}</Message>}

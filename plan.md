@@ -61,7 +61,7 @@ Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
 ## Stage 4 - landing page and invitation requests
 
 - Create a Bulgarian parent-facing page matching the app with accurate supported-content descriptions. Keep the large screenshot and personal-data section removed. Use a lightweight decorative island journey with the existing otter, cream surfaces, dark-teal shared actions and gold accents.
-- Include one Заяви покана form and a discreet Вход link. Collect only parent email; show “Ще използваме имейла само за поканата.” without a separate consent checkbox or hidden substitute. Preserve email validation, duplicate handling and the existing rate limit.
+- Include one secondary Заяви покана form and a prominent primary Вход button (hierarchy updated by owner approval on 2026-11-05). Collect only parent email; show “Ще използваме имейла само за поканата.” without a separate consent checkbox or hidden substitute. Preserve email validation, duplicate handling and the existing rate limit.
 - Requests are private and manually reviewed. Submission grants no access. Keep additional families waiting until the owner separately approves expansion beyond five children.
 - Defer the public contact/personal-data section at the owner’s request. Invitation submissions remain private; this owner-approved email-only flow supersedes the earlier checkbox requirement.
 - Acceptance: parents understand the app, can request an invitation and receive confirmation; applicants remain private and cannot self-enrol.
@@ -729,3 +729,18 @@ Production release evidence, 2026-11-05:
 - Production home, About and login respond successfully. The new Progress route renders its loading state and redirects signed-out visitors to login; profiles redirect to login and the learning API returns 401 without authentication.
 - Development catalogue, private learner data URL and materials path return 404. Personalized responses retain no-store. No production learner commands or database edits were made.
 - Final SHA-256 comparison confirms all 13 original private history/backup files remain unchanged. Authenticated family and physical-device smoke checks remain with the owner.
+
+
+## Landing entry and onboarding feedback - approved 2026-11-05
+
+Status: implementation verified; approved for production rollout.
+
+- Promote “Вход” to the shared primary button; keep “Заяви покана” as the outlined secondary action.
+- First profile heading: “Име на детето:”; field label: “Име на детето”. Nicknames remain accepted with the existing 1–40 character validation.
+- Selecting a child uses the existing learning-only account context, removing the parent upsert and child-login metadata read from this POST. Verified Google authentication, parent role and active owned-child checks remain required.
+- Optional-email “Не сега” retains native POST/303 navigation, immediately shows “Зареждане…”, prevents duplicate submissions and resets after back navigation. No migration or learner-history changes.
+
+Verification, 2026-11-05:
+- All 242 tests pass, including owned-child selection, expired/child-account rejection, immediate skip pending state, duplicate prevention and back-navigation reset; typecheck, lint and production build pass.
+- Browser checks cover landing, first profile and optional email at 1280, 390 and 320 px with reduced motion: no horizontal overflow, primary login hierarchy, visible focus and no runtime errors. Development previews cannot submit profile actions.
+- All 13 private learner history/backup file hashes remain unchanged. Selection removes two sequential database operations; live authenticated end-to-end latency still requires the owner's smoke test.

@@ -30,7 +30,8 @@ const request = (body: Record<string, string>) => new Request("https://maths.exa
 test("first visit has one nickname field and a direct adventure action; existing profiles keep setup secondary", async () => {
   reset();
   let doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({}) }));
-  assert.equal(doc.querySelector("h1")?.textContent, "Как да те наричаме?");
+  assert.equal(doc.querySelector("h1")?.textContent, "Име на детето:");
+  assert.equal(doc.querySelector('label[for="nickname"]')?.textContent, "Име на детето");
   assert.equal(doc.querySelectorAll('input:not([type="hidden"])').length, 1);
   assert.equal(doc.querySelector('input[name="nickname"]')?.getAttribute("maxLength"), "40");
   assert.equal(doc.querySelector('form[action="/api/profiles"] button')?.textContent, "Към приключението →");
@@ -87,6 +88,7 @@ test("profile creation saves trimmed nickname and selection cookie; invalid inpu
   reset();
   const response = await profile(request({ action: "create", nickname: "  Лисиче  " }));
   assert.equal(location(response), "https://maths.example/profiles?setup=created-child");
+  assert.deepEqual(state.contextOptions, [{ learningOnly: false }]);
   assert.deepEqual(state.inserted, { parent_id: "parent-a", nickname: "Лисиче" });
   const cookie = response.headers.get("set-cookie")!;
   for (const value of ["maths_child=created-child", "HttpOnly", "Secure", "SameSite=lax"]) assert.ok(cookie.includes(value));
@@ -109,6 +111,7 @@ test("profile switching accepts owned IDs only and expired parent login cannot s
   state.parentError = new KidsError("Expired", 401);
   response = await profile(request({ action: "select", childId: "child-a" }));
   assert.equal(location(response), "https://maths.example/login");
+  assert.deepEqual(state.contextOptions, [{ learningOnly: true }, { learningOnly: true }, { learningOnly: true }]);
   assert.equal(response.headers.get("set-cookie"), null);
 });
 

@@ -9,7 +9,7 @@ export function Landing({request}:{request?:string}){
  return <main className={l.shell}><div className={l.content}>
   <header className={l.header}>
    <strong className={l.brand}>Състезателна математика</strong>
-   <ButtonLink variant="quiet" className={l.login} href="/login">Вход</ButtonLink>
+   <ButtonLink variant="primary" className={l.login} href="/login">Вход</ButtonLink>
   </header>
   <section className={l.hero} aria-labelledby="landing-title">
    <div className={l.heroCopy}>
@@ -21,7 +21,7 @@ export function Landing({request}:{request?:string}){
       <label className={l.email} htmlFor="invitation-email">Имейл на родител</label>
       <div className={l.formFields}>
        <Input id="invitation-email" name="email" type="email" maxLength={254} required autoComplete="email" aria-describedby={error?"invitation-note invitation-error":"invitation-note"} aria-invalid={request==="invalid"?true:undefined}/>
-       <Button className={l.button} type="submit">Заяви покана</Button>
+       <Button variant="secondary" className={l.button} type="submit">Заяви покана</Button>
       </div>
       <p className={l.note} id="invitation-note">Ще използваме имейла само за поканата.</p>
      </form>}

@@ -75,3 +75,5 @@ Use short transitions (`--motion-fast`) for controls. Progress uses its existing
 ## Migration boundary
 
 Shared buttons, fields, messages, badges and dialog now serve landing, onboarding/profiles, feedback and generic learning actions. Remaining specialist map/answer/illustration styles are intentional, not duplicate generic APIs. Migrate remaining legacy generic controls when their screens are changed; do not rebuild unrelated screens or educational state just to expand this library. Follow test feedback before adding more abstraction.
+
+Onboarding: `SkipChildEmailForm` keeps native POST navigation for the optional email step, announces “Зареждане…” and blocks duplicate submissions while pending; `pageshow` restores the action after back navigation. The catalogue includes first-profile and optional-email previews, with submissions prevented. Landing uses primary “Вход” and secondary “Заяви покана”.

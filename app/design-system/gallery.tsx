@@ -17,7 +17,7 @@ import k from "@/components/kids.module.css";
 import s from "./gallery.module.css";
 
 const leaf: LearningSkillView = { id: "preview", title: "Обратни действия", prerequisites: [], status: "practising", milestones: { started: true, firstCorrect: "hinted" }, evidence: { independent: 0, hinted: 1, incorrect: 0, revealed: 0 }, confirmation: { earned: false, streak: 0, target: 2, revisit: false } };
-const views = { components: "Компоненти", landing: "Начална страница", login: "Вход", profiles: "Профили", learning: "Учебен екран", progress: "Напредък" };
+const views = { components: "Компоненти", landing: "Начална страница", login: "Вход", profiles: "Профили", firstProfile: "Нов профил", childEmail: "Имейл на детето", learning: "Учебен екран", progress: "Напредък" };
 export function DesignSystemGallery() {
  const [view, setView] = useState<keyof typeof views>("components");
  const [notice, setNotice] = useState("");
@@ -33,6 +33,8 @@ export function DesignSystemGallery() {
    {view === "landing" && <Landing />}
    {view === "login" && <LoginWelcome issue="cancelled" />}
    {view === "profiles" && <ChildProfiles children={[{ id: "preview-one", nickname: "Мореплавател" }]} issue="email" />}
+   {view === "firstProfile" && <ChildProfiles children={[]} />}
+   {view === "childEmail" && <ChildProfiles children={[{ id: "preview-one", nickname: "Мореплавател" }]} setup="preview-one" />}
    {view === "components" && <main className={s.catalog}>
     <section className={s.section}><h2>Действия</h2><div className={s.row}><Button onClick={() => setNotice("Действието работи.")}>Продължи</Button><Button variant="secondary">Подсказка</Button><Button variant="quiet">← Начало</Button><Button disabled>Провери отговора</Button><Button loading>Изпращаме…</Button><ButtonLink href="#fields">Към полетата</ButtonLink></div><p>Дълъг надпис:</p><Button>Продължи към следващата задача от приключението</Button></section>
     <section className={s.section} id="fields"><h2>Полета</h2><form className={s.form}><label htmlFor="preview-email">Имейл на родител</label><Input id="preview-email" type="email" required aria-describedby="preview-email-help" /><p id="preview-email-help">Ще използваме имейла само за поканата.</p><label htmlFor="preview-invalid">Твоят прякор</label><Input id="preview-invalid" aria-invalid="true" aria-describedby="preview-error" /><Message id="preview-error" tone="error" inline>Напиши прякор от 1 до 40 знака.</Message><label htmlFor="preview-disabled">Неактивно поле</label><Input id="preview-disabled" disabled value="Мореплавател" /><label htmlFor="preview-select">Състезание</label><Select id="preview-select" defaultValue="all"><option value="all">Всички състезания</option><option value="long">Примерно състезание с дълго българско име</option></Select><label htmlFor="preview-select-disabled">Неактивен избор</label><Select id="preview-select-disabled" disabled><option>Всички състезания</option></Select><label htmlFor="preview-select-invalid">Избор с грешка</label><Select id="preview-select-invalid" aria-invalid="true" aria-describedby="preview-select-error" defaultValue=""><option value="">Избери състезание</option><option value="one">Примерно състезание</option></Select><Message id="preview-select-error" tone="error" inline>Избери състезание.</Message><label htmlFor="preview-message">Съобщение</label><Textarea id="preview-message" rows={3} /><Button type="submit">Заяви покана</Button></form></section>

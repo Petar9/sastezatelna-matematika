@@ -1,6 +1,7 @@
 import { KidsError } from "../../src/core/kids.ts";
 export const state = {
   deployment: "hosted",
+  contextOptions: [] as { learningOnly?: boolean }[],
   role: "parent" as "parent" | "child",
   rpcCall: undefined as unknown,
   deleteFilters: [] as [string, unknown][],
@@ -18,7 +19,7 @@ export const state = {
   databaseError: null as null | { code: string; message: string },
 };
 export function reset() {
-  Object.assign(state, { deployment: "hosted", role: "parent", rpcCall: undefined, deleteFilters: [], children: [], parentError: undefined, authError: false, exchangeError: false,
+  Object.assign(state, { contextOptions: [], deployment: "hosted", role: "parent", rpcCall: undefined, deleteFilters: [], children: [], parentError: undefined, authError: false, exchangeError: false,
     throws: false, signedOut: false, oauthOptions: undefined, inserted: undefined, updated: undefined, updateFilters: [], updateMissing: false, databaseError: null });
 }
 export const childCookie = "maths_child";
@@ -32,7 +33,8 @@ export async function authClient() {
     async signOut() { state.signedOut = true; },
   } };
 }
-export async function accountContext() {
+export async function accountContext(options: { learningOnly?: boolean } = {}) {
+  state.contextOptions.push(options);
   if (state.parentError) throw state.parentError;
   const db = {
     rpc(name: string, args: unknown) {

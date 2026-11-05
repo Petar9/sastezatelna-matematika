@@ -9,8 +9,8 @@ export async function POST(request: Request) {
   let failedAction = "unavailable";
   const linkRetry = (query: string) => retry(`${query}${setup ? `&setup=${encodeURIComponent(setup)}` : ""}`);
   try {
-    const parent = await accountContext();
     const body = await request.formData();
+    const parent = await accountContext({ learningOnly: body.get("action") === "select" });
     if (body.get("action") === "rename") {
       const json = request.headers.get("accept")?.includes("application/json");
       const fail = (issue: string, message: string, status: number) => json ? Response.json({ message }, { status }) : retry(`error=${issue}`);

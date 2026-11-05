@@ -61,6 +61,8 @@ test("landing has one parent email form before decorative artwork with connected
  assert.equal(form.querySelector("label")?.getAttribute("for"),input.id);
  assert.equal(doc.querySelector(`#${input.getAttribute("aria-describedby")}`)?.textContent,"Ще използваме имейла само за поканата.");
  assert.equal(form.querySelector("button")?.textContent,"Заяви покана");
+ assert.ok(form.querySelector("button")?.classList.contains("secondary"));
+ assert.ok(doc.querySelector('a[href="/login"]')?.classList.contains("primary"));
  assert.equal(doc.querySelector('input[name="consent"]'),null);
  const html=doc.body.innerHTML;
  assert.ok(html.indexOf("<form")<html.indexOf('aria-hidden="true"'));
