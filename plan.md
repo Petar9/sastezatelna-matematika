@@ -706,7 +706,7 @@ Acceptance evidence:
 
 ## Third-hint reward rule and source consistency - approved 2026-11-05
 
-Status: implemented; final verification and combined production publication in progress.
+Status: implemented, verified locally and published to production on 2026-11-05.
 
 - Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and release verification.
 - [x] Remove “Можеш да продължиш и без нея.” from the review prompt.
@@ -715,7 +715,7 @@ Status: implemented; final verification and combined production publication in p
 - [x] Unify original and authored source labels across all three competitions using actual original-source metadata and accessible source links.
 - [x] Record the rules in key decisions and the competition checklist. No database migration or production learner edit.
 - [x] Run combined automated checks and isolated browser verification.
-- [ ] Publish all approved pending progress, navigation, performance and current changes to GitHub/Vercel and verify production.
+- [x] Publish all approved pending progress, navigation, performance and current changes to GitHub/Vercel and verify production.
 
 Acceptance evidence:
 - 241/241 tests, TypeScript, ESLint, production build, private deployment trace audit and git diff --check passed.
@@ -723,3 +723,9 @@ Acceptance evidence:
 - Final calendar browser checks verified the supplied two-day split, 290 monthly gold, compact skill summaries, month/filter/keyboard controls and shared Select states without horizontal overflow at 1440, 390 and 320px.
 - All 13 original learner-history and backup files retain their baseline SHA-256 hashes. Only disposable fixtures received learning commands; no database migration or production learner edit. Previously earned gold remains unchanged.
 - Hosted parent/child Google sessions and physical-phone behavior remain owner smoke checks after publication.
+
+Production release evidence, 2026-11-05:
+- GitHub main release commit `ddd4b75ab9be995447522e3cc4af7504ac5fd60a`; Vercel reported successful completion for deployment `iC51CEhdNdpAZUpnARfhtmaV5JwK`. Production: https://sastezatelna-matematika.vercel.app/ .
+- Production home, About and login respond successfully. The new Progress route renders its loading state and redirects signed-out visitors to login; profiles redirect to login and the learning API returns 401 without authentication.
+- Development catalogue, private learner data URL and materials path return 404. Personalized responses retain no-store. No production learner commands or database edits were made.
+- Final SHA-256 comparison confirms all 13 original private history/backup files remain unchanged. Authenticated family and physical-device smoke checks remain with the owner.
