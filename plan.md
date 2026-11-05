@@ -733,7 +733,7 @@ Production release evidence, 2026-11-05:
 
 ## Landing entry and onboarding feedback - approved 2026-11-05
 
-Status: implementation verified; approved for production rollout.
+Status: released and verified on production.
 
 - Promote “Вход” to the shared primary button; keep “Заяви покана” as the outlined secondary action.
 - First profile heading: “Име на детето:”; field label: “Име на детето”. Nicknames remain accepted with the existing 1–40 character validation.
@@ -747,3 +747,9 @@ Verification, 2026-11-05:
 
 - Follow-up owner request: remove “Тестваме с група до 5 деца.” from the public landing and delete its unused styles; the invitation process remains unchanged.
 - Follow-up verification: six invitation tests, production build and responsive browser checks pass after the sentence removal. Initial UI/onboarding release `39f20e5` is successful on Vercel; the copy-removal follow-up is included in this rollout.
+
+Production evidence, 2026-11-05:
+- Application release `a83210e` succeeded on Vercel: https://vercel.com/petar-s-projects33/sastezatelna-matematika/Do5uzkghCPPDnpFbLfC8X4ZMKdCV .
+- Live home at 1280 and 320 px: primary 48 px login, outlined invitation, no horizontal overflow and no pilot-group sentence. Keyboard focus is visible, login opens correctly and Chrome reports no runtime errors.
+- Development gallery returns 404, signed-out profiles redirect to login and the learning API returns 401/no-store. No production learner actions or data edits were performed; all 13 original private file hashes remain unchanged.
+- Authenticated “Не сега” latency requires the owner's smoke test; the two removed database operations and loading/duplicate behavior are covered by automated checks.
