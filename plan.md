@@ -485,7 +485,7 @@ Homepage and first profile update, 2026-11-04:
 ## Landing redesign - 2026-11-04
 
 - Approved: one hero with text and a single invitation form on the left, a decorative three-island journey and existing otter on the right; mobile order is text, form, illustration, collection information. Remove repeated benefits, headings, CTA and oversized framed sections.
-- Keep “Подготовка за състезания, стъпка по стъпка.”, use “Истински задачи, ясни подсказки и приключения с награди.”, retain the exact owner-supplied collection sentence below the hero, and display “Тестваме с група до 5 деца.” above the form.
+- Keep “Подготовка за състезания, стъпка по стъпка.”, use “Истински задачи, ясни подсказки и приключения с награди.”, retain the exact owner-supplied collection sentence below the hero, and omit the pilot-group sentence above the form (owner-requested removal, 2026-11-05).
 - Remove the checkbox and server-side consent=yes requirement together; no hidden consent value. Keep native email validation, private invitation RPC, duplicate success and 30/hour protection unchanged. Confirmation: “Благодарим! Получихме заявката за покана.” No database, history, collection-publication or learning-flow changes.
 - Acceptance: inspect 390/768/1440 px, 200% zoom, keyboard focus, validation and success/error states; run focused route tests, TypeScript, lint, full tests and production build. Record final evidence below. Changes remain local until deployed separately.
 - Coordinator: gpt-6.1-sol, high reasoning. Implementation: gpt-6.1-sol, high reasoning. Independent critical review: gpt-6-astra, high reasoning.
@@ -744,3 +744,6 @@ Verification, 2026-11-05:
 - All 242 tests pass, including owned-child selection, expired/child-account rejection, immediate skip pending state, duplicate prevention and back-navigation reset; typecheck, lint and production build pass.
 - Browser checks cover landing, first profile and optional email at 1280, 390 and 320 px with reduced motion: no horizontal overflow, primary login hierarchy, visible focus and no runtime errors. Development previews cannot submit profile actions.
 - All 13 private learner history/backup file hashes remain unchanged. Selection removes two sequential database operations; live authenticated end-to-end latency still requires the owner's smoke test.
+
+- Follow-up owner request: remove “Тестваме с група до 5 деца.” from the public landing and delete its unused styles; the invitation process remains unchanged.
+- Follow-up verification: six invitation tests, production build and responsive browser checks pass after the sentence removal. Initial UI/onboarding release `39f20e5` is successful on Vercel; the copy-removal follow-up is included in this rollout.

@@ -16,7 +16,6 @@ export function Landing({request}:{request?:string}){
     <h1 className={l.title} id="landing-title">Подготовка за състезания, стъпка по стъпка.</h1>
     <p className={l.intro}>Истински задачи, ясни подсказки и приключения с награди.</p>
     <div className={l.invitation} id="invitation">
-     <p className={l.pilot}>Тестваме с група до 5 деца.</p>
      {request==="received"?<Message className={l.success} tone="success">Благодарим! Получихме заявката за покана.</Message>:<form className={l.form} action="/api/invitations" method="post">
       <label className={l.email} htmlFor="invitation-email">Имейл на родител</label>
       <div className={l.formFields}>

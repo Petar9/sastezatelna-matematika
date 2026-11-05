@@ -15,7 +15,6 @@
 .title { margin: 0; max-width: 600px; font-size: clamp(38px, 3.8vw, 52px); line-height: 1.12; letter-spacing: -0.025em; font-weight: 700; text-wrap: balance; }
 .intro { max-width: 490px; margin: 22px 0 0; color: var(--muted); font-size: 21px; line-height: 1.5; }
 .invitation { margin-top: 36px; scroll-margin-top: 24px; }
-.pilot { margin: 0 0 18px; font-size: 17px; font-weight: 600; }
 .form { min-width: 0; }
 .email { display: block; margin-bottom: 8px; font-size: 16px; font-weight: 600; }
 .formFields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto); gap: 10px; min-width: 0; }
@@ -46,7 +45,6 @@
  .title { font-size: 36px; line-height: 1.14; }
  .intro { margin-top: 18px; font-size: 19px; }
  .invitation { margin-top: 26px; }
- .pilot { margin-bottom: 16px; font-size: 16px; }
  .formFields { grid-template-columns: minmax(0, 1fr); gap: 12px; }
  .button { width: 100%; }
  .note { font-size: 14px; }
