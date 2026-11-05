@@ -8,3 +8,7 @@ export function Input({ className, ...props }: ComponentPropsWithRef<"input">) {
 export function Textarea({ className, ...props }: ComponentPropsWithRef<"textarea">) {
   return <textarea {...props} className={`${s.field} ${s.textarea} ${className ?? ""}`} />;
 }
+
+export function Select({ className, ...props }: ComponentPropsWithRef<"select">) {
+  return <select {...props} className={`${s.field} ${s.select} ${className ?? ""}`} />;
+}

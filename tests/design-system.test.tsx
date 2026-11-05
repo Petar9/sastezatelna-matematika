@@ -10,7 +10,7 @@ registerHooks({ load(url, context, nextLoad) {
 } });
 Object.assign(globalThis, { React });
 const { Button, ButtonLink } = await import("../components/ui/button.tsx");
-const { Input, Textarea } = await import("../components/ui/field.tsx");
+const { Input, Select, Textarea } = await import("../components/ui/field.tsx");
 const { Message } = await import("../components/ui/message.tsx");
 const { Dialog } = await import("../components/ui/dialog.tsx");
 const doc = (node: React.ReactNode) => parseHTML(`<html><body>${renderToStaticMarkup(node)}</body></html>`).document;
@@ -53,4 +53,15 @@ test("shared modal keeps native dialog semantics and an accessible labelled clos
  assert.equal(d.getElementById("title")?.textContent, "Обратна връзка");
  assert.equal(dialog.querySelector('button[aria-label="Затвори"]')?.getAttribute("type"), "button");
  assert.equal(dialog.hasAttribute("open"), false);
+});
+
+test("shared select retains native choices, validation, disabled state and caller styling", () => {
+ const d=doc(<><label htmlFor="competition">Състезание</label><Select id="competition" name="competition" required defaultValue="two" aria-invalid="true" aria-describedby="choice-error" className="compact"><option value="one">Първо</option><option value="two">Второ</option></Select><Message id="choice-error" tone="error" inline>Избери състезание.</Message><Select disabled><option>Недостъпно</option></Select></>);
+ const [select,disabled]=d.querySelectorAll("select");
+ assert.equal(select?.getAttribute("name"),"competition");
+ assert.ok(select?.hasAttribute("required"));assert.equal(select?.getAttribute("aria-invalid"),"true");
+ assert.equal(select?.querySelector("option[selected]")?.getAttribute("value"),"two");
+ assert.equal(d.getElementById(select!.getAttribute("aria-describedby")!)?.textContent,"Избери състезание.");
+ assert.ok(select?.classList.contains("field"));assert.ok(select?.classList.contains("select"));assert.ok(select?.classList.contains("compact"));
+ assert.ok(disabled?.hasAttribute("disabled"));assert.equal(d.querySelectorAll('[role="listbox"]').length,0);
 });

@@ -23,7 +23,7 @@ export function courseGoldAwards(course: KidsCourse): GoldAward[] {
  const awards = new Map((course.goldAwards ?? []).map(award => [goldKey(award), award]));
  const add = (award: GoldAward) => { if (!awards.has(goldKey(award))) awards.set(goldKey(award), award); };
  for (const attempt of course.attempts) {
-  if (!attempt.outcome) continue;
+  if (!attempt.outcome || attempt.goldEligible === false) continue;
   const skillId = attempt.problem.skillId, earnedAt = attempt.completedAt ?? course.updatedAt;
   add({ skillId, milestone: "started", earnedAt });
   if (attempt.outcome === "independent" || attempt.outcome === "hinted") add({ skillId, milestone: "correct", earnedAt });
@@ -66,7 +66,7 @@ export function problemGoldPreview(course: KidsCourse, content: KidsCourseConten
  return { amount, multiplier: amount === hardProblemGoldAmount ? 1.5 : 1 };
 }
 export function awardProblemGold(course: KidsCourse, content: KidsCourseContent, attempt: CourseAttempt, now: string) {
- if (attempt.outcome !== "independent" && attempt.outcome !== "hinted") return;
+ if (attempt.goldEligible === false || (attempt.outcome !== "independent" && attempt.outcome !== "hinted")) return;
  const key = problemGoldKey(attempt.problem, content);
  // A future successful attempt can recover missed gold; originals and parts share it.
  if (course.problemGoldAwards?.some(a => a.key === key)) return;

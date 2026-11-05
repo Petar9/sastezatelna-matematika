@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { registerHooks } from "node:module";
 import { test } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
 import { parseHTML } from "linkedom";
 import { state, reset } from "./helpers/onboarding-server.ts";
 import { KidsError } from "../src/core/kids.ts";
@@ -22,7 +23,7 @@ const { GET: callback } = await import("../app/auth/callback/route.ts");
 const { POST: profile } = await import("../app/api/profiles/route.ts");
 const { default: LoginPage } = await import("../app/login/page.tsx");
 const { default: ProfilesPage } = await import("../app/profiles/page.tsx");
-const documentFor = (node: React.ReactNode) => parseHTML(`<html><body>${renderToStaticMarkup(node)}</body></html>`).document;
+const documentFor = (node: React.ReactNode) => parseHTML(`<html><body>${renderToStaticMarkup(<AppRouterContext.Provider value={{ refresh() {} } as never}>{node}</AppRouterContext.Provider>)}</body></html>`).document;
 const location = (response: Response) => { assert.equal(response.status, 303); return response.headers.get("location"); };
 const request = (body: Record<string, string>) => new Request("https://maths.example/api/profiles", { method: "POST", body: new URLSearchParams(body) });
 
@@ -177,7 +178,7 @@ if (process.env.MATHS_UI_PROOF_DIR) {
   for (const [name, node] of Object.entries({ login: <LoginWelcome />, nickname: <ChildProfiles children={[]} />,
     profiles: <ChildProfiles children={[{ id: "test-one", nickname: "Звездоброец" }, { id: "test-two", nickname: "Мореплавател" }]} />,
     denied: <LoginWelcome issue="denied" />, full: <ChildProfiles children={[]} issue="full" /> })) {
-    const html = `<!doctype html><html lang="bg"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onboarding layout check</title><style>*{box-sizing:border-box}body{--font-sans3:Arial,sans-serif;margin:0;font-family:Arial,sans-serif}a{color:inherit}${theme}${shared}${css}</style>${renderToStaticMarkup(node)}</html>`;
+    const html = `<!doctype html><html lang="bg"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onboarding layout check</title><style>*{box-sizing:border-box}body{--font-sans3:Arial,sans-serif;margin:0;font-family:Arial,sans-serif}a{color:inherit}${theme}${shared}${css}</style>${renderToStaticMarkup(<AppRouterContext.Provider value={{ refresh() {} } as never}>{node}</AppRouterContext.Provider>)}</html>`;
     await fs.writeFile(path.join(dir, `${name}.html`), html);
   }
 }
@@ -196,4 +197,50 @@ test("profile failures name the action that failed and leave the relevant form a
   assert.ok(doc.querySelector('[role="alert"]')?.textContent?.includes(text));
   assert.ok(doc.querySelector("details[open]"));
  }
+});
+
+
+test("parents and children rename only their authorized nickname, without changing selection or login", async () => {
+  for (const role of ["parent", "child"] as const) {
+    reset(); state.role = role; state.children = [{ id: "child-a", nickname: "Лисиче" }];
+    const response = await profile(new Request("https://maths.example/api/profiles", { method: "POST", headers: { Accept: "application/json" }, body: new URLSearchParams({ action: "rename", childId: "child-a", nickname: "  Мореплавател  " }) }));
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { nickname: "Мореплавател" });
+    assert.deepEqual(state.updated, { nickname: "Мореплавател" });
+    assert.deepEqual(state.updateFilters, [["parent_id", "parent-a"], ["id", "child-a"], ["active", true]]);
+    assert.equal(response.headers.get("set-cookie"), null);
+    assert.equal(state.rpcCall, undefined);
+    assert.equal(state.inserted, undefined);
+  }
+});
+
+test("rename rejects foreign profiles, empty/long nicknames, stale ownership and database failures", async () => {
+  const rename = (childId: string, nickname: string) => profile(new Request("https://maths.example/api/profiles", { method: "POST", headers: { Accept: "application/json" }, body: new URLSearchParams({ action: "rename", childId, nickname }) }));
+  reset(); state.role = "child"; state.children = [{ id: "child-a", nickname: "Лисиче" }];
+  assert.equal((await rename("sibling", "Друг" )).status, 403);
+  assert.equal(state.updated, undefined);
+  for (const nickname of ["   ", "я".repeat(41)]) assert.equal((await rename("child-a", nickname)).status, 400);
+  assert.equal(state.updated, undefined);
+  state.updateMissing = true;
+  assert.equal((await rename("child-a", "Друг")).status, 403);
+  state.updateMissing = false; state.databaseError = { code: "503", message: "secret database detail" };
+  let response = await rename("child-a", "Друг");
+  assert.equal(response.status, 503);
+  assert.ok(!(await response.text()).includes("secret"));
+  state.parentError = new KidsError("secret auth", 401);
+  response = await rename("child-a", "Друг");
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("set-cookie"), null);
+});
+
+test("child settings expose only nickname and progress; native rename has a recoverable redirect", async () => {
+  reset(); state.role = "child"; state.children = [{ id: "child-a", nickname: "Лисиче" }];
+  const doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({}) }));
+  assert.ok(doc.querySelector('input[name="action"][value="rename"]'));
+  assert.equal(doc.querySelector('input[name="nickname"]')?.getAttribute("value"), "Лисиче");
+  for (const action of ["create", "select", "link-email", "unlink-email"]) assert.equal(doc.querySelector(`input[name="action"][value="${action}"]`), null);
+  assert.ok(doc.querySelector('a[href="/progress"]'));
+  assert.equal(location(await profile(request({ action: "rename", childId: "child-a", nickname: "Ема" }))), "https://maths.example/profiles?status=renamed");
+  state.databaseError = { code: "503", message: "Offline" };
+  assert.equal(location(await profile(request({ action: "rename", childId: "child-a", nickname: "Ема" }))), "https://maths.example/profiles?error=rename-unavailable");
 });

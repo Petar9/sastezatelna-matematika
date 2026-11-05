@@ -123,3 +123,19 @@ test("saved drafts sync between devices and stay isolated by parent, child, comp
  for(const other of [createSupabaseCourseStore(db.client,"other","c"),createSupabaseCourseStore(db.client,"p","other"),createSupabaseCourseStore(db.client,"p","c","other")])assert.equal(await other.read(content),null);
  assert.equal(saved.attempts.length,0);assert.equal(saved.goldAwards!.length,0);
 });
+
+test("one private GET snapshot supplies fresh selected progress and cross-competition wallet",async()=>{
+ const started=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"matches"},now);
+ const task=started.topics.matches!.work.core!.attempt;
+ const earned=applyCourseAction(started,content,{type:"answer",taskKey:task.key,answers:task.problem.fields.map(field=>field.answer)},now);
+ const row=(parent_id:string,child_id:string,competition_id:string)=>({parent_id,child_id,competition_id,revision:earned.revision,course:earned});
+ const db=fakeDatabase([row("p","c",DEFAULT_COMPETITION_ID),row("p","c","other"),row("foreign","c",DEFAULT_COMPETITION_ID),row("p","foreign",DEFAULT_COMPETITION_ID)]);
+ const store=createSupabaseCourseStore(db.client,"p","c");
+ const {readKidsCourseView}=await import("../src/server/kids-course.ts");
+ const view=await readKidsCourseView(store,content);
+ assert.equal(view.revision,earned.revision);assert.equal(view.gold,50);
+ assert.equal(db.filters.length,1);assert.deepEqual(db.filters[0],[{parent_id:"p"},{child_id:"c"}]);
+ db.rows[0]!.course=applyCourseAction(earned,content,{type:"pause"},now);db.rows[0]!.revision=earned.revision+1;
+ assert.equal((await readKidsCourseView(store,content)).revision,earned.revision+1);
+ assert.equal(db.filters.length,2,"each GET must read fresh authoritative state");
+});

@@ -164,3 +164,10 @@ Adopted educational decisions for Математически открития. U
 
 - Owner explicitly approved publishing Математика за всеки, Олимпиада and НВО together after disclosure of the existing draft gates and outstanding final human review, including the missing 2024 Olympiad official solution PDF. This supersedes the local-only holds for the invitation-only pilot; it does not assert a completed human review.
 - Keep separate progress and the same IDs, content versions, difficulty badges, gold rules and excluded underdetermined Olympiad problem. Enable the existing dropdown; do not reset learner history or broaden account access.
+
+
+## 2026-11-05 - Hint limits for gold and consistent source labels
+
+- Future completed attempts using the third hint earn no new gold, including problem rewards and 5/10/20 skill milestones. Persist `goldEligible: false`; hints one and two retain existing rates (10 standard, 15 reviewed hard). Assisted classification, learning rules and previously earned history remain unchanged. A later eligible success can recover unpaid entitlements, dated to that later attempt.
+- Replace the reward preview after hint three with “Без злато след третата подсказка”. Keep “Да си припомним с позната задача.” without the optional-skip sentence.
+- Original task footer: “[competition] · [year]”. Authored practice: “По [competition] · [source year]”. Use actual source provenance and the same link styling; link only accessible original statements, without internal problem codes or fabricated exercise dates.

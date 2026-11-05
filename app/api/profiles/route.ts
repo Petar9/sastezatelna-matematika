@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mode, parentContext, appOrigin, childCookie } from "@/src/server";
+import { mode, accountContext, appOrigin, childCookie } from "@/src/server";
 import { invitationEmail } from "@/src/server/invitations";
 import { KidsError } from "@/src/core";
 export async function POST(request: Request) {
@@ -9,8 +9,23 @@ export async function POST(request: Request) {
   let failedAction = "unavailable";
   const linkRetry = (query: string) => retry(`${query}${setup ? `&setup=${encodeURIComponent(setup)}` : ""}`);
   try {
-    const parent = await parentContext();
+    const parent = await accountContext();
     const body = await request.formData();
+    if (body.get("action") === "rename") {
+      const json = request.headers.get("accept")?.includes("application/json");
+      const fail = (issue: string, message: string, status: number) => json ? Response.json({ message }, { status }) : retry(`error=${issue}`);
+      const child = parent.children.find(child => child.id === body.get("childId"));
+      if (!child) return fail("missing", "Този профил вече не е достъпен.", 403);
+      const nickname = String(body.get("nickname") ?? "").trim();
+      if (!nickname || nickname.length > 40) return fail("nickname", "Напиши прякор от 1 до 40 знака.", 400);
+      failedAction = "rename-unavailable";
+      const { data, error } = await parent.db.from("child_profiles").update({ nickname })
+        .eq("parent_id", parent.parentId).eq("id", child.id).eq("active", true).select("id").maybeSingle();
+      if (error) throw error;
+      if (!data) return fail("missing", "Този профил вече не е достъпен.", 403);
+      return json ? Response.json({ nickname }) : retry("status=renamed");
+    }
+    if (parent.role !== "parent") throw new KidsError("Тази промяна е достъпна за родителя.", 403);
     failedAction = ({ "link-email": "save-email-unavailable", "unlink-email": "remove-email-unavailable", create: "create-unavailable", select: "select-unavailable" } as Record<string, string>)[String(body.get("action"))] ?? "unavailable";
     let childId: string;
     if (body.get("action") === "link-email" || body.get("action") === "unlink-email") {
@@ -48,6 +63,10 @@ export async function POST(request: Request) {
     response.cookies.set(childCookie, childId, { httpOnly: true, secure: appOrigin().startsWith("https:"), sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
     return response;
   } catch (error) {
+    if (request.headers.get("accept")?.includes("application/json")) {
+      const status = error instanceof KidsError ? error.status : 503;
+      return Response.json({ message: status === 401 ? "Влез отново с Google профила си." : status === 403 ? "Този профил вече не е достъпен." : "Не успяхме да запазим името. Опитай отново." }, { status });
+    }
     if (error instanceof KidsError && (error.status === 401 || error.status === 403)) {
       return NextResponse.redirect(`${appOrigin()}/login${error.status === 403 ? "?denied=1" : ""}`, 303);
     }

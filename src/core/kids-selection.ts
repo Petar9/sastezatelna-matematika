@@ -17,6 +17,19 @@ function catalogueFor(content: KidsCourseContent) {
 export function catalogueProblems(content: KidsCourseContent): CourseProblem[] {
  return [...catalogueFor(content).values()];
 }
+export function problemSource(problem: CourseProblem, content: KidsCourseContent) {
+ const catalogue = catalogueFor(content);
+ const canonical = catalogue.get(problem.id);
+ const archive = archiveFor(problem, content);
+ const practice = archive ? archive.kind === "scaffold" : !isCompetitionProblem(problem);
+ const reference = problem.practiceSource ?? canonical?.practiceSource;
+ const linkedId = reference?.problemId ?? (archive ? `${archive.sourceId}:original` : undefined);
+ const original = linkedId ? catalogue.get(linkedId) ?? (!practice ? canonical ?? problem : undefined) : practice
+  ? [...catalogue.values()].find(p => p.skillId === problem.skillId && (p.archive?.kind === "original" || (!p.archive && p.id.endsWith(":original"))))
+  : canonical ?? problem;
+ return { sourceIsPractice: practice, sourceYear: practice ? original?.provenance?.year ?? reference?.year : problem.provenance?.year ?? original?.provenance?.year,
+  sourceProblemId: original?.provenance ? original.id : undefined };
+}
 export function difficultyFor(p: CourseProblem, content?: KidsCourseContent) {
  if (p.difficulty || !content) return p.difficulty;
  const canonical = catalogueFor(content).get(p.id);

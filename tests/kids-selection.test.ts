@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { applyCourseAction, courseView, migrateKidsCourse, newKidsCourse } from "../src/core/kids-course.ts";
 import type { CourseAction, CourseProblem, KidsCourseContent } from "../src/core/kids-course.ts";
-import { chooseSkillProblem, isCompetitionProblem, overlaps } from "../src/core/kids-selection.ts";
+import { catalogueProblems, problemSource, chooseSkillProblem, isCompetitionProblem, overlaps } from "../src/core/kids-selection.ts";
 import { kidsCourseContent } from "../src/server/kids-course-content.ts";
 import { olympiadCourseContent } from "../src/server/olimpiada-course-content.ts";
+import { nvoCourseContent } from "../src/server/nvo-course-content.ts";
 import { originalStatement } from "../src/server/original-statement.ts";
 
 const now = "2026-11-03T12:00:00.000Z", later = "2026-11-05T12:00:00.000Z";
@@ -198,7 +199,28 @@ test("refresh preserves help, input, feedback, lesson steps and confirmation aft
   delete h.course.topics[topic.id]!.skillWork![skill.id]!.lessonStep;
   h.course.attempts = catalogue(content, skill.id).filter(isCompetitionProblem).map((problem, i) => ({key:`seen-${i}`,problem,mode:"core",hintUsed:false,outcome:"independent",completedAt:now}));
   const refreshed = migrateKidsCourse(h.course, content, now);
-  assert.equal(courseView(refreshed, content, now).task!.sourceYear, undefined);
+  assert.ok(courseView(refreshed, content, now).task!.sourceYear);
+  assert.equal(courseView(refreshed, content, now).task!.sourceIsPractice, true);
   assert.equal(courseView(refreshed, content, now).task!.text, authored.text);
+ }
+});
+
+
+test("all competition problems and linked practice resolve honest year and original source metadata",()=>{
+ for(const content of [kidsCourseContent,olympiadCourseContent,nvoCourseContent]){
+  const problems=catalogueProblems(content);
+  for(const problem of problems){
+   const source=problemSource(problem,content);
+   assert.ok(source.sourceYear,problem.id);
+   assert.equal(source.sourceIsPractice,!isCompetitionProblem(problem),problem.id);
+   if(problem.practiceSource?.problemId === "oli-g4-municipal-2023-p3:original") {
+    assert.equal(source.sourceYear,2023);assert.equal(source.sourceProblemId,undefined);continue;
+   }
+   assert.ok(source.sourceProblemId,problem.id);
+   const original=originalStatement(content,source.sourceProblemId!);
+   assert.ok(original,problem.id);
+   const linked=problems.find(p=>p.id===source.sourceProblemId)!;
+   assert.equal(source.sourceYear,linked.provenance!.year,problem.id);
+  }
  }
 });

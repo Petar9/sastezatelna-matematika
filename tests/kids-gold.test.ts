@@ -98,3 +98,40 @@ test("topic gold uses retained awards, isolates topics and projects historical e
  assert.equal(courseView(historical,content,now).topics.find(t=>t.id==="matches")!.gold.earned,35);
  assert.equal(JSON.stringify(historical),before);
 });
+
+
+test("hints zero through two retain rewards; third hint blocks every new award for standard and hard problems",()=>{
+ for(const hard of [false,true])for(const hints of [0,1,2,3]){
+  const catalogue={...content,problem:(id:string,index:number,harder:boolean)=>{const p=content.problem(id,index,harder);return p?{...p,difficulty:{level:hard?"hard" as const:"standard" as const,rationale:"Test reward rate"}}:null;}};
+  let record=applyCourseAction(newKidsCourse(catalogue,now),catalogue,{type:"selectTopic",topicId:"matches"},now);
+  const task=()=>record.topics.matches!.work.core!.attempt;
+  for(let i=0;i<hints;i++)record=applyCourseAction(record,catalogue,{type:"hint",taskKey:task().key},now);
+  assert.equal(courseView(record,catalogue,now).task!.goldReward?.amount,hints===3?undefined:hard?15:10);
+  const before=record;
+  record=applyCourseAction(record,catalogue,{type:"answer",taskKey:task().key,answers:task().problem.fields.map(f=>f.answer)},now);
+  assert.equal(task().outcome,hints?"hinted":"independent");
+  assert.equal(courseGoldBalance(record),hints===3?0:hard?30:25);
+  assert.equal(newGoldGain(before,record)?.amount,hints===3?undefined:hard?30:25);
+  if(hints===3){
+   assert.equal(task().goldEligible,false);assert.equal(record.attempts[0]!.goldEligible,false);
+   const reloaded=JSON.parse(JSON.stringify(record));delete reloaded.goldAwards;
+   assert.deepEqual(courseGoldAwards(reloaded),[]);
+   const after=applyCourseAction(reloaded,catalogue,{type:"dashboard"},now);
+   assert.equal(courseView(after,catalogue,now).gold,0);
+  }
+ }
+});
+test("third-hint exclusion also survives incorrect and revealed outcomes, while future successes recover unpaid milestones",()=>{
+ for(const ending of ["answer","reveal","dontKnow"] as const){
+  const h=harness();for(let i=0;i<3;i++)h.go({type:"hint",taskKey:h.attempt().key});
+  const gain=ending==="answer"?h.answer(false):h.go({type:ending,taskKey:h.attempt().key});
+  assert.equal(gain,undefined);assert.equal(courseGoldBalance(h.record),0);
+  h.next();assert.equal(h.answer()?.amount,25);
+ }
+});
+test("old third-hint awards and historical evidence retain their value",()=>{
+ const h=harness();h.go({type:"hint",taskKey:h.attempt().key});h.answer();
+ const legacy=structuredClone(h.record);legacy.attempts[0]!.hintLevel=3;
+ assert.equal(courseGoldBalance(legacy),25);
+ delete legacy.goldAwards;assert.equal(courseGoldBalance(legacy),25);
+});

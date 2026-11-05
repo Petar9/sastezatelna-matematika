@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { ProfileNameForm } from "./profile-name-form";
 import { FeedbackButton } from "./feedback";
 import { KidsOtter } from "./kids-otter";
 import { Button } from "./ui/button";
@@ -41,7 +42,7 @@ export function LoginWelcome({ issue }: { issue?: LoginIssue }) {
 }
 
 type Child = { id: string; nickname: string; loginEmail?: string | null; loginConnected?: boolean };
-export type ProfileIssue = "nickname" | "unavailable" | "full" | "missing" | "email" | "email-used" | "create-unavailable" | "select-unavailable" | "save-email-unavailable" | "remove-email-unavailable";
+export type ProfileIssue = "nickname" | "unavailable" | "full" | "missing" | "email" | "email-used" | "create-unavailable" | "select-unavailable" | "save-email-unavailable" | "remove-email-unavailable" | "rename-unavailable";
 const profileMessages: Record<ProfileIssue, string> = {
   nickname: "Напиши прякор от 1 до 40 знака.",
   email: "Напиши валиден имейл адрес.",
@@ -51,6 +52,7 @@ const profileMessages: Record<ProfileIssue, string> = {
   "select-unavailable": "Не успяхме да изберем профила. Опитай отново.",
   "save-email-unavailable": "Не успяхме да запазим имейла. Опитай отново.",
   "remove-email-unavailable": "Не успяхме да премахнем имейла. Опитай отново.",
+  "rename-unavailable": "Не успяхме да запазим името. Опитай отново.",
   full: "Петте места в пробната група вече са заети.",
   missing: "Този профил вече не е достъпен. Избери друг профил.",
 };
@@ -82,11 +84,11 @@ function EmailForm({ child, setup = false, issue }: { child: Child; setup?: bool
 }
 
 function ProfileFooter() {
-  return <><Link href="/parent">За родителя</Link>
+  return <><Link href="/progress">Напредък</Link>
     <form method="post" action="/auth/logout"><Button type="submit" variant="quiet" className={o.textButton}>Изход</Button></form><FeedbackButton/></>;
 }
 
-export function ChildProfiles({ children, issue, setup, status }: { children: Child[]; issue?: ProfileIssue; setup?: string; status?: "saved" | "removed" }) {
+export function ChildProfiles({ children, issue, setup, status }: { children: Child[]; issue?: ProfileIssue; setup?: string; status?: "saved" | "removed" | "renamed" }) {
   const firstVisit = children.length === 0;
   const setupChild = children.find(child => child.id === setup);
   if (setupChild) return <OnboardingFrame footer={<ProfileFooter />}>
@@ -104,7 +106,7 @@ export function ChildProfiles({ children, issue, setup, status }: { children: Ch
     <h1>{firstVisit ? "Как да те наричаме?" : "Кой ще открива днес?"}</h1>
     <p className={o.intro}>{firstVisit ? "Видрата те очаква. Да направим ново откритие!" : "Избери своя профил и продължи приключението."}</p>
     {issue && <Message className={o.notice} tone="warning" role="alert">{profileMessages[issue]}</Message>}
-    {status && <Message className={o.notice} tone="success" role="status">{status === "saved" ? "Имейлът е запазен." : "Самостоятелният вход е премахнат."}</Message>}
+    {status && <Message className={o.notice} tone="success" role="status">{status === "saved" ? "Имейлът е запазен." : status === "renamed" ? "Името е запазено." : "Самостоятелният вход е премахнат."}</Message>}
     {firstVisit ? <NicknameForm issue={issue} /> : <>
       <div className={o.profiles}>
         {children.map(child => <div key={child.id}>
@@ -113,6 +115,10 @@ export function ChildProfiles({ children, issue, setup, status }: { children: Ch
             <input type="hidden" name="childId" value={child.id} />
             <Button type="submit" variant="secondary" className={o.profile}>{child.nickname}<span aria-hidden="true">→</span></Button>
           </form>
+          <details className={o.loginSettings} open={issue === "rename-unavailable"}>
+            <summary>Промени името</summary>
+            <ProfileNameForm child={child} />
+          </details>
           <details className={o.loginSettings} open={issue === "email" || issue === "email-used" || issue === "save-email-unavailable" || issue === "remove-email-unavailable"}>
             <summary>Google имейл на детето</summary>
             <p className={o.note}>{child.loginConnected ? "Google профилът е свързан." : "По желание добави Google имейл за самостоятелен вход."}</p>
@@ -131,5 +137,16 @@ export function ChildProfiles({ children, issue, setup, status }: { children: Ch
       </details>
       <Link className={o.home} href="/">← Начало</Link>
     </>}
+  </OnboardingFrame>;
+}
+
+export function ChildProfileSettings({ child, issue, status }: { child: Child; issue?: ProfileIssue; status?: "renamed" }) {
+  return <OnboardingFrame footer={<ProfileFooter />}>
+    <h1>Твоят профил</h1>
+    <p className={o.intro}>{child.nickname}</p>
+    {issue && <Message className={o.notice} tone="warning">{profileMessages[issue]}</Message>}
+    {status && <Message className={o.notice} tone="success">Името е запазено.</Message>}
+    <ProfileNameForm child={child} />
+    <Link className={o.home} href="/">← Начало</Link>
   </OnboardingFrame>;
 }

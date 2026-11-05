@@ -26,7 +26,7 @@ export default async function LastTask({ searchParams }: { searchParams: Promise
  if (error) throw error;
  const statement = lastCourseStatement(data?.course);
  return <main className={s.shell}><div className={s.content}>
-  <Link href="/parent" className={s.secondary}>← За родителя</Link>
+  <Link href={`/progress?child=${encodeURIComponent(child.id)}`} className={s.secondary}>← Напредък</Link>
   <section className={s.card}><h1>Последната задача на {child.nickname}</h1>
    {statement ? <>
     <p className={s.small}>{statement.year ? `${competition.title} · ${statement.year}` : statement.source}</p>

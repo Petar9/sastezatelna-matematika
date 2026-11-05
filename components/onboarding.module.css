@@ -18,14 +18,14 @@
 .profile:hover { background: #dfedde; }
 .profile span { flex-shrink: 0; color: var(--primary); }
 .loginSettings { text-align: left; font-size: 15px; }
-.loginSettings summary { padding: 8px 0; color: var(--muted); cursor: pointer; }
+.loginSettings summary { min-height: 44px; padding: 8px 0; color: var(--muted); cursor: pointer; }
 .loginSettings .form { margin-top: 12px; font-size: 16px; }
 .loginSettings .textButton { font-size: 15px; }
 .additional { margin: 24px 0 0; text-align: left; font-size: 16px; }
 .additional summary { display: list-item; padding: 10px 0; cursor: pointer; color: var(--muted); }
 .additional .form { margin-top: 14px; font-size: 18px; }
 .home { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; color: var(--muted); font-size: 16px; }
-.footer { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 20px; margin-top: 22px; font-size: 15px; color: var(--muted); }
+.footer { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 20px; margin-top: 22px; font-size: var(--text-small); font-weight: 600; color: var(--muted); }
 .footer a, .textButton { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
 .textButton { padding: var(--space-2); font: inherit; text-decoration: underline; }
 .shell a:focus-visible, .shell button:focus-visible, .shell input:focus-visible, .shell summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }

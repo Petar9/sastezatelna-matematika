@@ -93,11 +93,15 @@ function sourceProblem(o: Original, owner: Family, unit?: Unit): CourseProblem {
  if (o.diagram_required) p.figure = { src: `/kids/figures/olimpiada/${o.year}-p${o.problem}.png`, alt: o.diagram?.description_bg ?? "Оригинален чертеж към задачата" };
  return p;
 }
+function practiceSource(family: Family) {
+ const original = pack.originals.originals.find(o => o.units.some(u => family.original_unit_ids.includes(u.id)))!;
+ return { year: original.year, problemId: `${original.id}:original` };
+}
 const pools = new Map<string, { core: CourseProblem[]; hard: CourseProblem[] }>();
 const all = new Map<string, CourseProblem>();
 for (const family of pack.practice.families) {
  const authored = (difficulty: string): CourseProblem[] => family.items.filter(item => item.difficulty === difficulty).map(item =>
-  ({ ...problem(item.id, family, item.statement_bg, "Учебно упражнение · Олимпиада · 4. клас", item.fields, solution(item.worked_steps_bg)), difficulty: olympiadPracticeDifficulty(item.id) }));
+  ({ ...problem(item.id, family, item.statement_bg, "Учебно упражнение · Олимпиада · 4. клас", item.fields, solution(item.worked_steps_bg)), practiceSource: practiceSource(family), difficulty: olympiadPracticeDifficulty(item.id) }));
  const core = authored("core"), hard = authored("hard");
  const full: CourseProblem[] = [];
  for (const original of pack.originals.originals) {

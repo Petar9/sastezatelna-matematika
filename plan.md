@@ -381,18 +381,18 @@ This slice supersedes the earlier no-recovery policy for previously attempted pr
 - Coordinator: gpt-6.1-sol, high reasoning; one agent for this coupled reward/content slice. Local only, no push, deployment or cloud changes. Human content/publication review remains pending.
 
 
-## Approved daily progress calendar - after pilot - 2026-11-04
+## Approved daily progress calendar - 2026-11-04; implemented locally 2026-11-05
 
-Статус: одобрен бъдещ обхват след пилотния старт. В тази стъпка се обновява само планът.
+Статус: реализиран локално в одобрения обхват „Faster switching and shared Напредък“ по-долу; напомнянията остават бъдещ обхват.
 
 ### Календар на напредъка
 
-- [ ] Добави месечен календар за всяко дете, достъпен от детския профил и родителския екран чрез съществуващите права за достъп, без отделни детски имейл акаунти.
-- [ ] Показвай за всеки ден спечеленото злато, самостоятелните верни решения и верните решения с подсказка.
-- [ ] Брой всяко успешно решаване, включително повторенията. Повторението не носи допълнително злато извън съществуващите правила.
-- [ ] Не брой подусловията като отделни завършени задачи или разглеждането на решение като успешен отговор.
-- [ ] Покажи общ изглед за всички състезания с филтър по състезание; натискане на ден отваря подробностите.
-- [ ] Групирай дните по Europe/Sofia; седмицата започва в понеделник.
+- [x] Добави месечен календар за всяко дете, достъпен от детския профил и родителския екран чрез съществуващите права за достъп, без отделни детски имейл акаунти.
+- [x] Показвай за всеки ден спечеленото злато, самостоятелните верни решения и верните решения с подсказка.
+- [x] Брой всяко успешно решаване, включително повторенията. Повторението не носи допълнително злато извън съществуващите правила.
+- [x] Не брой подусловията като отделни завършени задачи или разглеждането на решение като успешен отговор.
+- [x] Покажи общ изглед за всички състезания с филтър по състезание; натискане на ден отваря подробностите.
+- [x] Групирай дните по Europe/Sofia; седмицата започва в понеделник.
 
 ### Обхват на промените
 
@@ -406,11 +406,11 @@ This slice supersedes the earlier no-recovery policy for previously attempted pr
 
 ### Проверки при реализацията
 
-- [ ] Решения с помощ и без помощ, повторения и задачи с подусловия се броят според правилата по-горе.
-- [ ] Дневното злато съвпада със записаните награди, без повторно начисляване или преизчисляване на историческите суми по нови ставки.
-- [ ] Групирането е правилно около полунощ и при смяна на часовото време.
-- [ ] Детският и родителският изглед показват еднакви резултати; няма достъп до чуждо дете.
-- [ ] Мобилният календар, празните дни, филтърът и преминаването между месеци работят.
+- [x] Решения с помощ и без помощ, повторения и задачи с подусловия се броят според правилата по-горе.
+- [x] Дневното злато съвпада със записаните награди, без повторно начисляване или преизчисляване на историческите суми по нови ставки.
+- [x] Групирането е правилно около полунощ и при смяна на часовото време.
+- [x] Детският и родителският изглед показват еднакви резултати; няма достъп до чуждо дете.
+- [x] Мобилният календар, празните дни, филтърът и преминаването между месеци работят.
 
 ### Бъдещ обхват: напомняния
 
@@ -437,7 +437,7 @@ This slice supersedes the earlier no-recovery policy for previously attempted pr
 
 - Complete production Supabase/Google OAuth credentials and Vercel configuration, then verify HTTPS login and cross-device resume with preserved history.
 - Finish human content/publication review for the locally available Олимпиада and НВО drafts, including the documented missing Olympiad answer key exception and permission to publish source statements/figures.
-- Confirm public contact identity, then verify the hosted invitation flow, family isolation and five-child cap. Calendar/history-by-day and inactivity reminders remain the future scope already recorded above.
+- Confirm public contact identity, then verify the hosted invitation flow, family isolation and five-child cap. Calendar/history-by-day was subsequently implemented locally on 2026-11-05; inactivity reminders remain future scope.
 
 
 ## Island topic cards - verified locally, 2026-11-04
@@ -629,3 +629,97 @@ Homepage and first profile update, 2026-11-04:
 
 - Published application commit `028d84f`; Vercel deployment `9NrKCgaa1TuazrutfEbPzymvawiL` reported success. Live `/welcome`, `/login` and `/about` returned HTTP 200, with the new semantic token stylesheet present. `/design-system`, `/data/kids/course-v2.json` and `/materials/` returned HTTP 404. No application-error screen was returned.
 - Final local history/backup comparison: all 13 files unchanged. Supabase migration verification confirmed unchanged hosted progress before publication. Signed-in Google/child access and physical-phone keyboard behavior remain for the agreed owner smoke test; release checks did not submit answers or feedback to production.
+
+
+## Faster switching and shared Напредък - approved 2026-11-05
+
+Status: implemented and verified locally; this promotes the previously deferred calendar to current scope. Publication is pending.
+
+- [x] Cache the current learner's visited competition screens in tab memory; show repeat visits immediately, refresh before enabling learning actions, finish pending saves before switching, and clear on account/profile changes. Reduce serial hosted reads without caching access rights or weakening revision checks.
+- [x] Add /progress for parents and children with the selected-child overview and monthly calendar. Parents may switch owned children; children see only themselves. Keep /parent as a compatibility redirect.
+- [x] Show daily independent/hinted correct solutions and recorded gold, including repeat successes but no duplicate reward, revealed-solution success or completed-task credit for standalone subconditions. Group in Europe/Sofia with Monday first, competition filter and inline day details. Keep uncertain dates separate.
+- [x] Allow both parent and child to rename the owned child profile without changing IDs, login links or learning history. Match footer action typography.
+- [x] Reuse the design system, document the calendar, verify isolation, history preservation, calculations, switching/drafts and browser layouts before release. No new database table, reminders or educational/reward-rule changes.
+
+Team: coordinator gpt-6.1-sol/high; performance worker gpt-6.1-sol/high; progress/calendar worker gpt-6-astra/high. Coordinator owns integration and final verification.
+
+
+Acceptance evidence for this slice:
+- 229/229 tests, TypeScript, ESLint, production build and git diff --check passed. The production bundle excludes private learner/source files; all 70 generated images retain pixel equality.
+- Isolated Chrome verification: repeat competition screen appeared in approximately 27 ms while its fresh GET was held; learning stayed disabled until authorization/data refresh completed. Browser Back restored the previous competition. These are local measurements, not hosted latency claims.
+- Three controlled focus refreshes returned HTTP 200 in 9–12 ms and cleared the busy state by 300 ms. No runtime errors were observed.
+- An answer selected immediately before footer navigation was saved before leaving, restored after Progress → Home and after a full reload. All learning commands used disposable data under /tmp/maths-progress-fixture, not Ema's history.
+- Calendar layouts checked at 1440, 390 and 320 px; task layout checked at 390 and 320 px, without horizontal overflow. Calendar month/filter/day interaction, keyboard focus and reduced-motion preference checked in Chrome. Automated tests cover Sofia midnight/DST, undated history, repeated successes, reward totals and family isolation.
+- All 13 baseline learner-history and backup files remain byte-identical. No database table, migration, production learner write, Git push or deployment was performed.
+- Local production preview: http://127.0.0.1:3107/ (disposable learning data). /parent redirects to /progress; /design-system, /data/kids/course-v2.json and /materials/ return 404 in the production build.
+- Hosted parent/child Google sessions and physical-phone behavior remain release smoke checks; local measurements do not establish production switching speed.
+
+
+Review-data follow-up, 2026-11-05:
+- Replaced disposable empty test courses at /tmp/maths-progress-fixture with byte-identical copies of the saved local courses for owner review; original data and Supabase remain unchanged.
+- Chrome /progress renders the local snapshot: 16 attempts, 5 confirmed skills, 2 for practice; 210 recorded gold and 13 independent successes on 2026-11-02, no hinted successes. No runtime errors. This is the saved local snapshot, not a freshly synchronized Supabase record.
+
+
+## Progress calendar polish and supplied-history audit - approved 2026-11-05
+
+Status: implemented and verified locally; publication remains pending.
+
+- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and final verification.
+- [x] Replace the wide competition field with a compact native shared `Select`; document its contract and add normal, disabled and invalid states to the development catalogue. Preserve Source Sans 3 and existing semantic colors, native keyboard behavior and forced-colors fallback.
+- [x] Separate the three monthly metrics (gold, independent successes, hinted successes); show only dates on empty days and gold plus successfully solved whole tasks on active days. Remove the redundant “В клетките” legend. Selected-day summaries distinguish independent, hinted, incorrect and revealed attempts.
+- [x] Keep original learner history, Supabase records, schema and reward rules unchanged; validate dates and rewards using an isolated private preview.
+- [x] Verify responsive layouts, controls, data classifications and regression checks; keep this slice local for owner review.
+
+History evidence:
+- The owner supplied revision 125 after a read-only SQL result showed 16 attempts on 2 November and 7 on 4 November. The previous 16-attempt local snapshot was stale.
+- The disposable preview under `/tmp/maths-progress-fixture` now reproduces the supplied event metadata, hint flags, confirmation state and reward records: 23 attempts, 6 confirmed skills and 4 for practice. Seven appended records use current catalogue text; this reconstruction is not a byte-identical export or fresh Supabase synchronization and must not be imported into production.
+- 2 November: 210 recorded gold, 13 independent successes, 0 hinted successes and 3 revealed solutions. 4 November: 80 recorded gold, 4 independent successes, 0 hinted successes and 3 incorrect attempts. Total recorded gold: 290. No undated gold or attempts in the supplied history.
+- Hint use exists in the supplied records, but those completed attempts ended in revealed solutions or an incorrect answer. Pending hinted work has no completion date. These records therefore do not establish a correct solution with hints; no classifications or dates were invented.
+- Earlier signed-in Supabase browser control did not execute the audit query; refreshing the original editor was rejected by automatic approval review because an unsaved query might be discarded. The owner-provided SQL result/export supplied the evidence instead. No production record was changed.
+
+Acceptance evidence:
+- 231/231 tests passed; TypeScript, ESLint, production build, private deployment trace audit and `git diff --check` passed. The final CSS-only correction was rebuilt and browser checks repeated.
+- Chrome verified actual local `/progress` at 1440, 390 and 320px with no horizontal overflow or runtime exceptions. Day targets remain at least 44.28px wide and 88px high at 320px; visual inspection confirmed the monthly Bulgarian labels remain whole.
+- Verified both activity dates and their five selected-day metrics, competition filtering, quiet empty dates, previous/next month behavior, Tab focus, shared Select disabled/invalid states and forced-colors native arrow restoration.
+- All 13 original private history/backup files retain their baseline SHA-256 hashes. No learner command, database migration, production write, Git push or deployment was performed.
+- Local review: http://127.0.0.1:3107/progress . Development components: http://127.0.0.1:3034/design-system . Hosted parent/child Google sessions and physical-phone picker behavior remain release smoke checks.
+
+
+## Compact daily skill summary and focused navigation - approved 2026-11-05
+
+Status: implemented and verified locally; publication remains pending.
+
+- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and final verification.
+- [x] Replace the long selected-day attempt/reward ledger with one row per skill grouped by competition. Resolve skill titles from the server catalogue; use “Други упражнения” for unmatched historic skills.
+- [x] Count independent and hinted successes only for completed whole problems, omit zero result labels and show “Упражнявано” when there is no successful whole problem. Preserve all five day headline metrics, raw history, classifications, reward amounts and dates.
+- [x] Rename “Умения за упражнение” to “Умения за припомняне”.
+- [x] Show the full За сайта / Напредък / Профили footer only on the main dashboard/map/topics. Keep quiet feedback separate below content on hosted main, island, task and progress screens; include task context only while the task is visible and preserve the mounted task/draft.
+- [x] Document the shared patterns and verify grouped results, navigation, feedback and responsive layouts without publication.
+
+Acceptance evidence:
+- 235/235 tests, TypeScript, ESLint, production build, private deployment trace audit and git diff --check passed; all 70 generated images retain pixel equality. Tests cover repeated skills, competition grouping, unknown historic titles, standalone subconditions, gold-only days, all feedback contexts and preservation of a drafted answer when the modal opens.
+- Chrome verified the actual local calendar and focused island at 1440, 390 and 320px without horizontal overflow. The 4 November details render three skill rows instead of seven raw attempts; the 2/4 November five-metric summaries and 290 monthly gold remain unchanged. Minimum calendar day width is 44.28px at 320px.
+- Browser checks confirmed the three main navigation links and their absence from focused island/task screens; the task check completed without runtime exceptions. The navigation harness initially timed out around focus refresh and an exhausted-skill screen; a controlled focus refresh returned HTTP 200 in 24–30ms and the focused-task check was repeated after refresh completed. No performance change was made in this slice.
+- All 13 original history/backup files retain baseline SHA-256 hashes. Browser learning navigation used only the disposable fixture; no original learner history, Supabase record or database schema was changed. No Git push or deployment was performed.
+- Local review: http://127.0.0.1:3107/progress . The supplied-history reconstruction is a preview, not a fresh Supabase synchronization. Hosted parent/child feedback and physical-phone behavior remain release smoke checks; automated tests verify the hosted feedback placement and context.
+
+
+## Third-hint reward rule and source consistency - approved 2026-11-05
+
+Status: implemented; final verification and combined production publication in progress.
+
+- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and release verification.
+- [x] Remove “Можеш да продължиш и без нея.” from the review prompt.
+- [x] Keep rewards through hint two; exclude every new gold award after hint three with an explicit persisted flag. Preserve assisted outcomes, learning behavior, old awards and later recovery of unpaid entitlements.
+- [x] Show “Без злато след третата подсказка” after hint three.
+- [x] Unify original and authored source labels across all three competitions using actual original-source metadata and accessible source links.
+- [x] Record the rules in key decisions and the competition checklist. No database migration or production learner edit.
+- [x] Run combined automated checks and isolated browser verification.
+- [ ] Publish all approved pending progress, navigation, performance and current changes to GitHub/Vercel and verify production.
+
+Acceptance evidence:
+- 241/241 tests, TypeScript, ESLint, production build, private deployment trace audit and git diff --check passed.
+- Isolated Chrome gameplay verified three hints followed by a correct answer earns zero gold, persists the exclusion and shows consistent original/practice source labels; no runtime errors at 1440, 390 and 320px.
+- Final calendar browser checks verified the supplied two-day split, 290 monthly gold, compact skill summaries, month/filter/keyboard controls and shared Select states without horizontal overflow at 1440, 390 and 320px.
+- All 13 original learner-history and backup files retain their baseline SHA-256 hashes. Only disposable fixtures received learning commands; no database migration or production learner edit. Previously earned gold remains unchanged.
+- Hosted parent/child Google sessions and physical-phone behavior remain owner smoke checks after publication.

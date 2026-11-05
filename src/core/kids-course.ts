@@ -1,6 +1,6 @@
 import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
-import { chooseSkillProblem, isCompetitionProblem, overlaps, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
+import { chooseSkillProblem, problemSource, isCompetitionProblem, overlaps, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
 import { chooseQuestProblem, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
 
 export type CourseMode = "core" | "challenge" | "review" | "practice";
@@ -14,6 +14,7 @@ export interface CourseProblem {
 	figure?: { src: string; alt: string };
 	provenance?: { year: number; objective: string; page: number; video?: string };
 	teachingFigure?: { src: string; alt: string };
+ practiceSource?: { year: number; problemId: string };
  archive?: { sourceId: string; kind: "original" | "part" | "scaffold"; covers: string[] };
 }
 export interface CourseSkill { id: string; title: string; lesson: string[]; illustration?: CourseProblem["figure"] }
@@ -48,6 +49,8 @@ export interface KidsCourseContent {
 export interface CourseAttempt {
 	key: string; problem: CourseProblem; mode: CourseMode; hintUsed: boolean; hintLevel?: number; questId?: string;
 	answers?: string[]; reasoning?: string; outcome?: KidsOutcome; completedAt?: string;
+ // Explicit exclusions apply only to new attempts; historical awards stay unchanged.
+ goldEligible?: false;
  draft?: { partIndex: number; answers: string[] };
  partIndex?: number; partOutcome?: KidsOutcome; partIncorrect?: boolean; freshEvidence?: boolean;
 }
@@ -97,7 +100,7 @@ export interface KidsCourseView {
 	quest?: { id: string; completed: number; total: number; step: number; finished: boolean; exhausted: boolean; achievement?: string };
  stamps?: QuestStamp[]; inQuest?: boolean; questAvailable?: boolean; nextReviewAt?: string;
  stage: "dashboard" | "question" | "lesson" | "questComplete"; streak?: number; target?: number; exhausted?: boolean;
-	task?: { goldReward?: { amount: number; multiplier: 1 | 1.5 }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; options?: string[];
+	task?: { goldReward?: { amount: number; multiplier: 1 | 1.5 }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; sourceIsPractice?: boolean; options?: string[];
 		fields: { label: string }[]; part?: { index: number; total: number; completed: boolean }; figure?: CourseProblem["figure"]; hint?: string; hints?: string[]; hintLevel?: number; solutionParts?: CourseSolutionPart[];
 		draft?: string[]; outcome?: KidsOutcome; answers?: string[]; explanation?: string[]; reasoning?: string; teachingFigure?: CourseProblem["figure"] };
 	lesson?: { title: string; steps: string[]; total: number; illustration?: CourseProblem["figure"] };
@@ -338,6 +341,7 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 		}
 	}
 	attempt.completedAt = now;
+ if ((attempt.hintLevel ?? 0) >= 3) attempt.goldEligible = false;
  awardProblemGold(course, content, attempt, now);
 	course.attempts.push(structuredClone(attempt));
  if (course.journey === "quest" && course.quest?.work?.attempt.key === attempt.key) course.quest.completed++;
@@ -527,7 +531,7 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
 		view.stage = "lesson"; view.lesson = { title: skill.title, steps: skill.lesson.slice(0, work.lessonStep + 1), total: skill.lesson.length, illustration: skill.illustration };
 	} else {
 		view.stage = "question";
-		view.task = { goldReward: problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, sourceYear: isCompetitionProblem(p) ? p.provenance?.year : undefined, sourceProblemId: isCompetitionProblem(p) || p.archive ? p.archive?.kind === "scaffold" ? `${p.archive.sourceId}:original` : p.id : undefined, options: p.options,
+		view.task = { goldReward: (a.hintLevel ?? 0) >= 3 ? undefined : problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, ...problemSource(p, content), options: p.options,
 			fields: (a.partIndex !== undefined ? [p.fields[a.partIndex]!] : p.fields).map(f => ({ label: f.label })), figure: p.figure,
    ...(a.partIndex !== undefined ? { part: { index: a.partIndex + 1, total: p.fields.length, completed: !!a.partOutcome && !a.outcome } } : {}),
    ...(a.partOutcome && !a.outcome ? { outcome: a.partOutcome, answers: [a.answers![a.partIndex!]!], explanation: [`${p.fields[a.partIndex!]!.label}: ${p.fields[a.partIndex!]!.answer}.`] } : {}),

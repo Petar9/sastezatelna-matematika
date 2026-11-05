@@ -109,7 +109,7 @@ test("NVO reveals three partial solutions, records supported success and prefers
  for (let i = 1; i <= 3; i++) {
   h.go({ type: "hint", taskKey: key }); assert.equal(h.view().task?.solutionParts?.length, i);
  }
- assert.equal(h.correct().task?.outcome, "hinted"); assert.equal(h.view().gold, 25);
+ assert.equal(h.correct().task?.outcome, "hinted"); assert.equal(h.view().gold, 0);
  h.next(); assert.notEqual(h.work().attempt.problem.id, id);
  assert.equal(h.work().attempt.problem.archive?.kind, "original");
 });

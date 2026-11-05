@@ -356,3 +356,5 @@
 @media (max-width: 540px) { .islandGrid { grid-template-columns: minmax(0, 1fr); } }
 
 .courseError { margin: var(--space-4) 0; }
+
+.feedbackAction { margin-top: var(--space-4); }

@@ -7,6 +7,8 @@ import { Button } from "./ui/button";
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 import Image from "next/image";
 import { publicImage } from "@/src/core/public-images";
 import {competitions, DEFAULT_COMPETITION_ID} from "@/src/core/competitions";
@@ -22,9 +24,12 @@ import { knowledgeGrowthKeys } from "./kids-map-decorations";
 import { kidsOutcomeLabels } from "./kids-player";
 import s from "./kids.module.css";
 
-export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learnerNickname, competitionId = DEFAULT_COMPETITION_ID, competitionChoices = [] }: { initialView: KidsCourseView; sessions?: KidsSessionSummary[]; learnerId?: string; learnerNickname?: string; competitionId?: string; competitionChoices?: Competition[] }) {
+export interface KidsCoursePlayerProps { initialView: KidsCourseView; sessions?: KidsSessionSummary[]; learnerId?: string; learnerNickname?: string; competitionId?: string; competitionChoices?: Competition[]; refreshing?: boolean; refreshedView?: KidsCourseView; onViewChange?:(view:KidsCourseView)=>void; onCompetitionChange?:(id:string)=>void; navigationGuard?:{current:(()=>Promise<boolean>)|null}; onBusyChange?:(busy:boolean)=>void; onAccessDenied?:(status:number)=>void }
+export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learnerNickname, competitionId = DEFAULT_COMPETITION_ID, competitionChoices = [], refreshing=false, refreshedView, onViewChange, onCompetitionChange, navigationGuard, onBusyChange, onAccessDenied }: KidsCoursePlayerProps) {
 	const [view, setView] = useState(initialView), [dashboard, setDashboard] = useState(true);
-	const [busy, setBusy] = useState(false), [error, setError] = useState("");
+ const [refreshEpoch,setRefreshEpoch]=useState(0);
+	const [saving, setBusy] = useState(false), [error, setError] = useState("");
+ const busy=saving||refreshing;
 	const [mapTopic, setMapTopic] = useState<string>();
  const [mapMode,setMapMode]=useState<"world"|"topics">("world");
  const [dashboardSection,setDashboardSection]=useState<"home"|"map">("home");
@@ -34,9 +39,13 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
  const pendingDraft = useRef<Extract<CourseAction, { type: "saveDraft" }>>(undefined);
  const draftTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
  const dashboardScroll = useRef<number | undefined>(undefined);
+ const router=useRouter(), leaving=useRef(false), accessDenied=useRef(false);
 
 	const [seenMapGrowth] = useState(() => new Set(knowledgeGrowthKeys(initialView.topics)));
 	const inFlight = useRef(false), heading = useRef<HTMLHeadingElement>(null);
+ useEffect(()=>{onBusyChange?.(saving);},[saving,onBusyChange]);
+ useEffect(()=>{if(refreshedView && refreshedView.revision>=viewRef.current.revision){const changed=refreshedView.revision!==viewRef.current.revision;viewRef.current=refreshedView;setView(refreshedView);if(changed)setRefreshEpoch(value=>value+1);}},[refreshedView]);
+ useEffect(()=>{if(!navigationGuard)return;navigationGuard.current=flushBeforeNavigation;return()=>{navigationGuard.current=null;};},[navigationGuard]);
 	const topic = view.topics.find(t => t.id === view.active?.topicId);
  const activeLeaf = topic?.leaves?.find(leaf => leaf.id === view.task?.skillId);
 	const stageKey = `${dashboard}:${view.stage}:${view.task?.key}:${view.paused}`;
@@ -45,8 +54,22 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
   if (dashboardScroll.current !== undefined) { window.scrollTo?.(0, dashboardScroll.current); dashboardScroll.current = undefined; }
   if (dashboard && mapScroll.current) { const map=document.getElementById("learning-map"); map?.scrollIntoView?.({block:"start",behavior:"instant"}); if(mapScroll.current==="focus") map?.querySelector<HTMLElement>("h2, h3")?.focus({preventScroll:true}); mapScroll.current=undefined; }
  }, [stageKey,dashboard,dashboardSection,mapTopic]);
+ async function flushBeforeNavigation() {
+  clearTimeout(draftTimer.current);
+  const waiting=inFlight.current;
+  if((await commandQueue.current===false&&waiting)||accessDenied.current)return false;
+  inFlight.current=true;setBusy(true);
+  try{return await enqueue();}finally{inFlight.current=false;setBusy(false);}
+ }
+ function leave(event:MouseEvent<HTMLAnchorElement>,href:string) {
+  if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button>0)return;
+  event.preventDefault();
+  if(leaving.current)return;
+  leaving.current=true;
+  void flushBeforeNavigation().then(saved=>{if(saved&&!accessDenied.current)router.push(href);else leaving.current=false;});
+ }
  function navigate(changeView:()=>void) {
-  if(inFlight.current) return;
+  if(inFlight.current||refreshing) return;
   inFlight.current=true; setBusy(true); clearTimeout(draftTimer.current);
   void enqueue().then(saved=>{if(saved) changeView();}).finally(()=>{inFlight.current=false;setBusy(false);});
  }
@@ -67,7 +90,7 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
  // The mounted player owns one child and competition; queued requests use viewRef.
  }, []);
  function act(action: CourseAction): Promise<void> {
-  if (inFlight.current) return Promise.resolve();
+  if (inFlight.current||refreshing) return Promise.resolve();
   inFlight.current = true; setBusy(true);
   return enqueue(action).then(() => {}).finally(() => { inFlight.current = false; setBusy(false); });
  }
@@ -90,14 +113,21 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
  }
  async function send(action: CourseAction) {
   setError("");
-		const receive = (next: KidsCourseView) => { viewRef.current = next; setView(next); };
+		const receive = (next: KidsCourseView) => { if(accessDenied.current)return;viewRef.current = next; setView(next); onViewChange?.(next); };
+  const checked = (response:Response) => {
+   if([401,403,428].includes(response.status)){
+    accessDenied.current=true;onAccessDenied?.(response.status);
+    throw new Error("Достъпът е прекратен.");
+   }
+   return response;
+  };
 		try {
-			const post = (revision: number) => fetch("/api/kids/course", { method: "POST", keepalive: true, headers: { "Content-Type": "application/json", "X-Maths-Competition": competitionId, ...(learnerId ? {"X-Maths-Child": learnerId} : {}) }, body: JSON.stringify({ revision, action }) });
+			const post = async (revision: number) => checked(await fetch("/api/kids/course", { method: "POST", keepalive: true, headers: { "Content-Type": "application/json", "X-Maths-Competition": competitionId, ...(learnerId ? {"X-Maths-Child": learnerId} : {}) }, body: JSON.stringify({ revision, action }) }));
 			const opensPractice = action.type === "selectTopic" || action.type === "resume" || action.type === "startQuest";
 			let response = await post(viewRef.current.revision);
 			let body = await response.json() as { course?: KidsCourseView; error?: string };
 			if (response.status === 409 && opensPractice) {
-				const latest = await fetch("/api/kids/course", { cache: "no-store", headers: {"X-Maths-Competition":competitionId,...(learnerId ? {"X-Maths-Child":learnerId} : {})} });
+				const latest = checked(await fetch("/api/kids/course", { cache: "no-store", headers: {"X-Maths-Competition":competitionId,...(learnerId ? {"X-Maths-Child":learnerId} : {})} }));
 				const refreshed = await latest.json() as { course?: KidsCourseView };
 				if (latest.ok && refreshed.course && refreshed.course.revision !== viewRef.current.revision) {
 					receive(refreshed.course);
@@ -114,9 +144,10 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 			if (action.type === "selectTopic") setMapTopic(action.topicId);
    if (action.type === "resume" && !body.course.inQuest) setMapTopic(body.course.active?.topicId);
 		} catch (error) {
+   if(accessDenied.current)throw error;
 			// A lost response may already have saved the answer. Reconcile without replaying it.
 			try {
-				const latest = await fetch("/api/kids/course", { cache: "no-store", headers: {"X-Maths-Competition":competitionId,...(learnerId ? {"X-Maths-Child":learnerId} : {})} });
+				const latest = checked(await fetch("/api/kids/course", { cache: "no-store", headers: {"X-Maths-Competition":competitionId,...(learnerId ? {"X-Maths-Child":learnerId} : {})} }));
 				if (latest.ok) receive((await latest.json() as { course: KidsCourseView }).course);
 			} catch { /* A later command still has the revision guard. */ }
 			setError(error instanceof Error ? error.message : "Провери връзката и опитай отново.");
@@ -133,7 +164,7 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 		</header>
 		{error && <Message tone="error" className={s.courseError}><p>{error}</p>{error === "Не успяхме да продължим. Презареди страницата." && <Button variant="secondary" className={s.secondary} onClick={() => window.location.reload()}>Презареди страницата</Button>}</Message>}
 		{showDashboard ? <>
-   {competitionChoices.length > 1 && <CompetitionPicker choices={competitionChoices} competitionId={competitionId}/>}
+   {competitionChoices.length > 1 && <CompetitionPicker choices={competitionChoices} competitionId={competitionId} disabled={saving} onSelect={onCompetitionChange}/>}
    {!focusedIsland && <AdventureHome view={view} nickname={learnerNickname} busy={busy} start={() => void act({ type: "startQuest" })} resumeTopic={() => void act({ type: "resume" })} headingRef={heading}/>}
    {!focusedIsland && <TreasureCollection stamps={view.stamps ?? []} />}
    <LearningMap topics={view.topics} progress={view} busy={busy} act={act} seenGrowth={seenMapGrowth} selection={{topicId:focusedIsland?mapTopic:undefined}} select={selectIsland} viewMode={mapMode} setViewMode={setMapMode}/>
@@ -143,20 +174,21 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 			{view.stage!=="questComplete" && <h1 ref={heading} tabIndex={-1} className={`${s.title} ${s.practiceTitle}`}>{topic?.title}</h1>}
 			{view.inQuest && view.quest && <QuestTrail quest={view.quest}/>}
    {view.stage === "questComplete" && <QuestFinish view={view} busy={busy} act={act} finish={showHome} map={() => showMap(null)}/>}
-			{view.active?.mode === "review" && <p className={s.small}>Да си припомним с позната задача. Можеш да продължиш и без нея.</p>}
+			{view.active?.mode === "review" && <p className={s.small}>Да си припомним с позната задача.</p>}
 			{view.exhausted && <section className={s.card}><h2>{view.active?.skillId ? "За момента няма следваща задача в тази подтема." : "За момента няма следваща задача за тази стъпка."}</h2><KidsActionBar label={view.active?.skillId ? "Към острова" : "Към картата"} disabled={busy} onClick={() => showMap(view.active?.skillId ? view.active.topicId : null)}/></section>}
 			{view.lesson && <section className={s.card}><h2>Да научим: {view.lesson.title}</h2><ol className={s.steps}>{view.lesson.steps.map((step, i) => <li key={i}>{step}</li>)}</ol>{view.lesson.illustration && <TeachingFigure figure={view.lesson.illustration} />}<p className={s.small}>Стъпка {view.lesson.steps.length} от {view.lesson.total}</p><KidsActionBar label={view.lesson.steps.length < view.lesson.total ? "Следваща стъпка" : view.inQuest && view.quest?.completed === view.quest?.total ? "Отвори съкровището" : "Да пробвам нова задача"} disabled={busy} onClick={() => void act({ type: "lessonNext" })}/></section>}
-			{view.task && <section className={`${s.card} ${s.taskCard}`}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title !== topic?.title && <h2 className={s.taskSkill}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title}</h2>}<CourseQuestion key={`${view.task.key}:${view.task.part?.index ?? 0}`} task={view.task} competitionId={competitionId} leaf={activeLeaf} inQuest={view.inQuest} goldGain={view.goldGain} busy={busy} act={act} draftChanged={draftChanged} />
+			{view.task && <section className={`${s.card} ${s.taskCard}`}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title !== topic?.title && <h2 className={s.taskSkill}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title}</h2>}<CourseQuestion key={`${view.task.key}:${view.task.part?.index ?? 0}:${refreshEpoch}`} task={view.task} competitionId={competitionId} leaf={activeLeaf} inQuest={view.inQuest} goldGain={view.goldGain} busy={busy} act={act} draftChanged={draftChanged} />
 				{view.reward && <div className={s.reward} role="status"><KidsOtter rank={view.reward.rank} mood="celebrate" /><h2>Браво! Вече си {view.reward.rank === "doctor" ? "доктор" : "професор"} по {view.reward.topic}! <span aria-hidden="true">🎓</span></h2></div>}
 				{view.complete && view.reward && <div className={s.feedback}><h2>Завърши курса! <span aria-hidden="true">🎉</span></h2></div>}
 				{view.task.outcome && <div className={s.actions}><KidsActionBar label={view.task.part?.completed ? "Следващо подусловие" : view.inQuest && view.quest?.completed === view.quest?.total ? "Отвори съкровището" : view.task.outcome === "independent" ? "Следваща задача" : "Продължи"} disabled={busy} onClick={() => void act({ type: "nextQuestion" })}/><Button variant="secondary" className={s.secondary} disabled={busy} onClick={() => showMap()}>Към картата</Button></div>}
 			</section>}
 		</>}
-		<footer className={s.footer}><Link href="/about" className={s.quiet}>За сайта</Link><Link href="/profiles" className={s.quiet}>Профили</Link>{learnerId && <FeedbackButton childId={learnerId} competitionId={competitionId} taskKey={showDashboard ? undefined : view.task?.key}/>}</footer>
+  {showDashboard && !focusedIsland && <footer className={s.footer}><Link href="/about" onClick={event=>leave(event,"/about")} className={s.quiet}>За сайта</Link><Link href={learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress"} onClick={event=>leave(event,learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress")} className={s.quiet}>Напредък</Link><Link href="/profiles" onClick={event=>leave(event,"/profiles")} className={s.quiet}>Профили</Link></footer>}
+  {learnerId && <div className={s.feedbackAction}><FeedbackButton childId={learnerId} competitionId={competitionId} taskKey={!showDashboard && !view.paused ? view.task?.key : undefined}/></div>}
 	</div></main>;
 }
 
-export function CompetitionPicker({ choices, competitionId }: { choices: Competition[]; competitionId: string }) {
+export function CompetitionPicker({ choices, competitionId, disabled=false, onSelect }: { choices: Competition[]; competitionId: string; disabled?:boolean; onSelect?:(id:string)=>void }) {
  const [open, setOpen] = useState(false);
  const container = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null);
  const id = useId();
@@ -170,11 +202,11 @@ export function CompetitionPicker({ choices, competitionId }: { choices: Competi
  return <div className={s.competitionPicker} ref={container} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false); }} onKeyDown={event => {
   if (event.key === "Escape" && open) { event.preventDefault(); setOpen(false); trigger.current?.focus(); }
  }}>
-  <button ref={trigger} className={s.competitionTrigger} aria-label={`Избери състезание: ${current?.title ?? "Състезания"}`} aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)}>
+  <button ref={trigger} disabled={disabled} className={s.competitionTrigger} aria-label={`Избери състезание: ${current?.title ?? "Състезания"}`} aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)}>
    <span className={s.competitionName}><small>Състезание · 4. клас</small><strong>{current?.title ?? "Избери състезание"}</strong></span>
    <Badge tone="warning">{current?.difficulty === "easy" ? "Лесно" : "Трудно"}</Badge><span className={s.competitionChevron} aria-hidden="true">⌄</span>
   </button>
-  {open && <nav id={id} className={s.competitionOptions} aria-label="Състезания">{choices.map(item => <Link key={item.id} className={s.competitionOption} aria-current={item.id === competitionId ? "page" : undefined} href={`/?competition=${encodeURIComponent(item.id)}`} onClick={() => setOpen(false)}>
+  {open && <nav id={id} className={s.competitionOptions} aria-label="Състезания">{choices.map(item => <Link key={item.id} prefetch={onSelect?false:undefined} className={s.competitionOption} aria-current={item.id === competitionId ? "page" : undefined} href={`/?competition=${encodeURIComponent(item.id)}`} onClick={event => {if(disabled){event.preventDefault();return;}if(onSelect&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();onSelect(item.id);}setOpen(false);}}>
    <span>{item.title}</span><Badge tone="warning">{item.difficulty === "easy" ? "Лесно" : "Трудно"}</Badge><span className={s.competitionCheck} aria-hidden="true">{item.id === competitionId ? "✓" : ""}</span>
   </Link>)}</nav>}
  </div>;
@@ -185,7 +217,7 @@ function CourseQuestion({ task, competitionId, leaf, inQuest, goldGain, busy, ac
 	const [field, setField] = useState(0);
  const reasoning = task.reasoning ?? "";
  const competitionTitle = competitions.find(item => item.id === competitionId)?.title ?? "Състезание";
- const sourceLabel = task.sourceYear ? `${competitionTitle} · ${task.sourceYear}` : competitionTitle;
+ const sourceLabel = `${task.sourceIsPractice ? "По " : ""}${competitionTitle}${task.sourceYear ? ` · ${task.sourceYear}` : ""}`;
 	const done = !!task.outcome;
 	const feedbackHeading = useRef<HTMLHeadingElement>(null);
 	useEffect(() => { if (task.outcome) feedbackHeading.current?.focus(); }, [task.outcome]);
@@ -208,7 +240,7 @@ function CourseQuestion({ task, competitionId, leaf, inQuest, goldGain, busy, ac
 		</>}
 		{!done && !!task.solutionParts?.length && <aside className={s.hint} aria-label="Подсказка" aria-live="polite"><h3>Подсказка · {task.solutionParts.length} от 3</h3><ol className={s.steps}>{task.solutionParts.map((part, i) => <li key={i}><strong>{part.title}</strong>{part.paragraphs.map((text, n) => <p key={n}>{text}</p>)}</li>)}</ol></aside>}
 		{!inQuest && !done && leaf && <KidsLearningProgress leaf={leaf}/>}
-  {!done && task.goldReward && <ProblemGoldPreview reward={task.goldReward}/>}
+  {!done && ((task.hintLevel ?? 0) >= 3 ? <p className={s.small} role="status">Без злато след третата подсказка</p> : task.goldReward && <ProblemGoldPreview reward={task.goldReward}/>)}
   {!done && <div className={s.actions}><KidsActionBar label="Провери отговора" disabled={busy || !ready} onClick={() => { if (ready) void act({ type: "answer", taskKey: task.key, answers: task.options ? [String(choice)] : values, reasoning }); }} secondary={{label:task.hintLevel ? "Следваща подсказка" : "Подсказка",disabled:busy || (task.hintLevel ?? 0) >= 3,onClick:() => { setChoice(undefined); if (task.options) saveDraft([""]); void act({ type: "hint", taskKey: task.key, reasoning }); }}}/><Button variant="quiet" className={s.quiet} disabled={busy} onClick={() => void act({ type: "reveal", taskKey: task.key, reasoning })}>Покажи решението</Button></div>}
 		{task.outcome && <div className={s.feedback} role="status"><div className={s.feedbackHeading}><KidsOtter small mood={task.outcome === "independent" || task.outcome === "hinted" ? "celebrate" : "support"}/><h3 ref={feedbackHeading} tabIndex={-1}>{task.outcome === "hinted" ? "Верен отговор с помощ" : kidsOutcomeLabels[task.outcome]}</h3></div>{goldGain && <GoldReward gain={goldGain} concise/>}{leaf && <KidsLearningProgress leaf={leaf} concise/>} {task.outcome === "independent" || task.outcome === "hinted" ? <details><summary>Виж решението</summary><ol className={s.steps}>{task.explanation?.map((step, i) => <li key={i}>{step}</li>)}</ol>{task.teachingFigure && <TeachingFigure figure={task.teachingFigure} />}</details> : <ol className={s.steps}>{task.explanation?.map((step, i) => <li key={i}>{step}</li>)}</ol>}{task.outcome !== "independent" && task.outcome !== "hinted" && task.teachingFigure && <TeachingFigure figure={task.teachingFigure} />}</div>}
 		<p className={s.small}>{task.sourceProblemId ? <a href={`/sources?competition=${encodeURIComponent(competitionId)}&problem=${encodeURIComponent(task.sourceProblemId)}`} target="_blank" rel="noopener noreferrer">{sourceLabel}</a> : sourceLabel}</p>

@@ -1,5 +1,5 @@
 import {notFound,redirect} from "next/navigation";
-import {KidsCoursePlayer} from "@/components/kids-course";
+import {KidsCompetitionPlayer} from "@/components/kids-competition-player";
 import {Landing} from "@/components/landing";
 import {learnerContext,readKidsCourseView,mode} from "@/src/server";
 import {availableCompetitions} from "@/src/server/competitions";
@@ -10,7 +10,8 @@ export default async function Home({searchParams}:{searchParams:Promise<{competi
  if(mode()==="hosted"&&process.env.VERCEL_ENV==="preview")return <Landing request={params.request}/>;
  try {
   const context=await learnerContext({api:false,competitionId:params.competition});
-  return <KidsCoursePlayer key={`${context.childId??"local"}:${context.competitionId}`} learnerId={context.childId} learnerNickname={context.childNickname} competitionId={context.competitionId} competitionChoices={availableCompetitions()} initialView={await readKidsCourseView(context.courseStore,context.content)} sessions={context.legacyStore?.list()??[]}/>;
+  const choices=availableCompetitions();
+  return <KidsCompetitionPlayer key={`${context.childId??"local"}:${choices.map(choice=>choice.contentVersion).join(":")}`} learnerId={context.childId} learnerNickname={context.childNickname} competitionId={context.competitionId} competitionChoices={choices} initialView={await readKidsCourseView(context.courseStore,context.content)} sessions={context.legacyStore?.list()??[]}/>;
  }catch(error){
   if(error instanceof KidsError){
    if(error.status===401)return <Landing request={params.request}/>;

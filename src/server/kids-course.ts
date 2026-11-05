@@ -3,12 +3,13 @@ import {courseView,newKidsCourse,parseCourseCommand} from "../core/kids-course.t
 import type {KidsCourse,KidsCourseContent,CourseAction} from "../core/kids-course.ts";
 import {newGoldGain} from "../core/kids-gold.ts";
 import {kidsCourseContent} from "./kids-course-content.ts";
-export interface CourseStore {goldBalance?(current:KidsCourse):number|Promise<number>;read(content?:KidsCourseContent):KidsCourse|null|Promise<KidsCourse|null>;update(revision:number,action:CourseAction,content:KidsCourseContent):KidsCourse|Promise<KidsCourse>;}
+export interface CourseStore {readSnapshot?(content:KidsCourseContent):Promise<{course:KidsCourse|null;gold:number}>;goldBalance?(current:KidsCourse):number|Promise<number>;read(content?:KidsCourseContent):KidsCourse|null|Promise<KidsCourse|null>;update(revision:number,action:CourseAction,content:KidsCourseContent):KidsCourse|Promise<KidsCourse>;}
 export async function readKidsCourseView(store:CourseStore, content:KidsCourseContent = kidsCourseContent){
- const now=new Date().toISOString();const course=await store.read(content)??newKidsCourse(content,now);
+ const now=new Date().toISOString();const snapshot=await store.readSnapshot?.(content);const course=(snapshot?snapshot.course:await store.read(content))??newKidsCourse(content,now);
  if(course.contentVersion!==content.version)throw new KidsError("Учебният комплект е от несъвместима версия.",409);
  const view=courseView(course,content,now);
- if(store.goldBalance)view.gold=await store.goldBalance(course);
+ if(snapshot)view.gold=snapshot.gold;
+ else if(store.goldBalance)view.gold=await store.goldBalance(course);
  return view;
 }
 export const json=(body:unknown,status=200)=>Response.json(body,{status,headers:{"Cache-Control":"no-store"}});

@@ -72,15 +72,15 @@ test("source originals retain their wording, figures and provenance while the am
  assert.equal(roman.options![Number(roman.fields[0]!.answer)],"MMXXV");assert.match(roman.source,/добавени учебни/);
 });
 
-test("three solution parts reveal progressively and helped success earns gold before fresh confirmation",()=>{
+test("three solution parts reveal progressively without gold, before a fresh success earns confirmation",()=>{
  const h=harness();h.go({type:"selectTopic",topicId:"oli-numbers"});const key=h.work().attempt.key;
  for(let i=1;i<=3;i++){
   h.go({type:"hint",taskKey:key});assert.equal(h.view().task?.solutionParts?.length,i);assert.equal(h.view().gold,0);
  }
  assert.throws(()=>h.go({type:"hint",taskKey:key}),{status:409});
- assert.equal(h.correct().task?.outcome,"hinted");assert.equal(h.view().gold,25);assert.equal(h.view().target,1);
+ assert.equal(h.correct().task?.outcome,"hinted");assert.equal(h.view().gold,0);assert.equal(h.view().target,1);
  const id=h.work().attempt.problem.id;h.next();assert.notEqual(h.work().attempt.problem.id,id);
- h.correct();assert.equal(h.view().gold,60);assert.equal(h.view().topics[0]!.confirmed,1);
+ h.correct();assert.equal(h.view().gold,50);assert.equal(h.view().topics[0]!.confirmed,1);
 });
 
 test("Olympiad five-task adventures finish with distinct tasks, bounded diagnosis and a retained treasure",()=>{

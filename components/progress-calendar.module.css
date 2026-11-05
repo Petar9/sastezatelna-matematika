@@ -1,0 +1,40 @@
+.stack { display: grid; gap: var(--space-6); min-width: 0; }
+.filter { display: grid; gap: var(--space-2); width: min(100%, 24rem); }
+.filter label { color: var(--muted); font-size: var(--text-small); font-weight: 600; }
+.calendar, .details { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-6); min-width: 0; }
+.monthNavigation { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.monthNavigation h2 { margin: 0; text-align: center; font-size: var(--text-heading); line-height: var(--line-heading); }
+.totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-6) 0; }
+.totals > div { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); background: var(--accent); border-radius: var(--radius-control); min-width: 0; }
+.totals dt { color: var(--muted); font-size: var(--text-small); line-height: var(--line-control); overflow-wrap: anywhere; }
+.totals dd { margin: 0; font-size: var(--text-title); font-weight: 700; line-height: var(--line-heading); font-variant-numeric: tabular-nums; }
+.totals > div:first-child { background: var(--celebration); }
+.legend { color: var(--muted); font-size: var(--text-small); line-height: var(--line-body); }
+.grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: var(--space-1); }
+.weekday { text-align: center; color: var(--muted); padding-block: var(--space-2); font-size: var(--text-small); }
+.day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1); min-width: 0; min-height: 88px; padding: var(--space-1) 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--foreground); cursor: pointer; font-variant-numeric: tabular-nums; }
+.day:hover { background: var(--accent); }
+.day[aria-pressed="true"] { outline: 2px solid var(--primary); outline-offset: -3px; }
+.day[aria-current="date"] .dayNumber { text-decoration: underline; text-underline-offset: 4px; }
+.active { background: var(--sea); border-color: var(--border); }
+.dayNumber { font-size: var(--text-small); font-weight: 600; }
+.dayGold { background: var(--gold); border-radius: var(--radius-pill); min-width: 24px; padding-inline: var(--space-1); font-size: var(--text-small); font-weight: 700; }
+.dayCounts { font-size: var(--text-caption); color: var(--muted); }
+.calendar .day:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: -3px; }
+.details h2 { margin-top: 0; font-size: var(--text-heading); line-height: var(--line-heading); }
+.daySummary { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); margin: 0 0 var(--space-6); }
+.daySummary > div { display: flex; flex-direction: column; gap: var(--space-1); }
+.daySummary dt { color: var(--muted); font-size: var(--text-small); }
+.daySummary dd { margin: 0; font-size: var(--text-heading); font-weight: 700; font-variant-numeric: tabular-nums; }
+.entries { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.entries li { display: grid; gap: var(--space-1); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.skillGroup + .skillGroup { margin-top: var(--space-6); }
+.skillGroup h3 { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--text-small); font-weight: 600; }
+.skillTitle { font-weight: 600; line-height: var(--line-body); }
+.skillResults { font-size: var(--text-small); color: var(--muted); line-height: var(--line-body); }
+.entries li:last-child { border-bottom: 0; padding-bottom: 0; }
+.summary + .summary { margin-top: var(--space-6); }
+.summary h3 { font-size: var(--text-body); }
+.summary p { line-height: var(--line-body); }
+@media(max-width: 600px) { .calendar, .details { padding: var(--space-4); } .totals { gap: var(--space-2); } .totals > div { padding: var(--space-2); } .totals dt { font-size: var(--text-caption); } .totals dd { font-size: var(--text-heading); } }
+@media(max-width: 400px) { .calendar { margin-inline: -14px; padding: var(--space-3) 0; border-inline: 0; border-radius: 0; } .monthNavigation, .totals, .legend { margin-inline: var(--space-2); } .monthNavigation h2 { font-size: var(--text-body); } .totals { gap: var(--space-1); } .totals > div { padding-inline: var(--space-1); } .totals dt { overflow-wrap: normal; } .grid { gap: 1px; } .day { border-radius: 6px; } }

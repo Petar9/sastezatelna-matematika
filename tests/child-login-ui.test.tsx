@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { registerHooks } from "node:module";
 import { test } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
 import { parseHTML } from "linkedom";
 registerHooks({ load(url, context, nextLoad) {
   if (url.endsWith(".module.css")) return { format: "module", source: "export default new Proxy({}, {get:(_,key)=>String(key)});", shortCircuit: true };
@@ -10,7 +11,7 @@ registerHooks({ load(url, context, nextLoad) {
 } });
 Object.assign(globalThis, { React });
 const { ChildProfiles, LoginWelcome } = await import("../components/onboarding.tsx");
-const documentFor = (node: React.ReactNode) => parseHTML(`<html><body>${renderToStaticMarkup(node)}</body></html>`).document;
+const documentFor = (node: React.ReactNode) => parseHTML(`<html><body>${renderToStaticMarkup(<AppRouterContext.Provider value={{ refresh() {} } as never}>{node}</AppRouterContext.Provider>)}</body></html>`).document;
 const children = [{ id: "one", nickname: "Лисиче", loginEmail: "child@example.com", loginConnected: true }];
 
 test("setup offers an independent skip form and only renders an owned child", () => {

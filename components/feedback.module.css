@@ -1,4 +1,4 @@
-.link { padding: var(--space-3) 0; text-decoration: underline; text-underline-offset: 4px; font: inherit; }
+.link { padding: var(--space-3) 0; text-decoration: underline; text-underline-offset: 4px; }
 .help { color: var(--muted); font-size: var(--text-small); line-height: var(--line-body); }
 .message { margin: var(--space-4) 0; }
 

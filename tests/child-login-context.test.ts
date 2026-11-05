@@ -133,3 +133,15 @@ test("allowlist and resolver backend errors propagate without granting access", 
   await assert.rejects(accountContext(), error => error === resolverError);
   assert.deepEqual(state.upserts, []);
 });
+
+test("learner requests recheck ownership without parent writes or login-management reads",async()=>{
+ state.user={...verifiedChild,id:"parent",email:"parent@example.com"};
+ state.tables.allowed_parent_emails=[{email:"parent@example.com"}];
+ state.tables.child_profiles=[{id:"own",nickname:"Моряк",parent_id:"parent",active:true}];
+ const context=await learnerContext({api:true,childId:"own"});
+ assert.equal(context.childId,"own");
+ assert.deepEqual(state.upserts,[]);
+ assert.deepEqual(state.queries.map(query=>query.table),["allowed_parent_emails","child_profiles"]);
+ state.tables.child_profiles=[];
+ await assert.rejects(learnerContext({api:true,childId:"own"}),{status:428});
+});

@@ -5,13 +5,14 @@ import {test} from "node:test";
 import {registerHooks} from "node:module";
 import {parseHTML} from "linkedom";
 import {applyCourseAction,courseView,newKidsCourse} from "../src/core/kids-course.ts";
+import {catalogueProblems, isCompetitionProblem, problemSource} from "../src/core/kids-selection.ts";
 import {newGoldGain} from "../src/core/kids-gold.ts";
 import type {CourseAction, CourseTopicView} from "../src/core/kids-course.ts";
 import {nvoCourseContent} from "../src/server/nvo-course-content.ts";
 import {olympiadCourseContent} from "../src/server/olimpiada-course-content.ts";
-import {competitions,publishedCompetitions} from "../src/core/competitions.ts";
+import {competitions,publishedCompetitions,DEFAULT_COMPETITION_ID} from "../src/core/competitions.ts";
 import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
-registerHooks({load(url,context,nextLoad){if(url.endsWith(".module.css"))return{format:"module",source:"export default new Proxy({}, {get:(_,key)=>String(key)});",shortCircuit:true};if(url.endsWith("/next/image.js"))return{format:"module",source:'import React from "react"; export default function Image({unoptimized, ...props}) { return React.createElement("img",props); }',shortCircuit:true};return nextLoad(url,context);}});
+registerHooks({load(url,context,nextLoad){if(url.endsWith(".module.css"))return{format:"module",source:"export default new Proxy({}, {get:(_,key)=>String(key)});",shortCircuit:true};if(url.endsWith("/next/navigation.js"))return{format:"module",source:'export function useRouter(){return {push(href){globalThis.__courseRoutes?.push(href);}}}',shortCircuit:true};if(url.endsWith("/next/image.js"))return{format:"module",source:'import React from "react"; export default function Image({unoptimized, ...props}) { return React.createElement("img",props); }',shortCircuit:true};return nextLoad(url,context);}});
 const dom=parseHTML("<html><body></body></html>");
 Object.assign(globalThis,{React,window:dom.window,self:dom.window,document:dom.document,HTMLElement:dom.window.HTMLElement,IS_REACT_ACT_ENVIRONMENT:true});
 document.oninput=null;
@@ -177,6 +178,8 @@ test("otter adventure home, three solution parts, explicit reveal and five-probl
   await act(async()=>button(h.host,"Следваща подсказка").click());
   await act(async()=>button(h.host,"Следваща подсказка").click());
   assert.equal(button(h.host,"Следваща подсказка").disabled,true);
+  assert.ok(h.host.textContent!.includes("Без злато след третата подсказка"));
+  assert.equal(courseView(h.record,content,now).task!.goldReward,undefined);
   assert.equal(h.record.quest!.completed,0);
   await act(async()=>button(h.host,"Почивка").click());
   primary(h.host,"Продължи");
@@ -736,7 +739,7 @@ test("a chosen subtopic opens its exercises, resumes after home and removes dupl
 
 
 test("task source footer shows only competition and actual year, including old saved labels", async () => {
- for (const [catalogue, competition] of [[content, competitions[0]!], [olympiadCourseContent, competitions[1]!]] as const) {
+ for (const [catalogue, competition] of [[content, competitions[0]!], [olympiadCourseContent, competitions[1]!], [nvoCourseContent, competitions[2]!]] as const) {
   const topic = catalogue.topics[0]!;
   let record = applyCourseAction(newKidsCourse(catalogue, now), catalogue, {type:"selectTopic",topicId:topic.id}, now);
   const work = record.topics[topic.id]!.work.core!;
@@ -1027,5 +1030,227 @@ test("technical draft and version errors offer reload without resetting or resub
    finally { Object.defineProperty(window, "location", { configurable: true, value: priorLocation }); }
    assert.equal(JSON.stringify(h.record), before); assert.equal(h.actions.length, actionCount);
   } finally { await h.cleanup(); }
+ }
+});
+
+const {KidsCompetitionPlayer}=await import("../components/kids-competition-player.tsx");
+function mockHistory(){
+ const originalLocation=Object.getOwnPropertyDescriptor(window,"location"),originalHistory=Object.getOwnPropertyDescriptor(window,"history");
+ const location={search:"",assignments:[] as string[],assign(url:string){this.assignments.push(url);}};
+ const history={pushState(_state:unknown,_title:string,url:string){location.search=new URL(url,"http://localhost").search;},replaceState(_state:unknown,_title:string,url:string){location.search=new URL(url,"http://localhost").search;}};
+ Object.defineProperty(window,"location",{value:location,configurable:true});Object.defineProperty(window,"history",{value:history,configurable:true});
+ return {location,restore(){for(const [name,descriptor] of [["location",originalLocation],["history",originalHistory]] as const){if(descriptor)Object.defineProperty(window,name,descriptor);else Reflect.deleteProperty(window,name);}}};
+}
+async function chooseCompetition(host:HTMLElement,id:string){
+ await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label^="Избери състезание:"]')!.click());
+ const link=host.querySelector<HTMLAnchorElement>(`a[href="/?competition=${id}"]`);assert.ok(link);
+ await act(async()=>link.dispatchEvent(new dom.window.Event("click",{bubbles:true,cancelable:true})));
+}
+test("competition revisits render private snapshots immediately and gate actions until fresh GET",async()=>{
+ const originalFetch=globalThis.fetch,history=mockHistory(),pending:((response:Response)=>void)[]=[],headers:Headers[]=[];
+ const choices=publishedCompetitions(),initial=courseView(newKidsCourse(content,now),content,now),nvo=courseView(newKidsCourse(nvoCourseContent,now),nvoCourseContent,now);
+ globalThis.fetch=async(_url,init)=>{headers.push(new Headers(init?.headers));assert.equal(init?.cache,"no-store");return new Promise(resolve=>pending.push(resolve));};
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ try{
+  await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={choices} initialView={initial}/>));
+  assert.equal(pending.length,0);
+  await chooseCompetition(host,"nvo");assert.ok(host.textContent!.includes("Обновяване…"));assert.equal(host.querySelector('[aria-label="Карта на ученето"]'),null);
+  await act(async()=>pending.shift()!(Response.json({course:nvo})));
+  assert.ok(host.textContent!.includes(nvo.topics[0]!.title));
+  await chooseCompetition(host,choices[0]!.id);
+  assert.ok(host.textContent!.includes("Точки и мачове"),"cached map renders before the deferred response");
+  assert.equal(button(host,"Започни приключение").disabled,true);
+  const changed={...initial,revision:3,gold:123,topics:initial.topics.map((topic,index)=>index===0?{...topic,doctor:true}:topic)};
+  await act(async()=>pending.shift()!(Response.json({course:changed})));
+  assert.equal(button(host,"Започни приключение").disabled,false);assert.ok(host.textContent!.includes("123"));
+  await chooseCompetition(host,"nvo");
+  await act(async()=>pending.shift()!(Response.json({course:{...nvo,revision:2}})));
+  await chooseCompetition(host,choices[0]!.id);
+  await act(async()=>pending.shift()!(Response.json({course:{...initial,revision:1,gold:0}})));
+  assert.ok(host.textContent!.includes("Не успяхме да обновим"));assert.ok(host.textContent!.includes("123"));assert.equal(button(host,"Започни приключение").disabled,true);
+  assert.ok(headers.every(h=>h.get("X-Maths-Child")==="child-a"));
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+});
+
+test("competition refresh ignores obsolete replies and clears private display on denied access",async()=>{
+ const originalFetch=globalThis.fetch,history=mockHistory(),pending:((response:Response)=>void)[]=[];
+ const initial=courseView(newKidsCourse(content,now),content,now),nvo=courseView(newKidsCourse(nvoCourseContent,now),nvoCourseContent,now);
+ globalThis.fetch=async()=>new Promise(resolve=>pending.push(resolve));
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ try{
+  await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={initial}/>));
+  await chooseCompetition(host,"nvo");await chooseCompetition(host,"olimpiada");
+  await act(async()=>pending[0]!(Response.json({course:nvo})));
+  assert.equal(host.querySelector('[aria-label="Карта на ученето"]'),null);assert.ok(host.textContent!.includes("Олимпиада"));
+  await act(async()=>pending[1]!(Response.json({}, {status:403})));
+  assert.deepEqual(history.location.assignments,["/login?denied=1"]);assert.equal(host.querySelector('[aria-label="Карта на ученето"]'),null);
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+});
+
+test("browser competition changes flush pending drafts and retain the current exercise on save failure",async()=>{
+ for(const fail of [true,false]){
+  const originalFetch=globalThis.fetch,history=mockHistory();let record=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"grids"},now);const actions:CourseAction[]=[];
+  globalThis.fetch=async(_url,init)=>{
+   const id=new Headers(init?.headers).get("X-Maths-Competition");
+   if(init?.method==="POST"){
+    const {action}=JSON.parse(String(init.body)) as {action:CourseAction};
+    if(fail&&action.type==="saveDraft")return Response.json({error:"Не успяхме да запазим. Опитай отново."},{status:500});
+    actions.push(action);record=applyCourseAction(record,content,action,now);
+   }
+   return Response.json({course:id==="nvo"?courseView(newKidsCourse(nvoCourseContent,now),nvoCourseContent,now):courseView(record,content,now)});
+  };
+  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+  try{
+   await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={courseView(record,content,now)}/>));
+   await act(async()=>button(host,`Продължи: ${content.topics.find(topic=>topic.id==="grids")!.title}`).click());
+   await act(async()=>button(host,"7").click());
+   history.location.search="?competition=nvo";
+   await act(async()=>window.dispatchEvent(new dom.window.Event("popstate")));
+   if(fail){assert.ok(host.querySelector('[role="alert"]'));assert.ok(host.querySelector('[aria-label="Следващо действие"]'));assert.ok(history.location.search.includes(DEFAULT_COMPETITION_ID));assert.equal(host.querySelector<HTMLInputElement>("input")!.value,"7");}
+   else{assert.ok(actions.some(action=>action.type==="saveDraft"&&action.answers[0]==="7"));assert.ok(host.textContent!.includes("НВО"));}
+  }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+ }
+});
+
+test("focus saves local input before refresh, restores newer remote drafts and denies obsolete account replies",async()=>{
+ const originalFetch=globalThis.fetch,history=mockHistory(),pending:((response:Response)=>void)[]=[];
+ let record=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"grids"},now);
+ const actions:CourseAction[]=[];
+ globalThis.fetch=async(_url,init)=>{
+  if(init?.method==="POST"){
+   const {action}=JSON.parse(String(init.body)) as {action:CourseAction};actions.push(action);record=applyCourseAction(record,content,action,now);
+   return Response.json({course:courseView(record,content,now)});
+  }
+  return new Promise(resolve=>pending.push(resolve));
+ };
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ try{
+  await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={courseView(record,content,now)}/>));
+  await act(async()=>button(host,`Продължи: ${content.topics.find(topic=>topic.id==="grids")!.title}`).click());
+  await act(async()=>button(host,"7").click());
+  await act(async()=>window.dispatchEvent(new dom.window.Event("focus")));
+  assert.equal(actions.at(-1)?.type,"saveDraft");assert.deepEqual(courseView(record,content,now).task!.draft,["7"]);
+  assert.equal(button(host,"Провери отговора").disabled,true);
+  const task=courseView(record,content,now).task!;
+  record=applyCourseAction(record,content,{type:"saveDraft",taskKey:task.key,partIndex:0,answers:["8"]},now);
+  await act(async()=>pending.shift()!(Response.json({course:courseView(record,content,now)})));
+  assert.equal(host.querySelector<HTMLInputElement>("input")!.value,"8");assert.equal(button(host,"Провери отговора").disabled,false);
+  await act(async()=>button(host,"← Начало").click());
+  await chooseCompetition(host,"nvo");await chooseCompetition(host,"olimpiada");
+  await act(async()=>pending.shift()!(Response.json({}, {status:401})));
+  assert.deepEqual(history.location.assignments,["/login"]);
+  assert.equal(host.querySelector('[aria-label="Карта на ученето"]'),null);
+  await act(async()=>pending.shift()!(Response.json({course:courseView(newKidsCourse(olympiadCourseContent,now),olympiadCourseContent,now)})));
+  assert.equal(host.querySelector('[aria-label="Карта на ученето"]'),null,"later success must not restore a denied learner's cache");
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+});
+
+
+test("home navigation awaits pending drafts, retains failed input and exposes footer routes only on main",async()=>{
+ for(const href of ["/about","/profiles","/progress?child=child-a"]){
+  for(const fail of [false,true]){
+   const h=await mount("grids",false,"child-a"),fetchCourse=globalThis.fetch,routes:string[]=[];
+   Object.assign(globalThis,{__courseRoutes:routes});
+   let finish:((response:Response)=>void)|undefined,submitted:CourseAction|undefined;
+   try{
+    globalThis.fetch=async(url,init)=>{
+     if(init?.method==="POST"){
+      const {action}=JSON.parse(String(init.body)) as {action:CourseAction};
+      if(action.type==="saveDraft"){submitted=action;return new Promise(resolve=>{finish=resolve;});}
+     }
+     return fetchCourse(url,init);
+    };
+    await act(async()=>button(h.host,"7").click());
+    const input=h.host.querySelector<HTMLInputElement>("input")!;
+    assert.equal(h.host.querySelector("footer"),null);
+    await act(async()=>button(h.host,"← Начало").click());
+    assert.equal(submitted?.type,"saveDraft");assert.deepEqual(submitted?.answers,["7"]);assert.deepEqual(routes,[]);
+    assert.equal(input.value,"7");
+    const modal=h.host.querySelector<HTMLDialogElement>("dialog")!;
+    modal.showModal=()=>{modal.setAttribute("open","");};
+    await act(async()=>button(h.host,"Подай обратна връзка").click());
+    assert.ok(modal.hasAttribute("open"),"pending route save must not block feedback");
+    if(!fail)h.advance(submitted!);
+    await act(async()=>finish!(fail?Response.json({error:"Не успяхме да запазим."},{status:500}):Response.json({course:courseView(h.record,content,now)})));
+    assert.deepEqual(routes,[]);
+    if(!fail){
+     assert.equal(h.host.querySelectorAll("footer a").length,3);
+     await act(async()=>h.host.querySelector<HTMLAnchorElement>(`footer a[href="${href}"]`)!.dispatchEvent(new dom.window.Event("click",{bubbles:true,cancelable:true})));
+     assert.deepEqual(routes,[href]);
+    }
+    if(fail){assert.ok(h.host.querySelector('[role="alert"]'));assert.equal(h.host.querySelector("input"),input);assert.equal(input.value,"7");}
+   }finally{Reflect.deleteProperty(globalThis,"__courseRoutes");await h.cleanup();}
+  }
+ }
+});
+
+test("all reconciliation reads and navigation retry posts purge private state on access denial",async()=>{
+ for(const path of ["network","conflict-read","retry-post"] as const){
+  for(const status of [401,403,428]){
+   const originalFetch=globalThis.fetch,history=mockHistory(),initial=courseView(newKidsCourse(content,now),content,now),requests:string[]=[];
+   globalThis.fetch=async(_url,init)=>{
+    const method=init?.method??"GET";requests.push(method);
+    if(requests.length===1){if(path==="network")throw new Error("Lost response");return Response.json({},{status:409});}
+    if(path==="retry-post"&&method==="GET")return Response.json({course:{...initial,revision:initial.revision+1}});
+    return Response.json({},{status});
+   };
+   const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+   try{
+    await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={initial}/>));
+    await act(async()=>button(host,"Започни приключение").click());
+    assert.deepEqual(requests,path==="retry-post"?["POST","GET","POST"]:["POST","GET"]);
+    assert.deepEqual(history.location.assignments,[status===401?"/login":status===403?"/login?denied=1":"/profiles"]);
+    assert.equal(host.querySelector('[aria-label="Карта на ученето"]'),null);
+    assert.equal(host.querySelector("header"),null,"denied recovery must remove private player immediately");
+   }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+  }
+ }
+});
+
+
+test("quiet feedback remains on main, island, task and pause and includes only visible task context",async()=>{
+ const h=await mount("grids",false,"child-a"),fetchCourse=globalThis.fetch;
+ const bodies:Record<string,unknown>[]=[];
+ try{
+  globalThis.fetch=async(url,init)=>{if(url==="/api/reports"){bodies.push(JSON.parse(String(init?.body)));return Response.json({});}return fetchCourse(url,init);};
+  async function check(taskVisible:boolean,footerVisible:boolean){
+   assert.equal(!!h.host.querySelector("footer"),footerVisible);
+   assert.equal([...h.host.querySelectorAll("button")].filter(item=>item.textContent==="Подай обратна връзка").length,1);
+   const modal=h.host.querySelector<HTMLDialogElement>("dialog")!;
+   modal.showModal=()=>modal.setAttribute("open","");
+   modal.close=()=>{modal.removeAttribute("open");modal.dispatchEvent(new dom.window.Event("close"));};
+   await act(async()=>button(h.host,"Подай обратна връзка").click());
+   const textarea=modal.querySelector<HTMLTextAreaElement>("textarea")!;
+   await act(async()=>{Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype,"value")!.set!.call(textarea,"Тестова обратна връзка");textarea.dispatchEvent(new dom.window.Event("input",{bubbles:true}));});
+   await act(async()=>modal.querySelector("form")!.dispatchEvent(new dom.window.Event("submit",{bubbles:true,cancelable:true})));
+   assert.equal(bodies.at(-1)?.taskKey,taskVisible?courseView(h.record,content,now).task!.key:undefined);
+   assert.equal(bodies.at(-1)?.childId,"child-a");
+   await act(async()=>button(modal,"Затвори").click());
+  }
+  await check(true,false);
+  await act(async()=>button(h.host,"← Начало").click());await check(false,true);
+  await act(async()=>islandButton(h.host,"Точки и мачове").click());await check(false,false);
+  await act(async()=>button(h.host,"Към задачите").click());await check(true,false);
+  await act(async()=>button(h.host,"Почивка").click());await check(false,false);
+  assert.equal(h.record.attempts.length,0);
+ }finally{await h.cleanup();}
+});
+
+
+test("derived task footers use the same linked competition/year pattern without internal codes",async()=>{
+ for(const [catalogue,competition] of [[content,competitions[0]!],[olympiadCourseContent,competitions[1]!]] as const){
+  const practice=catalogueProblems(catalogue).find(p=>!isCompetitionProblem(p))!;
+  const topic=catalogue.topics.find(t=>t.skills.some(s=>s.id===practice.skillId))!;
+  const record=applyCourseAction(newKidsCourse(catalogue,now),catalogue,{type:"selectTopic",topicId:topic.id},now);
+  record.topics[topic.id]!.work.core!.attempt.problem=practice;
+  const originalFetch=globalThis.fetch;globalThis.fetch=async()=>Response.json({course:courseView(record,catalogue,now)});
+  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+  try{
+   await act(async()=>root.render(<KidsCoursePlayer initialView={courseView(record,catalogue,now)} competitionId={competition.id}/>));
+   await act(async()=>button(host,`Продължи: ${topic.title}`).click());
+   const footer=host.querySelector('a[href^="/sources?"]')!;
+   assert.ok(footer);assert.equal(footer.textContent,`По ${competition.title} · ${problemSource(practice,catalogue).sourceYear}`);
+   assert.equal(footer.parentElement!.textContent,footer.textContent);
+  }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;}
  }
 });

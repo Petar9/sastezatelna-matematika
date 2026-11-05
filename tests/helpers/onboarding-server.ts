@@ -12,11 +12,14 @@ export const state = {
   signedOut: false,
   oauthOptions: undefined as unknown,
   inserted: undefined as unknown,
+  updated: undefined as unknown,
+  updateFilters: [] as [string, unknown][],
+  updateMissing: false,
   databaseError: null as null | { code: string; message: string },
 };
 export function reset() {
   Object.assign(state, { deployment: "hosted", role: "parent", rpcCall: undefined, deleteFilters: [], children: [], parentError: undefined, authError: false, exchangeError: false,
-    throws: false, signedOut: false, oauthOptions: undefined, inserted: undefined, databaseError: null });
+    throws: false, signedOut: false, oauthOptions: undefined, inserted: undefined, updated: undefined, updateFilters: [], updateMissing: false, databaseError: null });
 }
 export const childCookie = "maths_child";
 export function mode() { return state.deployment; }
@@ -40,6 +43,15 @@ export async function accountContext() {
       if (table === "child_profiles") return { insert(value: unknown) {
         state.inserted = value;
         return { select() { return { async single() { return { data: { id: "created-child" }, error: state.databaseError }; } }; } };
+      }, update(value: unknown) {
+        state.updated = value;
+        state.updateFilters = [];
+        const chain = {
+          eq(key: string, value: unknown) { state.updateFilters.push([key, value]); return chain; },
+          select() { return chain; },
+          async maybeSingle() { return { data: state.updateMissing ? null : { id: "child-a" }, error: state.databaseError }; },
+        };
+        return chain;
       } };
       if (table === "child_profile_logins") return { delete() {
         state.deleteFilters = [];
