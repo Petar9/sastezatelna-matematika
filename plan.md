@@ -626,3 +626,6 @@ Homepage and first profile update, 2026-11-04:
 - Existing progress row count remains 1, reports remain 0, and the progress fingerprint matches the pre-migration value. No learner history was imported, reset or modified.
 - Release acceptance: prior 207/207 tests, TypeScript, ESLint, production build, private-bundle checks, pixel equality and isolated desktop/mobile/keyboard checks passed. Only release documentation changed after those checks.
 - Publication and live HTTP verification follow below; physical-phone keyboard and signed-in family flows remain the owner's smoke test.
+
+- Published application commit `028d84f`; Vercel deployment `9NrKCgaa1TuazrutfEbPzymvawiL` reported success. Live `/welcome`, `/login` and `/about` returned HTTP 200, with the new semantic token stylesheet present. `/design-system`, `/data/kids/course-v2.json` and `/materials/` returned HTTP 404. No application-error screen was returned.
+- Final local history/backup comparison: all 13 files unchanged. Supabase migration verification confirmed unchanged hosted progress before publication. Signed-in Google/child access and physical-phone keyboard behavior remain for the agreed owner smoke test; release checks did not submit answers or feedback to production.
