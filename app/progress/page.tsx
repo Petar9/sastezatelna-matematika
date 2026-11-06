@@ -27,7 +27,7 @@ export default async function Progress({ searchParams }: { searchParams: Promise
    await learnerContext({ api: false });
    collections = competitions.map(competition => ({ ...projectProgressCourse(localStores(competition.id).kidsCourseStore.read(), competition.id, competitionContent(competition.id)), title: competition.title }));
   } else {
-   const account = await accountContext();
+   const account = await accountContext({learningOnly:true});
    const child = progressChild(account.children, params.child, (await cookies()).get(childCookie)?.value);
    childId = child.id; nickname = child.nickname; parent = account.role === "parent";
    children = account.children.map(item => ({ id: item.id, nickname: item.nickname }));

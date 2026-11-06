@@ -3,7 +3,14 @@ import {courseView,newKidsCourse,parseCourseCommand} from "../core/kids-course.t
 import type {KidsCourse,KidsCourseContent,CourseAction} from "../core/kids-course.ts";
 import {newGoldGain} from "../core/kids-gold.ts";
 import {kidsCourseContent} from "./kids-course-content.ts";
-export interface CourseStore {readSnapshot?(content:KidsCourseContent):Promise<{course:KidsCourse|null;gold:number}>;goldBalance?(current:KidsCourse):number|Promise<number>;read(content?:KidsCourseContent):KidsCourse|null|Promise<KidsCourse|null>;update(revision:number,action:CourseAction,content:KidsCourseContent):KidsCourse|Promise<KidsCourse>;}
+export interface CourseStore {
+ readSnapshot?(content:KidsCourseContent):Promise<{course:KidsCourse|null;gold:number}>;
+ goldBalance?(current:KidsCourse):number|Promise<number>;
+ read(content?:KidsCourseContent):KidsCourse|null|Promise<KidsCourse|null>;
+ update(revision:number,action:CourseAction,content:KidsCourseContent):KidsCourse|Promise<KidsCourse>;
+ // Return the migrated input used by the successful revision-guarded update.
+ updateWithPrevious?(revision:number,action:CourseAction,content:KidsCourseContent):Promise<{before:KidsCourse;next:KidsCourse}>;
+}
 export async function readKidsCourseView(store:CourseStore, content:KidsCourseContent = kidsCourseContent){
  const now=new Date().toISOString();const snapshot=await store.readSnapshot?.(content);const course=(snapshot?snapshot.course:await store.read(content))??newKidsCourse(content,now);
  if(course.contentVersion!==content.version)throw new KidsError("Учебният комплект е от несъвместима версия.",409);
@@ -17,8 +24,9 @@ export function failure(error:unknown){if(error instanceof KidsError)return json
 export async function kidsCourseResponse(request:Request,store:CourseStore,content:KidsCourseContent = kidsCourseContent){try{
  if(request.method==="GET")return json({course:await readKidsCourseView(store,content)});
  const {revision,action}=parseCourseCommand(await request.json().catch(()=>null));
- const before=await store.read(content)??newKidsCourse(content,new Date().toISOString());
- const next=await store.update(revision,action,content);
+ const {before,next}=store.updateWithPrevious
+  ?await store.updateWithPrevious(revision,action,content)
+  :{before:await store.read(content)??newKidsCourse(content,new Date().toISOString()),next:await store.update(revision,action,content)};
  const view=courseView(next,content,new Date().toISOString());
  if(store.goldBalance)view.gold=await store.goldBalance(next);
  view.goldGain=newGoldGain(before,next);

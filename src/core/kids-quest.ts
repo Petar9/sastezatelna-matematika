@@ -1,6 +1,6 @@
 import type { CourseMode, CourseProblem, KidsCourse, KidsCourseContent, LearningConceptView, LearningSkillView, QuestKind } from "./kids-course.ts";
 
-import { chooseSkillProblem, isCompetitionProblem, isIntroduction, teachingMethod, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
+import { chooseSkillProblem, createSelectionContext, isCompetitionProblem, isIntroduction, teachingMethod, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
 
 export function learningSkillView(course: KidsCourse, content: KidsCourseContent, topicId: string, now: string): LearningSkillView[] {
  const topic = content.topics.find(t => t.id === topicId)!;
@@ -48,7 +48,8 @@ export function learningMapView(course: KidsCourse, content: KidsCourseContent, 
  });
 }
 
-export function chooseQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string, preferredSkill?: string, availabilityOnly = false) {
+function selectQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string, preferredSkill?: string, availabilityOnly = false, existenceOnly = false) {
+ const context = createSelectionContext(course, content, now);
  const quest = course.quest!;
  const previous = quest.steps.at(-1);
  const primary = (id: string) => teachingMethod(content, id);
@@ -58,7 +59,7 @@ export function chooseQuestProblem(course: KidsCourse, content: KidsCourseConten
  const paired = !!last && !!penultimate && primary(penultimate.problem.skillId) === lastMethod;
  const followup = last && !paired;
  const opening = quest.completed === 0;
- const known = new Set(course.attempts.filter(a => a.outcome === "independent").map(a => primary(a.problem.skillId)));
+ const known = context.independentMethods;
  const prerequisites = (id: string) => content.concepts?.find(c => c.id === primary(id))?.prerequisites ?? [];
  const failures = course.attempts.filter(a => a.questId === quest.id && a.outcome !== "independent");
  const diagnosticCount = quest.steps.filter(s => s.kind === "diagnostic").length;
@@ -74,24 +75,25 @@ export function chooseQuestProblem(course: KidsCourse, content: KidsCourseConten
  const candidates: { topicId: string; skillId: string; mode: CourseMode; problem: CourseProblem; kind: QuestKind; cursor: number; score: number }[] = [];
  for (const topic of content.topics) for (const skill of topic.skills) {
   const progress = course.topics[topic.id]!, state = progress.skills[skill.id]!;
-  const independent = course.attempts.some(a => a.problem.skillId === skill.id && a.outcome === "independent");
+  const independent = context.independentSkills.has(skill.id);
   const familiar = !state.revisit && (!!state.confirmedAt || independent);
   const gap = state.revisit || !state.confirmedAt && state.streak > 0;
   const topicConfirmed = topic.skills.every(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit);
   const challenge = !!followup && last.outcome === "independent" && last.problem.skillId === skill.id && topicConfirmed && ready(skill.id);
   const due = skillReviewDue(course, topic.id, skill.id);
   let mode: CourseMode = challenge ? "challenge" : familiar && !!due && due <= now ? "review" : "core";
-  let chosen = chooseSkillProblem(course, content, skill.id, mode === "challenge", now, mode === "review");
+  let chosen = chooseSkillProblem(course, content, skill.id, mode === "challenge", now, mode === "review", undefined, context, existenceOnly);
   if (!chosen && topicConfirmed && ready(skill.id)) {
    mode = "challenge";
-   chosen = chooseSkillProblem(course, content, skill.id, true, now);
+   chosen = chooseSkillProblem(course, content, skill.id, true, now, false, undefined, context, existenceOnly);
   }
   if (!chosen) continue;
   const { problem, cursor } = chosen;
   const original = isCompetitionProblem(problem);
   if (desired === "diagnostic" && quest.diagnosticFor && !focusConcepts.has(primary(skill.id))) continue;
+  if (existenceOnly) return { topicId: topic.id, skillId: skill.id, mode, problem, cursor, kind: desired, score: 0 };
   const matches = desired === "diagnostic" ? original && !familiar : desired === "familiar" ? familiar : gap;
-  const lastIndex = course.attempts.findLastIndex(a => primary(a.problem.skillId) === primary(skill.id));
+  const lastIndex = context.lastMethodIndices.get(primary(skill.id)) ?? -1;
   const sameConcept = previous && primary(previous.skillId) === primary(skill.id);
   const related = focus && focusConcepts.has(primary(skill.id));
   // Pair one fresh application with the previous method, then interleave.
@@ -100,7 +102,7 @@ export function chooseQuestProblem(course: KidsCourse, content: KidsCourseConten
   if (opening && known.has(primary(skill.id))) score += 60000;
   if (followup && primary(skill.id) === lastMethod) score += 100000 + (original ? 20000 : 0) + (skill.id === last.problem.skillId ? 2000 : 0);
   if (paired && primary(skill.id) === lastMethod) score -= 100000;
-  if (isIntroduction(course, content, problem)) score += 4000;
+  if (isIntroduction(course, content, problem, context.independentMethods)) score += 4000;
   if (desired === "diagnostic" && !original) score -= 20000;
   if ((desired === "diagnostic" || desired === "gap") && related) score += 1500;
   if (!ready(skill.id) && !gap) score -= 20000;
@@ -117,9 +119,20 @@ export function chooseQuestProblem(course: KidsCourse, content: KidsCourseConten
  const chosen = candidates[0];
  if (desired === "diagnostic" && (!chosen || !isCompetitionProblem(chosen.problem))) {
   quest.diagnostic = false;
-  return chooseQuestProblem(course, content, now, preferredSkill, availabilityOnly);
+  return selectQuestProblem(course, content, now, preferredSkill, availabilityOnly, existenceOnly);
  }
  return chosen;
+}
+
+export function chooseQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string, preferredSkill?: string, availabilityOnly = false) {
+ return selectQuestProblem(course, content, now, preferredSkill, availabilityOnly);
+}
+
+export function hasQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string): boolean {
+ // The preview replaces quest work, reserving only manual work. Its fresh quest
+ // is the only object selection mutates, so learner history needs no deep clone.
+ const preview: KidsCourse = { ...course, quest: { id: "preview", startedAt: now, steps: [], completed: 0, diagnostic: false } };
+ return !!selectQuestProblem(preview, content, now, undefined, true, true);
 }
 
 export function questAchievement(course: KidsCourse): string {

@@ -49,10 +49,10 @@ export function skillPrerequisitesReady(course: KidsCourse, content: KidsCourseC
   return teachingMethod(content, skill.id) === concept && !state.revisit && (!!state.confirmedAt || state.streak > 0);
  })));
 }
-export function isIntroduction(course: KidsCourse, content: KidsCourseContent, problem: CourseProblem) {
+export function isIntroduction(course: KidsCourse, content: KidsCourseContent, problem: CourseProblem, independentMethods?: ReadonlySet<string>) {
  const method = teachingMethod(content, problem.skillId);
  return content.introductions?.[method]?.problemId === problem.id && isCompetitionProblem(problem)
-  && !course.attempts.some(a => teachingMethod(content, a.problem.skillId) === method && a.outcome === "independent");
+  && !(independentMethods ? independentMethods.has(method) : course.attempts.some(a => teachingMethod(content, a.problem.skillId) === method && a.outcome === "independent"));
 }
 export function overlaps(a: CourseProblem, b: CourseProblem, content?: KidsCourseContent): boolean {
  if (a.id === b.id || problemIdentity(a) === problemIdentity(b)) return true;
@@ -68,12 +68,62 @@ export function skillReviewDue(course: KidsCourse, topicId: string, skillId: str
  return state.reviewDueAt ?? (state.confirmedAt ? new Date(Date.parse(state.lastReviewAt ?? state.confirmedAt) + 2 * 86400000).toISOString() : undefined);
 }
 
+type Exposure = { seen: boolean; blocked: boolean; reserved: boolean };
+export type SelectionContext = ReturnType<typeof createSelectionContext>;
+
+// A selection call owns this snapshot. Never retain it across commands: history,
+// pending work and saved problem snapshots can all change without changing identity.
+export function createSelectionContext(course: KidsCourse, content: KidsCourseContent, now: string, replacingKey?: string) {
+ const identities = new WeakMap<CourseProblem, string>();
+ const identity = (problem: CourseProblem) => {
+  let value = identities.get(problem);
+  if (value === undefined) { value = problemIdentity(problem); identities.set(problem, value); }
+  return value;
+ };
+ const archive = (problem: CourseProblem) => {
+  if (problem.archive) return problem.archive;
+  const canonical = catalogueFor(content).get(problem.id);
+  return canonical && identity(canonical) === identity(problem) ? canonical.archive : undefined;
+ };
+ const byId = new Map<string, Exposure>(), byIdentity = new Map<string, Exposure>();
+ const bySource = new Map<string, Map<string, Exposure>>();
+ const independentSkills = new Set<string>(), independentMethods = new Set<string>(), lastMethodIndices = new Map<string, number>();
+ const merge = (index: Map<string, Exposure>, key: string, value: Exposure) => {
+  const existing = index.get(key);
+  if (existing) { existing.seen ||= value.seen; existing.blocked ||= value.blocked; existing.reserved ||= value.reserved; }
+  else index.set(key, { ...value });
+ };
+ const add = (problem: CourseProblem, value: Exposure) => {
+  merge(byId, problem.id, value); merge(byIdentity, identity(problem), value);
+  const source = archive(problem);
+  if (source) {
+   let covers = bySource.get(source.sourceId);
+   if (!covers) { covers = new Map(); bySource.set(source.sourceId, covers); }
+   for (const cover of source.covers) merge(covers, cover, value);
+  }
+ };
+ const time = Date.parse(now);
+ for (const [index, attempt] of course.attempts.entries()) {
+  const method = teachingMethod(content, attempt.problem.skillId);
+  lastMethodIndices.set(method, index);
+  if (attempt.outcome === "independent") { independentSkills.add(attempt.problem.skillId); independentMethods.add(method); }
+  add(attempt.problem, { seen: true, blocked: !attempt.completedAt || time - Date.parse(attempt.completedAt) < 2 * 86400000, reserved: false });
+ }
+ for (const problem of pendingProblems(course, replacingKey)) add(problem, { seen: false, blocked: false, reserved: true });
+ return { independentSkills, independentMethods, lastMethodIndices, exposure(problem: CourseProblem): Exposure {
+  const result = { seen: false, blocked: false, reserved: false };
+  const include = (value?: Exposure) => { if (value) { result.seen ||= value.seen; result.blocked ||= value.blocked; result.reserved ||= value.reserved; } };
+  include(byId.get(problem.id)); include(byIdentity.get(identity(problem)));
+  const source = archive(problem);
+  if (source) { const covers = bySource.get(source.sourceId); for (const cover of source.covers) include(covers?.get(cover)); }
+  return result;
+ } };
+}
+
 // Enumerate finite catalogues from the beginning. Saved cursors remain compatible,
 // but cannot hide newly prioritised originals after a content-order change.
-export function chooseSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, now: string, review = false, replacingKey?: string) {
- const reserved = pendingProblems(course, replacingKey);
- const history = course.attempts;
- const candidates: { problem: CourseProblem; cursor: number; rank: number }[] = [];
+export function chooseSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, now: string, review = false, replacingKey?: string, context = createSelectionContext(course, content, now, replacingKey), existenceOnly = false) {
+ let chosen: { problem: CourseProblem; cursor: number; rank: number } | undefined;
  const ids = new Set<string>();
  for (const pool of harder ? [true] : [false, true]) for (let cursor = 0; cursor < 1000; cursor++) {
   const problem = content.problem(skillId, cursor, pool);
@@ -82,12 +132,13 @@ export function chooseSkillProblem(course: KidsCourse, content: KidsCourseConten
   ids.add(problem.id);
   // Harder authored tasks remain challenges, rather than filling exhausted core pools.
   if (!harder && pool && !isCompetitionProblem(problem)) continue;
-  if (reserved.some(p => overlaps(p, problem, content))) continue;
-  const seen = history.filter(a => overlaps(a.problem, problem, content));
-  if (seen.length && (!review || seen.some(a => !a.completedAt || Date.parse(now) - Date.parse(a.completedAt) < 2 * 86400000))) continue;
+  const exposure = context.exposure(problem);
+  if (exposure.reserved || exposure.seen && (!review || exposure.blocked)) continue;
+  if (existenceOnly) return { problem, cursor, rank: 0 };
   const rank = isCompetitionProblem(problem) ? problem.archive?.kind === "part" ? 3 : 4 : problem.archive?.kind === "scaffold" ? 1 : 0;
-  candidates.push({ problem, cursor, rank: rank + (seen.length ? -10 : 0) + (!harder && isIntroduction(course, content, problem) ? 2 : 0) });
+  const candidate = { problem, cursor, rank: rank + (exposure.seen ? -10 : 0) + (!harder && isIntroduction(course, content, problem, context.independentMethods) ? 2 : 0) };
+  // Strict comparison preserves catalogue order for equal ranks, including pools.
+  if (!chosen || candidate.rank > chosen.rank) chosen = candidate;
  }
- candidates.sort((a, b) => b.rank - a.rank);
- return candidates[0];
+ return chosen;
 }

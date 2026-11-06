@@ -1,7 +1,7 @@
 import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
 import { chooseSkillProblem, problemSource, isCompetitionProblem, overlaps, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
-import { chooseQuestProblem, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
+import { chooseQuestProblem, hasQuestProblem, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
 
 export type CourseMode = "core" | "challenge" | "review" | "practice";
 export interface CourseField { label: string; answer: string }
@@ -511,9 +511,7 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
 		professorGoal: Math.ceil(topics.length / 2), complete: !!course.completedAt, previouslyCompleted: !!course.previousCompletions?.length, stage: "dashboard" };
 	view.inQuest = course.journey === "quest";
  view.stamps = course.stamps ?? [];
- const preview = structuredClone(course);
- preview.quest = { id: "preview", startedAt: now, steps: [], completed: 0, diagnostic: false };
- view.questAvailable = !!chooseQuestProblem(preview, content, now, undefined, true);
+ view.questAvailable = hasQuestProblem(course, content, now);
  view.nextReviewAt = topics.map(t => t.reviewDueAt).filter((date): date is string => !!date && date > now).sort()[0];
  if (course.quest) view.quest = { id: course.quest.id, completed: course.quest.completed, total: course.quest.total ?? 5,
   step: Math.min(course.quest.steps.length, course.quest.total ?? 5), finished: !!course.quest.completedAt, exhausted: !!course.quest.exhausted,

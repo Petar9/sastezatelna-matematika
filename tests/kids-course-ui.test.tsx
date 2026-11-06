@@ -1046,7 +1046,8 @@ async function chooseCompetition(host:HTMLElement,id:string){
  const link=host.querySelector<HTMLAnchorElement>(`a[href="/?competition=${id}"]`);assert.ok(link);
  await act(async()=>link.dispatchEvent(new dom.window.Event("click",{bubbles:true,cancelable:true})));
 }
-test("competition revisits render private snapshots immediately and gate actions until fresh GET",async()=>{
+test("stale competition revisits render private snapshots immediately and gate actions until fresh GET",async()=>{
+ const originalNow=Date.now;let clock=originalNow();Date.now=()=>clock;
  const originalFetch=globalThis.fetch,history=mockHistory(),pending:((response:Response)=>void)[]=[],headers:Headers[]=[];
  const choices=publishedCompetitions(),initial=courseView(newKidsCourse(content,now),content,now),nvo=courseView(newKidsCourse(nvoCourseContent,now),nvoCourseContent,now);
  globalThis.fetch=async(_url,init)=>{headers.push(new Headers(init?.headers));assert.equal(init?.cache,"no-store");return new Promise(resolve=>pending.push(resolve));};
@@ -1057,19 +1058,22 @@ test("competition revisits render private snapshots immediately and gate actions
   await chooseCompetition(host,"nvo");assert.ok(host.textContent!.includes("Обновяване…"));assert.equal(host.querySelector('[aria-label="Карта на ученето"]'),null);
   await act(async()=>pending.shift()!(Response.json({course:nvo})));
   assert.ok(host.textContent!.includes(nvo.topics[0]!.title));
+  clock+=30_001;
   await chooseCompetition(host,choices[0]!.id);
   assert.ok(host.textContent!.includes("Точки и мачове"),"cached map renders before the deferred response");
   assert.equal(button(host,"Започни приключение").disabled,true);
   const changed={...initial,revision:3,gold:123,topics:initial.topics.map((topic,index)=>index===0?{...topic,doctor:true}:topic)};
   await act(async()=>pending.shift()!(Response.json({course:changed})));
   assert.equal(button(host,"Започни приключение").disabled,false);assert.ok(host.textContent!.includes("123"));
+  clock+=30_001;
   await chooseCompetition(host,"nvo");
-  await act(async()=>pending.shift()!(Response.json({course:{...nvo,revision:2}})));
+  await act(async()=>pending.shift()!(Response.json({course:{...nvo,revision:2,gold:123}})));
+  clock+=30_001;
   await chooseCompetition(host,choices[0]!.id);
   await act(async()=>pending.shift()!(Response.json({course:{...initial,revision:1,gold:0}})));
   assert.ok(host.textContent!.includes("Не успяхме да обновим"));assert.ok(host.textContent!.includes("123"));assert.equal(button(host,"Започни приключение").disabled,true);
   assert.ok(headers.every(h=>h.get("X-Maths-Child")==="child-a"));
- }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;Date.now=originalNow;history.restore();}
 });
 
 test("competition refresh ignores obsolete replies and clears private display on denied access",async()=>{
@@ -1253,4 +1257,141 @@ test("derived task footers use the same linked competition/year pattern without 
    assert.equal(footer.parentElement!.textContent,footer.textContent);
   }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;}
  }
+});
+
+
+test("fresh competition revisits reuse private snapshots and retain the latest global wallet",async()=>{
+ const originalFetch=globalThis.fetch,history=mockHistory();let gets=0;
+ const initial=courseView(newKidsCourse(content,now),content,now);
+ globalThis.fetch=async()=>{gets++;return Response.json({course:{...courseView(newKidsCourse(nvoCourseContent,now),nvoCourseContent,now),gold:123}});};
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ try{
+  await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={initial}/>));
+  await chooseCompetition(host,"nvo");assert.equal(gets,1);
+  await chooseCompetition(host,DEFAULT_COMPETITION_ID);
+  assert.equal(gets,1);assert.equal(button(host,"Започни приключение").disabled,false);assert.ok(host.textContent!.includes("123"));
+  await chooseCompetition(host,"nvo");assert.equal(gets,1);
+  await act(async()=>window.dispatchEvent(new dom.window.Event("focus")));
+  assert.equal(gets,2,"focus revalidates even a fresh private snapshot");
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+});
+
+test("an immediate answer atomically includes its matching pending draft in one save",async()=>{
+ const h=await mount();try{
+  await act(async()=>h.host.querySelector<HTMLButtonElement>('[aria-label="Отговори"] button')!.click());
+  const before=h.actions.length;
+  await act(async()=>primary(h.host,"Провери отговора").click());
+  assert.deepEqual(h.actions.slice(before).map(action=>action.type),["answer"]);
+  assert.equal(h.record.attempts.length,1);
+ }finally{await h.cleanup();}
+});
+
+test("an immediate numeric answer coalesces its exact pending draft into one save",async()=>{
+ const h=await mount("sequences");try{
+  const attempt=h.record.topics.sequences!.work.core!.attempt;
+  assert.equal(courseView(h.record,content,now).task!.part,undefined);assert.equal(attempt.problem.options,undefined);
+  const before=h.actions.length,revision=h.record.revision,answers=attempt.problem.fields.map(field=>field.answer);
+  for(const digit of answers[0]!)await act(async()=>button(h.host,digit).click());
+  await act(async()=>primary(h.host,"Провери отговора").click());
+  assert.deepEqual(h.actions.slice(before),[{type:"answer",taskKey:attempt.key,answers,reasoning:""}]);
+  assert.equal(h.record.revision,revision+1);assert.equal(h.record.attempts.length,1);
+  assert.deepEqual(h.record.attempts[0]!.answers,answers);assert.equal(h.record.attempts[0]!.outcome,"independent");
+  assert.equal(courseView(h.record,content,now).task!.draft,undefined);
+ }finally{await h.cleanup();}
+});
+
+test("immediate numeric multipart answers coalesce only the current part and award the original once",async()=>{
+ const h=await mount("grids");try{
+  const attempt=h.record.topics.grids!.work.core!.attempt;
+  const answers=attempt.problem.fields.map(field=>field.answer);
+  assert.equal(answers.length,3);
+  for(const [part,answer] of answers.entries()){
+   assert.equal(courseView(h.record,content,now).task!.part!.index,part+1);
+   const before=h.actions.length,revision=h.record.revision;
+   for(const digit of answer)await act(async()=>button(h.host,digit).click());
+   await act(async()=>primary(h.host,"Провери отговора").click());
+   assert.deepEqual(h.actions.slice(before),[{type:"answer",taskKey:attempt.key,answers:[answer],reasoning:""}]);
+   assert.equal(h.record.revision,revision+1,"each part is submitted with one revision-guarded save");
+   assert.deepEqual(h.record.topics.grids!.work.core!.attempt.answers,answers.slice(0,part+1));
+   assert.equal(courseView(h.record,content,now).task!.draft,undefined);
+   if(part<answers.length-1){
+    assert.equal(h.record.attempts.length,0);assert.equal(courseView(h.record,content,now).gold,0);
+    await act(async()=>primary(h.host,"Следващо подусловие").click());
+   }
+  }
+  assert.equal(h.actions.filter(action=>action.type==="saveDraft").length,0);
+  assert.equal(h.record.attempts.length,1);assert.equal(h.record.attempts[0]!.outcome,"independent");
+  assert.equal(h.record.goldAwards!.length,2);assert.equal(h.record.problemGoldAwards!.length,1);
+  assert.ok(courseView(h.record,content,now).gold>0);
+ }finally{await h.cleanup();}
+});
+
+test("a coalesced answer conflict reconciles newer work and waits for an explicit answer retry",async()=>{
+ const h=await mount(),fetchCourse=globalThis.fetch;const posts:CourseAction[]=[];
+ try{
+  globalThis.fetch=async(url,init)=>{if(init?.method==="POST")posts.push(JSON.parse(String(init.body)).action);return fetchCourse(url,init);};
+  const task=h.record.topics.matches!.work.core!.attempt,answer=Number(task.problem.fields[0]!.answer);
+  await act(async()=>h.host.querySelectorAll<HTMLButtonElement>('[aria-label="Отговори"] button')[answer]!.click());
+  h.advance({type:"hint",taskKey:task.key});
+  await act(async()=>primary(h.host,"Провери отговора").click());
+  assert.deepEqual(posts.map(action=>action.type),["answer"]);
+  assert.equal(h.actions.filter(action=>action.type==="answer").length,0);
+  assert.equal(h.record.attempts.length,0);assert.equal(courseView(h.record,content,now).gold,0);
+  assert.equal(courseView(h.record,content,now).task!.hintLevel,1);assert.ok(h.host.querySelector('[role="alert"]'));
+  await act(async()=>h.host.querySelectorAll<HTMLButtonElement>('[aria-label="Отговори"] button')[answer]!.click());
+  await act(async()=>primary(h.host,"Провери отговора").click());
+  assert.deepEqual(posts.map(action=>action.type),["answer","answer"]);
+  assert.equal(h.record.attempts.length,1);assert.equal(h.record.attempts[0]!.outcome,"hinted");
+  assert.equal(h.record.goldAwards!.length,2);assert.equal(h.record.problemGoldAwards!.length,1);
+  assert.equal(courseView(h.record,content,now).gold,25);
+ }finally{await h.cleanup();}
+});
+
+test("a lost coalesced answer reply reconciles once without resubmitting or repeating gold",async()=>{
+ const h=await mount("matches",true);try{
+  const task=h.record.topics.matches!.work.core!.attempt,answer=Number(task.problem.fields[0]!.answer),before=h.actions.length;
+  await act(async()=>h.host.querySelectorAll<HTMLButtonElement>('[aria-label="Отговори"] button')[answer]!.click());
+  await act(async()=>{const check=primary(h.host,"Провери отговора");check.click();check.click();});
+  assert.deepEqual(h.actions.slice(before).map(action=>action.type),["answer"]);
+  assert.equal(h.record.attempts.length,1);assert.equal(h.record.goldAwards!.length,2);assert.equal(h.record.problemGoldAwards!.length,1);
+  const awards=structuredClone({skills:h.record.goldAwards,problems:h.record.problemGoldAwards});
+  assert.equal(courseView(h.record,content,now).gold,25);assert.equal(h.host.querySelectorAll("[data-gold-gain]").length,0);
+  assert.ok(h.host.querySelector('[role="alert"]')!.textContent!.includes("Lost response"));
+  await act(async()=>primary(h.host,"Следваща задача").click());
+  await h.reload();
+  assert.equal(h.record.attempts.length,1);assert.equal(h.actions.filter(action=>action.type==="answer").length,1);
+  assert.deepEqual({skills:h.record.goldAwards,problems:h.record.problemGoldAwards},awards);
+  assert.equal(h.host.querySelectorAll("[data-gold-gain]").length,0);
+ }finally{await h.cleanup();}
+});
+
+test("a reward POST updates the wallet on an immediate cached competition revisit",async()=>{
+ const originalFetch=globalThis.fetch,history=mockHistory();let gets=0;
+ const records=new Map([[DEFAULT_COMPETITION_ID,applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"matches"},now)],["nvo",newKidsCourse(nvoCourseContent,now)]]);
+ const wallet=()=>courseView(records.get(DEFAULT_COMPETITION_ID)!,content,now).gold+courseView(records.get("nvo")!,nvoCourseContent,now).gold;
+ globalThis.fetch=async(_url,init)=>{
+  const id=new Headers(init?.headers).get("X-Maths-Competition")!,catalogue=id==="nvo"?nvoCourseContent:content;
+  const before=records.get(id)!;let goldGain;
+  if(init?.method==="POST"){
+   const {revision,action}=JSON.parse(String(init.body)) as {revision:number;action:CourseAction};
+   assert.equal(revision,before.revision);
+   const next=applyCourseAction(before,catalogue,action,now);records.set(id,next);goldGain=newGoldGain(before,next);
+  }else gets++;
+  return Response.json({course:{...courseView(records.get(id)!,catalogue,now),gold:wallet(),goldGain}});
+ };
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ try{
+  await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={courseView(records.get(DEFAULT_COMPETITION_ID)!,content,now)}/>));
+  await chooseCompetition(host,"nvo");await chooseCompetition(host,DEFAULT_COMPETITION_ID);assert.equal(gets,1);
+  await act(async()=>button(host,"Продължи: Точки и мачове").click());
+  const answer=Number(records.get(DEFAULT_COMPETITION_ID)!.topics.matches!.work.core!.attempt.problem.fields[0]!.answer);
+  await act(async()=>host.querySelectorAll<HTMLButtonElement>('[aria-label="Отговори"] button')[answer]!.click());
+  await act(async()=>primary(host,"Провери отговора").click());
+  assert.equal(host.querySelector("[data-gold-wallet]")!.getAttribute("aria-label"),"25 злато");
+  await act(async()=>button(host,"← Начало").click());await chooseCompetition(host,"nvo");
+  assert.equal(gets,1,"the fresh revisit must use its existing learning snapshot");
+  assert.equal(host.querySelector("[data-gold-wallet]")!.getAttribute("aria-label"),"25 злато");
+  assert.equal(host.querySelectorAll("[data-gold-gain]").length,0);
+  assert.equal(records.get("nvo")!.revision,0);assert.equal(records.get("nvo")!.attempts.length,0);
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
 });

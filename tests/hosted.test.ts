@@ -4,18 +4,24 @@ import {test} from "node:test";
 import type {SupabaseClient} from "@supabase/supabase-js";
 import {createSupabaseCourseStore} from "../src/store/supabase-course.ts";
 import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
-import {applyCourseAction,newKidsCourse} from "../src/core/kids-course.ts";
+import {applyCourseAction,migrateKidsCourse,newKidsCourse} from "../src/core/kids-course.ts";
+import type {KidsCourse} from "../src/core/kids-course.ts";
+import {newGoldGain} from "../src/core/kids-gold.ts";
+import {kidsCourseResponse} from "../src/server/kids-course.ts";
 import {approvedGoogleUser,selectedChild} from "../src/server/context.ts";
 import {mode,mutationAllowed,isLoopbackHost} from "../src/server/config.ts";
 
 type Row={parent_id:string;child_id:string;competition_id?:string;revision:number;course:unknown;updated_at?:string};
 function fakeDatabase(initial:Row[]=[]){
  const rows=structuredClone(initial).map(row=>({competition_id:DEFAULT_COMPETITION_ID,...row}));const filters:Record<string,unknown>[][]=[];
- return {rows,filters,client:{from(table:string){assert.equal(table,"course_progress");let operation="read",value:Partial<Row>={};const conditions:Record<string,unknown>[]=[];
- const chain={select(){return chain;},eq(key:string,v:unknown){conditions.push({[key]:v});return chain;},update(v:Partial<Row>){operation="update";value=v;return chain;},
- async insert(row:Row){await Promise.resolve();if(rows.some(r=>r.child_id===row.child_id&&r.competition_id===row.competition_id))return {error:{code:"23505"}};rows.push({...structuredClone(row),competition_id:row.competition_id??DEFAULT_COMPETITION_ID});return {error:null};},
- then(resolve:(value:unknown)=>unknown){filters.push(conditions);return Promise.resolve({data:structuredClone(rows.filter(r=>conditions.every(c=>Object.entries(c).every(([k,v])=>r[k as keyof Row]===v)))),error:null}).then(resolve);},
- async maybeSingle(){filters.push(conditions);const row=rows.find(r=>conditions.every(c=>Object.entries(c).every(([k,v])=>r[k as keyof Row]===v)));if(operation==="update"&&row)Object.assign(row,structuredClone(value));return {data:row?structuredClone(row):null,error:null};}};return chain;}} as unknown as SupabaseClient};
+ const requests:{operation:string;conditions:Record<string,unknown>[];exclusions:Record<string,unknown>[];returnedRows:number}[]=[];
+ return {rows,filters,requests,client:{from(table:string){assert.equal(table,"course_progress");let operation="read",value:Partial<Row>={};const conditions:Record<string,unknown>[]=[],exclusions:Record<string,unknown>[]=[];
+ const matches=(row:Row)=>conditions.every(c=>Object.entries(c).every(([k,v])=>row[k as keyof Row]===v))&&exclusions.every(c=>Object.entries(c).every(([k,v])=>row[k as keyof Row]!==v));
+ const record=(returnedRows:number)=>{filters.push(conditions);requests.push({operation,conditions,exclusions,returnedRows});};
+ const chain={select(){return chain;},eq(key:string,v:unknown){conditions.push({[key]:v});return chain;},neq(key:string,v:unknown){exclusions.push({[key]:v});return chain;},update(v:Partial<Row>){operation="update";value=v;return chain;},
+ async insert(row:Row){await Promise.resolve();requests.push({operation:"insert",conditions:[],exclusions:[],returnedRows:0});if(rows.some(r=>r.child_id===row.child_id&&r.competition_id===row.competition_id))return {error:{code:"23505"}};rows.push({...structuredClone(row),competition_id:row.competition_id??DEFAULT_COMPETITION_ID});return {error:null};},
+ then(resolve:(value:unknown)=>unknown){const matched=rows.filter(matches);record(matched.length);return Promise.resolve({data:structuredClone(matched),error:null}).then(resolve);},
+ async maybeSingle(){const row=rows.find(matches);record(row?1:0);if(operation==="update"&&row)Object.assign(row,structuredClone(value));return {data:row?structuredClone(row):null,error:null};}};return chain;}} as unknown as SupabaseClient};
 }
 const now="2026-11-03T10:00:00Z";
 test("Supabase course CAS rejects concurrent first inserts and updates, and scopes both owner keys",async()=>{
@@ -138,4 +144,79 @@ test("one private GET snapshot supplies fresh selected progress and cross-compet
  db.rows[0]!.course=applyCourseAction(earned,content,{type:"pause"},now);db.rows[0]!.revision=earned.revision+1;
  assert.equal((await readKidsCourseView(store,content)).revision,earned.revision+1);
  assert.equal(db.filters.length,2,"each GET must read fresh authoritative state");
+});
+
+const coursePost=(revision:number,action:unknown)=>new Request("http://localhost/api/kids/course",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({revision,action})});
+test("POST reuses its CAS input for exact gold gain and removes one database read",async()=>{
+ const started=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"matches"},now);
+ const task=started.topics.matches!.work.core!.attempt;
+ const action={type:"answer",taskKey:task.key,answers:task.problem.fields.map(field=>field.answer)};
+ const earned=applyCourseAction(started,content,action as Parameters<typeof applyCourseAction>[2],now);
+ const row=(parent_id:string,child_id:string,competition_id:string,course:KidsCourse)=>({parent_id,child_id,competition_id,revision:course.revision,course});
+ // A legacy ledger must still project gold from history, even without stored awards.
+ const legacy=structuredClone(earned);delete legacy.goldAwards;
+ const initial=[row("p","c",DEFAULT_COMPETITION_ID,started),row("p","c","other",legacy),row("foreign","c",DEFAULT_COMPETITION_ID,earned),row("p","foreign",DEFAULT_COMPETITION_ID,earned)];
+ for(const optimized of [false,true]){
+  const db=fakeDatabase(initial),store=createSupabaseCourseStore(db.client,"p","c");
+  if(!optimized)store.updateWithPrevious=undefined;
+  const response=await kidsCourseResponse(coursePost(started.revision,action),store,content);
+  assert.equal(response.status,200);assert.equal(response.headers.get("Cache-Control"),"no-store");
+  const {course:view}=await response.json();
+  const saved=db.rows[0]!.course as KidsCourse;
+  assert.deepEqual(view.goldGain,newGoldGain(started,saved));assert.equal(view.goldGain.amount,25);assert.equal(view.gold,50);
+  assert.equal(db.requests.length,optimized?3:4);
+  const reads=db.requests.filter(request=>request.operation==="read");
+  assert.equal(reads.length,optimized?2:3);
+  const wallet=reads.at(-1)!;
+  assert.deepEqual(wallet.exclusions,[{competition_id:DEFAULT_COMPETITION_ID}]);assert.equal(wallet.returnedRows,1);
+  for(const request of db.requests){assert.ok(request.conditions.some(filter=>filter.parent_id==="p"));assert.ok(request.conditions.some(filter=>filter.child_id==="c"));}
+  db.requests.length=0;
+  const paused=await kidsCourseResponse(coursePost(saved.revision,{type:"pause"}),store,content);
+  assert.equal(paused.status,200);assert.equal((await paused.json()).course.goldGain,undefined);
+ }
+});
+
+test("atomic POST migration compares projected revision but saves against raw revision without replaying gold",async()=>{
+ const started=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"matches"},now);
+ const task=started.topics.matches!.work.core!.attempt;
+ const old=applyCourseAction(started,content,{type:"answer",taskKey:task.key,answers:task.problem.fields.map(field=>field.answer)},now);
+ delete old.questVersion;delete old.journey;delete old.stamps;delete old.diagnostics;delete old.quest;delete old.goldAwards;
+ const projected=migrateKidsCourse(old,content,new Date().toISOString());
+ assert.ok(projected.revision>old.revision);
+ const db=fakeDatabase([{parent_id:"p",child_id:"c",revision:old.revision,course:old}]);
+ const store=createSupabaseCourseStore(db.client,"p","c");
+ const stale=await kidsCourseResponse(coursePost(old.revision,{type:"pause"}),store,content);
+ assert.equal(stale.status,409);assert.equal(db.requests.length,1);assert.equal(db.rows[0]!.revision,old.revision);
+ db.requests.length=0;
+ const response=await kidsCourseResponse(coursePost(projected.revision,{type:"pause"}),store,content);
+ assert.equal(response.status,200);
+ const {course:view}=await response.json();
+ assert.equal(view.revision,projected.revision+1);assert.equal(view.gold,25);assert.equal(view.goldGain,undefined);
+ assert.equal(db.requests.length,3);
+ const write=db.requests.find(request=>request.operation==="update")!;
+ assert.ok(write.conditions.some(filter=>filter.revision===old.revision));
+ assert.deepEqual((db.rows[0]!.course as KidsCourse).attempts,old.attempts);
+ const replay=await kidsCourseResponse(coursePost(projected.revision,{type:"pause"}),store,content);
+ assert.equal(replay.status,409);
+});
+
+test("atomic POST keeps first-insert and concurrent reward conflicts at 409",async()=>{
+ const db=fakeDatabase(),store=createSupabaseCourseStore(db.client,"p","c");
+ const first=await Promise.all([kidsCourseResponse(coursePost(0,{type:"selectTopic",topicId:"matches"}),store,content),kidsCourseResponse(coursePost(0,{type:"selectTopic",topicId:"matches"}),store,content)]);
+ assert.deepEqual(first.map(response=>response.status).sort(),[200,409]);assert.equal(db.rows.length,1);
+ const started=db.rows[0]!.course as KidsCourse,task=started.topics.matches!.work.core!.attempt;
+ const action={type:"answer",taskKey:task.key,answers:task.problem.fields.map(field=>field.answer)};
+ db.requests.length=0;
+ const answers=await Promise.all([kidsCourseResponse(coursePost(started.revision,action),store,content),kidsCourseResponse(coursePost(started.revision,action),store,content)]);
+ assert.deepEqual(answers.map(response=>response.status).sort(),[200,409]);
+ const success=answers.find(response=>response.status===200)!;
+ const {course:view}=await success.json();assert.equal(view.goldGain.amount,25);assert.equal(view.gold,25);
+ assert.equal((db.rows[0]!.course as KidsCourse).attempts.length,1);
+ assert.equal(db.requests.filter(request=>request.exclusions.length).length,1,"only the successful writer reads the wallet");
+});
+
+test("atomic POST rejects mismatched raw course revisions without writing",async()=>{
+ const course=newKidsCourse(content,now),db=fakeDatabase([{parent_id:"p",child_id:"c",revision:course.revision+1,course}]);
+ const response=await kidsCourseResponse(coursePost(course.revision,{type:"pause"}),createSupabaseCourseStore(db.client,"p","c"),content);
+ assert.equal(response.status,409);assert.equal(db.requests.length,1);assert.equal(db.rows[0]!.revision,course.revision+1);
 });

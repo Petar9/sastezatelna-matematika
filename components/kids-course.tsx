@@ -99,7 +99,10 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
    const draft = pendingDraft.current, revision = viewRef.current.revision;
    pendingDraft.current = undefined;
    try {
-    if (draft) await send(draft);
+    const answerIncludesDraft=draft&&action?.type==="answer"&&action.taskKey===draft.taskKey&&
+     draft.partIndex===(viewRef.current.task?.part?viewRef.current.task.part.index-1:0)&&
+     action.answers.length===draft.answers.length&&action.answers.every((value,index)=>value===draft.answers[index]);
+    if (draft&&!answerIncludesDraft) await send(draft);
     if (action) await send(action);
     return true;
    } catch {

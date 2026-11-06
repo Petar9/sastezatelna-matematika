@@ -753,3 +753,26 @@ Production evidence, 2026-11-05:
 - Live home at 1280 and 320 px: primary 48 px login, outlined invitation, no horizontal overflow and no pilot-group sentence. Keyboard focus is visible, login opens correctly and Chrome reports no runtime errors.
 - Development gallery returns 404, signed-out profiles redirect to login and the learning API returns 401/no-store. No production learner actions or data edits were performed; all 13 original private file hashes remain unchanged.
 - Authenticated “Не сега” latency requires the owner's smoke test; the two removed database operations and loading/duplicate behavior are covered by automated checks.
+
+
+## Application performance - approved 2026-11-06
+
+Status: implemented and verified locally; production release in progress.
+
+- Coordinator: gpt-6.1-sol/high, owns integration and release verification; bounded selection and server workers plus Astra independent critical review. No subscription upgrade, migration or learner-data edit.
+- [x] Reuse per-selection history indexes and avoid ranking/cloning a full adventure just to check availability. Preserve existing task ordering, reservations, review boundaries and source identities.
+- [x] Revisit validated competition snapshots immediately for 30 seconds within the mounted learner. Keep stale views gated until refresh; focus, retry and every write retain server checks. Synchronize wallet display across cached competitions without extending their freshness.
+- [x] Coalesce an exact pending draft into its answer command, preserving separate drafts, multipart drafts, failure recovery and revision conflict handling.
+- [x] Remove the duplicate selected-course read on hosted saves and exclude that already-known course from the wallet query. Keep owner/child scope, revision guards and historical rewards.
+- [x] Use learning-only account context on Progress, removing the unused parent upsert and child-login metadata read.
+- [x] Refresh auth cookies through verified claims in the proxy; protected routes retain fresh getUser authorization. Asymmetric signing keys can use cached JWKS; symmetric fallback can still require a network request.
+- [x] Configure the single Vercel function region as London (lhr1), matching the existing Supabase eu-west-2 location.
+- [x] Run combined tests, production build, browser smoke checks and independent review before publication.
+- [ ] Publish and verify the production deployment and London execution region.
+
+Acceptance evidence:
+- 261/261 tests pass; full ESLint, TypeScript, production build, private deployment trace checks and git diff --check pass. Existing generated images are unchanged.
+- Tests cover fresh/stale/focus competition caching, cross-competition wallet display, exact and standalone drafts, multipart answers, stale revisions, lost responses, concurrent inserts and reward preservation.
+- Astra found no material regression; 6,750 additional differential comparisons preserve selection behavior. Real-catalogue benchmark medians with 100 synthetic history records: full quest ranking 189.899 to 1.514 ms; availability including the previous clone cost 11.477 to 0.140 ms. With 1,000 records: 2,775.091 to 2.156 ms and 603.957 to 1.166 ms respectively. Reproduce with node --import tsx scripts/benchmark-selection-performance.ts --real. These are CPU benchmarks, not measured end-to-end latency for Ema's short history.
+- Chrome on the isolated production build loaded and switched all three competitions, returned to mathematics and saved a correct adventure answer with the existing 25-gold result and 1/5 completion. Only disposable local data received commands. Browser instrumentation was unavailable, so request-count assertions use component/store tests rather than browser timing claims.
+- Authenticated production latency, cross-device refresh and physical-device behavior remain owner smoke checks. No database schema or educational/reward rule changes.

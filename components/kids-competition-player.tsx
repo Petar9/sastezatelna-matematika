@@ -13,15 +13,19 @@ function snapshot(view:KidsCourseView):KidsCourseView {
  const saved={...view};delete saved.goldGain;return saved;
 }
 
+const SNAPSHOT_FRESH_MS=30_000;
+type CachedView={view:KidsCourseView;validatedAt:number};
+
 // Private snapshots live only in this mounted learner's tab, never in a shared cache.
 export function KidsCompetitionPlayer(props:KidsCoursePlayerProps) {
  const {competitionId:initialId=DEFAULT_COMPETITION_ID,competitionChoices:choices=[],learnerId}=props;
  const key=(id:string)=>`${learnerId??"local"}:${id}:${choices.find(choice=>choice.id===id)?.contentVersion??""}`;
- const cache=useRef(new Map([[key(initialId),snapshot(props.initialView)]]));
+ const cache=useRef(new Map<string,CachedView>([[key(initialId),{view:snapshot(props.initialView),validatedAt:Date.now()}]]));
  const [competitionId,setCompetitionId]=useState(initialId);
  const [view,setView]=useState<KidsCourseView|undefined>(props.initialView);
  const [refreshing,setRefreshing]=useState(false),[error,setError]=useState("");
  const [retry,setRetry]=useState(0);
+ const forceRefresh=useRef(false);
  const first=useRef(true),generation=useRef(0),current=useRef(initialId);
  function denied(status:number){generation.current++;cache.current.clear();setView(undefined);setRefreshing(true);window.location.assign(status===428?"/profiles":status===403?"/login?denied=1":"/login");}
  const navigationGuard=useRef<(()=>Promise<boolean>)|null>(null);
@@ -42,7 +46,8 @@ export function KidsCompetitionPlayer(props:KidsCoursePlayerProps) {
    }
    if(!next||next.id===current.current)return;
    current.current=next.id;generation.current++;
-   setError("");setRefreshing(true);setView(cache.current.get(key(next.id)));setCompetitionId(next.id);
+   const cached=cache.current.get(key(next.id));
+   setError("");setRefreshing(!cached||Date.now()-cached.validatedAt>=SNAPSHOT_FRESH_MS);setView(cached?.view);setCompetitionId(next.id);
    if(next.push)window.history.pushState(null,"",`/?competition=${encodeURIComponent(next.id)}`);
   } finally {switching.current=false;}
  }
@@ -54,7 +59,7 @@ export function KidsCompetitionPlayer(props:KidsCoursePlayerProps) {
    const id=current.current;
    void (async()=>{
     const saved=!navigationGuard.current||await navigationGuard.current();
-    if(saved&&!switching.current&&current.current===id){setRefreshing(true);setRetry(value=>value+1);}
+    if(saved&&!switching.current&&current.current===id){forceRefresh.current=true;setRefreshing(true);setRetry(value=>value+1);}
    })();
   };
   window.addEventListener("popstate",back);window.addEventListener("focus",focus);
@@ -63,6 +68,8 @@ export function KidsCompetitionPlayer(props:KidsCoursePlayerProps) {
  },[]);
  useEffect(()=>{
   if(first.current){first.current=false;return;}
+  const cached=cache.current.get(key(competitionId)),forced=forceRefresh.current;forceRefresh.current=false;
+  if(!forced&&cached&&Date.now()-cached.validatedAt<SNAPSHOT_FRESH_MS){setRefreshing(false);return;}
   const controller=new AbortController(),request=++generation.current;
   setRefreshing(true);setError("");
   void (async()=>{
@@ -77,8 +84,8 @@ export function KidsCompetitionPlayer(props:KidsCoursePlayerProps) {
     if(request!==generation.current||controller.signal.aborted)return;
     if(!response.ok||!body.course||!Number.isSafeInteger(body.course.revision)||!Array.isArray(body.course.topics))throw new Error("refresh");
     const cached=cache.current.get(key(competitionId));
-    if(cached&&body.course.revision<cached.revision)throw new Error("stale");
-    const fresh=snapshot(body.course);cache.current.set(key(competitionId),fresh);setView(fresh);setRefreshing(false);
+    if(cached&&body.course.revision<cached.view.revision)throw new Error("stale");
+    const fresh=remember(body.course);setView(fresh);setRefreshing(false);
    }catch{
     if(request!==generation.current||controller.signal.aborted)return;
     setError("Не успяхме да обновим. Опитай отново.");
@@ -89,8 +96,13 @@ export function KidsCompetitionPlayer(props:KidsCoursePlayerProps) {
  },[competitionId,learnerId,retry]);
  function remember(next:KidsCourseView){
   const saved=snapshot(next),cached=cache.current.get(key(competitionId));
-  if(!cached||saved.revision>=cached.revision)cache.current.set(key(competitionId),saved);
+  if(!cached||saved.revision>=cached.view.revision){
+   // The wallet spans competitions; learning snapshots retain their own validation time.
+   for(const entry of cache.current.values())entry.view={...entry.view,gold:saved.gold};
+   cache.current.set(key(competitionId),{view:saved,validatedAt:Date.now()});
+  }
+  return saved;
  }
- const status=(refreshing||error)&&<div className={s.content}>{error?<Message tone="error"><p>{error}</p><Button variant="secondary" onClick={()=>setRetry(value=>value+1)}>Опитай отново</Button></Message>:<p role="status">Обновяване…</p>}</div>;
+ const status=(refreshing||error)&&<div className={s.content}>{error?<Message tone="error"><p>{error}</p><Button variant="secondary" onClick={()=>{forceRefresh.current=true;setRetry(value=>value+1);}}>Опитай отново</Button></Message>:<p role="status">Обновяване…</p>}</div>;
  return <>{status}{view?<KidsCoursePlayer {...props} key={`${learnerId??"local"}:${competitionId}`} competitionId={competitionId} initialView={view} refreshedView={view} refreshing={refreshing} onViewChange={remember} onCompetitionChange={id=>void select(id)} navigationGuard={navigationGuard} onBusyChange={busy=>{saving.current=busy;}} onAccessDenied={denied}/>:<main lang="bg" className={s.shell} aria-busy={refreshing}><div className={s.content}><CompetitionPicker choices={choices} competitionId={competitionId} onSelect={id=>void select(id)}/></div></main>}</>;
 }
