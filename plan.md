@@ -128,3 +128,11 @@ Keep active tasks, material open decisions and a short latest-verification summa
 - [x] 320/320 tests, TypeScript, ESLint and production build/private-file checks passed. Isolated Chrome at 320, 390 and 1440px checked nine routes, date selection, article links and overflow; no page errors.
 - [x] Published `06c9166` to `main`; [Vercel deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/vF3N9JuYbYNP528rAcL2esk5P3mF) reported success for that exact SHA. Live checks passed for all nine public pages: 200, canonical, indexable metadata, Article schema, public cache (home remains no-store), no Set-Cookie, nine-page sitemap and robots. Chrome at 390px confirmed dates, approved wording, keyboard access and no overflow/page errors; unauthenticated progress reaches login with no-store and `/design-system` returns 404.
 - No learner-data, API, CMS or schema changes. Real Google account/physical-device smoke checks were not repeated. Landing expansion remains plan-only.
+
+
+## Connected-statement UX - approved release 2026-11-06
+
+- [x] Always show the complete original statement once, highlight the active natural subpart, and remove the full-statement disclosure and repeated current question across all competitions. Preserve supplemental answer-entry instructions, show each diagram once, and keep previous submitted answers/solutions collapsed. Updated the design-system pattern.
+- [x] Verification: 324/324 tests, TypeScript, ESLint and production build/private-file checks passed. Isolated Chrome at 1200, 390 and 320px checked the municipal multipart statement, draft retention after reload, correct submission, next-part highlighting and collapsed prior answers; a long Spring original showed its diagram once, loaded correctly. No horizontal overflow or page errors.
+- [x] Production publication explicitly approved. The release contains this UX change only; pending calendar/article changes remain separate.
+- No learner-data, API, reward-rule or schema changes. Real-account and physical-device smoke checks were not repeated.

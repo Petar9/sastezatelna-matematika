@@ -7,7 +7,7 @@ import {parseHTML} from "linkedom";
 import {applyCourseAction,courseView,newKidsCourse} from "../src/core/kids-course.ts";
 import {catalogueProblems, isCompetitionProblem, problemSource} from "../src/core/kids-selection.ts";
 import {newGoldGain} from "../src/core/kids-gold.ts";
-import type {CourseAction, CourseTopicView, KidsCourseContent} from "../src/core/kids-course.ts";
+import type {ConnectedCourseProblem, CourseAction, CourseTopicView, KidsCourseContent} from "../src/core/kids-course.ts";
 import {nvoCourseContent} from "../src/server/nvo-course-content.ts";
 import {proletnoCourseContent} from "../src/server/proletno-course-content.ts";
 import {regionalOlympiadCourseContent} from "../src/server/olimpiada-oblasten-course-content.ts";
@@ -1424,13 +1424,19 @@ test("connected UI groups the natural part fields, preserves drafts, and keeps e
  const base=content.problem("M1-03",0,false)!;
  const solution=[{title:"Първа стъпка",paragraphs:["Точките от победите са 13 · 3."]},{title:"Продължаваме",paragraphs:["Равенствата са 44 − 39."]},{title:"Проверка",paragraphs:["13 + 5 + 4 = 22."]}] as const;
  const connectedContent:KidsCourseContent={...content,connectedProblem:p=>p.id===base.id?{
-  sourceId:"M1-03",text:"Общо 22 мача и 44 точки. а) Колко точки носят 13 победи и колко са равенствата? б) Колко са загубите?",introduction:"Отбор има 44 точки от 22 мача и 13 победи. Победа носи 3 точки, равенство - 1.",
+  sourceId:"M1-03",text:"Отбор има 44 точки от 22 мача и 13 победи. Победа носи 3 точки, равенство - 1. а) Колко точки носят победите и колко са равенствата? б) Колко са загубите?",introduction:"Отбор има 44 точки от 22 мача и 13 победи. Победа носи 3 точки, равенство - 1.",
   units:[{id:"a",skillId:"M1-03",text:"а) Колко точки носят победите и колко са равенствата?",fields:[{label:"Точки",answer:"39"},{label:"Равенства",answer:"5"}],solution:structuredClone(solution) as never},{id:"b",skillId:"M1-03",text:"б) Колко са загубите?",fields:[{label:"Загуби",answer:"4"}],dependsOn:["a"],solution:structuredClone(solution) as never}],
  }:undefined};
  const h=await mount("matches",false,undefined,undefined,undefined,false,connectedContent);try{
   assert.equal(h.host.querySelectorAll("input").length,2);
   assert.ok(h.host.textContent!.includes("Подусловие 1 от 2"));
-  assert.ok(h.host.textContent!.includes("Цялото условие"));
+  assert.ok(!h.host.textContent!.includes("Цялото условие"));
+  const statement=h.host.querySelector(".connectedContext > .question")!;
+  assert.equal(statement.closest("details"),null);
+  assert.equal(statement.textContent,courseView(h.record,connectedContent,now).task!.connected!.text);
+  assert.equal(statement.querySelector('[aria-current="step"]')!.textContent,"а) Колко точки носят победите и колко са равенствата?");
+  assert.equal(h.host.textContent!.split("Колко точки носят победите и колко са равенствата?").length,2);
+  assert.equal(h.host.textContent!.split("Отбор има 44 точки от 22 мача и 13 победи.").length,2);
   assert.ok(!h.host.textContent!.includes("Предишни подусловия"));
   await act(async()=>button(h.host,"3").click());await act(async()=>button(h.host,"9").click());
   const second=h.host.querySelectorAll<HTMLInputElement>("input")[1]!;
@@ -1444,10 +1450,54 @@ test("connected UI groups the natural part fields, preserves drafts, and keeps e
   await act(async()=>primary(h.host,"Следващо подусловие").click());
   assert.equal(h.host.querySelectorAll("input").length,1);
   assert.ok(h.host.textContent!.includes("Подусловие 2 от 2"));
+  assert.equal(h.host.querySelector('[aria-current="step"]')!.textContent,"б) Колко са загубите?");
+  assert.equal(h.host.textContent!.split("б) Колко са загубите?").length,2);
   const previous=[...h.host.querySelectorAll("details")].find(d=>d.querySelector("summary")?.textContent==="Предишни подусловия · 1")!;
   assert.ok(previous);assert.equal(previous.hasAttribute("open"),false);assert.ok(previous.textContent!.includes("39"));
   assert.equal(courseView(h.record,connectedContent,now).task!.hintLevel,0);
   await act(async()=>button(h.host,"4").click());await act(async()=>primary(h.host,"Провери отговора").click());
   primary(h.host,"Следваща задача");assert.equal(h.record.attempts.length,2);
+ }finally{await h.cleanup();}
+});
+
+function connectedSource(catalogue:KidsCourseContent,id:string):ConnectedCourseProblem {
+ for(const topic of catalogue.topics)for(const skill of topic.skills)for(const harder of [false,true])for(let index=0;;index++){
+  const problem=catalogue.problem(skill.id,index,harder);if(!problem)break;
+  const source=catalogue.connectedProblem?.(problem);if(source?.sourceId===id)return source;
+ }
+ throw new Error(`Missing source: ${id}`);
+}
+
+for(const [catalogue,id,part] of [
+ [olympiadCourseContent,"oli-g4-municipal-2024-p1",0],
+ [regionalOlympiadCourseContent,"oli-ob-g4-2023-p2",2],
+ [proletnoCourseContent,"pms-g4-2024-p3",1],
+] as const)test(`${id}: the full original stays visible once with its current part and answer-entry instructions`,async()=>{
+ const original=connectedSource(catalogue,id),unit=original.units[part]!;
+ const connectedContent:KidsCourseContent={...content,connectedProblem:()=>({...original,sourceId:"M1-03",units:original.units.slice(part).map(unit=>({...unit,skillId:"M1-03"}))})};
+ const h=await mount("matches",false,undefined,undefined,undefined,false,connectedContent);try{
+  const statement=h.host.querySelector(".connectedContext > .question")!;
+  assert.equal(statement.textContent,original.text);
+  assert.equal(statement.closest("details"),null);
+  assert.ok(!h.host.textContent!.includes("Цялото условие"));
+  const originalPart=original.text.includes(unit.text)?unit.text:unit.text.split("\n\n")[0]!;
+  assert.equal(h.host.textContent!.split(originalPart).length,2,"The active question must not repeat below the original");
+  const instruction=unit.text.slice(originalPart.length).trim();
+  if(instruction)assert.ok([...h.host.querySelectorAll(".taskCard > .question")].some(p=>p.textContent===instruction));
+  assert.equal(h.host.querySelectorAll("input").length,unit.options?0:unit.fields.length);
+ }finally{await h.cleanup();}
+});
+
+test("connected originals show each figure once and single-part statements need no extra control",async()=>{
+ const base=content.problem("M1-03",0,false)!;
+ const first={src:"/kids/figures/M1-09.png",alt:"Първи чертеж"},second={src:"/kids/figures/M2-2a.png",alt:"Втори чертеж"};
+ const connectedContent:KidsCourseContent={...content,connectedProblem:()=>({sourceId:"M1-03",text:base.text,introduction:base.text,figures:[first,second,first],units:[{id:"question",skillId:base.skillId,text:base.text,fields:base.fields,figure:first,solution:base.solution!}]})};
+ const h=await mount("matches",false,undefined,undefined,undefined,false,connectedContent);try{
+  assert.equal(h.host.querySelector(".connectedContext > .question")!.textContent,base.text);
+  assert.equal(h.host.textContent!.split(base.text).length,2);
+  assert.equal(h.host.querySelectorAll(".connectedContext figure").length,2);
+  assert.equal(h.host.querySelectorAll(`img[alt="${first.alt}"]`).length,1);
+  assert.equal(h.host.querySelectorAll(`img[alt="${second.alt}"]`).length,1);
+  assert.equal(h.host.querySelectorAll(".connectedPart, .connectedDisclosure, [aria-current=step]").length,0);
  }finally{await h.cleanup();}
 });

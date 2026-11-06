@@ -232,13 +232,14 @@ function CourseQuestion({ task, competitionId, leaf, inQuest, goldGain, busy, ac
  function saveDraft(answers: string[]) { draftChanged({ type: "saveDraft", taskKey: task.key, partIndex: (task.part?.index ?? 1) - 1, answers }); }
  function updateValues(next: string[]) { setValues(next); saveDraft(next); }
 	const ready = task.options ? choice !== undefined : values.every(v => /^\d+(?:[.,]\d{1,2})?$/.test(v));
+ const question = task.connected ? connectedStatement(task).instruction : task.text;
 	function digit(value: string) { updateValues(values.map((s, i) => i !== field ? s : value === "back" ? s.slice(0, -1) : (s + value).slice(0, 12))); }
 	return <>
 		{task.connected && <ConnectedProblemContext task={task}/>}
 		{task.connected && task.connected.total > 1 && <p className={s.connectedPart} role="status">Подусловие {task.connected.index} от {task.connected.total}</p>}
-		<p className={s.question}>{task.text}</p>
+		{question && <p className={s.question}>{question}</p>}
   {task.part && !task.connected && <p className={s.small} role="status">Отговор {task.part.index} от {task.part.total}</p>}
-		{task.figure && <figure className={s.figure}><Image src={publicImage(task.figure.src)} alt={task.figure.alt} width={360} height={360} unoptimized /><figcaption>{task.source.startsWith("Учебно") ? "Учебна схема; числата са в условието." : "Оригинален чертеж. Не измервай по изображението."}</figcaption></figure>}
+		{task.figure && !task.connected && <figure className={s.figure}><Image src={publicImage(task.figure.src)} alt={task.figure.alt} width={360} height={360} unoptimized /><figcaption>{task.source.startsWith("Учебно") ? "Учебна схема; числата са в условието." : "Оригинален чертеж. Не измервай по изображението."}</figcaption></figure>}
 		{task.options ? <div className={s.options} role="group" aria-label="Отговори">{task.options.map((option, index) => <button key={index} className={s.option} aria-pressed={done ? task.answers?.[0] === String(index) : choice === index} disabled={busy || done} onClick={() => { setChoice(index); saveDraft([String(index)]); }}><span className={s.letter}>{["А", "Б", "В", "Г"][index]})</span>{option}</button>)}</div> : <>
 			<div className={s.numberFields}>{task.fields.map((item, i) => <label key={i} className={s.numberLabel}>{item.label}<Input aria-label={item.label} type="text" inputMode="decimal" autoComplete="off" maxLength={12} value={values[i] ?? ""} disabled={busy || done} onFocus={() => setField(i)} onChange={e => { const value = e.target.value; if (/^[\d.,]*$/.test(value)) updateValues(values.map((v, n) => n === i ? value : v)); }} /></label>)}</div>
 			{!done && <div className={s.keypad} role="group" aria-label={`Клавиатура: ${task.fields[field]?.label}`}>{["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "back"].map(key => <Button variant="secondary" key={key} className={s.secondary} disabled={busy} onClick={() => digit(key)} aria-label={key === "back" ? "Изтрий последната цифра" : key === "," ? "Десетична запетая" : key}>{key === "back" ? "⌫" : key}</Button>)}</div>}
@@ -252,11 +253,22 @@ function CourseQuestion({ task, competitionId, leaf, inQuest, goldGain, busy, ac
 	</>;
 }
 
+function connectedStatement(task: NonNullable<KidsCourseView["task"]>) {
+ const text = task.connected!.text;
+ // A few natural parts append answer-entry instructions that are not in the original statement.
+ const current = text.includes(task.text) ? task.text : task.text.split("\n\n")[0]!;
+ const start = text.indexOf(current);
+ if (start < 0) return { before: text, current: "", after: "", instruction: task.text };
+ return { before: text.slice(0, start), current, after: text.slice(start + current.length), instruction: task.text.slice(current.length).trim() };
+}
+
 function ConnectedProblemContext({ task }: { task: NonNullable<KidsCourseView["task"]> }) {
  const connected = task.connected!;
+ const statement = connectedStatement(task);
+ const figures = [...new Map([...(connected.figures ?? []), ...(task.figure ? [task.figure] : [])].map(figure => [figure.src, figure])).values()];
  return <div className={s.connectedContext}>
-  {connected.introduction && <p className={s.question}>{connected.introduction}</p>}
-  <details className={s.connectedDisclosure}><summary>Цялото условие</summary><p className={s.question}>{connected.text}</p>{connected.figures?.filter(figure => !!figure).map(figure => <figure key={figure.src} className={s.figure}><Image src={publicImage(figure.src)} alt={figure.alt} width={360} height={360} unoptimized/></figure>)}</details>
+  <p className={s.question}>{statement.before}{statement.current && (connected.total > 1 ? <span className={s.currentStatement} aria-current="step">{statement.current}</span> : statement.current)}{statement.after}</p>
+  {figures.map(figure => <figure key={figure.src} className={s.figure}><Image src={publicImage(figure.src)} alt={figure.alt} width={360} height={360} unoptimized/><figcaption>{task.source.startsWith("Учебно") ? "Учебна схема; числата са в условието." : "Оригинален чертеж. Не измервай по изображението."}</figcaption></figure>)}
   {connected.completed.length > 0 && <details className={s.connectedDisclosure}><summary>Предишни подусловия · {connected.completed.length}</summary><ol className={s.completedParts}>{connected.completed.map(part => <li key={part.id}><p>{part.text}</p><strong>{kidsOutcomeLabels[part.outcome]}</strong>{part.answers.length > 0 && <dl>{part.fields.map((field, index) => <div key={index}><dt>{field.label}</dt><dd>{part.answers[index] ?? "-"}</dd></div>)}</dl>}<details><summary>Виж решението</summary><ol className={s.steps}>{part.explanation.map((step, index) => <li key={index}>{step}</li>)}</ol></details></li>)}</ol></details>}
  </div>;
 }
