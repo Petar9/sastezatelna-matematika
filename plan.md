@@ -19,6 +19,12 @@ Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 - [x] Final visual checks: regional gameplay at 390px; materials hub and both articles at 390px/1440px, with screenshots inspected, no horizontal overflow, no visible broken images and no gameplay runtime console errors. Disposable local learner/storage only; no real learner, Supabase record or schema changed.
 - [x] Published and verified the approved application/content/SEO/documentation changes on Vercel; see current release evidence above. Commercial landing expansion, billing and migrations remain outside this release. Real parent/child Google sessions and physical-device checks remain owner checks.
 
+## Mandatory copy review gate - 2026-11-06
+
+- [x] Saved the [Alpha copy review gate](AGENTS.md#alpha-copy-review-before-testing) and linked it from competition, UI and article workflows: draft → independent critical review → owner approves proposals → apply approved copy → acceptance tests → release checks.
+- [x] Require saved review context, recommendations and owner decisions; preserve original statements, mathematical meaning and approved wording. This instruction does not claim a new review of existing content.
+- Verification: documentation diff, local links/anchors and gate ordering checked; no application code, learner data or deployment changed. Application tests are not required for this documentation-only change.
+
 ## Outstanding checks and decisions
 
 - [ ] Owner smoke test: real parent and linked-child Google sessions, family isolation, cross-device resume, refresh and optional-email “Не сега” latency. Measure authenticated competition switching before attributing remaining delay to hosting plans.
@@ -111,3 +117,13 @@ Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 ## Recording future work
 
 Keep active tasks, material open decisions and a short latest-verification summary here. For each completed slice record the outcome, checks/results, unresolved limitations and release status. Move lengthy completed evidence to the history archive; do not turn it back into mandatory reading. Update the authoritative domain guide when behavior changes, and preserve dated approval context for exceptions.
+
+
+## Competition reference and parent materials - approved release 2026-11-06
+
+- [x] Consolidated supplied background, verified facts and corrections in [docs/competition-reference.md](docs/competition-reference.md); retained unverified history as editorial context.
+- [x] Drafted four format/preparation articles, linked About cards, shared 2027 calendar for both school guides, and extended static metadata/public route/sitemap registration. SMG's historical formula remains separate from NPMG's upcoming intake.
+- [x] Added the owner-approved upcoming competition list and marked dates to the shared child/parent progress calendar, using one schedule for public articles and the app; activity and gold projections remain separate.
+- [x] Independent [Alpha copy review and owner decisions](docs/reviews/competition-articles-2026-11-06.md): all three proposals approved and applied; production publication approved on 2026-11-06.
+- [x] 320/320 tests, TypeScript, ESLint and production build/private-file checks passed. Isolated Chrome at 320, 390 and 1440px checked nine routes, date selection, article links and overflow; no page errors.
+- [ ] Push approved release and verify the exact Vercel commit plus live public metadata/cache/sitemap. No learner-data, API, CMS or schema changes. Landing expansion remains plan-only.

@@ -18,8 +18,26 @@ export const admissionGuides={
  },
 };
 export type AdmissionGuide=(typeof admissionGuides)[keyof typeof admissionGuides];
+export const competitionGuides={
+ maths:{path:"/materiali/matematika-za-vseki-4-klas",label:"Математика за всеки",eyebrow:"Състезание · 4. клас",title:"Математика за всеки за 4. клас: формат и подготовка",description:"Модули, задачи, оценяване и подготовка за „Математика за всеки“ в 4. клас. Дата за 2027 г. и източници с обозначена учебна година.",summary:"Как се различават тестът и задачите с подробно решение и какво да упражнява детето.",reviewedAt:"2026-11-06",modifiedAt:"2026-11-06"},
+ olympiad:{path:"/materiali/olimpiada-matematika-4-klas",label:"Олимпиада",eyebrow:"Два кръга · 4. клас",title:"Олимпиада по математика за 4. клас: общински и областен кръг",description:"Как се различават общинският и областният кръг на олимпиадата по математика за 4. клас. Формат, подготовка и дата за областния кръг през 2027 г.",summary:"Двата кръга, преминаването между тях и защо обяснението на решението е важно.",reviewedAt:"2026-11-06",modifiedAt:"2026-11-06"},
+ spring:{path:"/materiali/proletno-matematichesko-sastezanie-4-klas",label:"Пролетно състезание",eyebrow:"Състезание · 4. клас",title:"Пролетно математическо състезание за 4. клас",description:"Какъв е форматът на Пролетното математическо състезание за 4. клас, как се оценяват задачите и как да се подготви детето. Официални източници.",summary:"Четири задачи с подробно решение: какво изискват и как да се подготвите.",reviewedAt:"2026-11-06",modifiedAt:"2026-11-06"},
+ nvo:{path:"/materiali/nvo-matematika-4-klas",label:"НВО",eyebrow:"Външно оценяване · 4. клас",title:"НВО по математика в 4. клас: задачи и подготовка",description:"Какво проверява НВО по математика в 4. клас, какви задачи включва и как да се подготви детето. Разлика спрямо състезанията и официални източници.",summary:"Какво проверява оценяването и как да упражнявате училищния материал.",reviewedAt:"2026-11-06",modifiedAt:"2026-11-06"},
+};
+export type CompetitionGuide=(typeof competitionGuides)[keyof typeof competitionGuides];
+export type MaterialGuide=AdmissionGuide|CompetitionGuide;
+export const materialGuides=[...Object.values(admissionGuides),...Object.values(competitionGuides)];
+export {competitionCalendar,competitionCalendarSource} from "./competition-dates";
+export const competitionSources={
+ maths:"https://www.mon.bg/nfs/2025/10/reglament-ns-mat-za-vseki_2025-2026_29102025.pdf",
+ mathsCopy:"https://danybon.com/wp-content/uploads/2025/10/reglament-ns-mat-za-vseki_2025-2026_29102025.pdf",
+ olympiad:"https://ruo.mon.bg/files/sites/2/2025/11/regl-ol-math-4-7kl_05112025.pdf",
+ spring:"https://tutunjian.bg/wp-content/uploads/2026/02/regl-ns-proletno-math-4kl_2026.pdf",
+ nvo:"https://mon.bg/obshto-obrazovanie/natsionalno-vanshno-otsenyavane-nvo/nvo-za-iv-klas/model-na-nvo-za-iv-klas/",
+ nvoCopy:"https://ou-gm.com/download-239/",
+};
 export const legacyAdmissionPath="/materiali/priem-sled-4-klas-smg-npmg";
-export const publicPagePaths=["/","/about","/materiali",...Object.values(admissionGuides).map(guide=>guide.path)];
+export const publicPagePaths=["/","/about","/materiali",...materialGuides.map(guide=>guide.path)];
 
 export function publicOrigin(){
  const url=new URL(process.env.MATHS_APP_URL??"https://sastezatelna-matematika.vercel.app");
@@ -49,7 +67,7 @@ export function publicMetadata(title:string,description:string,path:string,optio
 export function hasAuthCookie(names:string[]){
  return names.some(name=>/^sb-.*-auth-token(?:\.\d+)?$/.test(name));
 }
-export function articleStructuredData(guide:AdmissionGuide){
+export function articleStructuredData(guide:MaterialGuide){
  const origin=publicOrigin(),url=origin+guide.path;
  return {"@context":"https://schema.org","@graph":[
   {"@type":"Article",headline:guide.title,description:guide.description,inLanguage:"bg",dateModified:guide.modifiedAt,mainEntityOfPage:url,author:{"@type":"Organization",name:siteName,url:origin+"/about"},publisher:{"@type":"Organization",name:siteName,url:origin}},

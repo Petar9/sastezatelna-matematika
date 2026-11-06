@@ -1,6 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
+import Link from "next/link";
+import { competitionCalendar, competitionCalendarSource } from "../src/competition-dates";
 import { Button, ButtonLink } from "./ui/button";
 import { Select } from "./ui/field";
 import { Message } from "./ui/message";
@@ -27,6 +29,10 @@ export function ProgressCalendar({ collections, initialDay }: { collections: Pro
  const [competition, setCompetition] = useState("all");
  const [selected, setSelected] = useState(initialDay);
  const id = useId();
+ const scheduled = competitionCalendar.filter(item => competition === "all" || item.competitionId === competition);
+ const upcoming = scheduled.filter(item => item.date >= initialDay);
+ const selectedCompetitions = scheduled.filter(item => item.date === selected);
+ const lastMonth = competitionCalendar.reduce((last, item) => item.date.slice(0, 7) > last ? item.date.slice(0, 7) : last, initialDay.slice(0, 7));
  const visible = collections.filter(item => competition === "all" || item.competitionId === competition);
  const events = visible.flatMap(item => item.events.map(event => ({ ...event, competitionId: item.competitionId, competition: item.title })));
  const monthly = events.filter(event => event.day.startsWith(month));
@@ -57,8 +63,17 @@ export function ProgressCalendar({ collections, initialDay }: { collections: Pro
   <div className={s.filter}><label htmlFor={`${id}-competition`}>Състезание</label><Select id={`${id}-competition`} value={competition} onChange={event => setCompetition(event.target.value)}>
    <option value="all">Всички състезания</option>{collections.map(item => <option key={item.competitionId} value={item.competitionId}>{item.title}</option>)}
   </Select></div>
+  {upcoming.length > 0 && <section className={s.upcoming} aria-labelledby={`${id}-upcoming`}>
+   <h2 id={`${id}-upcoming`}>Предстоящи състезания</h2>
+   <ul>{upcoming.map(event => <li key={event.date}>
+    <Button variant="quiet" className={s.upcomingButton} aria-controls={`${id}-details`} onClick={() => { setMonth(event.date.slice(0, 7)); setSelected(event.date); }}>
+     <time dateTime={event.date}>{event.displayDate}</time><span>{event.label}</span><span aria-hidden="true">→</span>
+    </Button>
+   </li>)}</ul>
+   <p className={s.legend}>По <a href={competitionCalendarSource}>графика на НПМГ за 2026/2027 г.</a> Датите подлежат на промяна от МОН. Проверявайте и сроковете за записване.</p>
+  </section>}
   <section className={s.calendar} aria-labelledby={`${id}-month`}>
-   <div className={s.monthNavigation}><Button variant="quiet" aria-label="Предишен месец" onClick={() => navigate(-1)}>←</Button><h2 id={`${id}-month`} aria-live="polite">{monthLabel(month)}</h2><Button variant="quiet" aria-label="Следващ месец" disabled={month >= initialDay.slice(0,7)} onClick={() => navigate(1)}>→</Button></div>
+   <div className={s.monthNavigation}><Button variant="quiet" aria-label="Предишен месец" onClick={() => navigate(-1)}>←</Button><h2 id={`${id}-month`} aria-live="polite">{monthLabel(month)}</h2><Button variant="quiet" aria-label="Следващ месец" disabled={month >= lastMonth} onClick={() => navigate(1)}>→</Button></div>
    <dl className={s.totals} aria-label="За месеца">
     <div><dt>Злато</dt><dd>{totals.gold}</dd></div>
     <div><dt>Самостоятелно</dt><dd>{totals.independent}</dd></div>
@@ -70,18 +85,20 @@ export function ProgressCalendar({ collections, initialDay }: { collections: Pro
     {Array.from({length: offset}, (_, index) => <span key={`empty-${index}`} aria-hidden="true"/>)}
     {Array.from({length: count}, (_, index) => {
      const day = `${month}-${String(index + 1).padStart(2,"0")}`;
+     const competitions = scheduled.filter(event => event.date === day);
      const activity = events.filter(event => event.day === day), value = dayProgress(activity);
-     return <button type="button" key={day} className={`${s.day} ${activity.length ? s.active : ""}`} aria-pressed={selected === day} aria-current={day === initialDay ? "date" : undefined} aria-controls={`${id}-details`} aria-label={`${dateLabel(day)}: ${value.gold} злато, ${value.independent} самостоятелни, ${value.hinted} с подсказка, ${activity.filter(event => event.kind === "attempt" && event.outcome === "incorrect").length} грешни отговора, ${activity.filter(event => event.kind === "attempt" && event.outcome === "revealed").length} разгледани решения${activity.length ? "" : ", няма записана активност"}`} onClick={() => setSelected(day)}>
+     return <button type="button" key={day} className={`${s.day} ${activity.length ? s.active : ""} ${competitions.length ? s.eventDay : ""}`} aria-pressed={selected === day} aria-current={day === initialDay ? "date" : undefined} aria-controls={`${id}-details`} aria-label={`${dateLabel(day)}: ${value.gold} злато, ${value.independent} самостоятелни, ${value.hinted} с подсказка, ${activity.filter(event => event.kind === "attempt" && event.outcome === "incorrect").length} грешни отговора, ${activity.filter(event => event.kind === "attempt" && event.outcome === "revealed").length} разгледани решения${activity.length ? "" : ", няма записана активност"}${competitions.map(event => `, състезание: ${event.label}`).join("")}`} onClick={() => setSelected(day)}>
       <span className={s.dayNumber}>{index + 1}</span>{activity.length > 0 && <>
        <span className={s.dayGold} aria-hidden="true">{value.gold}</span>
        <span className={s.dayCounts} aria-hidden="true">{value.independent + value.hinted} {activity.some(event => event.naturalPart) ? "стъпки" : "реш."}</span>
-      </>}
+      </>}{competitions.length > 0 && <span className={s.eventMarker} aria-hidden="true">◆</span>}
      </button>;
     })}
    </div>
   </section>
   <section className={s.details} id={`${id}-details`} aria-labelledby={`${id}-date`}>
    <h2 id={`${id}-date`} aria-live="polite">{dateLabel(selected)}</h2>
+   {selectedCompetitions.map(event => <p className={s.scheduledEvent} key={event.date}><span className={s.eventMarker} aria-hidden="true">◆</span> <Link href={event.path}>{event.label}</Link></p>)}
    {details.length > 0 && <dl className={s.daySummary} aria-label="За деня">
     <div><dt>Злато</dt><dd>{selectedTotals.gold}</dd></div>
     {selectedOutcomes.map(item => <div key={item.outcome}><dt>{item.label}</dt><dd>{item.count}</dd></div>)}

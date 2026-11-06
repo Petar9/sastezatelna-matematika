@@ -2,9 +2,10 @@
 .intro { max-width: 780px; margin: 32px 0; }
 .intro p { margin: 16px 0 0; }
 .lead { font-size: 22px; line-height: 1.45; }
-.competitions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.competitions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
 .competitions .competition { margin: 0; border-top: 4px solid var(--progress); }
 .competition p { margin: 0; }
+.competition .articleLink { margin-top: 16px; }
 @media (max-width: 900px) {
  .competitions { grid-template-columns: minmax(0, 1fr); }
 }

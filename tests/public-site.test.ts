@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import {test} from "node:test";
-import {admissionGuides,legacyAdmissionPath,articleStructuredData,hasAuthCookie,indexableDeployment,publicMetadata,publicOrigin,publicPagePaths,publicReadPath,searchVerification} from "../src/public-site.ts";
+import {materialGuides,legacyAdmissionPath,articleStructuredData,hasAuthCookie,indexableDeployment,publicMetadata,publicOrigin,publicPagePaths,publicReadPath,searchVerification} from "../src/public-site.ts";
 
 test("only explicitly public read paths bypass authentication; learner and API routes never do",()=>{
- for(const path of ["/about","/materiali",...Object.values(admissionGuides).map(guide=>guide.path),legacyAdmissionPath,"/robots.txt","/sitemap.xml"])assert.equal(publicReadPath(path),true,path);
+ for(const path of ["/about","/materiali",...materialGuides.map(guide=>guide.path),legacyAdmissionPath,"/robots.txt","/sitemap.xml"])assert.equal(publicReadPath(path),true,path);
  for(const path of ["/","/progress","/profiles","/parent","/login","/api/kids/course","/auth/callback","/materiali/private","/about/private"])assert.equal(publicReadPath(path),false,path);
- assert.equal(publicPagePaths.length,5);
+ assert.equal(publicPagePaths.length,9);
 });
 test("public metadata uses configured canonical origin and only production is indexable",()=>{
  const original={...process.env};try{
@@ -22,7 +22,7 @@ test("Supabase auth cookies including chunks suppress indexing on the mixed home
  assert.equal(hasAuthCookie(["theme","sb-project-code-verifier"]),false);
 });
 test("article schema matches the published guide and includes no unsupported reviews or offers",()=>{
- for(const guide of Object.values(admissionGuides)){
+ for(const guide of materialGuides){
  const schema=articleStructuredData(guide),article=schema["@graph"][0]!;
  assert.equal(article.headline,guide.title);assert.equal(article.dateModified,guide.modifiedAt);
  assert.equal(article.mainEntityOfPage,publicOrigin()+guide.path);

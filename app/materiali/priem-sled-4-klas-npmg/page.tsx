@@ -1,4 +1,5 @@
 import Link from "next/link";
+import {CompetitionCalendar} from "@/components/competition-calendar";
 import {MaterialsArticle} from "@/components/materials-article";
 import {admissionGuides,publicMetadata} from "@/src/public-site";
 import s from "@/components/materials.module.css";
@@ -10,7 +11,7 @@ export default function NpmgAdmissions(){
  return <MaterialsArticle guide={guide} related={admissionGuides.smg} intro={<>За приема в 5. клас през 2027/2028 г. НПМГ е обявила състезанията, които определят правото на участие. Методиката за класиране предстои да бъде публикувана.</>} contents={[{id:"competitions",label:"Състезанията"},{id:"scoring",label:"Балообразуване"},{id:"preparation",label:"Какво да следите"}]}>
   <section id="competitions"><h2>Кои състезания са посочени?</h2>
    <p>В <a href={rules}>официалното съобщение на НПМГ (PDF)</a> са посочени три състезания за 4. клас през учебната 2026/2027 г. Те се използват за определяне на правото на участие в приема за 2027/2028 г.:</p>
-   <ul><li>Областен кръг на олимпиадата по математика.</li><li>Пролетно математическо състезание.</li><li>„Математика за всеки“.</li></ul>
+   <CompetitionCalendar/>
    <p>Списъкът не дава сам по себе си пълните условия за кандидатстване. Проверете ги в правилата за съответния прием, когато бъдат публикувани.</p>
   </section>
   <section id="scoring"><h2>Как ще се образува балът?</h2>

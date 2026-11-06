@@ -33,6 +33,7 @@ test("progress parent and child read the same authorized history, with no answer
  assert.deepEqual(state.reads,[[["parent_id","parent-a"],["child_id","child-a"]]]);
  state.role="child"; state.reads=[];
  const child=renderToStaticMarkup(await page("child-a"));
+ assert.ok(child.includes("Предстоящи състезания")); assert.ok(parent.includes("Предстоящи състезания"));
  assert.ok(child.includes("Подай обратна връзка")); assert.ok(child.includes("Общо досега")); assert.ok(!child.includes("/parent/task")); assert.ok(!child.includes('href="/profiles"'));
  assert.deepEqual(state.reads,[[["parent_id","parent-a"],["child_id","child-a"]]]); assert.deepEqual(state.writes,[]);
  state.reads=[]; await assert.rejects(page("sibling"),/NEXT_HTTP_ERROR_FALLBACK;404/); assert.deepEqual(state.reads,[]);
@@ -82,7 +83,7 @@ test("calendar day selection, month navigation and competition filtering update 
   assert.equal(host.querySelectorAll('button[aria-pressed]').length,31);
   await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label="Следващ месец"]')!.click());
   assert.ok(host.textContent?.includes("ноември 2026"));
-  assert.equal(host.querySelector<HTMLButtonElement>('button[aria-label="Следващ месец"]')!.disabled,true);
+  assert.equal(host.querySelector<HTMLButtonElement>('button[aria-label="Следващ месец"]')!.disabled,false);
   assert.equal(JSON.stringify(state.writes),before);
  }finally {await act(async()=>root.unmount());host.remove();}
 });
@@ -148,4 +149,41 @@ test("natural subparts count as steps while whole original completion is shown s
  assert.equal(document.querySelector('[aria-current="date"] .dayCounts')?.textContent,"3 стъпки");
  assert.ok(document.querySelector(".skillResults")?.textContent?.includes("Самостоятелно: 2 · С подсказка: 1"));
  assert.ok(!document.toString().includes("Подусловията не се броят"));
+});
+
+test("upcoming dates open marked days and articles without creating learning activity or gold",async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ const collections=[{competitionId:"olimpiada-oblasten",title:"Областен кръг",summary:{attempts:0,confirmed:0,revisit:0,hasTask:false},undatedGold:0,undatedAttempts:0,events:[]}];
+ const before=JSON.stringify(collections);
+ try{
+  await act(async()=>root.render(<ProgressCalendar collections={collections} initialDay="2026-11-06"/>));
+  assert.equal(host.querySelectorAll(".upcoming li").length,3);
+  assert.ok(host.querySelector('.upcoming a[href^="https://npmg.org/"]'));
+  await act(async()=>host.querySelector<HTMLButtonElement>(".upcoming button")!.click());
+  const day=host.querySelector('button[aria-pressed="true"]')!;
+  assert.ok(day.getAttribute("aria-label")?.includes("7 февруари 2027"));
+  assert.ok(day.getAttribute("aria-label")?.includes("състезание: Олимпиада"));
+  assert.equal(day.querySelector(".dayGold"),null);assert.equal(day.querySelector(".eventMarker")?.textContent,"◆");
+  assert.ok(host.querySelector('.scheduledEvent a[href="/materiali/olimpiada-matematika-4-klas"]'));
+  assert.equal(host.querySelector('dl[aria-label="За месеца"]')?.textContent,"Злато0Самостоятелно0С подсказка0");
+  assert.equal(host.querySelector('dl[aria-label="За деня"]'),null);
+  await act(async()=>host.querySelectorAll<HTMLButtonElement>(".upcoming button")[2]!.click());
+  assert.ok(host.querySelector('button[aria-pressed="true"]')?.getAttribute("aria-label")?.includes("15 май 2027"));
+  assert.equal(host.querySelector<HTMLButtonElement>('button[aria-label="Следващ месец"]')!.disabled,true);
+  const select=host.querySelector<HTMLSelectElement>("select")!;
+  Object.defineProperty(select,"value",{value:"olimpiada-oblasten",configurable:true});
+  await act(async()=>select.dispatchEvent(new dom.window.Event("change",{bubbles:true})));
+  assert.equal(host.querySelectorAll(".upcoming li").length,1);
+  assert.equal(host.querySelectorAll(".scheduledEvent").length,0);
+  assert.equal(host.querySelectorAll(".eventMarker").length,0);
+  assert.equal(JSON.stringify(collections),before);
+ }finally{await act(async()=>root.unmount());host.remove();}
+});
+test("past competition dates stay marked but leave the upcoming list",()=>{
+ const {document}=parseHTML(renderToStaticMarkup(<ProgressCalendar initialDay="2027-02-08" collections={[]}/>));
+ assert.equal(document.querySelectorAll(".upcoming li").length,2);
+ assert.ok(document.querySelector('button[aria-label^="7 февруари"] .eventMarker'));
+ const later=parseHTML(renderToStaticMarkup(<ProgressCalendar initialDay="2028-01-01" collections={[]}/>)).document;
+ assert.equal(later.querySelectorAll(".upcoming").length,0);
+ assert.ok(later.querySelector('button[aria-label="Следващ месец"]')?.hasAttribute("disabled"));
 });
