@@ -17,12 +17,13 @@ Make the app's purpose clear, its steps simple, and learning enjoyable. Use Line
 - Use bounded parallel workers only when authorized and independently useful; one owner integrates and verifies the result. Runtime instructions govern model choice and team limits.
 - Verify proportionately to the change. Report evidence and limitations; a local build is not a verified deployment. Record completed work briefly in `plan.md`, update the affected authoritative guide, and archive lengthy evidence instead of growing mandatory reading.
 
-## Alpha copy review before testing
+## Astra copy review before testing
 
 For every new or expanded competition, new page or article, and substantial copy revision, complete this gate after drafting and before acceptance/regression testing:
 
-1. Give an independent Alpha agent the changed files, intended audience, sources, approved wording and previous owner decisions. Critically review all visible Bulgarian: descriptions, headings, controls, hints, solutions and messages, as applicable.
-2. Present the owner with each hesitation: location, current wording, concern and recommended replacement. Wait for approval before applying copy proposals; explicitly report when no changes are recommended. Preserve original competition statements and mathematical meaning; propose clarifications separately.
+1. Use an independent reviewer running the `gpt-6-astra` model (Astra), not merely an agent named Astra. Give it the changed files, intended audience, sources, approved wording and previous owner decisions. Critically review all visible Bulgarian: descriptions, headings, controls, hints, solutions and messages, as applicable.
+   If Astra is unavailable, report the review as pending and ask the owner before substituting another model; never label a different model’s review as Astra.
+2. Keep every suggestion in the current conversation/terminal task context as well as the linked review record, so a later chat reply can resolve it without reopening the files or repeating the question. Accept the owner’s answer here in the conversation as approval or rejection of the clearly identified pending suggestions; update their status and proceed without asking again. Present the owner with each hesitation: location, current wording, concern and recommended replacement. Wait for approval before applying copy proposals; explicitly report when no changes are recommended. Preserve original competition statements and mathematical meaning; propose clarifications separately.
 3. Save the review context, reviewer/date, proposals and owner approvals/rejections in the collection review record or a linked task review note. Retain approved exceptions so future agents do not reopen settled wording. An agent review does not replace required human source/content verification.
 4. Apply approved changes, then run the required acceptance tests and release checks. Material copy changes after approval repeat this gate for the affected text. If the independent review or owner decision is pending, report it as pending; do not skip the gate or claim readiness.
 

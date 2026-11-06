@@ -21,7 +21,7 @@ Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 
 ## Mandatory copy review gate - 2026-11-06
 
-- [x] Saved the [Alpha copy review gate](AGENTS.md#alpha-copy-review-before-testing) and linked it from competition, UI and article workflows: draft → independent critical review → owner approves proposals → apply approved copy → acceptance tests → release checks.
+- [x] Saved the [Astra copy review gate](AGENTS.md#astra-copy-review-before-testing) and linked it from competition, UI and article workflows: draft → independent critical review → owner approves proposals → apply approved copy → acceptance tests → release checks.
 - [x] Require saved review context, recommendations and owner decisions; preserve original statements, mathematical meaning and approved wording. This instruction does not claim a new review of existing content.
 - Verification: documentation diff, local links/anchors and gate ordering checked; no application code, learner data or deployment changed. Application tests are not required for this documentation-only change.
 
@@ -124,10 +124,20 @@ Keep active tasks, material open decisions and a short latest-verification summa
 - [x] Consolidated supplied background, verified facts and corrections in [docs/competition-reference.md](docs/competition-reference.md); retained unverified history as editorial context.
 - [x] Drafted four format/preparation articles, linked About cards, shared 2027 calendar for both school guides, and extended static metadata/public route/sitemap registration. SMG's historical formula remains separate from NPMG's upcoming intake.
 - [x] Added the owner-approved upcoming competition list and marked dates to the shared child/parent progress calendar, using one schedule for public articles and the app; activity and gold projections remain separate.
-- [x] Independent [Alpha copy review and owner decisions](docs/reviews/competition-articles-2026-11-06.md): all three proposals approved and applied; production publication approved on 2026-11-06.
+- [x] Independent [copy review and owner decisions](docs/reviews/competition-articles-2026-11-06.md): all three proposals approved and applied; production publication approved on 2026-11-06.
 - [x] 320/320 tests, TypeScript, ESLint and production build/private-file checks passed. Isolated Chrome at 320, 390 and 1440px checked nine routes, date selection, article links and overflow; no page errors.
 - [x] Published `06c9166` to `main`; [Vercel deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/vF3N9JuYbYNP528rAcL2esk5P3mF) reported success for that exact SHA. Live checks passed for all nine public pages: 200, canonical, indexable metadata, Article schema, public cache (home remains no-store), no Set-Cookie, nine-page sitemap and robots. Chrome at 390px confirmed dates, approved wording, keyboard access and no overflow/page errors; unauthenticated progress reaches login with no-store and `/design-system` returns 404.
 - No learner-data, API, CMS or schema changes. Real Google account/physical-device smoke checks were not repeated. Landing expansion remains plan-only.
+
+- [x] Corrected the copy-review requirement to Astra (`gpt-6-astra`) across the agent, competition, design and SEO guides; preserved the actual model in historical review evidence.
+
+## Calendar links and complete schedule - approved 2026-11-06
+
+- [x] Drafted the approved five-entry schedule, deadline distinction, shared preparation links, calendar/list order, article rows and quiet materials navigation.
+- [x] Actual `gpt-6-astra` completed the independent Bulgarian copy review; [all three proposals approved in chat and applied](docs/reviews/calendar-navigation-2026-11-06.md).
+- [x] Applied the three owner decisions, added materials navigation to the parent last-task view, refreshed design guidance and internal date provenance, and documented chat approval handling in AGENTS.md.
+- [x] Regression tests, TypeScript, ESLint, production build and private-file checks passed. Isolated Chrome checked all six articles and progress at 320, 390 and 1440px: five dates, municipal deadline, competition filter, direct preparation navigation, materials links, no overflow or page errors; production design catalogue returns 404. No learner-data changes.
+- [ ] Publish and verify the exact production deployment.
 
 
 ## Connected-statement UX - approved release 2026-11-06

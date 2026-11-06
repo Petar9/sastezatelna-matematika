@@ -16,6 +16,7 @@ const {default:Materials}=await import("../app/materiali/page.tsx");
 const {default:robots}=await import("../app/robots.ts");
 const {default:sitemap}=await import("../app/sitemap.ts");
 const {materialGuides,competitionGuides,competitionCalendar}=await import("../src/public-site.ts");
+const {competitionHref}=await import("../src/competition-dates.ts");
 const {default:About}=await import("../app/about/page.tsx");
 const competitionArticles=await Promise.all([
  import("../app/materiali/matematika-za-vseki-4-klas/page.tsx"),
@@ -50,7 +51,7 @@ test("school guides expose distinct sourced answers, review dates and matching s
  assert.ok(npmg.querySelector('a[href="/materiali/priem-sled-4-klas-smg"]'));
  for(const [d,host] of [[smg,"smg.bg"],[npmg,"npmg.org"]] as const){
   const external=[...d.querySelectorAll('a[href^="https:"]')].map(a=>new URL(a.getAttribute("href")!).hostname);
-  assert.deepEqual(new Set(external),new Set(host==="smg.bg"?[host,"npmg.org"]:[host]));
+  assert.deepEqual(new Set(external),new Set([host]));
  }
  const hub=doc(<Materials/>);
  assert.equal(hub.querySelectorAll("article").length,6);
@@ -89,6 +90,24 @@ test("competition articles are public server-rendered answers with matching sche
  for(const guide of Object.values(competitionGuides))assert.ok(about.querySelector(`a[href="${guide.path}"]`));
  for(const Article of [Smg,Npmg]){
   const d=doc(<Article/>);
-  for(const event of competitionCalendar){assert.ok([...d.querySelectorAll("time")].some(time=>time.getAttribute("dateTime")===event.date));assert.ok(d.querySelector(`a[href="${event.path}"]`));}
+  for(const event of competitionCalendar){assert.ok([...d.querySelectorAll("time")].some(time=>time.getAttribute("dateTime")===event.date));assert.ok(d.querySelector(`a[href="${competitionHref(event)}"]`));}
  }
+});
+
+test("shared article schedules contain only relevant preparation links and distinguish the municipal deadline",()=>{
+ const counts=[1,2,1,1];
+ for(const [index,module] of competitionArticles.entries()){
+  const d=doc(React.createElement(module.default));
+  assert.equal(d.querySelectorAll('a[href^="/?competition="]').length,counts[index]);
+  assert.ok(!d.body.textContent!.includes("По графика на НПМГ"));
+  assert.ok(!d.body.textContent!.includes("Датите подлежат на промяна"));
+ }
+ for(const Article of [Smg,Npmg]){
+  const d=doc(<Article/>);
+  assert.equal(d.querySelectorAll('a[href^="/?competition="]').length,5);
+  const deadline=d.querySelector('a[href="/?competition=olimpiada"]')!;
+  assert.ok(deadline.textContent?.includes("До 12 декември 2026 г."));
+  assert.ok(deadline.textContent?.includes("Краен срок за провеждане"));
+ }
+ assert.ok(doc(<Npmg/>).body.textContent?.includes("Общ календар за 4. клас през 2026/2027 г."));
 });

@@ -50,6 +50,6 @@ export default async function Progress({ searchParams }: { searchParams: Promise
   <ButtonLink href="/">← Начало</ButtonLink><h1>Напредък</h1>
   {parent && children.length > 1 ? <form action="/progress" method="get" className={p.filter}><label htmlFor="progress-child">Детски профил</label><Select name="child" id="progress-child" defaultValue={childId}>{children.map(child => <option key={child.id} value={child.id}>{child.nickname}</option>)}</Select><Button type="submit" variant="secondary">Покажи напредъка</Button></form> : nickname && <p>{nickname}</p>}
   <ProgressCalendar key={childId ?? "local"} collections={collections} initialDay={sofiaDay(new Date().toISOString())!}/>
-  {childId && <div className={s.feedbackAction}><FeedbackButton childId={childId}/></div>}
+  <div className={s.feedbackAction}><ButtonLink href="/materiali" variant="quiet">Ценни материали</ButtonLink>{childId && <FeedbackButton childId={childId}/>}</div>
  </div></main>;
 }

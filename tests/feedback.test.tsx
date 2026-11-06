@@ -69,6 +69,7 @@ test("parent last-task page is read-only, family scoped and excludes answers and
  assert.deepEqual(state.writes, []); assert.equal(JSON.stringify(course), before);
  await assert.rejects(Parent({ searchParams: Promise.resolve({}) }), /NEXT_REDIRECT/);
  assert.ok(markup.includes("/progress?child=child-a"));
+ assert.ok(markup.includes('href="/materiali"')); assert.ok(markup.includes("Подай обратна връзка"));
  reset(); assert.ok(renderToStaticMarkup(await page()).includes("Все още няма записана задача."));
  await assert.rejects(page("foreign-child"), /NEXT_HTTP_ERROR_FALLBACK;404/);
  await assert.rejects(page("child-a", "unpublished"), /NEXT_HTTP_ERROR_FALLBACK;404/);

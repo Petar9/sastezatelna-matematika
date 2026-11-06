@@ -187,7 +187,7 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 			</section>}
 		</>}
   {showDashboard && !focusedIsland && <footer className={s.footer}><Link href="/about" onClick={event=>leave(event,"/about")} className={s.quiet}>За сайта</Link><Link href={learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress"} onClick={event=>leave(event,learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress")} className={s.quiet}>Напредък</Link><Link href="/profiles" onClick={event=>leave(event,"/profiles")} className={s.quiet}>Профили</Link></footer>}
-  {learnerId && <div className={s.feedbackAction}><FeedbackButton childId={learnerId} competitionId={competitionId} taskKey={!showDashboard && !view.paused ? view.task?.key : undefined}/></div>}
+  <div className={s.feedbackAction}><Link href="/materiali" onClick={event=>leave(event,"/materiali")} className={s.quiet}>Ценни материали</Link>{learnerId && <FeedbackButton childId={learnerId} competitionId={competitionId} taskKey={!showDashboard && !view.paused ? view.task?.key : undefined}/>}</div>
 	</div></main>;
 }
 

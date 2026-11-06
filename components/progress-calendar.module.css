@@ -41,12 +41,7 @@
 
 .upcoming { min-width: 0; }
 .upcoming h2 { margin: 0 0 var(--space-3); font-size: var(--text-heading); line-height: var(--line-heading); }
-.upcoming ul { list-style: none; padding: 0; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); overflow: hidden; }
-.upcoming li + li { border-top: 1px solid var(--border); }
-.upcomingButton { display: grid; grid-template-columns: 11rem minmax(0, 1fr) auto; width: 100%; gap: var(--space-3); text-align: left; border-radius: 0; white-space: normal; }
-.upcomingButton time { color: var(--muted); font-size: var(--text-small); font-weight: 400; }
-.upcomingButton > span { min-width: 0; overflow-wrap: anywhere; }
 .eventDay { border-color: var(--primary); }
 .eventMarker { color: var(--primary); font-size: var(--text-caption); }
 .scheduledEvent { line-height: var(--line-body); }
-@media(max-width: 600px) { .upcomingButton { grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1) var(--space-3); } .upcomingButton time { grid-column: 1 / -1; } }
+.deadlineCaption { display: block; color: var(--muted); font-size: var(--text-small); }

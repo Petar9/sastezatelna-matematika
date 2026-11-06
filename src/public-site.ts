@@ -27,7 +27,7 @@ export const competitionGuides={
 export type CompetitionGuide=(typeof competitionGuides)[keyof typeof competitionGuides];
 export type MaterialGuide=AdmissionGuide|CompetitionGuide;
 export const materialGuides=[...Object.values(admissionGuides),...Object.values(competitionGuides)];
-export {competitionCalendar,competitionCalendarSource} from "./competition-dates";
+export {competitionCalendar} from "./competition-dates";
 export const competitionSources={
  maths:"https://www.mon.bg/nfs/2025/10/reglament-ns-mat-za-vseki_2025-2026_29102025.pdf",
  mathsCopy:"https://danybon.com/wp-content/uploads/2025/10/reglament-ns-mat-za-vseki_2025-2026_29102025.pdf",

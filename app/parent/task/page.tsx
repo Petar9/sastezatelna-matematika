@@ -34,6 +34,6 @@ export default async function LastTask({ searchParams }: { searchParams: Promise
     {statement.figure && <figure className={s.figure}><Image src={publicImage(statement.figure.src)} alt={statement.figure.alt} width={360} height={360} unoptimized/></figure>}
     {statement.options && <ol className={s.list}>{statement.options.map((option, index) => <li key={index}>{["А", "Б", "В", "Г"][index] ?? index + 1}) {option}</li>)}</ol>}
    </> : <p>Все още няма записана задача.</p>}
-  </section><footer className={s.footer}><FeedbackButton/></footer>
+  </section><div className={s.feedbackAction}><Link href="/materiali" className={s.quietButton}>Ценни материали</Link><FeedbackButton/></div>
  </div></main>;
 }

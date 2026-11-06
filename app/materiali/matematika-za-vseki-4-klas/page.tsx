@@ -1,7 +1,8 @@
+import {CompetitionCalendar} from "@/components/competition-calendar";
+import {competitionCalendar} from "@/src/competition-dates";
 import Link from "next/link";
 import {MaterialsArticle} from "@/components/materials-article";
-import {admissionGuides,competitionGuides,competitionSources,competitionCalendarSource,publicMetadata} from "@/src/public-site";
-import s from "@/components/materials.module.css";
+import {admissionGuides,competitionGuides,competitionSources,publicMetadata} from "@/src/public-site";
 const guide=competitionGuides.maths;
 export const metadata=publicMetadata(guide.title,guide.description,guide.path,{article:true});
 export default function Article(){
@@ -11,7 +12,7 @@ export default function Article(){
 <p>По <a href={competitionSources.maths}>регламента на МОН за 2025/2026 г. (PDF)</a> първият модул съдържа 15 задачи с избираем отговор и 5 с кратък числов отговор. Те носят съответно по 1 и по 2 точки, общо до 25.</p>
 <p>Вторият модул е с две задачи с подробно решение, всяка до 10 точки. Максималният резултат от състезанието е <strong>45 точки</strong>.</p>
 <p>Времето по този регламент е 75 минути за първия модул и 120 за втория. Времетраенето е променяно през годините; за участието през 2027 г. следвайте регламента за 2026/2027 г.</p>
-<p className={s.notice}>Обявената дата за 2027 г. е <time dateTime="2027-05-15">15 май</time> според <a href={competitionCalendarSource}>съобщението на НПМГ (PDF)</a>. Датата и сроковете за записване се проверяват отделно.</p>
+<CompetitionCalendar events={competitionCalendar.filter(event=>event.competitionId==="matematika-za-vseki")}/>
 </section>
 <section id="admission"><h2>Какво значение има за приема след 4. клас?</h2>
 <p>Зависи от правилата на училището за конкретния прием. В <Link href={admissionGuides.smg.path}>разгледаната формула на СМГ за 2026/2027 г.</Link> трансформираният резултат има тежест 6. За <Link href={admissionGuides.npmg.path}>НПМГ през 2027/2028 г.</Link> са обявени състезанията, но тежестите предстои да бъдат публикувани.</p>

@@ -1,4 +1,4 @@
-# Alpha review: competition reference and articles
+# Copy review: competition reference and articles
 
 Date: 2026-11-06. Audience: Bulgarian parents of fourth-graders. Scope: four distinct format/preparation articles, one competition reference, short About cards, school-guide calendar. Production publication approved by the owner on 2026-11-06.
 
@@ -13,11 +13,11 @@ Date: 2026-11-06. Audience: Bulgarian parents of fourth-graders. Scope: four dis
 
 ## Review gate
 
-Independent reviewer: Alpha (`gpt-6.1-sol`, low), 2026-11-06. Article and calendar extension reviews completed. Read the actual changed Bulgarian text, titles, summaries, About and school-guide additions with `docs/competition-reference.md` and `AGENTS.md`.
+Independent reviewer: `gpt-6.1-sol` (low), 2026-11-06. Article and calendar extension reviews completed. Read the actual changed Bulgarian text, titles, summaries, About and school-guide additions with `docs/competition-reference.md` and `AGENTS.md`.
 
 For each hesitation record file/location, exact current text, concern and recommended replacement; separate required factual corrections from optional copy improvements. No copy changes are approved merely because the implementation plan was approved. Owner approved all three proposals and production publication on 2026-11-06 ("ok i accept move it to production"). All three replacements applied verbatim before testing. Acceptance: 320/320 tests, TypeScript, ESLint, production build and private-file exclusions passed. Isolated Chrome checked nine routes at 320, 390 and 1440px, calendar date selection and article links, with no horizontal overflow or page errors. Physical-device and real Google account smoke checks were not repeated. Production release `06c9166` succeeded on Vercel; live nine-page metadata/cache/sitemap, dates, approved wording, keyboard, private-route guard and development-catalogue exclusion checks passed.
 
-## Alpha proposals - all approved and applied
+## Previous reviewer proposals - all approved and applied
 
 1. `app/materiali/olimpiada-matematika-4-klas/page.tsx:13`: “За областния кръг през тази учебна година се допускат учениците с поне 16 точки.” → “По регламента за 2025/2026 г. до областния кръг се допускат учениците с поне 16 точки.” Avoid implying that last year's verified threshold is current.
 2. `app/materiali/matematika-za-vseki-4-klas/page.tsx:8`: “„Математика за всеки“ съчетава тест и две задачи с подробно решение.” → “По регламента за 2025/2026 г. „Математика за всеки“ съчетава тест и две задачи с подробно решение.” Current regulation remains unread.
@@ -29,4 +29,8 @@ No other substantial article copy changes recommended; settled teacher-review wo
 
 Owner approved 2026-11-06: short “Предстоящи състезания” list above the shared child/parent calendar, selection opens and marks the day, with an article link; announced dates do not count as learning activity or gold. Shared schedule follows competition filtering; source caveat retained. No learner-data changes.
 
-Calendar review result: Alpha (`gpt-6.1-sol`, low), 2026-11-06, recommends no substantive copy changes to the upcoming list, dates, competition names, source/change/registration caveat, accessible day labels or article links. The reviewer inspected the actual calendar and shared date source; no tests, visual acceptance or independent external verification were performed. Article proposals above were subsequently approved and applied.
+Calendar review result: `gpt-6.1-sol` (low), 2026-11-06, recommends no substantive copy changes to the upcoming list, dates, competition names, source/change/registration caveat, accessible day labels or article links. The reviewer inspected the actual calendar and shared date source; no tests, visual acceptance or independent external verification were performed. Article proposals above were subsequently approved and applied.
+
+## Reviewer model correction
+
+Owner clarified on 2026-11-06 that the required reviewer is Astra (`gpt-6-astra`), not “Alpha”. The completed reviews above actually used `gpt-6.1-sol`; they are historical evidence, not completed Astra reviews. Future qualifying work must follow the [Astra review gate](../../AGENTS.md#astra-copy-review-before-testing).

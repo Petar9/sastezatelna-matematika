@@ -1,6 +1,8 @@
+import {CompetitionCalendar} from "@/components/competition-calendar";
+import {competitionCalendar} from "@/src/competition-dates";
 import Link from "next/link";
 import {MaterialsArticle} from "@/components/materials-article";
-import {admissionGuides,competitionGuides,competitionSources,competitionCalendarSource,publicMetadata} from "@/src/public-site";
+import {admissionGuides,competitionGuides,competitionSources,publicMetadata} from "@/src/public-site";
 const guide=competitionGuides.spring;
 export const metadata=publicMetadata(guide.title,guide.description,guide.path,{article:true});
 export default function Article(){
@@ -12,7 +14,7 @@ export default function Article(){
 <p>Източник: <a href={competitionSources.spring}>регламент на МОН за 2025/2026 г. (копие, PDF)</a>. За следващото издание проверете регламента за съответната учебна година.</p>
 </section>
 <section id="admission"><h2>Кога е през 2027 г. и участва ли в приема?</h2>
-<p>В <a href={competitionCalendarSource}>съобщението на НПМГ (PDF)</a> е посочена дата <strong><time dateTime="2027-03-27">27 март 2027 г.</time></strong> Датите могат да се променят; следете и отделния срок за записване.</p>
+<CompetitionCalendar events={competitionCalendar.filter(event=>event.competitionId==="proletno")}/>
 <p>Значението на резултата зависи от училището и годината на приема. Вижте <Link href={admissionGuides.smg.path}>правилата на СМГ за 2026/2027 г.</Link> и <Link href={admissionGuides.npmg.path}>обявеното от НПМГ за 2027/2028 г.</Link>, без да смесвате двата приема.</p>
 </section>
 <section id="preparation"><h2>Как да се подготви детето?</h2>

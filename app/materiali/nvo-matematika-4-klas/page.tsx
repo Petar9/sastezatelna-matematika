@@ -1,3 +1,5 @@
+import {CompetitionCalendar} from "@/components/competition-calendar";
+import {competitionCalendar} from "@/src/competition-dates";
 import Link from "next/link";
 import {MaterialsArticle} from "@/components/materials-article";
 import {admissionGuides,competitionGuides,competitionSources,publicMetadata} from "@/src/public-site";
@@ -7,6 +9,7 @@ export const metadata=publicMetadata(guide.title,guide.description,guide.path,{a
 export default function Article(){
  return <MaterialsArticle guide={guide} related={competitionGuides.maths} intro={<>НВО по математика проверява наученото до края на 4. клас. То е външно оценяване по училищния материал, а не математическо състезание.</>} contents={[{"id": "format", "label": "Какво включва"}, {"id": "preparation", "label": "Подготовка"}, {"id": "admission", "label": "Роля при приема"}]}>
 
+<CompetitionCalendar events={competitionCalendar.filter(event=>event.competitionId==="nvo")}/>
 <section id="format"><h2>Какви знания и задачи проверява?</h2>
 <p>В <a href={competitionSources.nvoCopy}>модела на МОН за 2026/2027 г. (копие, PDF)</a> са включени числа и действия, неизвестно число, мерни единици, геометрични фигури, текстови задачи и разчитане на данни.</p>
 <p>Тестът съдържа <strong>25 задачи</strong> с избираем и свободен отговор, включително задача с три подусловия. Времето е <strong>60 минути</strong>, а максималният резултат - <strong>100 точки</strong>. Моделът предвижда допълнително време за ученици със специални образователни потребности.</p>

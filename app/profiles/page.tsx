@@ -7,7 +7,7 @@ import { ChildProfiles, ChildProfileSettings } from "@/components/onboarding";
 import s from "@/components/kids.module.css";
 export const dynamic = "force-dynamic";
 export default async function Profiles({ searchParams }: { searchParams: Promise<{ full?: string; error?: string; setup?: string; status?: string }> }) {
-  if (mode() === "local") return <main className={s.shell}><div className={s.content}><Link href="/" className={s.secondary}>← Начало</Link><h1>Твоето приключение</h1><p>Напредъкът се пази на този компютър.</p></div></main>;
+  if (mode() === "local") return <main className={s.shell}><div className={s.content}><Link href="/" className={s.secondary}>← Начало</Link><h1>Твоето приключение</h1><p>Напредъкът се пази на този компютър.</p><div className={s.feedbackAction}><Link href="/materiali" className={s.quiet}>Ценни материали</Link></div></div></main>;
   const account = await accountContext().catch(error => {
     if (error instanceof KidsError) redirect(error.status === 401 ? "/login" : "/login?denied=1");
     throw error;

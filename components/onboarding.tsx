@@ -86,7 +86,7 @@ function EmailForm({ child, setup = false, issue }: { child: Child; setup?: bool
 
 function ProfileFooter() {
   return <><Link href="/progress">Напредък</Link>
-    <form method="post" action="/auth/logout"><Button type="submit" variant="quiet" className={o.textButton}>Изход</Button></form><FeedbackButton/></>;
+    <form method="post" action="/auth/logout"><Button type="submit" variant="quiet" className={o.textButton}>Изход</Button></form><Link href="/materiali">Ценни материали</Link><FeedbackButton/></>;
 }
 
 export function ChildProfiles({ children, issue, setup, status }: { children: Child[]; issue?: ProfileIssue; setup?: string; status?: "saved" | "removed" | "renamed" }) {
