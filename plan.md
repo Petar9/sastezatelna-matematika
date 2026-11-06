@@ -757,7 +757,7 @@ Production evidence, 2026-11-05:
 
 ## Application performance - approved 2026-11-06
 
-Status: implemented and verified locally; production release in progress.
+Status: released and verified on production.
 
 - Coordinator: gpt-6.1-sol/high, owns integration and release verification; bounded selection and server workers plus Astra independent critical review. No subscription upgrade, migration or learner-data edit.
 - [x] Reuse per-selection history indexes and avoid ranking/cloning a full adventure just to check availability. Preserve existing task ordering, reservations, review boundaries and source identities.
@@ -768,7 +768,7 @@ Status: implemented and verified locally; production release in progress.
 - [x] Refresh auth cookies through verified claims in the proxy; protected routes retain fresh getUser authorization. Asymmetric signing keys can use cached JWKS; symmetric fallback can still require a network request.
 - [x] Configure the single Vercel function region as London (lhr1), matching the existing Supabase eu-west-2 location.
 - [x] Run combined tests, production build, browser smoke checks and independent review before publication.
-- [ ] Publish and verify the production deployment and London execution region.
+- [x] Publish and verify the production deployment and London execution region.
 
 Acceptance evidence:
 - 261/261 tests pass; full ESLint, TypeScript, production build, private deployment trace checks and git diff --check pass. Existing generated images are unchanged.
@@ -776,3 +776,8 @@ Acceptance evidence:
 - Astra found no material regression; 6,750 additional differential comparisons preserve selection behavior. Real-catalogue benchmark medians with 100 synthetic history records: full quest ranking 189.899 to 1.514 ms; availability including the previous clone cost 11.477 to 0.140 ms. With 1,000 records: 2,775.091 to 2.156 ms and 603.957 to 1.166 ms respectively. Reproduce with node --import tsx scripts/benchmark-selection-performance.ts --real. These are CPU benchmarks, not measured end-to-end latency for Ema's short history.
 - Chrome on the isolated production build loaded and switched all three competitions, returned to mathematics and saved a correct adventure answer with the existing 25-gold result and 1/5 completion. Only disposable local data received commands. Browser instrumentation was unavailable, so request-count assertions use component/store tests rather than browser timing claims.
 - Authenticated production latency, cross-device refresh and physical-device behavior remain owner smoke checks. No database schema or educational/reward rule changes.
+
+Production evidence, 2026-11-06:
+- Application release `9731616` succeeded on Vercel: https://vercel.com/petar-s-projects33/sastezatelna-matematika/E3e1XuipfXA1Gs5YipnQ4iPoNFEa . Live dynamic response headers confirm execution in `lhr1`, alongside Supabase London.
+- Chrome verified the released homepage and login navigation. HTTP checks passed for home, about and login; signed-out profiles redirect to login, the learning API returns 401/no-store, and private materials, raw course data and the development gallery return 404.
+- The original checkout was fast-forwarded and all 13 private learner-history/backup hashes remain unchanged. No production learner commands or data edits were performed. Authenticated interaction latency still requires an owner smoke test; anonymous warm-page samples are not a substitute.
