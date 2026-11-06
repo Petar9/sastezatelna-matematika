@@ -4,10 +4,12 @@ Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 
 ## Current release
 
-- Production: https://sastezatelna-matematika.vercel.app/ . Latest recorded application release: `9731616`; verification recorded in `f3fe572`, 2026-11-06. Vercel deployment: [performance release](https://vercel.com/petar-s-projects33/sastezatelna-matematika/E3e1XuipfXA1Gs5YipnQ4iPoNFEa).
-- Published: three competitions, optional child Google access, shared design system, general feedback, shared Напредък/calendar, compact daily summaries, current third-hint rewards/source labels, landing/onboarding and performance improvements. Earlier archive entries saying these await publication describe their recording date.
-- Latest recorded checks: 261 tests, TypeScript, ESLint, production build/private-file checks, isolated gameplay and independent selection review passed. Production public/auth-boundary checks passed; London `lhr1` execution confirmed alongside Supabase London. No learner-history or database-schema change in that performance release.
-- Competition snapshots are reused for 30 seconds within the mounted learner, with stale/focus/write checks retained. Selection CPU benchmarks improved substantially, but do not establish authenticated end-to-end latency for a real child.
+- Production: https://sastezatelna-matematika.vercel.app/ . Application release: `e001ef0`, 2026-11-06. Vercel: [verified release](https://vercel.com/petar-s-projects33/sastezatelna-matematika/7P3zqhZK367tew5birjiRYHLa82S).
+- Published: five competitions, including Пролетни and Олимпиада (областен кръг), approved Bulgarian revisions, connected natural subparts and the 16/4/6/4/4 island maps; public „Ценни материали“ and separate СМГ/НПМГ guides with SEO metadata. Earlier dated entries describing drafts/local-only work record their state at that time.
+- Final local checks: 317/317 tests, TypeScript, ESLint, production build/private-file checks and desktop/mobile Chrome passed. Verified draft restoration, grouped answers, next-part continuation and zero new gold after the third hint with disposable local data.
+- Live checks: Vercel deployment succeeded; anonymous public pages, canonical/indexing metadata, five-URL sitemap, robots and legacy 308 redirect passed. Public article routes have shared cache headers and no Set-Cookie, including with a disposable invalid auth-cookie fixture; private routes remain no-store/noindex and protected read APIs return 401. New competition assets return 200 with immutable caching. Chrome loaded the live materials hub and СМГ guide without layout overflow.
+- No database schema, real learner history or Supabase records changed. Real parent/child Google sessions, physical devices and final human content review remain owner checks. Commercial landing expansion and billing remain plan-only.
+- Competition snapshots retain the earlier 30-second mounted-learner reuse policy with stale/focus/write checks. Local checks and deployment success do not establish authenticated end-to-end latency for a real child.
 
 ## Approved release readiness - 2026-11-06
 
@@ -15,7 +17,7 @@ Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 - [x] Prepared both new competitions for publication, bringing the catalogue to five. Preserved connected natural subparts, legacy history/rewards, sixteen Maths islands, four municipal, six NVO, four Spring and four Regional islands. Reproduced and fixed the Regional map missing all four positions, with a regression test that failed before the fix.
 - [x] Final regression: 317/317 tests, TypeScript, ESLint, whitespace check and production build/private-file trace checks passed. Chrome on the final production build confirmed all five maps, the five-choice picker and navigation, grouped answers, draft restoration after reload, third-hint zero gold and continuation to the next part with its original diagram.
 - [x] Final visual checks: regional gameplay at 390px; materials hub and both articles at 390px/1440px, with screenshots inspected, no horizontal overflow, no visible broken images and no gameplay runtime console errors. Disposable local learner/storage only; no real learner, Supabase record or schema changed.
-- [ ] Publish and verify the approved application/content/SEO/documentation changes on Vercel. Commercial landing expansion, billing and migrations remain outside this release. Real parent/child Google sessions and physical-device checks remain owner checks.
+- [x] Published and verified the approved application/content/SEO/documentation changes on Vercel; see current release evidence above. Commercial landing expansion, billing and migrations remain outside this release. Real parent/child Google sessions and physical-device checks remain owner checks.
 
 ## Outstanding checks and decisions
 
@@ -45,7 +47,7 @@ Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 - [x] Local verification: 270/270 tests, ESLint, TypeScript and production build/private-file checks passed. Real HTTP checks confirmed six explicit public read routes return 200 with shared cache headers and no Set-Cookie, both anonymously and with a fixture auth cookie; five canonical sitemap URLs; the legacy 308 redirect; and no-store/noindex on login/progress/welcome. No real learner data was used.
 - [x] Chrome checks at 320/390/1440px: the hub and both articles have one H1, valid section targets and no horizontal overflow; inspected screenshots, visible keyboard focus, card activation and formula anchor navigation. Latest console contained no errors. These checks used a local production build, not physical devices or a live deployment.
 - [x] Optional production Search Console verification metadata and owner setup instructions are ready; the owner token and ownership verification remain pending.
-- [ ] Production publication and live verification. This slice is local and has not been deployed; current production evidence above is unchanged.
+- [x] Production publication and live verification completed in `e001ef0`; see current release evidence above. Search Console ownership and indexing by search engines are not implied.
 - Landing expansion for paid acquisition remains plan-only. Domain availability/purchase, Search Console/Bing setup and commercial launch remain owner/configuration steps; no payments, schema or learner-history changes.
 
 ## Paid-launch blueprint - agreed 2026-11-06
