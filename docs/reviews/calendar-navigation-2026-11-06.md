@@ -1,6 +1,6 @@
 # Calendar navigation copy review
 
-Date: 2026-11-06. Independent reviewer: `gpt-6-astra`, high reasoning. Audience: fourth-graders and their parents. Status: all three proposals approved by the owner in the conversation on 2026-11-06 and applied; local acceptance checks passed; production verification pending.
+Date: 2026-11-06. Independent reviewer: `gpt-6-astra`, high reasoning. Audience: fourth-graders and their parents. Status: all three proposals approved by the owner in the conversation on 2026-11-06 and applied; local acceptance and production checks passed.
 
 ## Context
 
@@ -21,3 +21,5 @@ No other wording changes recommended. Municipal deadline wording, date formats, 
 ## Acceptance evidence
 
 TypeScript, ESLint, the production build/private-file checks and regression tests passed. Isolated Chrome checked the six articles and progress at 320, 390 and 1440px, municipal deadline selection, competition filtering, direct preparation navigation and materials links; no horizontal overflow or page errors. The production design catalogue returns 404. Tests use isolated disposable learner data; real Google accounts were not retested.
+
+Production: release `9c10f7e` was published successfully by [Vercel](https://vercel.com/petar-s-projects33/sastezatelna-matematika/vJhaJLHRBFWhky4sL6iXHt3rZT3K). Live Chrome checked all six articles at 320/390/1440px, the complete schedule, preparation links, canonical/indexability, no overflow/page errors and unauthenticated privacy boundaries (progress login/no-store, API 401/no-store, design catalogue 404). All 325 regression tests passed. Authenticated navigation was tested locally with disposable data; real Google accounts were not repeated.

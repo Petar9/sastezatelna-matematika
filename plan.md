@@ -137,7 +137,7 @@ Keep active tasks, material open decisions and a short latest-verification summa
 - [x] Actual `gpt-6-astra` completed the independent Bulgarian copy review; [all three proposals approved in chat and applied](docs/reviews/calendar-navigation-2026-11-06.md).
 - [x] Applied the three owner decisions, added materials navigation to the parent last-task view, refreshed design guidance and internal date provenance, and documented chat approval handling in AGENTS.md.
 - [x] Regression tests, TypeScript, ESLint, production build and private-file checks passed. Isolated Chrome checked all six articles and progress at 320, 390 and 1440px: five dates, municipal deadline, competition filter, direct preparation navigation, materials links, no overflow or page errors; production design catalogue returns 404. No learner-data changes.
-- [ ] Publish and verify the exact production deployment.
+- [x] Published `9c10f7e`; [Vercel deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/vJhaJLHRBFWhky4sL6iXHt3rZT3K) succeeded for that exact SHA. Live Chrome verified all six articles at 320/390/1440px, the complete schedule and preparation links, canonical/indexability, no overflow or page errors, progress-to-login/no-store, API 401/no-store and design catalogue 404. All 325 regression tests passed; authenticated calendar/navigation was verified locally with disposable data, not real Google accounts.
 
 
 ## Connected-statement UX - approved release 2026-11-06
