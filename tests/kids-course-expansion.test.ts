@@ -5,11 +5,13 @@ import path from "node:path";
 import { test } from "node:test";
 import { applyCourseAction, courseView, migrateKidsCourse, newKidsCourse } from "../src/core/kids-course.ts";
 import type { KidsCourse, KidsCourseContent } from "../src/core/kids-course.ts";
-import { kidsCourseContent as content } from "../src/server/kids-course-content.ts";
+import { kidsCourseContent as currentContent } from "../src/server/kids-course-content.ts";
 import { isCompetitionProblem } from "../src/core/kids-selection.ts";
 import { expansionRows } from "../src/server/kids-course-expansion.ts";
 import { createKidsCourseStore } from "../src/store/kids-course.ts";
 
+// Retain the pre-connected course and migration contract as a historical fixture.
+const content: KidsCourseContent = { ...currentContent, connectedProblem: undefined, navigationGroups: undefined };
 const now = "2026-11-02T12:00:00.000Z";
 const legacy: KidsCourseContent = { ...content, version: "bg4-2024-v1", topics: content.topics
  .filter(t => t.skills.some(s => s.id.startsWith("M"))).map(t => ({ ...t, skills: t.skills.filter(s => s.id.startsWith("M")) })) };

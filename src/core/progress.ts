@@ -4,7 +4,7 @@ import { courseGoldAwards, goldAmounts, goldKey, problemAwardAmount } from "./ki
 export type ProgressEvent = {
  key: string; day: string; kind: "attempt" | "gold"; label: string;
  outcome?: "independent" | "hinted" | "incorrect" | "revealed";
- wholeProblem?: boolean; amount?: number; skillId?: string; skillTitle?: string;
+ wholeProblem?: boolean; naturalPart?: boolean; wholeOriginal?: boolean; amount?: number; skillId?: string; skillTitle?: string;
 };
 export type ProgressCourse = {
  competitionId: string; summary: { attempts: number; confirmed: number; revisit: number; hasTask: boolean };
@@ -35,7 +35,8 @@ export function projectProgressCourse(value: unknown, competitionId: string, con
   result.events.push({ key: `attempt:${attempt.key}`, kind: "attempt", day,
    label: attempt.problem.source || "Задача", outcome: attempt.outcome,
    skillId: attempt.problem.skillId, skillTitle: skillTitles.get(attempt.problem.skillId) ?? "Други упражнения",
-   wholeProblem: attempt.problem.archive?.kind !== "part" });
+   ...(attempt.problem.naturalUnit ? { naturalPart: attempt.problem.naturalUnit.total > 1, wholeOriginal: attempt.sourceComplete === true } : {}),
+   wholeProblem: attempt.problem.naturalUnit ? attempt.problem.naturalUnit.total === 1 : attempt.problem.archive?.kind !== "part" });
  }
  for (const award of courseGoldAwards(course)) {
   const candidates = attempts.filter(attempt => attempt.problem.skillId === award.skillId && !!attempt.outcome && attempt.goldEligible !== false);

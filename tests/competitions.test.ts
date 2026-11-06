@@ -9,7 +9,7 @@ import {createKidsCourseStore} from "../src/store/kids-course.ts";
 import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
 
 test("published catalogue includes all approved competitions and rejects unknown or path-like identifiers",()=>{
- assert.deepEqual(publishedCompetitions().map(c=>c.id),[DEFAULT_COMPETITION_ID,"olimpiada","nvo"]);
+ assert.deepEqual(publishedCompetitions().map(c=>c.id),[DEFAULT_COMPETITION_ID,"olimpiada","nvo","proletno","olimpiada-oblasten"]);
  assert.equal(competitionContent().topics.length,17);
  assert.equal(requirePublishedCompetition().contentVersion,competitionContent().version);
  for(const id of ["unfinished","../kids","", "toString"]){
@@ -42,19 +42,22 @@ test("local legacy file remains the default and unfinished paths never create st
  }finally{process.env=prior;fs.rmSync(directory,{recursive:true,force:true});}
 });
 
-test("hosted and local modes expose the same three approved competition paths",()=>{
+test("hosted and local catalogues expose all five approved competitions with stable versions",()=>{
  const prior={...process.env};
  try{
   for(const key of ["VERCEL","NETLIFY","RENDER","FLY_APP_NAME"])delete process.env[key];
   for(const deployment of ["hosted","local"]){
    process.env.MATHS_MODE=deployment;
-   assert.deepEqual(availableCompetitions().map(c=>c.id),[DEFAULT_COMPETITION_ID,"olimpiada","nvo"]);
-   for(const [id,count] of [[DEFAULT_COMPETITION_ID,17],["olimpiada",4],["nvo",10]] as const){
+   assert.deepEqual(availableCompetitions().map(c=>c.id),[DEFAULT_COMPETITION_ID,"olimpiada","nvo","proletno","olimpiada-oblasten"]);
+   for(const [id,count] of [[DEFAULT_COMPETITION_ID,17],["olimpiada",4],["nvo",10],["proletno",6],["olimpiada-oblasten",4]] as const){
     assert.equal(competitionContent(id).topics.length,count);
     assert.equal(requireAvailableCompetition(id).published,true);
     assert.equal(requirePublishedCompetition(id).contentVersion,competitionContent(id).version);
    }
+   for(const id of ["proletno","olimpiada-oblasten"])assert.equal(requireAvailableCompetition(id).difficulty,"hard");
    assert.equal(requireAvailableCompetition("nvo").difficulty,"easy");
+   assert.equal(requireAvailableCompetition("olimpiada").title,"Олимпиада (общински кръг)");
+   assert.equal(requireAvailableCompetition("olimpiada").difficulty,"medium");
    for(const id of ["unfinished","../kids","","toString"])assert.throws(()=>requireAvailableCompetition(id),{status:404});
   }
   process.env.VERCEL="1";

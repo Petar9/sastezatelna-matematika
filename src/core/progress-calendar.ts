@@ -13,6 +13,6 @@ export function sofiaDay(value: string | undefined): string | undefined {
 
 export function dayProgress(events: ProgressEvent[]) {
  return { gold: events.reduce((sum, event) => sum + (event.amount ?? 0), 0),
-  independent: events.filter(event => event.kind === "attempt" && event.wholeProblem && event.outcome === "independent").length,
-  hinted: events.filter(event => event.kind === "attempt" && event.wholeProblem && event.outcome === "hinted").length };
+  independent: events.filter(event => event.kind === "attempt" && (event.wholeProblem || event.naturalPart) && event.outcome === "independent").length,
+  hinted: events.filter(event => event.kind === "attempt" && (event.wholeProblem || event.naturalPart) && event.outcome === "hinted").length };
 }

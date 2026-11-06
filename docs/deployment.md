@@ -1,6 +1,6 @@
 # Deployment and recovery
 
-This is a local preparation guide, not evidence of a deployed service. Do not upload `data/`, `backups/`, `materials/`, or environment files to a repository or deployment. Review every file before publishing a remote repository. `.gitignore`, `.vercelignore`, Next tracing exclusions, and the build check are complementary safeguards; inspect the upload and build output before release. The service-role key belongs only in server-side secrets and must never use a `NEXT_PUBLIC_` name.
+This guide describes setup and recovery, not proof that a particular operation has completed. See [current release status](../plan.md) and its linked history for recorded production evidence. Production already exists; use the setup steps below for a new environment or an approved configuration change, not to recreate existing resources. Do not upload `data/`, `backups/`, `materials/`, or environment files to a repository or deployment. Review every file before publishing a remote repository. `.gitignore`, `.vercelignore`, Next tracing exclusions, and the build check are complementary safeguards; inspect the upload and build output before release. The service-role key belongs only in server-side secrets and must never use a `NEXT_PUBLIC_` name.
 
 ## Production setup
 
@@ -50,10 +50,19 @@ Roll back the Vercel deployment to a previously verified version through the Ver
 
 Invitation requests appear only in the private `invitation_requests` table. Review them manually; submitting a request never adds an email to `allowed_parent_emails`. Initially approve only the owner's family. Approve another parent's verified Google email only after the owner authorizes that family and a child place is available. Do not send invitations or promise a place automatically. The database serializes profile creation and refuses a sixth active child, including simultaneous requests.
 
-Parents select child profiles at `/profiles`, view their own summary at `/parent`, and can report the latest completed problem there. Reports remain private in `problem_reports`. A child can be archived by an authorized operator setting that exact profile's `active` to false; preserve the profile and course instead of deleting history. Archived children cannot be selected or mutated through the app. Reactivation also respects the five-child cap.
+Parents select child profiles at `/profiles` and share the authorized child overview/calendar at `/progress` (`/parent` redirects there). The last-task action is read-only; quiet feedback opens a modal without discarding current work. Reports remain private in `problem_reports`. Optional child Google access reuses the existing child profile; apply its additive migration before deploying code that depends on it. A child can be archived by an authorized operator setting that exact profile's `active` to false; preserve the profile and course instead of deleting history. Archived children cannot be selected or mutated through the app. Reactivation also respects the five-child cap.
 
 Requests above the available capacity stay in the waiting list. To revoke access, remove the exact parent email from the allowlist; no data deletion is implied. Handle email correction or deletion requests manually after verifying the requesting parent. Publish the real owner contact before inviting public testers.
 
 ## Public image assets
 
 `npm run build` generates lossless, content-hashed images from unchanged PNG sources in `assets/images/`. Local development also runs this step. Commit the sources, `src/generated/public-images.json` and generated `public/assets/images/` files together. Original source PNGs are excluded from deployment traces; source PDFs remain private in `materials/`. Old PNG URLs redirect to the current optimized file. Hashed images use a one-year immutable cache; lesson SVGs revalidate on each use. Personalized pages, auth and APIs retain `no-store`.
+
+
+## Public SEO and domain rollout
+
+See [SEO/GEO strategy](../seo-geo.md) for content and commercial scope. Public metadata and sitemap use `MATHS_APP_URL` at build time; set it to the stable canonical HTTPS origin before building. Production public routes are an explicit allowlist; private responses remain no-store/noindex. Preview/local are noindex, with an empty sitemap. Their robots allow page crawling so bots can read noindex; API/auth paths stay disallowed. Noindex is not access control. Do not reuse a production-built artifact as an indexable preview without the proxy noindex header.
+
+When an approved domain is purchased, connect it in Vercel, redirect old/alternate origins permanently with paths preserved, update Supabase Site URL and exact callback allowlist, and review Google OAuth settings. Verify successful/denied login, existing profiles/history and cross-device resume as well as public canonical URLs. Submit sitemap after DNS ownership verification in Search Console and Bing. Check actual response headers, HTML metadata, robots, sitemap and absence of public Set-Cookie after deployment; a build does not prove CDN behavior or indexing. No purchase or deployment is implied by these instructions.
+
+For Search Console on the current Vercel address, create a URL-prefix property, choose HTML tag verification and set only its content value in `MATHS_GOOGLE_SITE_VERIFICATION` before a production build. Verify that the anonymous home response includes the expected `google-site-verification` tag, then click Verify in Search Console. Keep the value configured for subsequent builds. The optional tag is omitted on preview/local builds. For an owned domain, prefer DNS Domain-property verification. Follow the measurement checklist in [seo-geo.md](../seo-geo.md).

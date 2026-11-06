@@ -20,7 +20,7 @@ export default async function Source({ searchParams }: { searchParams: Promise<{
    <Link className={s.secondary} href={`/?competition=${encodeURIComponent(context.competitionId)}`}>← Начало</Link>
    <section className={s.card}><h1>Оригинално условие</h1><p>{statement.source}</p>
     <p className={s.question} style={{ whiteSpace: "pre-line" }}>{statement.text}</p>
-    {statement.figure && <figure className={s.figure}><Image src={publicImage(statement.figure.src)} alt={statement.figure.alt} width={360} height={360} unoptimized /></figure>}
+    {(statement.figures ?? (statement.figure ? [statement.figure] : [])).map(figure => <figure key={figure.src} className={s.figure}><Image src={publicImage(figure.src)} alt={figure.alt} width={360} height={360} unoptimized /></figure>)}
     {statement.options && <ol className={s.list}>{statement.options.map((option, i) => <li key={i}>{["А", "Б", "В", "Г"][i]}) {option}</li>)}</ol>}
    </section></div></main>;
  } catch (error) {

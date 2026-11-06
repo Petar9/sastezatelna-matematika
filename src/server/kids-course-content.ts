@@ -1,3 +1,4 @@
+import { mathsConnectedContent } from "./maths-connected-content.ts";
 import { active2023Rows, original2023 } from "./kids-course-2023.ts";
 import { mathsDifficulty } from "./problem-difficulty.ts";
 import { mathsIntroductions } from "./kids-teaching-introductions.ts";
@@ -319,6 +320,7 @@ for (const row of active2023Rows) {
  pool[row.difficulty === "hard" ? "hard" : "core"].push(original2023(row));
 }
 export const kidsCourseContent: KidsCourseContent = {
+ ...mathsConnectedContent([...pools.values()].flatMap(pool => [...pool.core, ...pool.hard]), courseTopics),
 	version: "bg4-2024-2026-v2", topics: courseTopics, introductions: mathsIntroductions, concepts: learningConcepts, objectiveMap,
 	solutionFor: problem => {
   const pool = pools.get(problem.skillId);

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import {indexableDeployment,publicReadPaths} from "./src/public-site";
 import images from "./src/generated/public-images.json";
 
 const config: NextConfig = {
@@ -21,6 +22,7 @@ const config: NextConfig = {
     {key:"X-Frame-Options",value:"DENY"},
     {key:"Cache-Control",value:"no-store"},
    ]},
+   ...publicReadPaths.map(source=>({source,headers:[{key:"Cache-Control",value:indexableDeployment()?"public, max-age=0, s-maxage=3600, stale-while-revalidate=86400":"no-store"}]})),
    {source:"/assets/images/:path*",headers:[{key:"Cache-Control",value:"public, max-age=31536000, immutable"}]},
    {source:"/kids/lessons/:path*",headers:[{key:"Cache-Control",value:"public, max-age=0, must-revalidate"}]},
   ];

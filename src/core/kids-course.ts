@@ -1,4 +1,4 @@
-import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
+import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, problemAwardAmount, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
 import { chooseSkillProblem, problemSource, isCompetitionProblem, overlaps, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
 import { chooseQuestProblem, hasQuestProblem, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
@@ -8,6 +8,7 @@ export interface CourseField { label: string; answer: string }
 export interface CourseSolutionPart { title: string; paragraphs: string[] }
 export type CourseSolution = [CourseSolutionPart, CourseSolutionPart, CourseSolutionPart];
 export interface CourseProblem {
+ naturalUnit?: { sourceId: string; unitId: string; total: number; groupId?: string; legacyGoldKeys?: string[] };
  difficulty?: { level: "standard" | "hard"; rationale: string };
 	id: string; skillId: string; text: string; source: string; options?: string[];
 	fields: CourseField[]; hint: string; hints?: [string, string, string]; explanation: string[]; solution?: CourseSolution;
@@ -16,6 +17,14 @@ export interface CourseProblem {
 	teachingFigure?: { src: string; alt: string };
  practiceSource?: { year: number; problemId: string };
  archive?: { sourceId: string; kind: "original" | "part" | "scaffold"; covers: string[] };
+}
+export interface ConnectedCourseUnit {
+ id: string; skillId: string; text: string; fields: CourseField[]; options?: string[];
+ solution: CourseSolution; figure?: CourseProblem["figure"]; dependsOn?: string[]; difficulty?: CourseProblem["difficulty"];
+}
+export interface ConnectedCourseProblem {
+ sourceId: string; text: string; introduction?: string; figure?: CourseProblem["figure"];
+ figures?: NonNullable<CourseProblem["figure"]>[]; units: ConnectedCourseUnit[]; legacyGoldKeys?: string[];
 }
 export interface CourseSkill { id: string; title: string; lesson: string[]; illustration?: CourseProblem["figure"] }
 export interface CourseTopic { id: string; title: string; rewardName: string; skills: CourseSkill[] }
@@ -42,8 +51,9 @@ export interface LearningSkillView extends Omit<LearningConceptView, "objectives
  confirmation: { earned: boolean; streak: number; target: number; revisit: boolean };
 }
 export interface KidsCourseContent {
-	version: string; topics: CourseTopic[]; introductions?: Record<string, { problemId?: string; rationale: string }>; concepts?: CourseConcept[]; objectiveMap?: Record<string, CourseObjectiveMap>;
+	version: string; topics: CourseTopic[]; navigationGroups?: { id: string; title: string; topicIds: string[]; sourceIds: string[] }[]; introductions?: Record<string, { problemId?: string; rationale: string }>; concepts?: CourseConcept[]; objectiveMap?: Record<string, CourseObjectiveMap>;
 	problem(skillId: string, index: number, harder: boolean): CourseProblem | null;
+ connectedProblem?(problem: CourseProblem): ConnectedCourseProblem | undefined;
  solutionFor?(problem: CourseProblem): CourseSolution | undefined;
 }
 export interface CourseAttempt {
@@ -51,14 +61,16 @@ export interface CourseAttempt {
 	answers?: string[]; reasoning?: string; outcome?: KidsOutcome; completedAt?: string;
  // Explicit exclusions apply only to new attempts; historical awards stay unchanged.
  goldEligible?: false;
+ problemGoldEligible?: false;
  draft?: { partIndex: number; answers: string[] };
+ sourceComplete?: boolean;
  partIndex?: number; partOutcome?: KidsOutcome; partIncorrect?: boolean; freshEvidence?: boolean;
 }
 export interface CourseSkillProgress {
 	streak: number; target: number; confirmedAt?: string; gap: boolean; revisit: boolean;
 	nextCore: number; nextHard: number; reviewDueAt?: string; lastReviewAt?: string;
 }
-export interface CourseWork { attempt: CourseAttempt; lessonStep?: number }
+export interface CourseWork { attempt: CourseAttempt; lessonStep?: number; connected?: { problem: ConnectedCourseProblem; index: number; completed: CourseAttempt[] } }
 export interface CourseTopicProgress {
 	skills: Record<string, CourseSkillProgress>; work: Partial<Record<CourseMode, CourseWork>>;
 	learningMode?: Exclude<CourseMode, "review">;
@@ -67,11 +79,12 @@ export interface CourseTopicProgress {
 	reviewDueAt?: string; lastReviewAt?: string; challengeNext: number; reviewNext: number;
 }
 export interface KidsCourse {
+ questContinuation?: CourseWork;
  goldAwards?: GoldAward[];
  problemGoldAwards?: ProblemGoldAward[];
  islandGoldTargets?: Record<string, number>;
 	version: 2; questVersion?: 1; journey?: "quest" | "topic"; quest?: CourseQuest; stamps?: QuestStamp[]; diagnostics?: { initialDone: boolean; checked: Record<string, number> }; contentVersion: string; revision: number; createdAt: string; updatedAt: string;
-	paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string }; topics: Record<string, CourseTopicProgress>;
+	paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string; groupId?: string }; topics: Record<string, CourseTopicProgress>;
 	attempts: CourseAttempt[]; awards: { topicId: string; rank: "doctor" | "professor"; earnedAt: string; taskKey: string }[];
 	completedAt?: string;
 	previousCompletions?: { contentVersion: string; completedAt: string }[];
@@ -95,12 +108,13 @@ export interface CourseTopicView {
 }
 export interface KidsCourseView {
  gold: number; goldGain?: GoldGain; lastTopicId?: string;
-	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string };
+	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string; groupId?: string };
 	topics: CourseTopicView[]; doctors: number; professors: number; professorGoal: number; complete: boolean; previouslyCompleted?: boolean;
 	quest?: { id: string; completed: number; total: number; step: number; finished: boolean; exhausted: boolean; achievement?: string };
  stamps?: QuestStamp[]; inQuest?: boolean; questAvailable?: boolean; nextReviewAt?: string;
  stage: "dashboard" | "question" | "lesson" | "questComplete"; streak?: number; target?: number; exhausted?: boolean;
 	task?: { goldReward?: { amount: number; multiplier: 1 | 1.5 }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; sourceIsPractice?: boolean; options?: string[];
+		connected?: { sourceId: string; text: string; introduction?: string; figures?: NonNullable<CourseProblem["figure"]>[]; index: number; total: number; completed: { id: string; text: string; outcome: KidsOutcome; answers: string[]; fields: { label: string }[]; explanation: string[] }[] };
 		fields: { label: string }[]; part?: { index: number; total: number; completed: boolean }; figure?: CourseProblem["figure"]; hint?: string; hints?: string[]; hintLevel?: number; solutionParts?: CourseSolutionPart[];
 		draft?: string[]; outcome?: KidsOutcome; answers?: string[]; explanation?: string[]; reasoning?: string; teachingFigure?: CourseProblem["figure"] };
 	lesson?: { title: string; steps: string[]; total: number; illustration?: CourseProblem["figure"] };
@@ -203,35 +217,103 @@ function selection(course: KidsCourse, content: KidsCourseContent) {
 	return { topic, progress: course.topics[topic.id]!, mode: course.active.mode };
 }
 
+function assignedWork(content: KidsCourseContent, attempt: CourseAttempt): CourseWork {
+ if (content.connectedProblem && attempt.problem.archive?.kind === "scaffold") attempt.problemGoldEligible = false;
+ const connected = content.connectedProblem?.(attempt.problem);
+ if (!connected?.units.length || attempt.problem.archive?.kind === "scaffold") return { attempt };
+ const work: CourseWork = { attempt, connected: { problem: structuredClone(connected), index: 0, completed: [] } };
+ setConnectedAttempt(work, attempt.key, attempt.mode, attempt.questId);
+ const groupId = navigationGroup(content, attempt.problem)?.id;
+ if (groupId) work.attempt.problem.naturalUnit!.groupId = groupId;
+ return work;
+}
+function setConnectedAttempt(work: CourseWork, key: string, mode: CourseMode, questId?: string) {
+ const session = work.connected!, source = session.problem, unit = source.units[session.index]!;
+ const previous = work.attempt.problem;
+ const dependencyHelp = (unit.dependsOn ?? []).some(id => session.completed.some(a => a.problem.naturalUnit?.unitId === id && a.outcome !== "independent"));
+ work.attempt = { key: `${key}:unit:${unit.id}`, mode, hintUsed: dependencyHelp, hintLevel: 0, ...(questId ? { questId } : {}),
+  problem: { id: `${source.sourceId}:unit:${unit.id}`, skillId: unit.skillId, text: unit.text, source: previous.source,
+   fields: structuredClone(unit.fields), ...(unit.options ? { options: [...unit.options] } : {}),
+   hint: unit.solution[0].paragraphs.join("\n"), solution: structuredClone(unit.solution), explanation: unit.solution.flatMap(p => p.paragraphs),
+   ...((unit.difficulty ?? previous.difficulty) ? { difficulty: unit.difficulty ?? previous.difficulty } : {}),
+   ...((unit.figure ?? source.figure ?? previous.figure) ? { figure: unit.figure ?? source.figure ?? previous.figure } : {}),
+   ...(previous.provenance ? { provenance: previous.provenance } : {}),
+   archive: { sourceId: source.sourceId, kind: "part", covers: [unit.id] },
+   naturalUnit: { sourceId: source.sourceId, unitId: unit.id, total: source.units.length, ...(source.legacyGoldKeys ? { legacyGoldKeys: source.legacyGoldKeys } : {}), ...(previous.naturalUnit?.groupId ? { groupId: previous.naturalUnit.groupId } : {}) } } };
+}
+function advanceConnected(work: CourseWork, course: KidsCourse) {
+ const session = work.connected;
+ if (!session || !work.attempt.outcome) return false;
+ session.completed.push(structuredClone(work.attempt));
+ if (session.index + 1 >= session.problem.units.length) return false;
+ session.index++;
+ setConnectedAttempt(work, `${course.revision + 1}:connected`, work.attempt.mode, work.attempt.questId);
+ return true;
+}
+
+function navigationGroup(content: KidsCourseContent, problem: CourseProblem) {
+ const sourceId = problem.naturalUnit?.sourceId ?? content.connectedProblem?.(problem)?.sourceId ?? problem.archive?.sourceId;
+ return content.navigationGroups?.find(group => sourceId && group.sourceIds.includes(sourceId))
+  ?? content.navigationGroups?.find(group => !sourceId && group.topicIds.some(id => content.topics.find(t => t.id === id)?.skills.some(skill => skill.id === problem.skillId)));
+}
+const navigationSkillCache = new WeakMap<KidsCourseContent, Map<string, CourseSkill[]>>();
+function groupSkills(content: KidsCourseContent, groupId?: string) {
+ const group = content.navigationGroups?.find(g => g.id === groupId);
+ if (!group) return undefined;
+ let cached = navigationSkillCache.get(content);
+ if (!cached) { cached = new Map(); navigationSkillCache.set(content, cached); }
+ if (cached.has(group.id)) return cached.get(group.id)!;
+ const ids = new Set<string>();
+ for (const topic of content.topics) for (const skill of topic.skills) {
+  if (group.topicIds.includes(topic.id)) ids.add(skill.id);
+  for (const hard of [false, true]) for (let i = 0; i < 1000; i++) {
+   const p = content.problem(skill.id, i, hard); if (!p) break;
+   if (navigationGroup(content, p)?.id !== group.id) continue;
+   ids.add(skill.id);
+   for (const unit of content.connectedProblem?.(p)?.units ?? []) ids.add(unit.skillId);
+  }
+ }
+ const skills = content.topics.flatMap(t => t.skills).filter(skill => ids.has(skill.id));
+ cached.set(group.id, skills);
+ return skills;
+}
+function skillState(course: KidsCourse, content: KidsCourseContent, skillId: string) {
+ const owner = content.topics.find(t => t.skills.some(s => s.id === skillId))!;
+ return course.topics[owner.id]!.skills[skillId]!;
+}
+
 function nextWork(course: KidsCourse, content: KidsCourseContent, preferredSkill?: string): CourseWork | undefined {
 	const { topic, progress, mode } = selection(course, content);
  let harder = mode === "challenge";
- const eligible = course.active?.skillId ? topic.skills.filter(s => s.id === course.active!.skillId)
-  : mode === "core" ? topic.skills.filter(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit)
-  : mode === "review" ? topic.skills.filter(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit) : [...topic.skills];
+ const skills = groupSkills(content, course.active?.groupId) ?? topic.skills;
+ const stateFor = (id: string) => skillState(course, content, id);
+ const accepts = course.active?.groupId ? (p: CourseProblem) => navigationGroup(content, p)?.id === course.active!.groupId : undefined;
+ const eligible = course.active?.skillId ? skills.filter(s => s.id === course.active!.skillId)
+  : mode === "core" ? skills.filter(s => !stateFor(s.id).confirmedAt || stateFor(s.id).revisit)
+  : mode === "review" ? skills.filter(s => stateFor(s.id).confirmedAt && !stateFor(s.id).revisit) : [...skills];
  const rotation = mode === "challenge" ? progress.challengeNext : progress.reviewNext;
  if (mode !== "core" && eligible.length) eligible.push(...eligible.splice(0, rotation % eligible.length));
  if (preferredSkill) eligible.sort((a, b) => Number(b.id === preferredSkill) - Number(a.id === preferredSkill));
  let candidates = eligible.flatMap(skill => {
-  const chosen = chooseSkillProblem(course, content, skill.id, harder, course.updatedAt, mode === "review");
+  const chosen = chooseSkillProblem(course, content, skill.id, harder, course.updatedAt, mode === "review", undefined, undefined, false, accepts);
   return chosen ? [{ skill, chosen }] : [];
  });
- if (!candidates.length && mode === "practice" && topic.skills.every(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit)) {
+ if (!candidates.length && mode === "practice" && skills.every(s => stateFor(s.id).confirmedAt && !stateFor(s.id).revisit)) {
   harder = true;
   candidates = eligible.filter(skill => skillPrerequisitesReady(course, content, skill.id)).flatMap(skill => {
-   const chosen = chooseSkillProblem(course, content, skill.id, true, course.updatedAt);
+   const chosen = chooseSkillProblem(course, content, skill.id, true, course.updatedAt, false, undefined, undefined, false, accepts);
    return chosen ? [{ skill, chosen }] : [];
   });
  }
  // Keep challenge rotation across skills and focused recovery; otherwise prefer the archive.
  if (!harder) candidates.sort((a, b) => Number(b.skill.id === preferredSkill) - Number(a.skill.id === preferredSkill) || b.chosen.rank - a.chosen.rank);
  for (const { skill, chosen } of candidates) {
-  const state = progress.skills[skill.id]!;
+  const state = stateFor(skill.id);
   if (harder) { state.nextHard = Math.max(state.nextHard, chosen.cursor + 1); progress.challengeNext++; }
   else { state.nextCore = Math.max(state.nextCore, chosen.cursor + 1); if (mode !== "core") progress.reviewNext++; }
   const problem = structuredClone(chosen.problem);
-  return { attempt: { key: `${course.revision + 1}:${topic.id}:${mode}:${problem.id}`, problem, mode, hintUsed: false,
-   ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) } };
+  return assignedWork(content, { key: `${course.revision + 1}:${topic.id}:${mode}:${problem.id}`, problem, mode, hintUsed: false,
+   ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) });
  }
 }
 
@@ -248,17 +330,25 @@ function selectedSkillMode(progress: CourseTopicProgress, skillId: string, now: 
 function advanceTopicWork(course: KidsCourse, content: KidsCourseContent, preferredSkill?: string) {
  const { topic, progress, mode } = selection(course, content);
  const skillId = course.active!.skillId;
- if (skillId) {
+ if (skillId?.startsWith("navigation:")) {
+  delete progress.skillWork![skillId];
+  delete course.active!.skillId;
+  const recovery = groupSkills(content, course.active?.groupId)!.some(s => !skillState(course, content, s.id).confirmedAt || skillState(course, content, s.id).revisit);
+  course.active!.mode = recovery ? "core" : "challenge";
+  const next = nextWork(course, content, preferredSkill);
+  course.active!.skillId = skillId;
+  if (next) progress.skillWork![skillId] = next;
+ } else if (skillId) {
   delete progress.skillWork![skillId];
   course.active!.mode = selectedSkillMode(progress, skillId, course.updatedAt);
   const next = nextWork(course, content);
   if (next) progress.skillWork![skillId] = next;
  } else {
   const previousSkill = progress.work[mode]?.attempt.problem.skillId;
-  const previousState = previousSkill ? progress.skills[previousSkill] : undefined;
+  const previousState = previousSkill ? skillState(course, content, previousSkill) : undefined;
   if (!preferredSkill && previousState?.streak && (!previousState.confirmedAt || previousState.revisit)) preferredSkill = previousSkill;
   delete progress.work[mode];
-  const recovery = topic.skills.some(s => !progress.skills[s.id]!.confirmedAt || progress.skills[s.id]!.revisit);
+  const recovery = (groupSkills(content, course.active?.groupId) ?? topic.skills).some(s => !skillState(course, content, s.id).confirmedAt || skillState(course, content, s.id).revisit);
   course.active!.mode = recovery ? "core" : progress.professorAt ? "practice" : "challenge";
   progress.learningMode = course.active!.mode;
   progress.work[course.active!.mode] ??= nextWork(course, content, preferredSkill);
@@ -287,8 +377,11 @@ function assignQuestWork(course: KidsCourse, content: KidsCourseContent, now: st
  if (mode === "challenge") { state.nextHard = cursor + 1; progress.challengeNext++; }
  else state.nextCore = cursor + 1;
  course.active = { topicId, mode };
- quest.work = { attempt: { key: `${course.revision + 1}:quest:${problem.id}`, problem: structuredClone(problem), mode, hintUsed: false, hintLevel: 0, questId: quest.id, ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) } };
- quest.steps.push({ key: quest.work.attempt.key, topicId, skillId, kind });
+ quest.work = assignedWork(content, { key: `${course.revision + 1}:quest:${problem.id}`, problem: structuredClone(problem), mode, hintUsed: false, hintLevel: 0, questId: quest.id, ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) });
+ const currentSkill = quest.work.attempt.problem.skillId;
+ const currentTopic = content.topics.find(t => t.skills.some(s => s.id === currentSkill))!.id;
+ course.active = { topicId: currentTopic, mode };
+ quest.steps.push({ key: quest.work.attempt.key, topicId: currentTopic, skillId: currentSkill, kind });
 }
 
 function finishQuestStep(course: KidsCourse, content: KidsCourseContent, now: string) {
@@ -302,10 +395,11 @@ function finishQuestStep(course: KidsCourse, content: KidsCourseContent, now: st
 function dueDate(now: string) { return new Date(Date.parse(now) + 2 * 24 * 60 * 60 * 1000).toISOString(); }
 
 function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: CourseAttempt, now: string) {
-	const { topic, progress, mode } = selection(course, content);
+	const topic = content.topics.find(t => t.skills.some(s => s.id === attempt.problem.skillId))!;
+ const progress = course.topics[topic.id]!, mode = attempt.mode;
 	const skill = progress.skills[attempt.problem.skillId]!;
 	const independent = attempt.outcome === "independent";
- const fresh = !course.attempts.some(a => overlaps(a.problem, attempt.problem, content));
+ const fresh = !course.attempts.some(a => overlaps(a.problem, attempt.problem, content) || !!attempt.problem.naturalUnit && a.problem.skillId === attempt.problem.skillId && (a.problem.naturalUnit?.sourceId ?? a.problem.archive?.sourceId ?? content.connectedProblem?.(a.problem)?.sourceId) === attempt.problem.naturalUnit.sourceId);
  attempt.freshEvidence = fresh;
 	if (!independent) progress.challengeStreak = 0;
 	// An outcome in another mode supersedes old feedback, never an unanswered task.
@@ -351,7 +445,8 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 	}
 	const recentChallenges = course.attempts.filter(a => a.mode === "challenge" && a.freshEvidence !== false && topic.skills.some(s => s.id === a.problem.skillId)).slice(-2);
  if (mode === "challenge" && progress.doctorAt && !progress.professorAt && progress.challengeStreak >= 2 && topic.skills.every(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit)
-  && (topic.skills.length === 1 || new Set(recentChallenges.map(a => a.problem.skillId)).size === 2)) {
+  && (topic.skills.length === 1 || new Set(recentChallenges.map(a => a.problem.skillId)).size === 2)
+  && (!attempt.problem.naturalUnit || new Set(recentChallenges.map(a => a.problem.naturalUnit?.sourceId ?? a.problem.archive?.sourceId ?? a.problem.id)).size === 2)) {
 		progress.professorAt = now;
 		course.awards.push({ topicId: topic.id, rank: "professor", earnedAt: now, taskKey: attempt.key });
 	}
@@ -382,7 +477,13 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
     diagnostic: !diagnostics.initialDone || !!unclear, diagnosticFor: unclear?.id };
    if (unclear) diagnostics.checked[unclear.id] = course.attempts.filter(a => a.problem.skillId === unclear.id && (a.outcome === "incorrect" || a.outcome === "revealed")).length;
    diagnostics.initialDone = true;
-   assignQuestWork(course, content, now);
+   if (course.questContinuation) {
+    course.quest.work = course.questContinuation; delete course.questContinuation;
+    const a = course.quest.work.attempt; a.questId = course.quest.id;
+    const topicId = content.topics.find(t => t.skills.some(s => s.id === a.problem.skillId))!.id;
+    course.active = { topicId, mode: a.mode };
+    course.quest.steps.push({ key: a.key, topicId, skillId: a.problem.skillId, kind: "familiar" });
+   } else assignQuestWork(course, content, now);
    if (course.quest.exhausted && previousQuest?.completedAt) course.quest = previousQuest;
   } else if (course.quest.work) {
    const a = course.quest.work.attempt;
@@ -392,7 +493,37 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
 	else if (action.type === "resume") course.paused = false;
 	else if (action.type === "dashboard") { /* Keep the resumable topic and its pause state. */ }
 	else if (action.type === "selectTopic") {
-		const topic = content.topics.find(t => t.id === action.topicId);
+		const group = content.navigationGroups?.find(g => g.id === action.topicId);
+  if (group && !action.skillId) {
+   const saved = Object.entries(course.topics).flatMap(([topicId, p]) => [
+    ...Object.entries(p.work).map(([mode, work]) => ({ topicId, mode: mode as CourseMode, work })),
+    ...Object.entries(p.skillWork ?? {}).map(([skillId, work]) => ({ topicId, mode: work.attempt.mode, skillId, work })),
+   ]).sort((left, right) => {
+    const active = course.active && activeWork(course, course.topics[course.active.topicId]!, course.active.mode);
+    return Number(right.work?.attempt.key === active?.attempt.key) - Number(left.work?.attempt.key === active?.attempt.key);
+   }).find(slot => slot.work && (!slot.work.attempt.outcome || slot.work.lessonStep !== undefined || slot.work.connected && slot.work.connected.index + 1 < slot.work.connected.problem.units.length) && navigationGroup(content, slot.work.attempt.problem)?.id === group.id && (!action.review || slot.mode === "review"));
+   const topicId = saved?.topicId ?? group.topicIds[0]!;
+   const progress = course.topics[topicId]!;
+   const skills = groupSkills(content, group.id)!;
+   const recovery = skills.some(s => !skillState(course, content, s.id).confirmedAt || skillState(course, content, s.id).revisit);
+   if (action.review && !skills.some(s => skillState(course, content, s.id).confirmedAt)) throw new KidsError("Първо затвърди едно умение.");
+   const mode: CourseMode = saved?.mode ?? (action.review ? "review" : recovery ? "core" : "challenge");
+   course.active = { topicId, mode, groupId: group.id, ...(saved && "skillId" in saved && typeof saved.skillId === "string" ? { skillId: saved.skillId } : {}) };
+   course.journey = "topic"; course.paused = false;
+   if (!saved && !progress.work[mode]) {
+    progress.work[mode] = nextWork(course, content);
+   } else if (!saved) {
+    // A historical slot can belong to another new island; keep it and use a group-specific slot.
+    const slot = `navigation:${group.id}`;
+    course.active.skillId = slot;
+    const work = progress.skillWork ??= {};
+    delete course.active.skillId;
+    const next = nextWork(course, content);
+    course.active.skillId = slot;
+    if (next) work[slot] = next;
+   }
+  } else {
+  const topic = content.topics.find(t => t.id === action.topicId);
 		if (!topic) throw new KidsError("Тази тема не е достъпна.");
 		const progress = course.topics[topic.id]!;
 		if (action.review && !topic.skills.some(s => progress.skills[s.id]!.confirmedAt)) throw new KidsError("Първо затвърди едно умение.");
@@ -409,6 +540,7 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
    if (mode !== "review") progress.learningMode = mode;
    progress.work[mode] ??= nextWork(course, content);
   }
+  }
 	} else {
 		if (course.paused) throw new KidsError("Първо продължи заниманието.", 409);
 		const { topic, progress, mode } = selection(course, content);
@@ -416,7 +548,7 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
 		if (!work) throw new KidsError("Подготвените задачи за тази стъпка свършиха. Избери друга тема.", 409);
 		const attempt = work.attempt;
 		if (action.type === "saveDraft") {
-   if (action.taskKey !== attempt.key || action.partIndex !== (attempt.partIndex ?? 0) || attempt.outcome || attempt.partOutcome || work.lessonStep !== undefined) throw new KidsError("Задачата е променена. Черновата не е записана.", 409);
+   if (action.taskKey !== attempt.key || action.partIndex !== (work.connected?.index ?? attempt.partIndex ?? 0) || attempt.outcome || attempt.partOutcome || work.lessonStep !== undefined) throw new KidsError("Задачата е променена. Черновата не е записана.", 409);
    const fields = attempt.partIndex !== undefined ? 1 : attempt.problem.fields.length;
    if (attempt.problem.options ? action.answers.length !== 1 || !/^(|\d+)$/.test(action.answers[0]!) || (action.answers[0] !== "" && !attempt.problem.options[Number(action.answers[0])]) : action.answers.length !== fields || action.answers.some(a => !/^[\d.,]{0,12}$/.test(a))) throw new KidsError("Невалидна чернова.");
    attempt.draft = { partIndex: action.partIndex, answers: [...action.answers] };
@@ -425,11 +557,12 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
 			if (action.reasoning !== undefined) attempt.reasoning = action.reasoning.trim() || undefined;
 			if (action.type === "reveal") { attempt.outcome = "revealed"; }
    else if (action.type === "dontKnow" || action.type === "hint") {
-    if (action.type === "dontKnow" && attempt.hintUsed) attempt.outcome = "revealed";
+    if (action.type === "dontKnow" && (work.connected ? (attempt.hintLevel ?? 0) > 0 : attempt.hintUsed)) attempt.outcome = "revealed";
     else {
      const level = attempt.hintLevel ?? (attempt.hintUsed ? 1 : 0);
      if (level >= 3) throw new KidsError("Всички стъпки от решението вече са показани.", 409);
      attempt.hintUsed = true; attempt.hintLevel = level + 1;
+     if (work.connected && attempt.hintLevel >= 3) attempt.goldEligible = false;
      if (attempt.problem.options) delete attempt.draft;
     }
    } else {
@@ -454,15 +587,29 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
     }
 			}
 			if (attempt.outcome || attempt.partOutcome) delete attempt.draft;
-			if (attempt.outcome) recordOutcome(course, content, attempt, now);
+			if (attempt.outcome) {
+    if (work.connected) attempt.sourceComplete = work.connected.index === work.connected.problem.units.length - 1;
+    recordOutcome(course, content, attempt, now);
+   }
 		} else if (action.type === "lessonNext") {
 			if (work.lessonStep === undefined) throw new KidsError("Сега не сме в обяснението.", 409);
-			const skill = topic.skills.find(s => s.id === attempt.problem.skillId)!;
+			const skill = content.topics.flatMap(t => t.skills).find(s => s.id === attempt.problem.skillId)!;
 			if (work.lessonStep + 1 < skill.lesson.length) work.lessonStep++;
 			else if (course.journey === "quest") finishQuestStep(course, content, now);
    else advanceTopicWork(course, content);
 		} else if (action.type === "nextQuestion") {
-			if (attempt.partOutcome && !attempt.outcome) {
+			if (work.connected && attempt.outcome && advanceConnected(work, course)) {
+    if (course.journey === "quest") {
+     if (course.quest!.completed >= 5) { course.questContinuation = work; assignQuestWork(course, content, now); }
+     else {
+      const next = work.attempt, topicId = content.topics.find(t => t.skills.some(s => s.id === next.problem.skillId))!.id;
+      course.active = { topicId, mode: next.mode };
+      course.quest!.steps.push({ key: next.key, topicId, skillId: next.problem.skillId, kind: "familiar" });
+     }
+    }
+    course.goldAwards = courseGoldAwards(course); course.updatedAt = now; course.revision++;
+    return course;
+   } else if (attempt.partOutcome && !attempt.outcome) {
     attempt.partIndex = (attempt.partIndex ?? 0) + 1;
     delete attempt.partOutcome;
     delete attempt.draft;
@@ -491,7 +638,7 @@ function solutionFor(problem: CourseProblem, content: KidsCourseContent): Course
 export function courseView(course: KidsCourse, content: KidsCourseContent, now: string): KidsCourseView {
  const goldAwards = courseGoldAwards(course);
  const targets = islandGoldTargets(course, content);
-	const topics: CourseTopicView[] = content.topics.map(t => {
+	let topics: CourseTopicView[] = content.topics.map(t => {
 		const p = course.topics[t.id]!;
   const skillIds = new Set(t.skills.map(skill => skill.id));
   const problemGold = topicProblemGold(course, content, t.id);
@@ -505,8 +652,46 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
    skills: t.skills.map(s => ({ id: s.id, title: s.title, confirmed: !!p.skills[s.id]!.confirmedAt,
 				streak: p.skills[s.id]!.streak, target: p.skills[s.id]!.target, revisit: p.skills[s.id]!.revisit })) };
 	});
+ if (content.navigationGroups) {
+  const oldTopics = topics;
+  topics = content.navigationGroups.map(group => {
+   const members = oldTopics.filter(topic => group.topicIds.includes(topic.id));
+   const skillIds = new Set(members.flatMap(topic => topic.skills.map(s => s.id)));
+   const milestones = goldAwards.filter(a => skillIds.has(a.skillId)).reduce((sum, a) => sum + goldAmounts[a.milestone], 0);
+   const awards = [...new Map((course.problemGoldAwards ?? []).map(a => [a.key, a])).values()];
+   const earned = milestones + awards.filter(a => a.groupId ? a.groupId === group.id : skillIds.has(a.skillId)).reduce((sum, a) => sum + problemAwardAmount(a), 0);
+   const skills = members.flatMap(topic => topic.skills);
+   const conceptGroups = new Map<string, LearningConceptView[]>();
+   for (const concept of members.flatMap(topic => topic.concepts ?? [])) {
+    const list = conceptGroups.get(concept.id) ?? []; list.push(concept); conceptGroups.set(concept.id, list);
+   }
+   const prerequisites = (items: LearningConceptView["prerequisites"]) => items.map(p => ({ ...p, topicIds: [...new Set(p.topicIds.flatMap(id => content.navigationGroups!.filter(g => g.topicIds.includes(id)).map(g => g.id)))] }));
+   const concepts = [...conceptGroups.values()].map(parts => {
+    const objectives = parts.flatMap(p => p.objectives), first = parts[0]!;
+    const evidence = { independent: 0, hinted: 0, incorrect: 0, revealed: 0 };
+    for (const p of parts) for (const outcome of ["independent", "hinted", "incorrect", "revealed"] as const) evidence[outcome] += p.evidence[outcome];
+    const status: LearningConceptView["status"] = objectives.every(o => o.confirmed && !o.revisit) ? parts.some(p => p.status === "review") ? "review" : "confirmed" : parts.some(p => p.status !== "untried") ? "practising" : "untried";
+    return { ...first, status, objectives, evidence, prerequisites: prerequisites(first.prerequisites),
+     milestones: { started: parts.some(p => p.milestones.started), firstCorrect: parts.find(p => p.milestones.firstCorrect)?.milestones.firstCorrect } };
+   });
+   return { id: group.id, title: group.title, rewardName: group.title,
+    gold: { earned, total: Math.max(earned, members.reduce((sum, topic) => sum + topic.gold.total, 0)) },
+    doctor: members.length > 0 && members.every(t => t.doctor), professor: members.length > 0 && members.every(t => t.professor),
+    confirmed: skills.filter(s => s.confirmed).length, total: skills.length, skills,
+    reviewDue: members.some(t => t.reviewDue), reviewDueAt: members.map(t => t.reviewDueAt).filter((d): d is string => !!d).sort()[0],
+    needsPractice: members.some(t => t.needsPractice), concepts,
+    leaves: members.flatMap(topic => topic.leaves ?? []).map(leaf => ({ ...leaf, prerequisites: prerequisites(leaf.prerequisites) })),
+   };
+  });
+ }
 	const lastSkillId = course.attempts.at(-1)?.problem.skillId;
- const view: KidsCourseView = { gold: courseGoldBalance(course), lastTopicId: content.topics.find(t => t.skills.some(s => s.id === lastSkillId))?.id ?? course.active?.topicId, revision: course.revision, paused: course.paused, active: course.active,
+ const activeProgress = course.active && course.topics[course.active.topicId];
+ const activeProblem = activeProgress && course.active ? activeWork(course, activeProgress, course.active.mode)?.attempt.problem : undefined;
+ const activeGroup = (activeProblem && navigationGroup(content, activeProblem)?.id) ?? course.active?.groupId ?? content.navigationGroups?.find(g => g.topicIds.includes(course.active?.topicId ?? ""))?.id;
+ const lastProblem = course.attempts.at(-1)?.problem;
+ const lastHistoricTopic = content.topics.find(t => t.skills.some(s => s.id === lastSkillId))?.id;
+ const lastTopicId = (lastProblem && navigationGroup(content, lastProblem)?.id) ?? content.navigationGroups?.find(g => g.topicIds.includes(lastHistoricTopic ?? ""))?.id ?? lastHistoricTopic ?? activeGroup ?? course.active?.topicId;
+ const view: KidsCourseView = { gold: courseGoldBalance(course), lastTopicId, revision: course.revision, paused: course.paused, active: course.active ? { ...course.active, topicId: activeGroup ?? course.active.topicId } : undefined,
 		topics, doctors: topics.filter(t => t.doctor).length, professors: topics.filter(t => t.professor).length,
 		professorGoal: Math.ceil(topics.length / 2), complete: !!course.completedAt, previouslyCompleted: !!course.previousCompletions?.length, stage: "dashboard" };
 	view.inQuest = course.journey === "quest";
@@ -521,24 +706,30 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
 	const { topic, progress, mode } = selection(course, content);
 	const work = activeWork(course, progress, mode);
 	if (!work) { view.exhausted = true; return view; }
-	const a = work.attempt, p = a.problem, state = progress.skills[p.skillId]!;
+	const a = work.attempt, p = a.problem, state = course.topics[content.topics.find(t => t.skills.some(s => s.id === p.skillId))!.id]!.skills[p.skillId]!;
 	view.streak = mode === "challenge" ? progress.challengeStreak : mode === "review" ? progress.reviewStreak : state.streak;
 	view.target = mode === "challenge" ? 2 : mode === "review" ? 1 : state.target;
 	if (work.lessonStep !== undefined) {
-		const skill = topic.skills.find(s => s.id === p.skillId)!;
+		const skill = content.topics.flatMap(t => t.skills).find(s => s.id === p.skillId)!;
 		view.stage = "lesson"; view.lesson = { title: skill.title, steps: skill.lesson.slice(0, work.lessonStep + 1), total: skill.lesson.length, illustration: skill.illustration };
 	} else {
 		view.stage = "question";
-		view.task = { goldReward: (a.hintLevel ?? 0) >= 3 ? undefined : problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, ...problemSource(p, content), options: p.options,
+		view.task = { goldReward: a.problemGoldEligible === false || (a.hintLevel ?? 0) >= 3 ? undefined : problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, ...problemSource(p, content), options: p.options,
 			fields: (a.partIndex !== undefined ? [p.fields[a.partIndex]!] : p.fields).map(f => ({ label: f.label })), figure: p.figure,
    ...(a.partIndex !== undefined ? { part: { index: a.partIndex + 1, total: p.fields.length, completed: !!a.partOutcome && !a.outcome } } : {}),
    ...(a.partOutcome && !a.outcome ? { outcome: a.partOutcome, answers: [a.answers![a.partIndex!]!], explanation: [`${p.fields[a.partIndex!]!.label}: ${p.fields[a.partIndex!]!.answer}.`] } : {}),
-   draft: a.draft?.partIndex === (a.partIndex ?? 0) ? a.draft.answers : undefined,
+   draft: a.draft?.partIndex === (work.connected?.index ?? a.partIndex ?? 0) ? a.draft.answers : undefined,
    hintLevel: a.hintLevel ?? (a.hintUsed ? 1 : 0),
    ...(a.hintUsed ? { solutionParts: solutionFor(a.problem, content).slice(0, a.hintLevel ?? 1) } : {}),
    ...(a.reasoning ? { reasoning: a.reasoning } : {}),
    ...(a.outcome ? { outcome: a.outcome, answers: a.partIndex !== undefined && a.answers ? [a.answers[a.partIndex]!] : a.answers,
     explanation: solutionFor(a.problem, content).flatMap(part => part.paragraphs), teachingFigure: p.teachingFigure } : {}) };
+  if (work.connected) {
+   const c = work.connected;
+   view.task.connected = { sourceId: c.problem.sourceId, text: c.problem.text, introduction: c.problem.introduction, figures: c.problem.figures, index: c.index + 1, total: c.problem.units.length,
+    completed: c.completed.map(done => ({ id: done.problem.naturalUnit!.unitId, text: done.problem.text, outcome: done.outcome!, answers: done.answers ?? [], fields: done.problem.fields.map(f => ({ label: f.label })), explanation: done.problem.explanation })) };
+   view.task.part = { index: c.index + 1, total: c.problem.units.length, completed: !!a.outcome };
+  }
 		const award = course.awards.findLast(award => award.taskKey === a.key);
 		if (a.outcome && award) view.reward = { rank: award.rank, topic: topic.rewardName };
 	}

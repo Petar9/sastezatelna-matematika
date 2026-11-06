@@ -23,7 +23,7 @@ function harness(source = content) {
  const work = () => record.journey === "quest" ? record.quest!.work! : (record.active!.skillId ? record.topics[record.active!.topicId]!.skillWork![record.active!.skillId]! : record.topics[record.active!.topicId]!.work[record.active!.mode]!);
  const correct = () => {
   const view = courseView(record, source, now), p = work().attempt.problem;
-  return go({ type: "answer", taskKey: work().attempt.key, answers: view.task?.part ? [p.fields[view.task.part.index - 1]!.answer] : p.fields.map(f => f.answer) });
+  return go({ type: "answer", taskKey: work().attempt.key, answers: view.task?.part && !view.task.connected ? [p.fields[view.task.part.index - 1]!.answer] : p.fields.map(f => f.answer) });
  };
  const next = () => { go({ type: "nextQuestion" }); while (courseView(record, source, now).stage === "lesson") go({ type: "lessonNext" }); };
  return { get record() { return record; }, go, correct, next, work, view: () => courseView(record, source, now) };
@@ -36,8 +36,9 @@ const keys = [
  [2025, "Б В Б Б Б Б В В А Б Б А А Б А В", [6, 1018, 75, 421, 450, 530, 120, 1400], [1750, 330, 420]],
 ] as const;
 
-test("NVO contains 100 distinct full originals, 108 answer conditions and ten approved islands", () => {
+test("NVO contains 100 distinct full originals, 108 answer conditions, six visible islands and ten historical topics", () => {
  assert.equal(content.topics.length, 10);
+ assert.equal(content.navigationGroups!.length, 6);
  assert.equal(content.topics.flatMap(t => t.skills).length, 27);
  const all = problems(); assert.equal(all.length, 100); assert.equal(new Set(all.map(p => p.id)).size, 100);
  assert.equal(all.reduce((sum, p) => sum + p.fields.length, 0), 108);
@@ -82,23 +83,23 @@ test("all 40 original figure crops exist and source views preserve choices witho
  assert.equal(originalStatement(content, "missing"), undefined);
 });
 
-test("every NVO original can be graded; multipart answers earn one completed-problem bonus", () => {
+test("every NVO natural question can be graded and earns its own original-part bonus", () => {
  for (const problem of problems()) {
-  const skill = content.topics.flatMap(t => t.skills).find(s => s.id === problem.skillId)!;
-  const isolated: KidsCourseContent = { ...content, topics: [{ id: "only", title: "Проверка", rewardName: "проверка", skills: [skill] }],
-   introductions: { [skill.id]: { problemId: problem.id, rationale: "Изолиран оригинал за проверка." } },
-   problem: (id, index, hard) => id === skill.id && index === 0 && !hard ? structuredClone(problem) : null };
-  const h = harness(isolated); h.go({ type: "selectTopic", topicId: "only", skillId: skill.id });
-  for (let part = 0; part < problem.fields.length; part++) {
+  const topic = content.topics.find(t => t.skills.some(s => s.id === problem.skillId))!;
+  const isolated: KidsCourseContent = { ...content, navigationGroups: undefined,
+   introductions: { [problem.skillId]: { problemId: problem.id, rationale: "Изолиран оригинал за проверка." } },
+   problem: (id, index, hard) => id === problem.skillId && index === 0 && !hard ? structuredClone(problem) : null };
+  const h = harness(isolated); h.go({ type: "selectTopic", topicId: topic.id, skillId: problem.skillId });
+  const units = content.connectedProblem!(problem)!.units;
+  for (let part = 0; part < units.length; part++) {
+   assert.deepEqual(h.work().attempt.problem.fields, units[part]!.fields);
    const result = h.correct();
    assert.equal(result.task?.outcome, "independent", `${problem.id} part ${part}`);
-   if (part < problem.fields.length - 1) {
-    assert.equal(h.record.attempts.length, 0); assert.equal(h.record.problemGoldAwards?.length ?? 0, 0); h.next();
-   }
+   assert.equal(h.record.attempts.length, part + 1);
+   assert.equal(h.record.problemGoldAwards?.length, part + 1);
+   if (part < units.length - 1) h.next();
   }
-  assert.equal(h.record.attempts.length, 1, problem.id);
-  assert.equal(h.record.problemGoldAwards?.length, 1, problem.id);
-  assert.equal(h.view().gold, problem.difficulty?.level === "hard" ? 30 : 25, problem.id);
+  assert.equal(h.record.problemGoldAwards!.reduce((sum, award) => sum + award.amount!, 0), units.length * (problem.difficulty?.level === "hard" ? 15 : 10));
   assert.equal(h.view().task?.sourceYear, problem.provenance?.year);
  }
 });
@@ -111,13 +112,13 @@ test("NVO reveals three partial solutions, records supported success and prefers
  }
  assert.equal(h.correct().task?.outcome, "hinted"); assert.equal(h.view().gold, 0);
  h.next(); assert.notEqual(h.work().attempt.problem.id, id);
- assert.equal(h.work().attempt.problem.archive?.kind, "original");
+ assert.equal(h.work().attempt.problem.archive?.kind, "part");
 });
 
-test("NVO adventures contain five distinct originals and at most three diagnostic questions", () => {
+test("NVO adventures contain five distinct natural questions and at most three diagnostic questions", () => {
  const h = harness(); h.go({ type: "startQuest" }); const ids = new Set<string>();
  for (let i = 0; i < 5; i++) {
-  const p = h.work().attempt.problem; assert.ok(!ids.has(p.archive!.sourceId)); ids.add(p.archive!.sourceId);
+  const p = h.work().attempt.problem; assert.ok(!ids.has(p.id)); ids.add(p.id);
   assert.equal(h.view().quest?.completed, i); h.correct(); h.next();
  }
  assert.equal(h.view().stage, "questComplete"); assert.equal(h.record.stamps?.length, 1);

@@ -5,7 +5,7 @@ import { archiveFor, catalogueProblems, difficultyFor, problemIdentity } from ".
 export const problemGoldAmount = 10;
 export const hardProblemGoldAmount = 15;
 const legacyProblemGoldAmount = 5;
-export interface ProblemGoldAward { key: string; skillId: string; earnedAt: string; amount?: number }
+export interface ProblemGoldAward { key: string; skillId: string; earnedAt: string; amount?: number; groupId?: string }
 // Missing amounts belong to the pre-multiplier ledger and must never be repriced.
 export const problemAwardAmount = (award: ProblemGoldAward) => award.amount ?? legacyProblemGoldAmount;
 export function problemGoldRate(problem: CourseProblem, content?: KidsCourseContent) {
@@ -58,20 +58,26 @@ function entitlements(content: KidsCourseContent) {
  return entries;
 }
 export function problemGoldKey(problem: CourseProblem, content: KidsCourseContent) {
+ if (problem.naturalUnit) return `source:${problem.naturalUnit.sourceId}:unit:${problem.naturalUnit.unitId}`;
  return entitlements(content).get(problem.id)?.key ?? (archiveFor(problem, content) ? `source:${archiveFor(problem, content)!.sourceId}` : `problem:${problem.id}`);
 }
+function alreadyPaid(course: KidsCourse, content: KidsCourseContent, problem: CourseProblem) {
+ const key = problemGoldKey(problem, content), unit = problem.naturalUnit;
+ const source = archiveFor(problem, content)?.sourceId ?? content.connectedProblem?.(problem)?.sourceId;
+ return course.problemGoldAwards?.some(a => a.key === key || (unit && (a.key === `source:${unit.sourceId}` || unit.legacyGoldKeys?.includes(a.key))) || (!unit && source && a.key.startsWith(`source:${source}:unit:`)));
+}
 export function problemGoldPreview(course: KidsCourse, content: KidsCourseContent, problem: CourseProblem): { amount: number; multiplier: 1 | 1.5 } | undefined {
- if (course.problemGoldAwards?.some(a => a.key === problemGoldKey(problem, content))) return undefined;
+ if (alreadyPaid(course, content, problem)) return undefined;
  const amount = problemGoldRate(problem, content);
  return { amount, multiplier: amount === hardProblemGoldAmount ? 1.5 : 1 };
 }
 export function awardProblemGold(course: KidsCourse, content: KidsCourseContent, attempt: CourseAttempt, now: string) {
- if (attempt.goldEligible === false || (attempt.outcome !== "independent" && attempt.outcome !== "hinted")) return;
+ if (attempt.problemGoldEligible === false || attempt.goldEligible === false || (attempt.outcome !== "independent" && attempt.outcome !== "hinted")) return;
  const key = problemGoldKey(attempt.problem, content);
  // A future successful attempt can recover missed gold; originals and parts share it.
- if (course.problemGoldAwards?.some(a => a.key === key)) return;
+ if (alreadyPaid(course, content, attempt.problem)) return;
  const amount = problemGoldRate(attempt.problem, content);
- (course.problemGoldAwards ??= []).push({ key, skillId: attempt.problem.skillId, earnedAt: now, amount });
+ (course.problemGoldAwards ??= []).push({ key, skillId: attempt.problem.skillId, earnedAt: now, amount, ...(attempt.problem.naturalUnit?.groupId ? { groupId: attempt.problem.naturalUnit.groupId } : {}) });
 }
 export function topicProblemGold(course: KidsCourse, content: KidsCourseContent, topicId: string) {
  const amounts = new Map([...entitlements(content).values()].filter(e => e.topicId === topicId).map(e => [e.key, e.amount]));

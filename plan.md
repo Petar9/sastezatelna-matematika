@@ -1,783 +1,111 @@
-# Математически открития - agent execution plan
+# Current work - Състезателна математика
 
-Approved: 2026-11-03. Owner: visible gpt-6.1-sol coordinator, high reasoning.
+Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
 
-## Read first
+## Current release
 
-- This is the standalone app in /Users/mac/ideas/maths. Do not modify the original AI study tool.
-- Preserve data/, backups/, existing answers, solution steps, discoveries and awards. Never include these private folders, materials/ or credentials in Git or public deployment bundles.
-- Reuse the existing deterministic educational engine and the decisions in key-decisions.md. No live AI grading, leaderboards, payments or self-service content upload in this rollout. Child Google login is optional and parent-managed (approved 2026-11-04).
-- Parent Google login, private child nicknames, invitation-only access, five active children total.
-- Each competition has separate practice, sessions, maps, evidence and awards. All content is mathematics for grade 4. Add Олимпиада before НВО.
-- User supplies PDFs, solutions and YouTube links. Archive transcripts as Markdown; prepare, review and publish via development workflow. Never invent missing source material or publish unreviewed questions.
+- Production: https://sastezatelna-matematika.vercel.app/ . Latest recorded application release: `9731616`; verification recorded in `f3fe572`, 2026-11-06. Vercel deployment: [performance release](https://vercel.com/petar-s-projects33/sastezatelna-matematika/E3e1XuipfXA1Gs5YipnQ4iPoNFEa).
+- Published: three competitions, optional child Google access, shared design system, general feedback, shared Напредък/calendar, compact daily summaries, current third-hint rewards/source labels, landing/onboarding and performance improvements. Earlier archive entries saying these await publication describe their recording date.
+- Latest recorded checks: 261 tests, TypeScript, ESLint, production build/private-file checks, isolated gameplay and independent selection review passed. Production public/auth-boundary checks passed; London `lhr1` execution confirmed alongside Supabase London. No learner-history or database-schema change in that performance release.
+- Competition snapshots are reused for 30 seconds within the mounted learner, with stale/focus/write checks retained. Selection CPU benchmarks improved substantially, but do not establish authenticated end-to-end latency for a real child.
 
-## Agent execution protocol
+## Approved release readiness - 2026-11-06
 
-1. Inspect instructions, code, repository state and connected services before changing anything.
-2. The approved decisions above are authorization; do not interview the user again about them.
-3. For material unresolved behavior, data, privacy, deployment or product decisions, ask one focused multiple-choice question at a time and wait before dependent changes. Reach enough clarity to specify behavior and acceptance criteria; do not claim a numerical confidence measurement. Continue independent work while waiting.
-4. Use at most two workers when independent workstreams justify them. Assign bounded file ownership, inputs, outputs and acceptance checks. Workers return changes, commands/results and risks. The coordinator integrates and verifies the whole result.
-5. Mark each stage pending, in progress, blocked or verified, with evidence and blockers. Local implementation is not a verified live release.
-6. Never print secrets or store them in this plan. Do not accept charges, terms or send invitations on the user's behalf without the required authorization.
-7. Inspect the integrated diff and run proportionate checks. Preserve unrelated changes. Keep user updates short and report blockers honestly.
+- [x] Applied the approved Bulgarian revisions to Spring and Regional Olympiad hints, explanations, labels and descriptions; retained source answers, stable IDs, content versions and exclusions. Independent Astra review found no remaining material content blocker; this does not replace the pending human review.
+- [x] Prepared both new competitions for publication, bringing the catalogue to five. Preserved connected natural subparts, legacy history/rewards, sixteen Maths islands, four municipal, six NVO, four Spring and four Regional islands. Reproduced and fixed the Regional map missing all four positions, with a regression test that failed before the fix.
+- [x] Final regression: 317/317 tests, TypeScript, ESLint, whitespace check and production build/private-file trace checks passed. Chrome on the final production build confirmed all five maps, the five-choice picker and navigation, grouped answers, draft restoration after reload, third-hint zero gold and continuation to the next part with its original diagram.
+- [x] Final visual checks: regional gameplay at 390px; materials hub and both articles at 390px/1440px, with screenshots inspected, no horizontal overflow, no visible broken images and no gameplay runtime console errors. Disposable local learner/storage only; no real learner, Supabase record or schema changed.
+- [ ] Publish and verify the approved application/content/SEO/documentation changes on Vercel. Commercial landing expansion, billing and migrations remain outside this release. Real parent/child Google sessions and physical-device checks remain owner checks.
 
-## Status
+## Outstanding checks and decisions
 
-| Stage | Status | Next gate |
-| --- | --- | --- |
-| 1. Host current app | HTTPS, owner login and history import verified | Verify cross-device resume |
-| 2. Competition paths | All three collections published on 2026-11-04; Vercel release verified | Signed-in visual selector check is blocked by Chrome automation; final human content review remains unconfirmed, including the missing 2024 Olympiad official solutions |
-| 3. Five-child pilot | Owner login and first child profile saved online | Verify history, cross-device resume and live family isolation |
-| 4. Landing/invitations | Landing redesign verified locally | Deploy and smoke-test hosted invitation flow |
+- [ ] Owner smoke test: real parent and linked-child Google sessions, family isolation, cross-device resume, refresh and optional-email “Не сега” latency. Measure authenticated competition switching before attributing remaining delay to hosting plans.
+- [ ] Physical-device check: keyboard/fixed action bar, touch map and native competition picker. Desktop/mobile viewport checks do not establish physical-device behavior.
+- [ ] Complete final human content review and record outcomes in collection review records. Preserve the disclosed pilot publication exception and missing 2024 Olympiad official solution key; publication does not imply completed review.
+- [ ] Resolve excluded 2023 Математика за всеки M1-06/M1-17 clarifications; see [source review](docs/maths-2023-review.md). Keep underdetermined Olympiad 2023 problem 3 excluded.
 
-## Stage 1 - host the current app
+## Future work - not implementation authorization
 
-- Create a separate local Git repository. Keep secrets, history, backups and source materials excluded; review files before publishing a remote repository.
-- Use Vercel Hobby and Supabase Free with a free Vercel URL. Configure hosted-only data access, Google OAuth, exact callback URLs and approved parent emails.
-- Inspect connected access first; account readiness is unknown. Ask for missing access/setup choices only after investigation.
-- Initially approve only the owner's family. Create the child profile, export a backup and import existing history with the existing guarded import tool. Never overwrite progress.
-- Keep credentials server-only; preserve revision guards, cross-family isolation and the current answer when saving fails.
-- Document deployment, rollback, manual progress export/restoration and free-tier constraints.
-- Vercel Hobby is for personal/non-commercial use. Supabase Free can pause after low activity; do not promise an always-on SLA or generate artificial activity.
-- Acceptance: HTTPS deployment works independently of the laptop, cross-device resume works, history survives deployment, unauthorized access fails, private files and server secrets stay out of public assets.
+- [ ] Plan reminders after two consecutive calendar days without learning activity, separately for parent/child channels, consent, sending time and repetition limits. Home-page visits do not count as learning. Design durable activity/sent-message tracking with that feature; no calendar schema migration is currently required.
+- Hosting upgrades or migration remain a separate decision after authenticated measurements. No subscription purchase, infrastructure move or automatic notification delivery is authorized by this document.
 
-## Stage 2 - separate competition paths
+## Documentation foundation - approved 2026-11-06
 
-- Add stable competition IDs and a catalogue with names, grade, content version and publication state.
-- Scope progress and active work by child plus competition. Preserve the existing course in matematika-za-vseki without resetting evidence or awards.
-- Competition selection preserves unfinished work; adventures draw only from the selected competition. Keep incomplete collections hidden.
-- Add Олимпиада first, then НВО. Archive supplied sources and explicitly flag missing keys. The approved 2024 Olympiad exception permits draft preparation from the tutor video and independent calculations, followed by human review.
-- Content pipeline: archive sources/transcripts privately; extract original text/figures; verify answers; map skills; prepare exact three-part worked solutions, fresh practice and harder variants; record provenance; review before publication.
-- Acceptance: full learning flow works within each published path; switching never mixes or discards work; every published answer and explanation has been checked.
+- [x] Put the clarity/simplicity principle and task routing in AGENTS.md; preserve child-friendly identity, necessary teaching guidance and the generated Next.js block.
+- [x] Consolidate current product rules and separate superseded decisions/release chronology into linked archives without losing recorded evidence.
+- [x] Align design-system guidance, content checklist, setup and deployment references with current approved behavior.
+- Verification: checked all 35 relative Markdown links in the nine changed documents, exact archive fidelity after link relocation, preservation of the generated Next.js block, and whitespace/diff scope. Application tests were not rerun for this documentation-only change; the 261-test result above is historical release evidence. No application code, APIs, schema or learner data changed; no deployment is required.
 
-## Stage 3 - five-child pilot
+## SEO/GEO foundation - approved 2026-11-06
 
-- Extend the existing parent/profile flow to approved families, with a global maximum of five active child profiles.
-- Keep each child's attempts, discoveries, confirmations and awards independent per competition.
-- Provide a concise parent summary and a way to report unclear problems.
-- Verify shared-device profile switching, multiple families and concurrent sessions. Collect feedback on clarity, navigation and willingness to return.
-- Acceptance: five children can learn independently without exposing or overwriting another child's history; concurrent creation cannot exceed the cap.
+- [x] Strategy in [seo-geo.md](seo-geo.md), „Ценни материали“, separate sourced СМГ/НПМГ admissions guides, canonical/OG metadata, public sitemap/robots and private/preview indexing guards.
+- [x] Public article reads bypass Supabase; shared caching is limited to explicit non-personal public routes. Home and learner routes retain their existing authentication/no-store behavior.
+- [x] Critical research review: corrected the SMG grade-average definition and conditional zero scores; clearly separated its historical 2026/2027 formula from NPMG’s upcoming 2027/2028 eligibility announcement. Removed an unconfirmed price and invented publication date; preview pages remain crawlable so bots can read noindex. Independent content review found no remaining material issue.
+- [x] Materials UI follows the landing page: shared header with prominent „Вход“, reused illustration, responsive article cards, readable article layout and related links. Added the reusable patterns to the design-system guide and development catalogue. SMG retains the formula and plain explanation of the sixfold weight without a worked example; NPMG clearly marks its methodology as pending. The retired combined URL permanently redirects to `/materiali` and is excluded from the sitemap.
+- [x] Local verification: 270/270 tests, ESLint, TypeScript and production build/private-file checks passed. Real HTTP checks confirmed six explicit public read routes return 200 with shared cache headers and no Set-Cookie, both anonymously and with a fixture auth cookie; five canonical sitemap URLs; the legacy 308 redirect; and no-store/noindex on login/progress/welcome. No real learner data was used.
+- [x] Chrome checks at 320/390/1440px: the hub and both articles have one H1, valid section targets and no horizontal overflow; inspected screenshots, visible keyboard focus, card activation and formula anchor navigation. Latest console contained no errors. These checks used a local production build, not physical devices or a live deployment.
+- [x] Optional production Search Console verification metadata and owner setup instructions are ready; the owner token and ownership verification remain pending.
+- [ ] Production publication and live verification. This slice is local and has not been deployed; current production evidence above is unchanged.
+- Landing expansion for paid acquisition remains plan-only. Domain availability/purchase, Search Console/Bing setup and commercial launch remain owner/configuration steps; no payments, schema or learner-history changes.
 
-## Stage 4 - landing page and invitation requests
+## Paid-launch blueprint - agreed 2026-11-06
 
-- Create a Bulgarian parent-facing page matching the app with accurate supported-content descriptions. Keep the large screenshot and personal-data section removed. Use a lightweight decorative island journey with the existing otter, cream surfaces, dark-teal shared actions and gold accents.
-- Include one secondary Заяви покана form and a prominent primary Вход button (hierarchy updated by owner approval on 2026-11-05). Collect only parent email; show “Ще използваме имейла само за поканата.” without a separate consent checkbox or hidden substitute. Preserve email validation, duplicate handling and the existing rate limit.
-- Requests are private and manually reviewed. Submission grants no access. Keep additional families waiting until the owner separately approves expansion beyond five children.
-- Defer the public contact/personal-data section at the owner’s request. Invitation submissions remain private; this owner-approved email-only flow supersedes the earlier checkbox requirement.
-- Acceptance: parents understand the app, can request an invitation and receive confirmation; applicants remain private and cannot self-enrol.
+- [x] Created [guideliness.md](guideliness.md): applied essentials from the three $100M books, agreed US$100/month offer, refined existing brand, anonymous sample, 14-day first-payment cancellation/refund window, ten-new-family intake, Stripe/Mollie comparison, acquisition scripts, economics, cohort definitions and staged implementation criteria.
+- [x] Linked the commercial source of truth from seo-geo.md and reconciled its earlier price/manual-activation proposals. Existing pilot, production and SEO release status are unchanged.
+- Verification: checked local Markdown links, fee/revenue examples, agreed-decision coverage and whitespace/diff scope. Book frameworks use official public companion sources rather than a full-text book review; the competitor price needs live reconfirmation. Application tests were not rerun for this documentation-only change.
+- [x] Updated the launch test to US$100/month, charged upfront, with a 14-day first-payment cancellation/full-refund window; aligned Bulgarian copy and SEO references, recalculated ten-family gross charges to US$1,000 and removed obsolete euro fee estimates pending USD configuration. Verified price/window consistency, arithmetic, relative links and whitespace; no application tests were needed for this documentation-only update.
+- [ ] Implement the paid-release slices in guideliness.md. No commercial UI, billing integration, account activation, outreach, purchase or deployment was performed in this documentation slice.
 
-## Verification and release gates
+## Landing-page specification - agreed 2026-11-06
 
-- Run applicable tests, type checking, lint and production build; verify mobile and desktop flows.
-- Test authentication, owner scoping, failed saves, concurrent updates and profile selection.
-- Test competition migration on a copy of existing history before any live import. Verify unchanged original history and archive integrity.
-- Production child data must not be used in preview deployments. Use a separate test project or disable authenticated preview use until configured.
-- Record commands/results below. Missing service access and missing reviewed content are explicit blockers, never completed checkboxes.
+- [x] Saved [landing-page-plan.md](landing-page-plan.md) and linked it from the commercial blueprint: researched practices, value-proposition critique, selected Bulgarian copy, one embedded sample with Лесно / Средно / Трудно, US$100/month and 14-day first-payment refund terms, and performance/accessibility acceptance criteria.
+- Verification: checked relative links, agreed copy and demo decisions, pricing/refund consistency, whitespace and scope. Application tests were not rerun for this documentation-only change.
+- [ ] Implement and verify the page, sample and required purchase flow separately. This slice creates the plan only; no application, learner-data or deployment changes.
 
-## Evidence and blockers
+## Spring competition - local implementation 2026-11-06
 
-Verified locally on 2026-11-03:
+- [x] Added the approved hard grade-4 competition for 2023–2026: six islands, twelve skills, twenty archived originals, forty eligible source learning units and sixty finite authored exercises; nineteen originals are eligible for automatic grading.
+- [x] Preserved source statements, subconditions, seven diagram crops and source metadata; integrated original-first selection, multipart answers, existing reward rules and history preservation. The 2026 solutions use the tutor video plus independent mathematical checks, without claiming an official key.
+- [x] Kept the competition as a local-only draft, excluded from hosted access and publication. Review record: [content/proletno/review.md](content/proletno/review.md).
+- [x] Verification: 280/280 tests, TypeScript, ESLint and production build/private-file checks passed; the map component test selects all six islands. Local production HTTP returned 200 with all six island titles.
+- Local review: http://127.0.0.1:3010/?competition=proletno, using isolated disposable local storage; no real learner or Supabase data changed.
+- [ ] Human content and visual desktop/mobile review. Browser automation entry points failed before page access, so no visual pass is claimed.
+- [ ] Resolve 2024 problem 6: its nonzero-number wording does not justify the positive-integer assumption in the supplied proof. The full problem remains archived and excluded from grading pending the owner's decision; no clarification was silently approved.
+- No commit, push or deployment. The previous SEO and other unrelated working-tree changes are preserved.
 
-- Separate local Git repository on `main`; no remote, commit or public source upload created while the owner's repository choice is pending. GitHub CLI authenticates as `Petar9`.
-- Added competition registry, stable IDs, grade, content version and draft state. Only the reviewed existing collection is selectable; Олимпиада and НВО stay hidden. Database, local stores, API calls, lost-response recovery and import/export use child + competition scope. Legacy local path stays unchanged.
-- Migration `202611030002_competitions.sql` preserves the original JSON and revision under `matematika-za-vseki`; no live import or database migration has been run.
-- Added private invitation requests, manual access approval, parent summary and unclear-problem reports; global cap is five active profiles. No request grants access.
-- Added Bulgarian landing at `/welcome` and unauthenticated hosted `/`, with a real app screenshot captured using temporary blank progress. No child's history or identity appears in it.
-- `npm test`: 89 passed. `npm run typecheck`, `npm run lint`, `npm run build`: passed. Build checks reject private history, source materials and environment files in traces/standalone output. Client chunks contain no service-role key name or prepared answer-content module references.
-- `bash scripts/test-database.sh`: passed on disposable PostgreSQL 14 with mocked Supabase auth. Covers all three migrations, JSON/revision preservation, owner isolation and revocation, private-table/RPC privileges, duplicate requests, rate limits/expiry, twelve concurrent profile inserts across two families, archive/replacement and reactivation at capacity. This is not live Supabase or OAuth evidence.
-- Real production HTTP checks passed: read-only course GET, no-store, invalid host/origin rejection, hidden draft rejection, public landing/image, Vercel Preview data denial, and private file paths inaccessible.
-- Browser check passed: start an adventure, request its first exact worked step, reload and resume the same question/help, submit an assisted correct answer, and see the primary action within a 390 x 844 viewport without horizontal overflow. Landing fits the same width and its image loads.
-- SHA-256 checks confirm all six original history/archive files in the private baseline manifest are unchanged. The original AI study tool was not edited.
-- Coordinator: gpt-6.1-sol, high reasoning; two bounded workers supported deployment review and pilot/database work. Final integration and checks were performed by the coordinator.
+## Connected originals - local implementation 2026-11-06
 
-Unresolved gates - ask the owner, do not infer answers:
+- [x] Applied connected original problems across Математика за всеки, Олимпиада, НВО and Пролетни: 216 eligible originals and 269 natural answer units. Each original has one island; natural а/б/в boundaries group all answer fields belonging to that part. Unlettered multi-answer questions remain one unit.
+- [x] Retained 15 Maths islands rather than the proposed aggressive consolidation from 17 to 5; Olympiad has 4, NVO 6 and Spring 4. Historical topic IDs, saved work and rewards remain readable without rewriting learner history.
+- [x] Show shared context and the current part, with collapsed full statement/diagrams and completed parts. Preserve drafts and exact continuation across navigation, reload and five-step adventures, including adventures ending mid-original.
+- [x] Award gold per natural part after all its fields are correct; the third hint excludes new gold. Reset local hints per part, retain dependent-help attribution and prevent sibling parts alone confirming a skill. Legacy whole/alias awards and new part awards cannot double-pay.
+- [x] Fixed canonical natural-part source links: full-source pages return the complete statement and all original diagrams without teaching answers.
+- [x] Verification: 306/306 tests, TypeScript, ESLint and production build/private-file checks passed. Real Chrome checks at 1200px and 390px covered grouped fields, continuation after reload, third-hint zero gold, source-page HTTP 200 with both diagrams, all four island maps and no horizontal overflow or console errors.
+- Local review: http://127.0.0.1:3011, using an isolated disposable learner and local data. No real learner/Supabase data, commit, push or deployment changes.
+- [ ] Human content review and physical-device checks remain pending. Spring stays a local-only draft; the existing source exclusions and missing official-key limitations remain in force.
 
-1. Source repository selected by owner: public `Petar9/sastezatelna-matematika` (https://github.com/Petar9/sastezatelna-matematika). Admin access and an empty remote were verified on 2026-11-03. Reviewed source was published to `main` in initial commit `efb0576`; private history, materials and credentials were excluded.
-2. Signed-in Vercel and Supabase accounts were verified in the owner's existing Chrome session on 2026-11-03. Vercel project `sastezatelna-matematika` was created in `Petar's projects` on Hobby. The owner created the separate Supabase Free project; all three migrations and nine live schema/access checks passed. Google OAuth configuration remains pending; no deployment or live history import has run.
-3. Public contact email for the landing page is pending. `MATHS_CONTACT_EMAIL` is documented in `.env.example`; do not invent an address or open public invitations without a real contact.
-4. Superseded by the 2026-11-03 Olympiad intake below: sources for 2022–2025 are archived; the 2024 official solutions remain missing. НВО source intake is still pending.
-5. After access is ready: create/configure only free projects, set exact callback URLs and production-only secrets, apply migrations in order, approve only the owner family, create the child profile, preserve a backup, run the guarded history import, and verify HTTPS/OAuth/cross-device resume/family isolation. Then verify a private invitation request before approving more families.
+## GTM roadmap - agreed 2026-11-06
 
-Operational details: [deployment and recovery](docs/deployment.md); [content intake and review](docs/content-workflow.md). These are local implementation results, not a claim that the app is deployed or that new collections are available.
+- [x] Saved [gtm-plan.md](gtm-plan.md): High / Medium / Low priorities, owners, dependencies and completion criteria; product readiness before outreach; both direct and tutor channels; feedback-led article selection; ambassador programs and commissions out of scope.
+- [x] Linked the roadmap from the commercial guidelines and reconciled their stale combined-guide reference and fixed article order with the existing separate school guides and agreed feedback-led selection.
+- Verification: checked Markdown links, task structure, agreed decisions, whitespace and edit scope. Application tests were not rerun for this documentation-only change.
+- [ ] Execute the roadmap in separately verified slices. No application code, billing, outreach, learner-data or deployment changes were performed here.
 
-Deployment preparation update, 2026-11-03:
+## Maths geometry follow-up - 2026-11-06
 
-- Owner selected the public GitHub repository above; the local `origin` targets only that repository. Initial source commit `efb0576` was pushed successfully to `main` on 2026-11-03.
-- Re-ran `npm test` (89 passed), `npm run typecheck`, `npm run lint` and `npm run build`: all passed. Build trace and standalone private-file checks passed.
-- Reviewed 132 source candidates before this status update, including the landing screenshot. Credential-pattern checks found no private keys, service secrets, GitHub tokens or JWTs; detected email addresses are test/documentation examples. Confirmed `data/`, `backups/`, `materials/`, `.env.local`, `node_modules/` and `.next/` are ignored.
-- `positioning.md` records the approved short positioning plan. The app name and candidate domain are unchanged; no domain purchase is authorized.
-- GitHub authentication for deployment providers does not configure the application's parent Google login; that OAuth setup is still required.
+- [x] Split the 20-original geometry island into „Обиколки на фигури“ (9) and „Лица и мрежи“ (11); Maths now has 16 islands. Keep every whole original together and preserve saved drafts, learner history and rewards.
+- [x] Updated the short content checklist for method-based grouping, natural subparts and reward compatibility; added saved-task continuation coverage.
+- Verification: 308/308 tests, TypeScript, ESLint and production build/private-file checks passed. Chrome at 390px and 1200px confirmed both island labels and the area panel, with no horizontal overflow.
+- Local only; no real learner-data, commit, push or deployment changes.
 
-Cloud setup update, 2026-11-03:
+## Regional Olympiad - local implementation 2026-11-06
 
-- Verified the existing Chrome sessions: Vercel Hobby and Supabase Free. Supabase contains three unrelated paused projects; none was changed.
-- Created the separate Vercel project connected to the approved GitHub repository; assigned production domain is `sastezatelna-matematika.vercel.app`. Dashboard confirms no production deployment.
-- Saved `MATHS_MODE=hosted` and the assigned HTTPS `MATHS_APP_URL` in Production only; Preview has no production credentials.
-- Prepared a separate Supabase project named `sastezatelna-matematika`, Free/Europe, Data API enabled and automatic table exposure disabled; migrations explicitly grant the required access. The owner created the project and privately saved the database password. The project is healthy in West Europe (London), `eu-west-2`, on Nano/Free.
-- Remaining gates: production-only Supabase credentials, Google OAuth client configuration and owner allowlist identity, approved public contact, guarded history import and live verification. No paid plan or terms acceptance was performed.
-- This documentation update is local until cloud configuration is ready; pushing now would trigger an incompletely configured deployment.
+- [x] Added „Олимпиада (областен кръг)“, „Трудно“, 2023–2026: 12 whole originals, 23 natural answer units, 21 finite exercises, seven skills in four approved islands; source statements, five figure crops, official keys and all four full video caption archives checked and saved privately.
+- [x] Renamed the existing display to „Олимпиада (общински кръг)“, „Средно“, preserving its stable ID, content version and history; integrated the new collection through the existing connected-original engine and reward rules.
+- [x] Verification: 316/316 tests, TypeScript, ESLint and production build/private-file checks passed. Real Chrome at 1200px/390px checked grouped answers, reload/resume, next part, third-hint zero new gold and both original diagrams; no horizontal overflow or runtime console errors.
+- Review record: [content/olimpiada-oblasten/review.md](content/olimpiada-oblasten/review.md). Local review: http://127.0.0.1:3012/?competition=olimpiada-oblasten, isolated disposable local learner.
+- [ ] Human content review, publication permission and physical-device checks. Unpublished local-only draft; no real learner/Supabase data, commit, push or deployment changes.
 
-Database setup update, 2026-11-03:
+## Recording future work
 
-- Applied all three reviewed migrations in order to the separate project `ptjeffzooxdkjdotxzxs`; Supabase SQL Editor reported success.
-- Nine read-only checks passed: seven expected tables, RLS enabled, anonymous progress reads blocked, direct authenticated progress reads blocked, service access present, invitation RPC private, child/competition primary key, child-limit trigger present, and no history imported. This verifies schema configuration, not a completed live authentication or cross-device test.
-- Saved Site URL `https://sastezatelna-matematika.vercel.app` and the sole exact allowed redirect `https://sastezatelna-matematika.vercel.app/auth/callback`.
-- Verified Google is disabled and its client ID/secret fields are empty. Supabase's Google callback is `https://ptjeffzooxdkjdotxzxs.supabase.co/auth/v1/callback`; Google Cloud client setup remains pending.
-- Asked which Google email should be the first approved parent. Public contact identity remains a separate owner decision. No parent, child profile, history or invitation has been created/imported.
-- Credentials have not been copied into Vercel; the server connection requires action-time confirmation before granting Vercel access. The app is not deployed.
-
-Parent setup update, 2026-11-03:
-
-- Added the owner's explicitly supplied Google email to the private parent allowlist, without publishing that identity in source. The live database confirmed exactly one approved parent. This is allowlist configuration; Google login remains disabled pending OAuth setup.
-- Saved `SUPABASE_URL` for Vercel Production only. API keys have not been transferred and no deployment has started.
-- Automatic approval review blocked opening Google Cloud Console before its account/project was identified. The owner clarified that Google Cloud is in a different Chrome profile and reported creating a separate `sastezatelna-matematika` project there. This is owner-reported, not browser-verified. Continue with manual Google OAuth setup in that profile; the approved parent login identity is unchanged.
-- Public contact email, OAuth client credentials, server connection approval, child-profile creation, guarded history transfer and live release checks remain pending.
-
-
-Approved onboarding update, 2026-11-03:
-
-- Implemented the owner-approved compact owl/island welcome: one parent Google action, then one nickname field with „Как да те наричаме?“ and „Към приключението“. Returning children retain direct resume; adding another child is secondary. The home greets the selected nickname without recording learning progress.
-- Kept parent approval, the global five-child limit, existing child ownership checks and learning history. Login cancellation, authorization denial, unavailable login and profile failures now have distinct Bulgarian recovery messages. Raw provider/database errors are not rendered.
-- Matched the public landing hero to the owl/island welcome. Invitation access rules are unchanged.
-- Research informed a short parent-to-child handoff, one action per screen and contextual help: [Khan Kids parent setup](https://khankids.zendesk.com/hc/en-us/articles/360006537272-How-do-I-set-up-an-account), [Khan Kids Learning Path](https://khankids.zendesk.com/hc/en-us/articles/360048828572-Learn-more-about-the-Learning-Path), [Duolingo characters](https://blog.duolingo.com/building-character/), [NN/g onboarding tutorials](https://www.nngroup.com/articles/onboarding-tutorials/). These are design inputs, not evidence of outcomes for this app.
-- Verification: `npm test` 97 passed; `npm run typecheck`, `npm run lint`, `npm run build` and `git diff --check` passed. The build private-file checks passed. New tests cover first/returning setup, nickname creation, owned-profile selection, secure selection cookie, cancellation/denial/retry, local-mode auth rejection and nickname greeting without fabricated progress.
-- Chrome checked the built login and landing at mobile/desktop sizes; no horizontal overflow at 390 px, with the login action above the fold. Login also fits 320 x 640. Actual onboarding components rendered as test-only HTML verified nickname/profile layout at 390 x 844 and 320 x 640, optional profile disclosure and keyboard focus from nickname to primary action. No authentication bypass was added to the app.
-- Live Google OAuth and hosted cross-device persistence remain unverified until the deferred cloud credentials/setup are complete. No production child/history data was changed, no source was pushed and no deployment was started for this UI update.
-
-
-Approved whole-app UI update, 2026-11-03:
-
-- Replace the owl with an original otter explorer throughout onboarding, landing, home, islands, practice and earned awards. Use warm cream surfaces, pale blue sea, teal primary actions, blue progress and gold discovery feedback. Keep original white-background figures on white panels without altering source assets.
-- Shorten the home introduction, prioritise the five-task adventure and bring the map higher. Keep topics secondary, collapse evidence details and remove unearned Doctor/Professor placeholders while preserving earned awards and the optional requirements explanation.
-- Use one horizontal adventure bar and one compact active-skill discovery indicator. Show real progress immediately after attempts and correctness, including labelled helped discoveries. Preserve the exact problem selection, worked solutions, confirmation rules, history and child/competition scope.
-- Research inputs: [Duolingo’s focused home path](https://blog.duolingo.com/new-duolingo-home-screen-design/), [Khan Academy course mastery](https://support.khanacademy.org/hc/en-us/articles/360032987591), [NN/g microinteractions](https://www.nngroup.com/articles/microinteractions/). These inform visual hierarchy and feedback, not claims of learning outcomes for this app.
-- Verification: `npm test` 97 passed; `npm run typecheck`, `npm run lint`, `npm run build` and `git diff --check` passed. Build traces and standalone private-file exclusion checks passed. All 36 baseline private-history, archive and source-figure hashes are unchanged.
-- Chrome checked the real production build at 1060 × 900 and 390 × 844: home, island selection, exact worked part, helped correct answer, adventure start/answer and original diagram. No horizontal overflow; fixed check/next actions remain visible. A helped correct answer immediately shows 2/3 discoveries and its remaining independent-answer goal. The original figure loads on white without alteration. Test-only rendered onboarding views also checked at 320 × 640, including keyboard focus and optional profile creation. The public landing screenshot now shows the blank-history otter home.
-- Original AI app, adaptive selection, award requirements and learning data were not edited for this redesign. Hosted Google OAuth and cross-device persistence remain deferred. No push, deployment or cloud changes were made.
-- Additional owner suggestion: a short otter celebration at major milestones. The supplied Google Images/Pinterest GIF has no verified reuse permission. Asked the owner to choose our original mascot animation with „Видрата празнува с теб!“ or a separately licensed real-otter GIF. This additional animation is pending that choice; the approved static mascot reactions are implemented.
-
-
-Approved Bulgarian explanation edit, 2026-11-03:
-
-- Replaced academic or unclear authored wording with concrete instructions for grade 4 in lessons, worked solutions and checks. Examples: “максимизирай” becomes “намери колко най-много”, and “низходящо” becomes “от най-голямата към най-малката”. Corrected the mistaken subtraction term “умалително” by describing the number being subtracted. Original competition statements, choices, numeric keys and provenance are unchanged.
-- Saved questions display revised worked solutions only when the current catalog matches the exact question ID, statement, fields/answer keys and options. Otherwise they retain their saved solution. This projection does not rewrite history, submitted answers, assistance, awards or revisions.
-- Verification: `npm test` 98 passed, `npm run typecheck`, `npm run lint`, `npm run build` and `git diff --check` passed. The regression covers refreshed partial and answered solutions, fallback for changed statements/keys, and read-only history. Build private-file exclusion checks passed.
-- Restarted the local production build at `http://127.0.0.1:3002/`. A read-only API comparison verified revised wording for the currently saved 2026-M1-16 task, with every field outside the displayed explanation unchanged. All 27 protected history/archive/original-source/figure hashes match the pre-edit snapshot. The Chrome CLI bridge did not start; no new visual-layout verification is claimed for this text-only edit. No push, deployment or cloud changes were made.
-
-
-Approved gold and adventure update, 2026-11-03:
-
-- [x] Add one-time server-validated gold per skill within each competition: 5 for first completed effort/revealed solution, 10 for first correct answer including help, 20 for independent confirmation (maximum 35). Combine simultaneous gains; help alone, repetitions, reconfirmation and completion add no bonus. No shop, deductions or lost gold.
-- [x] Keep one child wallet across competition ledgers, with learning and academic awards separate by competition and child. Preserve revision guards and profile isolation; simultaneous same-course commands cannot double-award, and different competitions do not overwrite a shared balance.
-- [x] Credit existing history quietly from saved attempts/confirmations, retaining an append-only earned ledger on the next accepted learning command. GET and reload do not replay old gains or mutate history. Existing private JSON storage needs no SQL schema migration.
-- [x] Prioritise one home start/resume action, otter, horizontal five-stop blue route and moving boat, next-treasure preview and latest souvenir. Keep topics and manual-topic resume secondary. Helped/revealed completed work advances the boat independently of skill confirmation.
-- [x] Replace tree leaves/plants with one skill marker: blue flag for first effort, teal sparkle for first correctness, gold checked medallion for confirmation. Рачешки задачи has five markers. Preserve earned states after later difficulty, current learning goals and Doctor/Professor rules.
-- [x] Start the secondary map near the latest/selected island while retaining all 17 destinations, full-map reset and topic grid. Exclude island buttons from pan-gesture handling so pointer activation remains native.
-- [x] Show a brief combined gold gain with optional breakdown and coin flight to the wallet; respect reduced motion. Preview/reveal four original repeating sea souvenirs using existing saved adventure stamps, retaining their actual achievement text.
-- [x] Keep fixed Check/Next controls and readable cream/sea/teal styling; blue denotes progress, gold denotes rewards. No automatic advance.
-- [x] Update key-decisions.md and verify the implementation locally. No push, deployment or cloud configuration changes in this slice.
-
-Verification and limits:
-
-- `npm test`: 107 passed, 0 failed. Coverage includes quiet historical credit, reveal/help/correctness/confirmation milestones, repeated and stale commands, lost-response recovery, cross-competition aggregation, parent/child isolation, simultaneous same- and different-competition writes, one marker per skill, map activation and the five-task UI flow.
-- `npm run typecheck`, `npm run lint`, `npm run build` and `git diff --check`: passed. Build trace and standalone private-file exclusions passed.
-- Chrome checked the built app on desktop and at 390 x 844 and 320 x 640 with temporary progress. No horizontal overflow; the home primary action is above the fold and fixed Check/Next is visible. Completed a five-task adventure containing independent, helped and revealed work; verified +15 combined first correctness, +5 new effort, no gold for help alone or repeated correctness, saved wallet after reload, moving route and matching souvenir preview/reveal. The chest adds no extra gold. Verified five selectable skills in Рачешки задачи and pointer opening from the full map. Temporary viewport override was reset.
-- A read-only GET from the updated real local app confirms a numeric historical wallet and no replayed gold gain. All 36 baseline history/archive/source-figure hashes remain unchanged. The original AI study app was not edited.
-- Restarted the verified local production build at `http://127.0.0.1:3002/`. Browser test data is isolated under `/tmp/maths-gold-browser-verification`, not real learning history.
-- Hosted store behavior is covered with the test database adapter; live Google OAuth and cross-device Supabase persistence still require the deferred cloud setup and are not claimed as verified here. Browser extensions emitted unrelated wallet-provider warnings during Chrome testing.
-- Coordinator remained gpt-6.1-sol with high reasoning effort; this coupled implementation and final verification used one agent.
-
-
-Map reward visibility fix, 2026-11-03:
-
-- [x] Reproduced the island-name plaques covering the lower part of the skill reward markers in Chrome; moved plaques below the reward row. No reward rules, saved progress or theme-card counts changed.
-- Verification: existing UI suite 29/29 passed; production build and private-file exclusions passed; `git diff --check` passed. Chrome DOM geometry checked all 17 islands at desktop and 390 x 844: no marker/name overlap or bottom label clipping in full-map view. Selected Рачешки задачи retains five unobscured markers at both sizes; navigation opens/closes the island. Restored the viewport override.
-- All 36 protected history/archive/source-figure hashes remain unchanged. The updated local production app runs at `http://127.0.0.1:3002/`. No push, deployment or cloud changes.
-
-
-Theme-card gold display correction, 2026-11-03:
-
-- Approved scope: replace the old island discovery counts with a coin, “Събрано злато”, earned/available gold and a gold bar in the topic grid and selected-island summary. Keep individual skill learning goals unchanged.
-- Project each topic's collected gold from the authoritative retained award ledger, including historical credit; maximum 35 per skill (175 for the five-skill Рачешки задачи island). Reading the display must not mutate history or replay rewards.
-- Verification: `npm test` 108 passed; `npm run typecheck`, `npm run lint`, `npm run build` and `git diff --check` passed. Build private-file exclusion checks passed. Regression coverage includes historical credit, retained ledger gold after learning evidence changes, topic isolation, five skills / 175 available gold, and unchanged individual learning goals.
-- Restarted the production build at `http://127.0.0.1:3002/`. Chrome verified coins and gold-colored fills on all 17 theme cards, existing Рачешки задачи gold of 70/175, and the matching selected-island summary. Desktop and 390 × 844 mobile checks show no horizontal overflow; all five skills remain accessible. No answers were submitted. All 36 protected history/archive/source-figure hashes are unchanged. No push, deployment or cloud changes.
-
-
-Compact theme gold display, 2026-11-03:
-
-- Remove the repeated visible “Събрано злато” label; place the coin beside earned/available gold on the right above the bar. Keep accessible gold descriptions and saved rewards unchanged.
-- Verification: UI regressions 29/29 passed; production build, private-file exclusions and `git diff --check` passed. Chrome checked all 17 cards: no repeated label, coin and number right-aligned, existing totals retained. Desktop and 390 × 844 mobile layouts have no horizontal overflow. Local app restarted on port 3002; no learner answers submitted. All 36 protected history/archive/source-figure hashes unchanged.
-
-
-Website and competition identity, 2026-11-03:
-
-- Approved: website name “Състезателна математика”, active competition and grade underneath the learning header, concise “За сайта” link; retain the current teal buttons. Competition labels follow the selected catalogue entry rather than a hard-coded course name.
-- Verification: all 108 tests, type checking, lint, production build and private-file exclusions passed. Chrome checked the header, About link, teal primary action and desktop/mobile layouts; isolated rendering checked selected-competition labels and login identity. Regenerated the public preview with an empty history profile. All 36 protected history/archive/source-figure hashes remained unchanged; no learning or reward behavior changes, answers submitted, push or deployment.
-
-
-## 2026-11-03 - Olympiad content preparation
-
-- [x] Organize seven unchanged PDFs privately by competition/grade/round/year and record hashes, provenance and the missing 2024 solution PDF.
-- [x] Archive the four full Bulgarian automatic transcripts as Markdown. Preserve the 2023 creator correction separately; it is not a full transcript. Save tutor teaching methods with source links.
-- [x] Prepare 12 originals / 29 learning units, 60 fresh exercises (three core and two harder per skill) and exactly three concrete solution parts. Independently check the maths; exclude the underdetermined 2023 problem 3 from grading.
-- [x] Integrate the approved four islands: Числови загадки, Геометрични открития, Истории с числа, Логически загадки. Retain the five-task adaptive adventure, progressive help and existing gold rules.
-- [x] Keep `olimpiada` unpublished and reject public access before any storage write. Preserve the existing competition's history and backups.
-- [ ] Human review of wording, figures, solutions and new variants; resolve/accept source caveats in `docs/olimpiada-content-review.md` before publication.
-- No deployment, Git push, new cloud setup or НВО content in this slice.
-
-Verification for Olympiad preparation:
-
-- `npm test`: 115 passed; type checking, lint, production build and `git diff --check` passed. Build trace and standalone private-file exclusions passed.
-- Independent Python checks verified original answers and all 60 new exercises. Regression tests cover four islands, three-part help, five-task adventures, gold, mastery, isolated persistence and unpublished access rejection.
-- All 36 protected history/archive/source files match the baseline; the seven relocated PDFs are byte-identical. Four full-video transcript archives match their inventory hashes. Runtime content has no private local paths, and the source answer pack is absent from client static assets.
-- New map rendering and actions were checked in DOM tests; no new live-browser visual verification or publication is claimed. The existing study history was not changed.
-
-
-Olympiad Bulgarian language review, 2026-11-03:
-
-- Reviewed all 60 new problem statements and the authored teaching steps for the 12 originals. Replaced awkward literal phrasing with clear fourth-grade Bulgarian, including rectangle sides, fees, Roman numerals and overlapping groups. Corrected misleading instructions to add where the displayed calculation subtracts.
-- Original competition statements, answer keys, IDs, options, curriculum, diagrams and provenance remain unchanged. Private review sources and runtime teaching text match. Original PDFs and raw automatic transcripts are preserved.
-- Checked 356 authored text fields for broken words, mixed-script words and encoding/invisible-character problems; no candidates remain. Human reading informed the language changes; the character scan is not a substitute for proofreading.
-- Verification: 115 tests passed, both independent maths checks passed, production build including TypeScript and private-file exclusion checks passed, and `git diff --check` passed. All 36 protected baseline hashes and recorded PDF/transcript hashes match. No live-browser visual check, publication, history changes or cloud changes in this text-only slice.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this closely related copy revision.
-
-
-Local Olympiad review enabled, 2026-11-03:
-
-- Owner approved showing Olympiad locally. The home now offers Математика за всеки and Олимпиада; page, API and local storage share the same availability guard. Olympiad remains unpublished in hosted mode; НВО stays hidden.
-- Verification: all 116 tests, lint, production build (including TypeScript and private-file exclusion checks), and `git diff --check` passed. Local home and Olympiad return HTTP 200; НВО returns 404. Chrome verified both competition links and switching to the four Olympiad islands. Separate-store persistence and hosted rejection pass regression tests.
-- All seven pre-change learner-history/backup hashes match. No answers submitted by verification; no reset, push, deployment or cloud changes. Local production server restarted at http://127.0.0.1:3002/.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent.
-
-Approved hint copy update, 2026-11-03:
-
-- Remove the optional Как мислиш? explanation box from both child players. Rename existing solution help to Подсказка / Следваща подсказка, including accessible headings. Retain step-by-step calculations, help classification and historical reasoning. Lesson navigation remains Следваща стъпка.
-- Verification: all 116 tests pass, including both players’ hint progression and absent explanation inputs. Lint, production build (including TypeScript and private-file exclusions), and `git diff --check` pass. Restarted port 3002; read-only HTTP checks confirm the served app includes both new hint labels and excludes the removed wording. All seven protected learner-history/backup hashes are unchanged. No live-browser hint interaction or learner answers submitted for this copy edit; no deployment or cloud changes.
-
-
-Approved map defaults and competition dropdown, 2026-11-03:
-
-- Both maps open fully zoomed out to show all islands, regardless of the last practised topic. Choosing an island still zooms into it; Цялата карта returns to the overview. No changes to teaching order, content, scoring or rewards.
-- Replaced the home competition links with a compact dropdown in the existing cream/teal design. Both Математика за всеки and Олимпиада show Трудно; the current choice has a check mark. Keyboard activation, Escape, focus leaving the selector and outside-click dismissal are supported.
-- Verification: all 118 tests, lint, production build (including TypeScript and private-file exclusions), and git diff --check pass. Chrome verified both maps after hydration, switching in both directions, badges/current selection, Escape dismissal, and a 390px mobile viewport without horizontal overflow. Restored the normal viewport and restarted the local production server at http://127.0.0.1:3002/.
-- Verification submitted no learner answers or learning commands. Six protected backup hashes match the previous baseline. The live course file has newer user progress than that older baseline (revision 85, last saved at 21:55:47 local, before this UI work); retained it without restoration or rewriting. No push, deployment or cloud changes.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this tightly related UI slice.
-
-
-Approved compact islands and direct subtopic practice, 2026-11-03:
-
-- [x] Each island skill row starts that skill’s exercises directly, with a right arrow and a decorative discovery marker. The top “Да упражним” action keeps whole-island adaptive practice. All five Рачешки задачи skills and all Olympiad skills remain individually selectable.
-- [x] Save scoped questions, help, lesson steps and feedback separately from other skills, whole-island practice and adventure work. Resume after reload; reject invalid or cross-island skill IDs. When the selected skill runs out of prepared exercises, keep its scope and offer a return to the island.
-- [x] Remove expanded skill evidence panels, “Моите малки открития”, repeated award requirements, the map milestone explainer and the duplicated home competition subtitle. Retain concise skill statuses, island gold, useful exercise progress, maths, help and earned recognition. Tighten island rows without reducing touch targets below 44px.
-- [x] Preserve all Doctor/Professor rules, earned awards, celebrations, confirmation requirements and gold accounting. This is a routing and display change, not a new rewards policy.
-- Verification: all 123 tests passed, including every skill in both competitions, isolated scoped persistence/exhaustion, stale revisions and unchanged rank/gold rules. Type checking, lint, production build including private-file exclusions, and git diff --check passed.
-- Chrome verified non-first subtopic selection in both competitions, scoped continuation, hint restoration after home/reload, compact island rows and 390 × 844 mobile layout without horizontal overflow. Learning commands ran only against a disposable local store on port 3003. Browser warnings/errors observed were from installed wallet extensions, not the application. Restored the normal viewport.
-- Restarted the real app at http://127.0.0.1:3002/ and checked it read-only: 210 wallet gold, 70/175 Рачешки задачи gold and the 3/5 unfinished adventure remain visible. All eight protected learner-history/backup hashes match the pre-change baseline. No reset, Git push, deployment or cloud changes.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this closely related UI and practice-routing change.
-
-
-Approved real-competition-first teaching policy, 2026-11-03:
-
-- [x] Apply one history-based selector to both competitions, adventures, diagnostics, whole islands and exact subtopics. Prefer unused real competition questions; retain the selected skill for confirmation. Use another real question when available, otherwise a reviewed, explicitly labelled teaching exercise. Keep diagnostics at three problems maximum.
-- [x] Preserve original statements/figures and display actual competition, year, round and problem number. Offer a read-only original-statement page without answer keys or private source files. Distinguish original subconditions and authored scaffolding.
-- [x] Present newly assigned multi-answer originals one subcondition at a time; persist the current part, mistakes and help. Record one final outcome and reward only after the whole problem. Preserve legacy pending questions and their existing input format.
-- [x] Give concrete partial solutions in three hints. Prevent repeats, overlapping original/subcondition work, revealed solutions and helped work from becoming fresh independent evidence. Preserve existing gold, Doctor/Professor rules and previously earned recognition.
-- [x] Schedule retention review for each confirmed skill after two days, without blocking further learning or rewards. Review repetitions do not mint fresh evidence or gold.
-- [x] Document the educational decision in key-decisions.md and correct About copy to describe real tasks followed by confirmation exercises.
-- Verification: all 130 tests pass; type checking, lint, production build, private-file exclusion checks and git diff --check pass. New regressions cover both catalogues and all entry points, old high cursors, original/subcondition overlap, sequential answers, help/error classification, two-day per-skill review and original-source whitelisting.
-- Chrome verification used only a disposable store on port 3003: completed the three-part 2024 grid original, resumed its second part after reload, checked one final outcome and delayed gold, then saw a clearly labelled confirmation exercise. Verified an exact non-first Olympiad skill starts a real 2024 subcondition and restores its concrete first hint after reload. The original-statement page exposes the statement and figure without answers. Screenshot: /tmp/maths-real-first-preview.png.
-- Restarted the real local production app at http://127.0.0.1:3002/; both competition APIs and the original-statement page return HTTP 200. Read-only verification confirms 210 wallet gold, 70/175 Рачешки задачи gold and the unfinished 3/5 adventure. All eight learner-history/backup files match their pre-change SHA-256 hashes. No learner actions were submitted against the real store; no reset, push, deployment or cloud changes.
-- Content limit retained: the underdetermined Olympiad 2023 problem 3 remains excluded from grading; the missing 2024 official solution PDF remains recorded for human content review. Local Olympiad review stays available; hosted publication remains a separate step.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for the coupled selection, evidence and persistence changes.
-
-
-Approved compact source labels and saved-task refresh, 2026-11-03:
-
-- [x] Show only competition and real year beneath real tasks in both competitions; make that label the original-statement link. Remove saved legacy wording from the display. Authored confirmation work shows the competition name without a fabricated year.
-- [x] Following the owner's “да замени”, replace only untouched saved authored exercises with eligible unused real tasks in the same skill/mode. Keep attempted/hinted work, history, skill progress, gold, academic awards and adventure position. Migration is projected on reads and persisted with the next accepted revision-guarded learning action.
-- Verification: all 133 tests, type checking, lint, production build including private-file exclusions, and git diff --check passed. Regressions cover both competitions, island/skill/adventure slots, migration idempotence, preserved started work and compact UI labels.
-- Read-only checks against the actual saved courses identify five eligible Olympiad replacements; other pending work either has help/history or no eligible unused real source. Existing 210 wallet gold and all historical attempts/skill state remain unchanged. All eight protected learner-history/backup SHA-256 hashes match the pre-change baseline.
-- Chrome used a disposable copy on port 3003: verified an old Olympiad number exercise is replaced by the real 2023 original, survives topic reopening after reload, and shows only “Олимпиада · 2023”; verified “Математика за всеки · 2024” on a real task in the other competition. Screenshot: /tmp/maths-compact-source-preview.png. No answers or hints submitted against real learner data.
-- Rebuilt and restarted http://127.0.0.1:3002/; both competition APIs return HTTP 200. No progress reset, push, deployment or cloud changes.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this coupled label and saved-task fix.
-
-
-Owner-approved Olympiad test refresh and content coverage audit, 2026-11-04:
-
-- [x] Follow the owner's explicit exception for seen/hinted local Olympiad test exercises. The five untouched replacements had already persisted through normal owner navigation; replace the remaining hinted Roman-numeral exercise with the full 2025 problem 1. All seven currently saved Olympiad work slots now contain real competition tasks. Preserve the existing adventure, active subtopic, skills, historical attempts and rewards.
-- [x] Save the original Olympiad record and repair evidence under private backups/olimpiada-test-refresh/2026-11-04T06-29-44-138Z/. Revision advances from 18 to 20; existing real tasks are byte-equivalent as objects, and all seven other protected history/archive file hashes match the immediate pre-repair baseline. No permanent relaxation of started-work migration rules.
-- [x] Audit all supplied Olympiad sources and the actual runtime catalogue. All 11 gradable originals from 2022–2025 are included: numbers 4, geometry 4, stories 2, logic 1. The remaining original is the known underdetermined 2023 problem 3. See docs/olimpiada-content-review.md for exact original/subcondition counts and skill gaps.
-- Proposed next content slice, pending source scope: enrich the existing four islands with additional years of real competition problems, prioritising logic and stories. Confirm a new island with the owner only if genuinely new subject matter needs one. No additional source material or new islands have been added in this slice.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for the local test-data repair and closely related coverage audit.
-- Verification: the running localhost:3002 Olympiad API returns HTTP 200 with the repaired revision and 210 wallet gold. Resuming the adventure through the actual startQuest command on an in-memory copy selects the real 2025 original with no inherited hints; the file is unchanged by this check. Migration is idempotent. Backup integrity, all seven other protected file hashes and git diff --check pass. Subsequent owner navigation is allowed to advance the revision normally. No application code, build or deployment changed in this data-only repair.
-
-
-## Approved method-based practice and fresh-problem gold - 2026-11-04
-
-- Preserve both catalogues, islands, skill IDs, history, unfinished work, 5/10/20 milestones and earned academic awards.
-- Use existing methods internally; select provisional real introductory questions with a short rationale rather than infer difficulty from exam numbering, length or answer format.
-- Return with an unseen application of a previously successful method; give one fresh related follow-up after success or supported/error/revealed work, then interleave. Repeated difficulty changes method. Keep real sources ahead of checked authored confirmation.
-- Keep five resumable tasks, diagnostics at most three and original subconditions in order; do not force a hard fifth task.
-- Add +5 once for a fresh correctly completed problem, helped included. Full originals and their parts share one entitlement; reveal alone, repetitions and historical work get no new bonus. No historical backfill or reward replay.
-- Island gold maximum includes distinct problem entitlements alongside skill milestones; retain a single compact gain notice.
-- Verify routing, persistence, overlap, rewards and UI using disposable learners; run tests, typecheck, lint and production build. Protect real history with hashes and restart localhost:3002 only after verification. No publication or cloud changes.
-- [x] Implemented method pairing, documented provisional introductions, cross-year real-source preference and prospective +5 problem gold; preserved exact-subtopic scope and existing skill/rank rules.
-- Verification: all 139 tests pass, including real introductions, same-method pairing across skills/years, return visits, repeated difficulty, hint persistence, source/part overlap and prospective reward accounting. Type checking, lint, production build/private-file checks and git diff --check pass. Catalogue audit found no duplicate identities with different bonus entitlements or entitlements shared across islands.
-- HTTP acceptance used only a disposable store on port 3003: a fresh Математика за всеки original paid one combined +20 (existing 5/10 milestones plus +5), then selected reviewed confirmation because that method has no second real source. An Olympiad original completed with a saved hint paid the same one-time problem bonus and selected a different-year real follow-up. GET/reload did not replay rewards.
-- Browser acceptance remains unverified in this slice: the preferred Chrome CLI failed on an incompatible pageId snapshot call, and the alternate Chrome connection failed while opening/claiming a tab. Existing rendered-component tests passed; do not count these as live visual verification. A manual visual check remains useful before the pilot.
-- Rebuilt and restarted http://127.0.0.1:3002/; both competition APIs and home pages return HTTP 200. Read-only checks confirm the saved 210 wallet gold, unfinished 3/5 adventure, no gain notice on GET and all eight protected learner-history/backup hashes unchanged. Test actions never used the real learner store. No reset, push, deployment or cloud changes.
-- Status: implementation and automated/HTTP acceptance complete; live browser visual acceptance outstanding because of the browser connection failure. Introductory choices remain provisional for the five-child pilot; existing source/publication caveats are unchanged.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for the coupled selection and reward changes.
-
-
-## Approved reachable-treasure and continuation polish - 2026-11-04
-
-This slice supersedes the earlier no-recovery policy for previously attempted problems and the moving catalogue target. No deployment or content expansion is included.
-
-- [x] Retain island gold-target bars, coin counts and small open/closed chests. Freeze per-child island targets on the next accepted persisted command for legacy courses and at creation for new courses; future content pays wallet gold without moving targets.
-- [x] Recover unpaid +5 problem entitlements on a future successful attempt exactly once, including originals/parts overlap. Preserve 5/10/20 skill milestones, existing gold, history and academic awards; never backfill problem bonuses on GET.
-- [x] Keep eligible hard problems available after Professor in adventures and topic practice with prerequisites and source/exposure protections. Complete finite adventures at the actual task count, grant one souvenir without extra gold, and show an honest zero-work/review state.
-- [x] Persist scoped numeric/choice answer drafts through the profile course store, restore across navigation and reload, and reject stale-device conflicts without overwriting answers. Saving a draft does not submit or grade it.
-- [x] Resolve revisit-status contradictions, use neutral continuation copy, fix “засега”, update About for both competitions, and group repeated souvenirs with counts.
-- Verification: all 151 tests pass, including gold recovery, fixed targets after content growth, hard work after Professor, finite/empty adventures, draft navigation, choice zero, stale-device conflicts and hosted-store profile/competition isolation.
-- Live Chrome verification used disposable data on port 3003: checked gold bars/chests, restored a two-digit answer through Home, Pause and reload without gold or grading, and checked both competitions at 390px without horizontal overflow. The mobile check button remains visible at the bottom of the viewport; no application runtime exceptions were observed.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this coupled learning, rewards and persistence slice.
-- Final acceptance: lint, production build (including TypeScript and private-file trace exclusions), and git diff --check pass. Exhausted exact-subtopic practice returns to its own island. Both competition pages and APIs return HTTP 200 on the refreshed http://127.0.0.1:3002/.
-- Preservation: read-only checks confirm the existing 210 wallet gold, unfinished 3/5 adventure, and no gain replay. All 54 non-metadata learner, backup and source files match their pre-change SHA-256 hashes; macOS changed one .DS_Store metadata file. Learning commands ran only against disposable data. No reset, push, deployment or cloud changes; live Supabase device testing remains part of hosted acceptance.
-
-
-## Approved competition-intake checklist - 2026-11-04
-
-- [x] Replace docs/content-workflow.md with the approved reusable checklist: source verification, island/skill mapping, integration without progress loss, and human review/release gates.
-- [x] Include 27 checklist items and a per-collection record for source scope, coverage, excluded problems, island approval, reviewer, verification and blockers. Retain the approved missing-key exception, real-problem-first policy, compact source labels, fixed island targets and existing rewards.
-- Verification: reviewed against key-decisions.md and the competition catalogue/local-review guard; all two relative Markdown links resolve; four checklist stages and the review-record template are present; git diff --check passes for the changed documentation.
-- Status: documentation verified. No content, application code, learner history, source materials, cloud settings or publication state changed. Runtime tests were not rerun for this documentation-only update; existing content/publication blockers remain unchanged.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this documentation-only slice.
-
-
-## Approved NVO intake - 2026-11-04
-
-- [x] Add all supplied 2022–2025 grade-4 NVO originals: 100 full problems, 108 answer conditions, 40 original figure crops and three concrete solution parts per original. No videos or bulk authored confirmation exercises.
-- [x] Map to the 10 owner-approved islands and 27 skills; keep question 25 as one original with three sequential answers and one reward entitlement.
-- [x] Add NVO to the local-review dropdown with “Лесно”; retain explicit unpublished/hosted gates and independent competition storage. Fit the whole ten-island map by default.
-- [x] Record source caveats, coverage and finite-source gaps in docs/nvo-content-review.md and key-decisions.md. Human content review remains pending; no claim of publication approval.
-- Verification: all 158 tests pass; typecheck, lint, production build/private-file exclusions and git diff --check pass. The independent key fixture covers all 108 answers.
-- Live isolated Chrome acceptance on disposable data at port 3003: all three competition choices and difficulty badges, fitted ten-island map, exact-subtopic launch, all three concrete hint parts, correct supported answer, +20 combined gold and reload without reward replay. At 390px there is no horizontal overflow and the check button stays in the viewport; no application runtime exceptions were observed.
-- Rebuilt and restarted http://127.0.0.1:3002/; all three home pages and APIs return HTTP 200. Read-only checks retain 210 wallet gold and existing unfinished adventures. All 62 protected learner-history, backup and source files match pre-change SHA-256 hashes; test learning commands used only disposable data.
-- Status: implementation and local automated/browser acceptance complete. Human mathematical/language review of the new collection remains pending; NVO remains unpublished. The single-source area-units skill is documented honestly rather than given duplicate evidence.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this coupled content and integration slice. No deployment, push or cloud changes.
-
-
-## Approved weighted problem gold - 2026-11-04
-
-- [x] Review all three original catalogues and authored templates; store explicit reasoning-based standard/hard metadata and rationales. Originals/parts share the source level. Selection pool names and competition badges are not reward levels.
-- [x] Implement prospective 10/15 problem gold, compact available-reward preview and actual-amount breakdown. Keep hinted correctness eligible, one award per source, 5/10/20 skill milestones and unchanged adaptive selection/academic criteria.
-- [x] Preserve amount-less historical awards at 5 and frozen per-child targets; use weighted unique entitlements only for new targets. No data migration, content identifiers or private source changes.
-- [x] Update docs/content-workflow.md, key-decisions.md and docs/problem-difficulty-review.md with the intake and compatibility rules.
-- [x] Complete automated checks, production build and private-file preservation verification; refresh localhost 3002.
-- Verification: 163/163 tests, typecheck, lint, production build/private-file trace exclusions and git diff --check pass. All three competition home pages and APIs return HTTP 200 at http://127.0.0.1:3002/. Read-only views retain 210 wallet gold and the existing unfinished 3/5 adventure; all 63 protected learner-history, backup and source files match their pre-change SHA-256 hashes.
-- Isolated production API acceptance on disposable port-3003 data: hard preview is 15/×1.5, hints retain that rate, supported success pays 15 problem gold plus unchanged 5/10 milestones, and reload retains 30 without replay or an unpaid preview. Real learner history received no learning commands.
-- [ ] Complete live desktop/mobile visual acceptance. Retried Chrome automation after the owner requested it; the preferred CLI cannot resolve page IDs, the alternate browser bridge fails before navigation, and native computer-use permission is unavailable. Component-rendering tests pass, but no live visual/responsive verification is claimed for this slice.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this coupled reward/content slice. Local only, no push, deployment or cloud changes. Human content/publication review remains pending.
-
-
-## Approved daily progress calendar - 2026-11-04; implemented locally 2026-11-05
-
-Статус: реализиран локално в одобрения обхват „Faster switching and shared Напредък“ по-долу; напомнянията остават бъдещ обхват.
-
-### Календар на напредъка
-
-- [x] Добави месечен календар за всяко дете, достъпен от детския профил и родителския екран чрез съществуващите права за достъп, без отделни детски имейл акаунти.
-- [x] Показвай за всеки ден спечеленото злато, самостоятелните верни решения и верните решения с подсказка.
-- [x] Брой всяко успешно решаване, включително повторенията. Повторението не носи допълнително злато извън съществуващите правила.
-- [x] Не брой подусловията като отделни завършени задачи или разглеждането на решение като успешен отговор.
-- [x] Покажи общ изглед за всички състезания с филтър по състезание; натискане на ден отваря подробностите.
-- [x] Групирай дните по Europe/Sofia; седмицата започва в понеделник.
-
-### Обхват на промените
-
-- Обобщаване на дневните решения и награди от съществуващата история.
-- Защитено четене на данните за избраното дете.
-- Общ календарен компонент за детския и родителския екран.
-- Навигация, филтри и мобилен изглед.
-- Автоматични проверки за изчисленията и достъпа.
-
-За пилота не е необходима нова таблица или предварителна миграция за календара: съществуващите записи на опити и награди съдържат необходимите дати. При реализацията провери старите записи; липсващи или възстановени дати не представяй като точна историческа активност.
-
-### Проверки при реализацията
-
-- [x] Решения с помощ и без помощ, повторения и задачи с подусловия се броят според правилата по-горе.
-- [x] Дневното злато съвпада със записаните награди, без повторно начисляване или преизчисляване на историческите суми по нови ставки.
-- [x] Групирането е правилно около полунощ и при смяна на часовото време.
-- [x] Детският и родителският изглед показват еднакви резултати; няма достъп до чуждо дете.
-- [x] Мобилният календар, празните дни, филтърът и преминаването между месеци работят.
-
-### Бъдещ обхват: напомняния
-
-- [ ] Планирай напомняне след два последователни календарни дни без учебна активност.
-- [ ] Преди реализацията уточни с потребителя каналите за родител и дете, съгласието, часа и ограничаването на повторни известия.
-- [ ] Добави надежден запис на последната учебна активност и изпратените напомняния; отварянето на началната страница не се приема за учене.
-- [ ] Реализирай изпращането на имейли и известия като отделна последваща задача.
-
-- Проверка на тази стъпка: добавен е само одобреният бъдещ обхват; предходното съдържание на плана е запазено. Приложението, базата и историята не са променяни. Не са изпълнявани runtime тестове за тази документална промяна.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent for this documentation-only slice.
-
-
-## Approved storage optimization - completed locally, 2026-11-04
-
-- Replaced public PNG delivery with reproducible lossless image generation. All 64 unchanged PNG sources remain in `assets/images/`; `npm run assets:build`, development startup and production builds generate smaller content-hashed public images and the path manifest. Content identifiers and saved figure paths stay unchanged; legacy PNG URLs temporarily redirect to their optimized versions.
-- Verified every decoded pixel and image dimension. Image payload fell from **2,319,694 to 1,129,660 bytes (51.3% smaller)**; all public files together fell from **2,326,979 to 1,136,945 bytes**. No resizing, lossy compression or changes to white figure backgrounds.
-- Hashed public images use `public, max-age=31536000, immutable`; stable lesson SVGs use `public, max-age=0, must-revalidate`. Excluded only the new public image directory from the auth proxy so it cannot override asset caching or refresh auth cookies there. Personalized pages, profiles, auth and API responses retain `no-store`.
-- Original PNG sources are excluded from deployment tracing alongside private source packs, backups, learner data and credentials. The verified local standalone bundle is **43,640,617 bytes**, including server dependencies; this macOS build is not a measured Vercel upload size. Existing dependencies and database persistence were retained; no new storage service or schema migration was introduced.
-- Verification: **166/166 tests passed**, TypeScript, ESLint and production build passed, deployment trace/private-file checks passed. Production HTTP checks verified all **64 optimized images**, all **64 legacy redirects**, preview image markup, SVG cache headers and uncached private endpoints. Source PNG hashes and **69 files** under `data/`, `backups/` and `materials/` are byte-identical; no protected files were added or removed. The duplicate source PDF remains intact.
-- Updated the figure-import checklist and deployment notes so future competitions use the same optimization workflow. Updated the stage table to include both implemented draft competitions; publication remains a separate review gate.
-- Local app restarted at `http://127.0.0.1:3002/`. Browser automation could not provide a snapshot because its page-ID bridge failed; rendering checks used production HTML/asset responses and exact pixel comparisons. No deployment, Git push, live database changes or learner reset performed.
-
-### Remaining before the pilot release
-
-- Complete production Supabase/Google OAuth credentials and Vercel configuration, then verify HTTPS login and cross-device resume with preserved history.
-- Finish human content/publication review for the locally available Олимпиада and НВО drafts, including the documented missing Olympiad answer key exception and permission to publish source statements/figures.
-- Confirm public contact identity, then verify the hosted invitation flow, family isolation and five-child cap. Calendar/history-by-day was subsequently implemented locally on 2026-11-05; inactivity reminders remain future scope.
-
-
-## Island topic cards - verified locally, 2026-11-04
-
-- Removed repeated open/close text from Themes cards in all three competitions. The entire card activates its existing native button; accessible gold bars, selected state and keyboard focus remain intact. Reduced unused card height.
-- Verified all 17 / 4 / 10 cards in Chrome at desktop (1280 × 900) and mobile (390 × 844) sizes: gold-area clicks, Space/Enter, return focus and no horizontal overflow. No learning POSTs occurred and learner data file hashes were unchanged.
-- Verification: 40/40 UI tests, TypeScript, ESLint and production build passed. Updated local production app running at `http://127.0.0.1:3002/`; no deployment or database changes.
-
-
-## GitHub source update - 2026-11-04
-
-- Owner authorized committing and pushing the current standalone app to `Petar9/sastezatelna-matematika` on `main`.
-- Verified 166/166 tests, TypeScript, ESLint, production build and deployment trace/private-file checks. Reviewed source candidates for credentials and private files.
-- Learner history, backups, source PDF/transcript archives and environment credentials remain excluded; macOS `.DS_Store` is not included.
-- This publishes source only. Production deployment, hosted OAuth/cross-device verification, content publication approval and public contact remain the release gates above.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent.
-
-
-## Vercel build repair - 2026-11-04
-
-- First production deployment of `395f7cc` compiled successfully, then failed in `scripts/deployment-check.mjs`: its blanket symlink rejection refused Vercel's generated `_global-error.segments/__PAGE__.segment.rsc.func` link.
-- Removed that blanket rejection for links contained within `.next`; inspect their resolved targets once and stop cycles. Links outside the build remain rejected, and standalone bundle/private-file checks remain enforced.
-- Added a regression covering Vercel function aliases, link cycles, private traced files, links outside the build and standalone symlinks. Verified 167/167 tests, TypeScript, ESLint, production build and `git diff --check`; all 69 private baseline files are unchanged.
-- Fix pushed as `3a6c052`; Vercel production deployment `4wLWRKJtjBxK4RpJ5WVEZH6ar9BZ` reached Ready (47 seconds). Public HTTPS GET returned HTTP 500; Vercel runtime logs identify `Missing SUPABASE_PUBLISHABLE_KEY`. Code also requires `SUPABASE_SERVICE_ROLE_KEY` for database access. Add the production keys through Vercel, redeploy, then verify login and saved progress. No credentials, cloud access settings, database content or learning behavior changed.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent.
-
-
-Homepage and first profile update, 2026-11-04:
-
-- Owner completed the hosted smoke test. Supabase Table Editor confirms the first active child profile under the approved parent; online course_progress was empty before import. Google login and child creation now work; the previous missing-key runtime blocker is resolved. Cross-device and live second-family checks remain pending.
-- Removed the large homepage screenshot and “Лични данни” section, including unused image styles. Kept the original small mascot and invitation consent.
-- Validated the local matematika-za-vseki course (revision 89, 16 attempts) through the current course projection without modifying the source. Created a byte-identical private backup and a one-row CSV for the verified parent/child IDs. The owner imported the CSV successfully. A fresh Supabase export confirms one record for the verified child and parent, competition matematika-za-vseki, revision 89; its complete course JSON matches the local source exactly. The validated history contains 16 attempts, 210 gold and 5 confirmed skills. No existing database progress was overwritten. The readback export is stored in the private import backup folder. Draft competitions have no attempts and were not imported. Cross-device display remains unverified.
-- Verification: TypeScript, ESLint, production build and private-file bundle checks passed. Coordinator: gpt-6.1-sol, high reasoning; one agent.
-
-
-## Compact homepage - 2026-11-04
-
-- Implemented the approved shorter headline, supporting copy, three benefits, invitation section and consent. Layout styles are limited to the landing page; learning, authentication, invitation processing and learner history are unchanged.
-- Applied the owner's exact collection wording: “Наличният комплект е по математика за 4. клас и включва задачи от „Математика за всеки“, Олимпиада, НВО (матура) за 2023-2026 г.” This copy edit does not publish draft competitions. Source years differ by collection as documented on the About page; the aggregate wording is owner supplied.
-- Verification before the final copy edit: 167/167 tests, TypeScript, ESLint, production build and private-file bundle checks passed. After the final copy edit, production build, TypeScript, ESLint, private-file bundle checks and git diff --check passed; local /welcome returned HTTP 200 with the exact requested text.
-- Browser automation was unavailable; desktop/mobile visual acceptance is not claimed. Local preview uses port 3003; these changes have not been deployed.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent.
-
-
-## Landing redesign - 2026-11-04
-
-- Approved: one hero with text and a single invitation form on the left, a decorative three-island journey and existing otter on the right; mobile order is text, form, illustration, collection information. Remove repeated benefits, headings, CTA and oversized framed sections.
-- Keep “Подготовка за състезания, стъпка по стъпка.”, use “Истински задачи, ясни подсказки и приключения с награди.”, retain the exact owner-supplied collection sentence below the hero, and omit the pilot-group sentence above the form (owner-requested removal, 2026-11-05).
-- Remove the checkbox and server-side consent=yes requirement together; no hidden consent value. Keep native email validation, private invitation RPC, duplicate success and 30/hour protection unchanged. Confirmation: “Благодарим! Получихме заявката за покана.” No database, history, collection-publication or learning-flow changes.
-- Acceptance: inspect 390/768/1440 px, 200% zoom, keyboard focus, validation and success/error states; run focused route tests, TypeScript, lint, full tests and production build. Record final evidence below. Changes remain local until deployed separately.
-- Coordinator: gpt-6.1-sol, high reasoning. Implementation: gpt-6.1-sol, high reasoning. Independent critical review: gpt-6-astra, high reasoning.
-
-- Implemented the approved layout, landing-only marine-blue CTA and lightweight SVG illustration with the existing otter. The form requests only the parent email; checkbox validation was removed from the route without changing the private RPC. Network/RPC failures retain a recoverable error state. No dependencies, database schema, learner history, shared learning styles or collection publication changed.
-- Verification: **173/173 tests passed**, TypeScript, ESLint, production build and deployment trace/private-file checks passed. Route tests cover validation, email normalization without a consent field, RPC results, network failure and local-mode behavior. Repeated-request tests mock the existing RPC; live database duplicate/rate-limit behavior was not exercised.
-- Real Chrome inspection passed at **390 × 844, 768 × 1000 and 1440 × 1000**: no horizontal overflow, mobile CTA before the illustration, one form, visible keyboard focus in login/email/CTA order, native email validation, button hover and accessible success/invalid/unavailable states. Decorative artwork is hidden from assistive technology; no browser warnings/errors were reported. Also checked 720 CSS-pixel reflow and 200% CSS magnification; the native browser zoom shortcut was unavailable, so native 200% zoom is not claimed.
-- Independent gpt-6-astra source and screenshot review found no blockers or meaningful usability defects; coordinator completed the browser interaction checks. No live invitation submissions or learner writes were made.
-- Updated production-mode local preview: **http://127.0.0.1:3003/welcome**. No commit, push or deployment in this step; hosted invitation submission and database verification remain post-deployment checks.
-
-
-## Learning app UI polish - 2026-11-04
-
-- Approved scope: compact practice header and one boat/count route; persistently reachable Hint beside Check; focused island screen replacing the dashboard/map while exploring; readable whole-map phone overview with page scrolling at fit; concise outcome, combined gold and one learning goal; correct map return and retained island/list context.
-- Preserve the cream/teal/gold palette, otter, original diagrams, three worked hint steps, learning selection, gold rules, Doctor/Professor logic, draft saves and all existing child history. No database, content-publication or deployment changes.
-- Implemented locally. Compact practice header and boat route bring the question higher; Hint and Check remain in the action bar. Exploring an island shows only that island and its selectable skills. Feedback combines gold into one amount and shows one learning goal. Returning to the map preserves the island/list context; Home/resume retains typed answers and revealed hints. Navigation waits for draft saving and remains on the question if saving fails.
-- Coordinator: gpt-6.1-sol, high reasoning. Implementation worker: gpt-6.1-sol, high reasoning. Independent critic: gpt-6-astra, high reasoning.
-
-- Verification: **176/176 tests passed**, TypeScript, ESLint, production build and deployment trace/private-file checks passed. Added navigation/save-failure and focused island regressions. Chrome checks covered 320 × 740, 390 × 844 and desktop layouts, direct skill selection, assisted answer/continue, typed answer + hint restoration after Home/resume, list return, all three competition maps and five-task treasure completion. No horizontal page overflow in the checked layouts. Tests used disposable learner data; all **13 private history/backup hashes** remain unchanged.
-- Independent gpt-6-astra review found no remaining functional blockers after correcting draft-loss handling and 320 px header overlap. Limitation: the 17-island fit overview at 320 px clips some long labels; zoom and Themes expose full names. Physical-device keyboard and touch gestures remain unverified. No push, deployment, database or learning-rule changes.
-
-
-## Optional child Google login, 2026-11-04 - implemented, rollout pending
-
-- Parents create nickname profiles, then may add a child Google email in an optional “Самостоятелен вход” step with “Не сега”. Existing profiles can add/change/remove this login later.
-- Child Google identities remain separate from parent identities. Link verified Google login to the existing child ID; child access is limited to that child, while the approved parent keeps family management.
-- A private service-only email/auth-user mapping is checked on protected requests. Enforce one login per child and one child per login, reject parent emails, and revoke access when unlinked, inactive or parent approval is removed.
-- Preserve all course JSON, revisions, awards, gold and the five-active-child cap. Link Ema’s supplied email to her existing hosted profile after backup; no duplicate profile or email invitation.
-- Coordinator owns auth/database/integration; a bounded worker owns onboarding/profile UI, followed by an independent security review. Verify UI, authorization, migration preservation, concurrent saves and build before live rollout.
-
-- Implemented the optional post-creation email step, skip, and parent-only add/change/remove controls. Confirmed Google identities resolve to the existing child profile, with no invitation email or duplicate profile.
-- Verification: **189/189 tests passed**, TypeScript, ESLint, production build, private-file deployment checks and git diff --check passed. Disposable PostgreSQL checks cover private table/function privileges, email uniqueness, identity binding, revocation, inactive/unapproved families, and unchanged seeded course JSON/revision. Existing concurrent-save and family-isolation checks pass. Independent security review found no material authorization defect.
-- Live preflight: the existing hosted course remains revision 89 with the same saved history; the child-login table is not yet present. Apply `supabase/migrations/202611040001_child_logins.sql` before deploying this code, then recheck the course fingerprint. Do not deploy ahead of this additive migration.
-- Pending: live migration, production deployment, linking the owner-supplied child email to the existing profile, and a real sign-in by the child. Chrome tab automation is currently failing; the active native Chrome window is the owner's meeting, so rollout is waiting for access to the Supabase SQL Editor. No hosted progress or login mapping has changed in this step.
-- Coordinator: **gpt-6.1-sol, high reasoning**; bounded UI implementation: gpt-6.1-terra, high reasoning; independent security review and authorization regression tests: gpt-6.1-sol, high reasoning.
-
-
-## Island gold target audit, 2026-11-04 - decision pending
-
-- Earned gold is unchanged: the imported course still projects 210 gold. Skill milestones pay 5 + 10 + 20; each newly solved distinct problem pays 10, or 15 when editorially marked hard. Repeated problems and overlapping source parts share one problem entitlement. Historical awards retain their recorded amount.
-- The imported revision-89 course has no saved island targets. Its fallback now adds every prepared practice entitlement to the skill milestones, producing the reported large denominators (1125 / 2795 / 845 / 3370 for the first four islands). This is target recalculation, not duplicated earned gold.
-- Asked the owner whether to restore legacy skill-based goals for imported courses while preserving earned gold, existing saved goals and current rewards. No reward or learner-history change made while that decision is pending.
-- Deployment remains blocked on the additive child-login migration. Chrome tab controls failed; the owner has been given the exact migration file to run in the Supabase SQL Editor. Do not push the dependent code before migration success is confirmed and verified.
-
-
-## Demo production release, 2026-11-04
-
-- Owner reports the additive child-login migration completed with “Success. No rows returned” and explicitly requests immediate production publication for the demo. This supersedes the migration rollout hold above.
-- Publish the verified landing, learning UI and optional child-login changes. Previous acceptance evidence: 189 tests, TypeScript, ESLint, production build and private-bundle checks passed.
-- Live Supabase access checks, linking the child email and real child sign-in remain follow-up verification; user explicitly requests not delaying the demo on these checks. No learner data is changed by this release.
-- Gold-target compatibility decision remains pending; this release preserves the audited reward calculations and earned history.
-- Coordinator: gpt-6.1-sol, high reasoning; release executed by one agent.
-
-- Production published: commit `d548e08`; Vercel deployment `ASWJY8z3H6o7G2xHK2Ko7PWWQs78` reported success. HTTPS `/welcome` and `/login` returned 200; the live welcome page contains the new landing copy and invitation field without a consent checkbox. Authenticated child sign-in and live database privilege checks remain unverified.
-
-
-## Earned island gold - approved 2026-11-04
-
-- Replace island gold-target fractions and bars with a coin and earned amount on both topic cards and focused islands. Keep the short adventure route/count and existing skill progress, earned awards and celebrations.
-- Supersedes the pending target-display decision in the audit above. Preserve all reward calculations, stored targets, learner history and database records; this slice changes presentation only.
-- Implemented: a shared earned-only component receives no maximum and does not cap the amount. Removed obsolete island bar/chest styles and the unused progress-display option.
-- Verification: all 189 tests passed, including 43 UI tests covering all 17 original islands and four Olympiad islands, direct skill practice, retained awards, unchanged saved learning and earned totals above a former target. Typecheck, ESLint, production build, private-bundle audit and diff checks passed. Visual browser verification was attempted but blocked by the Chrome automation connection; production publication is pending.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent. User approved testing and deployment after checks pass.
-
-
-## Publish all competition paths - approved 2026-11-04
-
-- Owner explicitly requests “publish everything” after being told why production hides Олимпиада and НВО and that final human review and the 2024 Olympiad official solutions remain outstanding. This supersedes their local-only publication holds for the invitation-only pilot; it does not claim a human content review occurred.
-- Publish the prepared Математика за всеки, Олимпиада and НВО paths through the existing competition dropdown, with their current difficulty badges and separate learner history. Preserve IDs, content versions, exclusions, source safeguards, rewards, saved work and authentication; no database migration or learner writes.
-- Acceptance: all three paths available in hosted mode; dropdown visible on each dashboard with three working destinations; existing history isolation and unknown-ID rejection pass; tests, typecheck, lint and production/private-bundle checks pass before release.
-- Verification: all 190 tests passed, including the three-way dropdown on each competition dashboard, hosted availability, separate history and invalid-ID rejection. Typecheck, ESLint, production build, pixel-preserving image generation, private-bundle audit and diff checks passed. The dropdown was exercised for all three dashboards in UI tests. Chrome automation is unavailable, so a signed-in live visual check could not be completed.
-- Release: `d9e8730` pushed to `main`; Vercel deployment `7GcKNWSMVPqQxZLATDo41CkhnT88` reported success. Production URLs for all three competition IDs, `/welcome` and `/login` returned HTTP 200 without an application-error screen. These unauthenticated checks validate availability, not signed-in dashboard rendering. No learner data was changed.
-- Coordinator: gpt-6.1-sol, high reasoning; one agent.
-
-
-## Математика за всеки 2023 source expansion - approved 2026-11-04
-
-- Coordinator: gpt-6.1-sol, high reasoning. Bounded content/answer review worker: gpt-6.1-sol, high; source-crop worker: gpt-6-luna, medium. Coordinator owns integration, final tests and acceptance; no deployment in this slice.
-- [x] Retain the existing 17 islands, 78 skill IDs, content version, learning model and saved history; append real 2023 tasks to existing pools. Approved row-to-island grouping is retained.
-- [x] Prepare all 22 full originals as 26 tasks/subconditions from the private problem and official solution PDFs. Independently verify all answers and three concrete worked parts; preserve original statements/options and ordered multi-answer fields.
-- [x] Integrate six original figure crops through the pixel-preserving image pipeline; keep PDFs and full transcripts private.
-- [x] Preserve 10/15 problem gold, 5/10/20 skill milestones, shared parent entitlement for Module 2 parts, old paid amounts and saved island targets. No reward redesign or learner-data writes.
-- [x] Verify catalogue reachability with exhausted old cursors, retained pool indexes and saved work, progressive hints/drafts, ordered subanswers and source-statement safety.
-- [ ] Resolve M1-06 and M1-17 clarifications with the owner. Their original rows/official answers are prepared but excluded from selection and grading until resolved; 24 new rows are currently active, bringing the collection to 102 active tasks/subconditions.
-- Transcript deferred by owner: supplied video aYay8vowt3w has no Bulgarian captions. No invented transcript or tutor-derived explanation; official PDFs and independent solving support the added solutions.
-- Review record: [docs/maths-2023-review.md](docs/maths-2023-review.md). Final build and browser evidence follows below. Human content review/publication remain separate.
-
-- Final verification: 194/194 tests, TypeScript, ESLint, production build, private-bundle audit and diff checks passed. The image generator verified decoded-pixel equality for all 70 images.
-- Refreshed the owner preview at http://127.0.0.1:3002 with the new build. Saved local course history was byte-for-byte unchanged before/after restart. An isolated temporary learner record served the 2023 M1-08 task, its source figure, a multipart original-source page and updated About copy successfully over HTTP.
-- Browser automation was attempted through Chrome CLI and CUA but both failed at the browser-control layer; desktop/mobile visual and interactive browser checks remain unverified. Progressive help, drafts, selection, source safety and history compatibility passed automated tests. No push or deployment performed.
-
-
-## About copy and 2023 content release - approved 2026-11-05
-
-- Coordinator: gpt-6.1-sol, high reasoning; one agent. Implement the approved Bulgarian About copy as a short introduction and three responsive competition cards, preserving the owner-approved Математика за всеки paragraph verbatim.
-- Replace the shared incorrect-answer label with “Грешен отговор”; retain grading, awards and saved history. Teacher review is described as ongoing, as confirmed by the owner. Use the owner-requested “последните четири години”.
-- Release includes the already approved 2023 content slice above. Exclude private files and unrelated local artifacts. No database migration or progress import is needed.
-- Local verification: 194/194 tests, TypeScript, ESLint, production build, private-bundle audit and diff checks passed. All 70 image assets retained identical decoded pixels. All 13 private history/backup files remained byte-for-byte unchanged.
-- Visually checked the isolated production About page at 1440px and 390px: three columns on desktop, stacked cards on mobile, no horizontal overflow. The owner-approved competition paragraph is unchanged. Chrome control bridge failed; isolated headless Chrome provided successful screenshots and layout measurements.
-- Published: application commit `ed7f10c` pushed to `main`; Vercel deployment `JDrMaQQmxf4DN4kioN9bHnhczvV9` reported success. Live `/about` contains the exact approved competition paragraph, four-year wording and ongoing teacher-review wording; legacy detailed copy is absent. `/about`, `/welcome`, `/login` and the new 2023 M1-08 source figure returned HTTP 200. Signed-in production learning was not exercised in this copy release; automated compatibility and feedback tests passed. No database or learner-data changes.
-
-
-## Bulgarian UI copy and feedback - approved 2026-11-05
-
-- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and verification.
-- Apply the approved copy audit, preserving “Откриваме заедно”, “Неприпокриващи се случаи” and “Гаранция чрез най-лош случай”. Use “Google имейл на детето” and “За момента няма следваща задача в тази подтема.”
-- Replace the parent report action with a read-only last-task statement: current saved task first, completed attempt second; verify parent ownership and expose no answers or solutions.
-- Add a permanent signed-in footer feedback action opening a short accessible modal without navigating or replacing the exercise. Accept authenticated parent/child feedback with optional validated task context and retained text on failure.
-- Replace technical draft/version errors with a reload action; retain all concurrency guards. Preserve learner records, gold, educational rules and original statements.
-- Add an additive service-only reports migration. Verify authorization, statement projection, feedback failure/retry, UI focus and mobile layout, full tests, TypeScript, lint, production build and private-bundle checks. Production rollout is outside this slice; migration must precede release.
-
-- Implemented all approved copy changes; the three owner-preserved phrases remain unchanged. Parent last-task viewing is read-only and family-scoped, using saved snapshots without grading data. Feedback stays in the mounted exercise and retains failed messages; technical recovery offers an explicit reload without replaying answers.
-- Verification: 203/203 tests passed; TypeScript, ESLint, production build, private-bundle audit and diff checks passed. The disposable PostgreSQL migration/security harness passed, including preserved legacy reports, service-only access and family constraints. All 70 images retained identical decoded pixels and all 13 private history/backup files remained byte-for-byte unchanged.
-- Real-browser verification used an isolated fixture with the actual feedback component: initial textarea focus, Escape and trigger-focus restoration, native modal keyboard behavior, retained text after failure, duplicate-send prevention, success focus and clearing passed. The 390px mobile viewport had no horizontal overflow. Integrated player tests separately verified that typed exercise work remains mounted and no answers/gold are submitted by feedback. No live signed-in session was exercised.
-- Not deployed. Apply `supabase/migrations/202611050001_general_feedback.sql` before publishing this slice; live Supabase migration and production verification remain pending.
-
-
-## Compact design system - approved 2026-11-05
-
-- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and final verification. No publication in this slice.
-- [x] Preserve cream/otter/islands and make existing dark teal the primary action color across landing/app; retain blue learning progress and gold rewards.
-- [x] Add semantic tokens and native shared buttons/links, inputs/textarea, messages, badges and modal; migrate landing, onboarding/profiles, feedback and generic learning actions without changing educational behavior.
-- [x] Preserve mobile fixed actions, native form semantics, keyboard focus and feedback recovery. Keep domain map/skill/answer controls specialized.
-- [x] Add `docs/design-system.md`, AGENTS reuse/extend/create rules and development-only `/design-system` catalogue with real components and safe synthetic previews.
-- [x] Complete tests, typecheck, lint, production/private-bundle checks and desktop/mobile/keyboard/reduced-motion verification. Confirm production catalogue 404 and unchanged private history.
-- Scope: a shared foundation and gradual migration when touched; no broad page redesign, new dependency, database changes or automatic deployment. Prior feedback migration remains required before its future production release.
-
-- Final verification: 207/207 tests passed; TypeScript, ESLint, production build, private-bundle audit and diff checks passed. All 70 image assets retained identical decoded pixels, and all 13 private history/backup files remained byte-for-byte unchanged.
-- Browser checks passed at 1440px desktop and 390/320px mobile: catalogue, actual landing/login/profile previews, long labels, visible focus, native dialog initial focus/containment/Escape/trigger restoration, and reduced-motion control/progress styles. An isolated local production player opened a real adventure and progressive hints; both fixed actions remained visible at 390×844 and 320×640 without horizontal overflow or runtime exceptions. Primary text contrast is 6.78:1; input boundaries are 3.45:1 against the card surface.
-- Development catalogue: http://127.0.0.1:3034/design-system; production `/design-system` returned HTTP 404. Browser fixtures and the isolated player use disposable data. No live Supabase session or physical mobile software keyboard was exercised; viewport emulation and existing keyboard-inset behavior were checked without changing that behavior.
-- Not pushed or deployed. No database change is required by the design system. The preceding feedback slice still requires `supabase/migrations/202611050001_general_feedback.sql` before a combined production release.
-
-
-## Combined production release - approved 2026-11-05
-
-- Owner approved the shared 48px controls, will perform the physical-phone smoke test, and authorized release of the copy/feedback and design-system slices above. Coordinator: gpt-6.1-sol, high reasoning; one agent.
-- Applied `202611050001_general_feedback.sql` in the production Supabase SQL Editor before publication. Read-only verification confirmed optional report context, required submitter, both new context constraints, the family foreign key, RLS enabled and no anonymous/authenticated table grants.
-- Existing progress row count remains 1, reports remain 0, and the progress fingerprint matches the pre-migration value. No learner history was imported, reset or modified.
-- Release acceptance: prior 207/207 tests, TypeScript, ESLint, production build, private-bundle checks, pixel equality and isolated desktop/mobile/keyboard checks passed. Only release documentation changed after those checks.
-- Publication and live HTTP verification follow below; physical-phone keyboard and signed-in family flows remain the owner's smoke test.
-
-- Published application commit `028d84f`; Vercel deployment `9NrKCgaa1TuazrutfEbPzymvawiL` reported success. Live `/welcome`, `/login` and `/about` returned HTTP 200, with the new semantic token stylesheet present. `/design-system`, `/data/kids/course-v2.json` and `/materials/` returned HTTP 404. No application-error screen was returned.
-- Final local history/backup comparison: all 13 files unchanged. Supabase migration verification confirmed unchanged hosted progress before publication. Signed-in Google/child access and physical-phone keyboard behavior remain for the agreed owner smoke test; release checks did not submit answers or feedback to production.
-
-
-## Faster switching and shared Напредък - approved 2026-11-05
-
-Status: implemented and verified locally; this promotes the previously deferred calendar to current scope. Publication is pending.
-
-- [x] Cache the current learner's visited competition screens in tab memory; show repeat visits immediately, refresh before enabling learning actions, finish pending saves before switching, and clear on account/profile changes. Reduce serial hosted reads without caching access rights or weakening revision checks.
-- [x] Add /progress for parents and children with the selected-child overview and monthly calendar. Parents may switch owned children; children see only themselves. Keep /parent as a compatibility redirect.
-- [x] Show daily independent/hinted correct solutions and recorded gold, including repeat successes but no duplicate reward, revealed-solution success or completed-task credit for standalone subconditions. Group in Europe/Sofia with Monday first, competition filter and inline day details. Keep uncertain dates separate.
-- [x] Allow both parent and child to rename the owned child profile without changing IDs, login links or learning history. Match footer action typography.
-- [x] Reuse the design system, document the calendar, verify isolation, history preservation, calculations, switching/drafts and browser layouts before release. No new database table, reminders or educational/reward-rule changes.
-
-Team: coordinator gpt-6.1-sol/high; performance worker gpt-6.1-sol/high; progress/calendar worker gpt-6-astra/high. Coordinator owns integration and final verification.
-
-
-Acceptance evidence for this slice:
-- 229/229 tests, TypeScript, ESLint, production build and git diff --check passed. The production bundle excludes private learner/source files; all 70 generated images retain pixel equality.
-- Isolated Chrome verification: repeat competition screen appeared in approximately 27 ms while its fresh GET was held; learning stayed disabled until authorization/data refresh completed. Browser Back restored the previous competition. These are local measurements, not hosted latency claims.
-- Three controlled focus refreshes returned HTTP 200 in 9–12 ms and cleared the busy state by 300 ms. No runtime errors were observed.
-- An answer selected immediately before footer navigation was saved before leaving, restored after Progress → Home and after a full reload. All learning commands used disposable data under /tmp/maths-progress-fixture, not Ema's history.
-- Calendar layouts checked at 1440, 390 and 320 px; task layout checked at 390 and 320 px, without horizontal overflow. Calendar month/filter/day interaction, keyboard focus and reduced-motion preference checked in Chrome. Automated tests cover Sofia midnight/DST, undated history, repeated successes, reward totals and family isolation.
-- All 13 baseline learner-history and backup files remain byte-identical. No database table, migration, production learner write, Git push or deployment was performed.
-- Local production preview: http://127.0.0.1:3107/ (disposable learning data). /parent redirects to /progress; /design-system, /data/kids/course-v2.json and /materials/ return 404 in the production build.
-- Hosted parent/child Google sessions and physical-phone behavior remain release smoke checks; local measurements do not establish production switching speed.
-
-
-Review-data follow-up, 2026-11-05:
-- Replaced disposable empty test courses at /tmp/maths-progress-fixture with byte-identical copies of the saved local courses for owner review; original data and Supabase remain unchanged.
-- Chrome /progress renders the local snapshot: 16 attempts, 5 confirmed skills, 2 for practice; 210 recorded gold and 13 independent successes on 2026-11-02, no hinted successes. No runtime errors. This is the saved local snapshot, not a freshly synchronized Supabase record.
-
-
-## Progress calendar polish and supplied-history audit - approved 2026-11-05
-
-Status: implemented and verified locally; publication remains pending.
-
-- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and final verification.
-- [x] Replace the wide competition field with a compact native shared `Select`; document its contract and add normal, disabled and invalid states to the development catalogue. Preserve Source Sans 3 and existing semantic colors, native keyboard behavior and forced-colors fallback.
-- [x] Separate the three monthly metrics (gold, independent successes, hinted successes); show only dates on empty days and gold plus successfully solved whole tasks on active days. Remove the redundant “В клетките” legend. Selected-day summaries distinguish independent, hinted, incorrect and revealed attempts.
-- [x] Keep original learner history, Supabase records, schema and reward rules unchanged; validate dates and rewards using an isolated private preview.
-- [x] Verify responsive layouts, controls, data classifications and regression checks; keep this slice local for owner review.
-
-History evidence:
-- The owner supplied revision 125 after a read-only SQL result showed 16 attempts on 2 November and 7 on 4 November. The previous 16-attempt local snapshot was stale.
-- The disposable preview under `/tmp/maths-progress-fixture` now reproduces the supplied event metadata, hint flags, confirmation state and reward records: 23 attempts, 6 confirmed skills and 4 for practice. Seven appended records use current catalogue text; this reconstruction is not a byte-identical export or fresh Supabase synchronization and must not be imported into production.
-- 2 November: 210 recorded gold, 13 independent successes, 0 hinted successes and 3 revealed solutions. 4 November: 80 recorded gold, 4 independent successes, 0 hinted successes and 3 incorrect attempts. Total recorded gold: 290. No undated gold or attempts in the supplied history.
-- Hint use exists in the supplied records, but those completed attempts ended in revealed solutions or an incorrect answer. Pending hinted work has no completion date. These records therefore do not establish a correct solution with hints; no classifications or dates were invented.
-- Earlier signed-in Supabase browser control did not execute the audit query; refreshing the original editor was rejected by automatic approval review because an unsaved query might be discarded. The owner-provided SQL result/export supplied the evidence instead. No production record was changed.
-
-Acceptance evidence:
-- 231/231 tests passed; TypeScript, ESLint, production build, private deployment trace audit and `git diff --check` passed. The final CSS-only correction was rebuilt and browser checks repeated.
-- Chrome verified actual local `/progress` at 1440, 390 and 320px with no horizontal overflow or runtime exceptions. Day targets remain at least 44.28px wide and 88px high at 320px; visual inspection confirmed the monthly Bulgarian labels remain whole.
-- Verified both activity dates and their five selected-day metrics, competition filtering, quiet empty dates, previous/next month behavior, Tab focus, shared Select disabled/invalid states and forced-colors native arrow restoration.
-- All 13 original private history/backup files retain their baseline SHA-256 hashes. No learner command, database migration, production write, Git push or deployment was performed.
-- Local review: http://127.0.0.1:3107/progress . Development components: http://127.0.0.1:3034/design-system . Hosted parent/child Google sessions and physical-phone picker behavior remain release smoke checks.
-
-
-## Compact daily skill summary and focused navigation - approved 2026-11-05
-
-Status: implemented and verified locally; publication remains pending.
-
-- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and final verification.
-- [x] Replace the long selected-day attempt/reward ledger with one row per skill grouped by competition. Resolve skill titles from the server catalogue; use “Други упражнения” for unmatched historic skills.
-- [x] Count independent and hinted successes only for completed whole problems, omit zero result labels and show “Упражнявано” when there is no successful whole problem. Preserve all five day headline metrics, raw history, classifications, reward amounts and dates.
-- [x] Rename “Умения за упражнение” to “Умения за припомняне”.
-- [x] Show the full За сайта / Напредък / Профили footer only on the main dashboard/map/topics. Keep quiet feedback separate below content on hosted main, island, task and progress screens; include task context only while the task is visible and preserve the mounted task/draft.
-- [x] Document the shared patterns and verify grouped results, navigation, feedback and responsive layouts without publication.
-
-Acceptance evidence:
-- 235/235 tests, TypeScript, ESLint, production build, private deployment trace audit and git diff --check passed; all 70 generated images retain pixel equality. Tests cover repeated skills, competition grouping, unknown historic titles, standalone subconditions, gold-only days, all feedback contexts and preservation of a drafted answer when the modal opens.
-- Chrome verified the actual local calendar and focused island at 1440, 390 and 320px without horizontal overflow. The 4 November details render three skill rows instead of seven raw attempts; the 2/4 November five-metric summaries and 290 monthly gold remain unchanged. Minimum calendar day width is 44.28px at 320px.
-- Browser checks confirmed the three main navigation links and their absence from focused island/task screens; the task check completed without runtime exceptions. The navigation harness initially timed out around focus refresh and an exhausted-skill screen; a controlled focus refresh returned HTTP 200 in 24–30ms and the focused-task check was repeated after refresh completed. No performance change was made in this slice.
-- All 13 original history/backup files retain baseline SHA-256 hashes. Browser learning navigation used only the disposable fixture; no original learner history, Supabase record or database schema was changed. No Git push or deployment was performed.
-- Local review: http://127.0.0.1:3107/progress . The supplied-history reconstruction is a preview, not a fresh Supabase synchronization. Hosted parent/child feedback and physical-phone behavior remain release smoke checks; automated tests verify the hosted feedback placement and context.
-
-
-## Third-hint reward rule and source consistency - approved 2026-11-05
-
-Status: implemented, verified locally and published to production on 2026-11-05.
-
-- Coordinator: gpt-6.1-sol, high reasoning; one agent owns implementation and release verification.
-- [x] Remove “Можеш да продължиш и без нея.” from the review prompt.
-- [x] Keep rewards through hint two; exclude every new gold award after hint three with an explicit persisted flag. Preserve assisted outcomes, learning behavior, old awards and later recovery of unpaid entitlements.
-- [x] Show “Без злато след третата подсказка” after hint three.
-- [x] Unify original and authored source labels across all three competitions using actual original-source metadata and accessible source links.
-- [x] Record the rules in key decisions and the competition checklist. No database migration or production learner edit.
-- [x] Run combined automated checks and isolated browser verification.
-- [x] Publish all approved pending progress, navigation, performance and current changes to GitHub/Vercel and verify production.
-
-Acceptance evidence:
-- 241/241 tests, TypeScript, ESLint, production build, private deployment trace audit and git diff --check passed.
-- Isolated Chrome gameplay verified three hints followed by a correct answer earns zero gold, persists the exclusion and shows consistent original/practice source labels; no runtime errors at 1440, 390 and 320px.
-- Final calendar browser checks verified the supplied two-day split, 290 monthly gold, compact skill summaries, month/filter/keyboard controls and shared Select states without horizontal overflow at 1440, 390 and 320px.
-- All 13 original learner-history and backup files retain their baseline SHA-256 hashes. Only disposable fixtures received learning commands; no database migration or production learner edit. Previously earned gold remains unchanged.
-- Hosted parent/child Google sessions and physical-phone behavior remain owner smoke checks after publication.
-
-Production release evidence, 2026-11-05:
-- GitHub main release commit `ddd4b75ab9be995447522e3cc4af7504ac5fd60a`; Vercel reported successful completion for deployment `iC51CEhdNdpAZUpnARfhtmaV5JwK`. Production: https://sastezatelna-matematika.vercel.app/ .
-- Production home, About and login respond successfully. The new Progress route renders its loading state and redirects signed-out visitors to login; profiles redirect to login and the learning API returns 401 without authentication.
-- Development catalogue, private learner data URL and materials path return 404. Personalized responses retain no-store. No production learner commands or database edits were made.
-- Final SHA-256 comparison confirms all 13 original private history/backup files remain unchanged. Authenticated family and physical-device smoke checks remain with the owner.
-
-
-## Landing entry and onboarding feedback - approved 2026-11-05
-
-Status: released and verified on production.
-
-- Promote “Вход” to the shared primary button; keep “Заяви покана” as the outlined secondary action.
-- First profile heading: “Име на детето:”; field label: “Име на детето”. Nicknames remain accepted with the existing 1–40 character validation.
-- Selecting a child uses the existing learning-only account context, removing the parent upsert and child-login metadata read from this POST. Verified Google authentication, parent role and active owned-child checks remain required.
-- Optional-email “Не сега” retains native POST/303 navigation, immediately shows “Зареждане…”, prevents duplicate submissions and resets after back navigation. No migration or learner-history changes.
-
-Verification, 2026-11-05:
-- All 242 tests pass, including owned-child selection, expired/child-account rejection, immediate skip pending state, duplicate prevention and back-navigation reset; typecheck, lint and production build pass.
-- Browser checks cover landing, first profile and optional email at 1280, 390 and 320 px with reduced motion: no horizontal overflow, primary login hierarchy, visible focus and no runtime errors. Development previews cannot submit profile actions.
-- All 13 private learner history/backup file hashes remain unchanged. Selection removes two sequential database operations; live authenticated end-to-end latency still requires the owner's smoke test.
-
-- Follow-up owner request: remove “Тестваме с група до 5 деца.” from the public landing and delete its unused styles; the invitation process remains unchanged.
-- Follow-up verification: six invitation tests, production build and responsive browser checks pass after the sentence removal. Initial UI/onboarding release `39f20e5` is successful on Vercel; the copy-removal follow-up is included in this rollout.
-
-Production evidence, 2026-11-05:
-- Application release `a83210e` succeeded on Vercel: https://vercel.com/petar-s-projects33/sastezatelna-matematika/Do5uzkghCPPDnpFbLfC8X4ZMKdCV .
-- Live home at 1280 and 320 px: primary 48 px login, outlined invitation, no horizontal overflow and no pilot-group sentence. Keyboard focus is visible, login opens correctly and Chrome reports no runtime errors.
-- Development gallery returns 404, signed-out profiles redirect to login and the learning API returns 401/no-store. No production learner actions or data edits were performed; all 13 original private file hashes remain unchanged.
-- Authenticated “Не сега” latency requires the owner's smoke test; the two removed database operations and loading/duplicate behavior are covered by automated checks.
-
-
-## Application performance - approved 2026-11-06
-
-Status: released and verified on production.
-
-- Coordinator: gpt-6.1-sol/high, owns integration and release verification; bounded selection and server workers plus Astra independent critical review. No subscription upgrade, migration or learner-data edit.
-- [x] Reuse per-selection history indexes and avoid ranking/cloning a full adventure just to check availability. Preserve existing task ordering, reservations, review boundaries and source identities.
-- [x] Revisit validated competition snapshots immediately for 30 seconds within the mounted learner. Keep stale views gated until refresh; focus, retry and every write retain server checks. Synchronize wallet display across cached competitions without extending their freshness.
-- [x] Coalesce an exact pending draft into its answer command, preserving separate drafts, multipart drafts, failure recovery and revision conflict handling.
-- [x] Remove the duplicate selected-course read on hosted saves and exclude that already-known course from the wallet query. Keep owner/child scope, revision guards and historical rewards.
-- [x] Use learning-only account context on Progress, removing the unused parent upsert and child-login metadata read.
-- [x] Refresh auth cookies through verified claims in the proxy; protected routes retain fresh getUser authorization. Asymmetric signing keys can use cached JWKS; symmetric fallback can still require a network request.
-- [x] Configure the single Vercel function region as London (lhr1), matching the existing Supabase eu-west-2 location.
-- [x] Run combined tests, production build, browser smoke checks and independent review before publication.
-- [x] Publish and verify the production deployment and London execution region.
-
-Acceptance evidence:
-- 261/261 tests pass; full ESLint, TypeScript, production build, private deployment trace checks and git diff --check pass. Existing generated images are unchanged.
-- Tests cover fresh/stale/focus competition caching, cross-competition wallet display, exact and standalone drafts, multipart answers, stale revisions, lost responses, concurrent inserts and reward preservation.
-- Astra found no material regression; 6,750 additional differential comparisons preserve selection behavior. Real-catalogue benchmark medians with 100 synthetic history records: full quest ranking 189.899 to 1.514 ms; availability including the previous clone cost 11.477 to 0.140 ms. With 1,000 records: 2,775.091 to 2.156 ms and 603.957 to 1.166 ms respectively. Reproduce with node --import tsx scripts/benchmark-selection-performance.ts --real. These are CPU benchmarks, not measured end-to-end latency for Ema's short history.
-- Chrome on the isolated production build loaded and switched all three competitions, returned to mathematics and saved a correct adventure answer with the existing 25-gold result and 1/5 completion. Only disposable local data received commands. Browser instrumentation was unavailable, so request-count assertions use component/store tests rather than browser timing claims.
-- Authenticated production latency, cross-device refresh and physical-device behavior remain owner smoke checks. No database schema or educational/reward rule changes.
-
-Production evidence, 2026-11-06:
-- Application release `9731616` succeeded on Vercel: https://vercel.com/petar-s-projects33/sastezatelna-matematika/E3e1XuipfXA1Gs5YipnQ4iPoNFEa . Live dynamic response headers confirm execution in `lhr1`, alongside Supabase London.
-- Chrome verified the released homepage and login navigation. HTTP checks passed for home, about and login; signed-out profiles redirect to login, the learning API returns 401/no-store, and private materials, raw course data and the development gallery return 404.
-- The original checkout was fast-forwarded and all 13 private learner-history/backup hashes remain unchanged. No production learner commands or data edits were performed. Authenticated interaction latency still requires an owner smoke test; anonymous warm-page samples are not a substitute.
+Keep active tasks, material open decisions and a short latest-verification summary here. For each completed slice record the outcome, checks/results, unresolved limitations and release status. Move lengthy completed evidence to the history archive; do not turn it back into mandatory reading. Update the authoritative domain guide when behavior changes, and preserve dated approval context for exceptions.

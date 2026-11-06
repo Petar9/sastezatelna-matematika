@@ -7,11 +7,15 @@ import {parseHTML} from "linkedom";
 import {applyCourseAction,courseView,newKidsCourse} from "../src/core/kids-course.ts";
 import {catalogueProblems, isCompetitionProblem, problemSource} from "../src/core/kids-selection.ts";
 import {newGoldGain} from "../src/core/kids-gold.ts";
-import type {CourseAction, CourseTopicView} from "../src/core/kids-course.ts";
+import type {CourseAction, CourseTopicView, KidsCourseContent} from "../src/core/kids-course.ts";
 import {nvoCourseContent} from "../src/server/nvo-course-content.ts";
+import {proletnoCourseContent} from "../src/server/proletno-course-content.ts";
+import {regionalOlympiadCourseContent} from "../src/server/olimpiada-oblasten-course-content.ts";
 import {olympiadCourseContent} from "../src/server/olimpiada-course-content.ts";
-import {competitions,publishedCompetitions,DEFAULT_COMPETITION_ID} from "../src/core/competitions.ts";
-import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
+import {competitions,publishedCompetitions,DEFAULT_COMPETITION_ID,competitionDifficultyLabel} from "../src/core/competitions.ts";
+import {kidsCourseContent as liveContent} from "../src/server/kids-course-content.ts";
+// Saved pre-connected tasks retain their original grading and draft contract.
+const content:KidsCourseContent={...liveContent,connectedProblem:undefined};
 registerHooks({load(url,context,nextLoad){if(url.endsWith(".module.css"))return{format:"module",source:"export default new Proxy({}, {get:(_,key)=>String(key)});",shortCircuit:true};if(url.endsWith("/next/navigation.js"))return{format:"module",source:'export function useRouter(){return {push(href){globalThis.__courseRoutes?.push(href);}}}',shortCircuit:true};if(url.endsWith("/next/image.js"))return{format:"module",source:'import React from "react"; export default function Image({unoptimized, ...props}) { return React.createElement("img",props); }',shortCircuit:true};return nextLoad(url,context);}});
 const dom=parseHTML("<html><body></body></html>");
 Object.assign(globalThis,{React,window:dom.window,self:dom.window,document:dom.document,HTMLElement:dom.window.HTMLElement,IS_REACT_ACT_ENVIRONMENT:true});
@@ -28,8 +32,9 @@ function button(host:HTMLElement,label:string){const b=[...host.querySelectorAll
 function primary(host:HTMLElement,label:string){const bars=host.querySelectorAll('[aria-label="Следващо действие"]');assert.equal(bars.length,1);assert.equal(bars[0]!.querySelectorAll("button").length,label==="Провери отговора"?2:1);assert.ok(bars[0]!.textContent!.includes(label));return button(host,label);}
 function islandButton(host:HTMLElement,topic:string){const b=host.querySelector<HTMLButtonElement>(`button[aria-label="${topic}"]`);assert.ok(b);return b;}
 async function practise(host:HTMLElement,topic:string){await act(async()=>islandButton(host,topic).click());await act(async()=>button(host,"Към задачите").click());}
-async function mount(topic:string|null="matches",loseResponse=false,learnerId?:string,competitionId?:string,learnerNickname?:string){
- let record=topic ? applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:topic},now) : newKidsCourse(content,now);
+async function mount(topic:string|null="matches",loseResponse=false,learnerId?:string,competitionId?:string,learnerNickname?:string,legacy=false,courseContent:KidsCourseContent=content){
+ const initialContent=legacy ? {...courseContent,connectedProblem:undefined} : courseContent;
+ let record=topic ? applyCourseAction(newKidsCourse(courseContent,now),initialContent,{type:"selectTopic",topicId:topic},now) : newKidsCourse(courseContent,now);
  const originalFetch=globalThis.fetch;const actions:CourseAction[]=[];const requestHeaders:Headers[]=[];
  globalThis.fetch=async(_url,init)=>{
   requestHeaders.push(new Headers(init?.headers));
@@ -38,16 +43,16 @@ async function mount(topic:string|null="matches",loseResponse=false,learnerId?:s
    const before=record;
    const command=JSON.parse(String(init.body)) as{revision:number;action:CourseAction};
    if(command.revision!==record.revision)return Response.json({error:"Напредъкът е променен в друг прозорец. Показваме последния запис."},{status:409});
-   actions.push(command.action);record=applyCourseAction(record,content,command.action,now);
+   actions.push(command.action);record=applyCourseAction(record,courseContent,command.action,now);
    goldGain=newGoldGain(before,record);
    if(loseResponse&&command.action.type==="answer")throw new Error("Lost response");
   }
-  return Response.json({course:{...courseView(record,content,now),goldGain}});
+  return Response.json({course:{...courseView(record,courseContent,now),goldGain}});
  };
  const host=document.createElement("div");document.body.append(host);let root=createRoot(host);
- await act(async()=>root.render(<KidsCoursePlayer learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,content,now)}/>));
- if(topic) await act(async()=>button(host,`Продължи: ${content.topics.find(t=>t.id===topic)!.title}`).click());
- return{host,actions,requestHeaders,get record(){return record;},advance:(action:CourseAction)=>{record=applyCourseAction(record,content,action,now);},reload:async()=>{await act(async()=>root.unmount());root=createRoot(host);await act(async()=>root.render(<KidsCoursePlayer learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,content,now)}/>));},cleanup:async()=>{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;}};
+ await act(async()=>root.render(<KidsCoursePlayer learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,courseContent,now)}/>));
+ if(topic) await act(async()=>button(host,`Продължи: ${courseView(record,courseContent,now).topics.find(t=>t.id===courseView(record,courseContent,now).active?.topicId)!.title}`).click());
+ return{host,actions,requestHeaders,get record(){return record;},advance:(action:CourseAction)=>{record=applyCourseAction(record,courseContent,action,now);},reload:async()=>{await act(async()=>root.unmount());root=createRoot(host);await act(async()=>root.render(<KidsCoursePlayer learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,courseContent,now)}/>));},cleanup:async()=>{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;}};
 }
 
 test("navigation buttons recover a stale tab in one click without losing newer progress",async()=>{
@@ -65,7 +70,7 @@ test("navigation buttons recover a stale tab in one click without losing newer p
    const label=entry==="quest"?"Започни приключение":entry==="resume"?"Продължи: Точки и мачове":"Към задачите";
    await act(async()=>button(h.host,label).click());
    assert.ok(!h.host.querySelector('[aria-label="Карта на ученето"]'),"Navigation should open the exercises");
-   assert.ok(h.host.textContent!.includes(entry==="quest"?"0/5 задачи":entry==="resume"?"Часовник и денонощия":"Пари и цени"));
+   assert.ok(h.host.textContent!.includes(entry==="quest"?"0/5 стъпки":entry==="resume"?"Часовник и денонощия":"Пари и цени"));
    assert.ok(!h.host.querySelector('[role="alert"]'),"A recovered navigation should not show an error");
    assert.equal(h.record.topics.clocks!.work.core!.attempt.key,newerTask);
    assert.equal(h.record.attempts.length,0);
@@ -129,7 +134,7 @@ test("kids course keeps explicit choices, hint/reveal and topic switching withou
 });
 
 test("original subconditions advance one at a time and keypad checks only on explicit submit",async()=>{
- const h=await mount("grids");try{
+ const h=await mount("grids",false,undefined,undefined,undefined,true);try{
   assert.equal(h.host.querySelectorAll("input").length,1);
   assert.equal(h.host.querySelector("img")!.getAttribute("src"),publicImage("/kids/figures/M2-2a.png"));
   assert.ok(h.host.querySelector('a[href*="problem=M2-2a%3Aoriginal"]'));
@@ -170,10 +175,10 @@ test("lost answer response reconciles server truth without replaying a successfu
 
 test("otter adventure home, three solution parts, explicit reveal and five-problem chest work through the UI",async()=>{
  const h=await mount(null);try{
-  assert.equal(h.host.querySelectorAll('[id^="island-"]').length,17);
+  assert.equal(h.host.querySelectorAll('[id^="island-"]').length,16);
   assert.ok(h.host.querySelector('a[href="#learning-map"]'));
   await act(async()=>button(h.host,"Започни приключение").click());
-  assert.ok(h.host.textContent!.includes("0/5 задачи"));
+  assert.ok(h.host.textContent!.includes("0/5 стъпки"));
   await act(async()=>button(h.host,"Подсказка").click());
   await act(async()=>button(h.host,"Следваща подсказка").click());
   await act(async()=>button(h.host,"Следваща подсказка").click());
@@ -187,7 +192,7 @@ test("otter adventure home, three solution parts, explicit reveal and five-probl
   assert.equal(courseView(h.record,content,now).task!.hintLevel,3);
   for(let i=0;i<5;i++){
    await act(async()=>button(h.host,"Покажи решението").click());
-   const trail=h.host.querySelector('[aria-label="Разгледани задачи в приключението"]')!;
+   const trail=h.host.querySelector('[aria-label="Изминати стъпки в приключението"]')!;
    assert.equal(trail.getAttribute("aria-valuenow"),String(i+1));
    assert.equal(trail.getAttribute("aria-valuemax"),"5");
    assert.ok(trail.getAttribute("aria-valuetext")!.includes("включително с помощ"));
@@ -330,7 +335,7 @@ test("saved achievement wording changes only for display",()=>{
 test("island exploration is read-only and shows one compact island panel at a time",async()=>{
  const h=await mount(null);try{
   const saved=JSON.stringify(h.record);
-  assert.equal(h.host.querySelectorAll('[id^="island-"]').length,17);
+  assert.equal(h.host.querySelectorAll('[id^="island-"]').length,16);
   assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,1);
   assert.ok(!h.host.textContent!.includes("Дървото"));assert.ok(!h.host.querySelector("[data-discoveries]"));
   await act(async()=>islandButton(h.host,"Рачешки задачи").click());
@@ -524,10 +529,10 @@ test("world and topic views expose every island in a focused view without changi
  const h=await mount(null);try{
   const saved=JSON.stringify(h.record);
   assert.deepEqual(content.topics.map(t=>t.id).filter(id=>!islandPlaces[id]),[]);
-  assert.equal(h.host.querySelectorAll('[data-island-scenery]').length,17);
+  assert.equal(h.host.querySelectorAll('[data-island-scenery]').length,16);
   for(const mode of ["Карта","Теми"]){
    if(mode==="Теми")await act(async()=>button(h.host,"Теми").click());
-   for(const topic of content.topics){
+   for(const topic of courseView(h.record,content,now).topics){
     const trigger=islandButton(h.host,topic.title);
     if(mode==="Теми")assert.equal(trigger.type,"button");
     await act(async()=>trigger.click());
@@ -624,7 +629,7 @@ test("lost replies reconcile against the tab's original child and competition wi
 test("a child is welcomed by nickname without adding progress or replaying setup",async()=>{
  const h=await mount(null,false,"child-a",undefined,"Звездоброец");try{
   assert.equal(h.host.querySelector("h1")?.textContent,"Здравей, Звездоброец!");
-  assert.ok(h.host.textContent!.includes("До пет задачи. Нови открития. Твое съкровище."));
+  assert.ok(h.host.textContent!.includes("Пет стъпки. Нови открития. Твое съкровище."));
   assert.equal(h.record.attempts.length,0);
   assert.equal(h.actions.length,0);
   assert.ok(button(h.host,"Започни приключение"));
@@ -679,7 +684,7 @@ test("both competitions open at whole-map fit and only zoom after choosing an is
    await act(async()=>button(host,"Цялата карта").click());
    assert.equal(surface().getAttribute("data-zoomed"),"false");assert.equal(surface().style.touchAction,"pan-y");
    assert.equal(host.querySelector<HTMLButtonElement>('[aria-label="Отдалечи картата"]')!.disabled,true);
-   assert.equal(host.querySelectorAll('[data-island-scenery]').length,catalogue.topics.length);
+   assert.equal(host.querySelectorAll('[data-island-scenery]').length,view.topics.length);
    await act(async()=>button(host,"Цялата карта").click());assert.equal(camera(),initial);
    await act(async()=>render(view.topics[1]!.id));assert.ok(Number(camera().split(',')[2])>Number(initial.split(',')[2]));
    await act(async()=>button(host,"Цялата карта").click());assert.equal(camera(),initial);
@@ -699,10 +704,10 @@ test("competition dropdown shows both difficulty badges, current choice and dism
    await act(async()=>trigger.click());
    const nav=host.querySelector('nav[aria-label="Състезания"]')!;
    assert.equal(trigger.getAttribute('aria-controls'),nav.id);
-   assert.equal(nav.querySelectorAll('a').length,2);
+   assert.equal(nav.querySelectorAll('a').length,choices.length);
    for(const choice of choices){
     const link=nav.querySelector(`a[href="/?competition=${choice.id}"]`)!;
-    assert.ok(link.textContent!.includes(choice.title));assert.ok(link.textContent!.includes('Трудно'));
+    assert.ok(link.textContent!.includes(choice.title));assert.ok(link.textContent!.includes(competitionDifficultyLabel(choice.difficulty)));
     assert.equal(link.getAttribute('aria-current'),choice.id===current.id?'page':null);
    }
    const escape=new dom.window.Event('keydown',{bubbles:true,cancelable:true});Object.defineProperty(escape,'key',{value:'Escape'});
@@ -752,7 +757,7 @@ test("task source footer shows only competition and actual year, including old s
   const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
   try {
    await act(async()=>root.render(<KidsCoursePlayer initialView={courseView(record,catalogue,now)} competitionId={competition.id}/>));
-   await act(async()=>button(host,`Продължи: ${topic.title}`).click());
+   await act(async()=>button(host,`Продължи: ${courseView(record,catalogue,now).topics.find(t=>t.id===courseView(record,catalogue,now).active?.topicId)!.title}`).click());
    const footer=host.querySelector('a[href^="/sources?"]')!;
    assert.ok(footer); assert.equal(footer.textContent,`${competition.title} · ${work.attempt.problem.provenance!.year}`);
    assert.equal(footer.parentElement!.textContent,footer.textContent);
@@ -763,7 +768,7 @@ test("task source footer shows only competition and actual year, including old s
 
 
 test("numeric drafts flush before home and pause and restore after reload without grading",async()=>{
- const h=await mount("grids");try{
+ const h=await mount("grids",false,undefined,undefined,undefined,true);try{
   const task=courseView(h.record,content,now).task!;
   await act(async()=>button(h.host,"5").click());
   await act(async()=>button(h.host,"6").click());
@@ -772,7 +777,7 @@ test("numeric drafts flush before home and pause and restore after reload withou
   assert.deepEqual(courseView(h.record,content,now).task!.draft,["56"]);
   assert.equal(h.actions.at(-1)!.type,"saveDraft");
   assert.equal(h.actions.filter(a=>a.type==="dashboard").length,0);
-  await h.reload();await act(async()=>button(h.host,`Продължи: ${content.topics.find(t=>t.id==="grids")!.title}`).click());
+  await h.reload();await act(async()=>button(h.host,`Продължи: ${courseView(h.record,content,now).topics.find(t=>t.id==="areas")!.title}`).click());
   assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"56");
   await act(async()=>button(h.host,"Провери отговора").click());
   assert.equal(courseView(h.record,content,now).task!.draft,undefined);
@@ -780,7 +785,7 @@ test("numeric drafts flush before home and pause and restore after reload withou
   assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"");
   await act(async()=>button(h.host,"6").click());
   await act(async()=>button(h.host,"Почивка").click());await h.reload();
-  await act(async()=>button(h.host,`Продължи: ${content.topics.find(t=>t.id==="grids")!.title}`).click());
+  await act(async()=>button(h.host,`Продължи: ${courseView(h.record,content,now).topics.find(t=>t.id==="areas")!.title}`).click());
   assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"6");
   assert.equal(courseView(h.record,content,now).task!.key,task.key);
   assert.equal(courseView(h.record,content,now).task!.part!.index,2);
@@ -790,7 +795,7 @@ test("numeric drafts flush before home and pause and restore after reload withou
 
 test("Home and Map keep typed work mounted when a draft save fails, then navigate after a successful retry",async()=>{
  for(const destination of ["← Начало","Карта"]){
-  const h=await mount("grids"),fetchCourse=globalThis.fetch;
+  const h=await mount("grids",false,undefined,undefined,undefined,true),fetchCourse=globalThis.fetch;
   let failSave=true,saveRequests=0;
   try{
    globalThis.fetch=async(url,init)=>{
@@ -816,9 +821,9 @@ test("Home and Map keep typed work mounted when a draft save fails, then navigat
    assert.equal(h.host.querySelector("input"),null);
    assert.equal(h.host.querySelector('[role="alert"]'),null);
    assert.equal(h.actions.filter(a=>a.type==="dashboard").length,0);
-   if(destination==="Карта") assert.ok(h.host.querySelector('[aria-label="Умения: Правоъгълници в квадратна мрежа"]'));
+   if(destination==="Карта") assert.ok(h.host.querySelector('[aria-label="Умения: Лица и мрежи"]'));
    await h.reload();
-   await act(async()=>button(h.host,`Продължи: ${content.topics.find(t=>t.id==="grids")!.title}`).click());
+   await act(async()=>button(h.host,`Продължи: ${courseView(h.record,content,now).topics.find(t=>t.id==="areas")!.title}`).click());
    assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"56");
   }finally{await h.cleanup();}
  }
@@ -841,7 +846,7 @@ test("choice zero autosaves without submission, restores and clears when help op
 });
 
 test("stale draft cannot overwrite another device or automatically submit a typed answer",async()=>{
- const h=await mount("grids");try{
+ const h=await mount("grids",false,undefined,undefined,undefined,true);try{
   await act(async()=>button(h.host,"5").click());
   const key=courseView(h.record,content,now).task!.key;
   h.advance({type:"saveDraft",taskKey:key,partIndex:0,answers:["99"]});
@@ -849,7 +854,7 @@ test("stale draft cannot overwrite another device or automatically submit a type
   assert.ok(h.host.querySelector('[role="alert"]'));
   assert.deepEqual(courseView(h.record,content,now).task!.draft,["99"]);
   assert.equal(h.record.attempts.length,0);assert.equal(h.actions.filter(a=>a.type==="answer").length,0);
-  await h.reload();await act(async()=>button(h.host,`Продължи: ${content.topics.find(t=>t.id==="grids")!.title}`).click());
+  await h.reload();await act(async()=>button(h.host,`Продължи: ${courseView(h.record,content,now).topics.find(t=>t.id==="areas")!.title}`).click());
   assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"99");
  }finally{await h.cleanup();}
 });
@@ -873,19 +878,20 @@ test("exhausted exact-subtopic practice returns to its island", async () => {
 });
 
 
-test("NVO dropdown shows Easy alongside Hard competitions and its whole map contains ten islands",async()=>{
+test("NVO dropdown shows all three difficulty badges and its whole map contains six islands",async()=>{
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
  try{
   await act(async()=>root.render(<CompetitionPicker choices={[...competitions]} competitionId="nvo"/>));
   assert.ok(host.textContent!.includes("Лесно"));
   await act(async()=>host.querySelector<HTMLButtonElement>("button")!.click());
-  const links=[...host.querySelectorAll("nav a")];assert.equal(links.length,3);
+  const links=[...host.querySelectorAll("nav a")];assert.equal(links.length,competitions.length);
   assert.ok(links.find(a=>a.textContent!.includes("НВО"))!.textContent!.includes("Лесно"));
-  assert.equal(links.filter(a=>a.textContent!.includes("Трудно")).length,2);
+  assert.equal(links.filter(a=>a.textContent!.includes("Трудно")).length,3);
+  assert.equal(links.filter(a=>a.textContent!.includes("Средно")).length,1);
   const view=courseView(newKidsCourse(nvoCourseContent,now),nvoCourseContent,now);
   let selected="";
   await act(async()=>root.render(<KidsWorldMap topics={view.topics} panelId="nvo-panel" seen={new Set()} buttons={{current:new Map()}} viewControls={null} onSelect={id=>{selected=id;}}/>));
-  assert.equal(host.querySelectorAll("[data-island-scenery]").length,10);
+  assert.equal(host.querySelectorAll("[data-island-scenery]").length,6);
   for(const topic of view.topics){
    const place=islandPlaces[topic.id]!;assert.ok(place && place.x>0 && place.x<1100 && place.y>0 && place.y<710);
    const island=host.querySelector<HTMLButtonElement>(`button[aria-label="${topic.title}"]`)!;
@@ -923,7 +929,7 @@ test("Home and Map retain the selected island, view mode and exact helped task w
   assert.equal(JSON.stringify(h.record),before);
   await act(async()=>button(h.host,"← Към картата").click());
   assert.equal(button(h.host,"Теми").getAttribute("aria-pressed"),"true");
-  assert.equal(h.host.querySelectorAll("section.island").length,17);
+  assert.equal(h.host.querySelectorAll("section.island").length,16);
   await practise(h.host,"Рачешки задачи");
   assert.equal(courseView(h.record,content,now).task!.key,key);
   assert.equal(h.host.querySelectorAll("aside li").length,1);
@@ -951,10 +957,10 @@ test("answering keeps Hint beside Check in the measured action bar and one compa
 });
 
 
-test("published competition dashboards keep the three-way selector visible",async()=>{
+test("published competition dashboards keep all five choices visible",async()=>{
  const choices=publishedCompetitions();
- assert.equal(choices.length,3);
- const catalogues=[content,olympiadCourseContent,nvoCourseContent];
+ assert.equal(choices.length,5);
+ const catalogues=[content,olympiadCourseContent,nvoCourseContent,proletnoCourseContent,regionalOlympiadCourseContent];
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
  try{
   for(const [index,current] of choices.entries()){
@@ -965,7 +971,7 @@ test("published competition dashboards keep the three-way selector visible",asyn
    assert.ok(trigger.textContent!.includes(current.title));
    await act(async()=>trigger.click());
    const links=host.querySelectorAll('nav[aria-label="Състезания"] a');
-   assert.equal(links.length,3);
+   assert.equal(links.length,5);
    for(const choice of choices)assert.ok([...links].some(link=>link.getAttribute("href")===`/?competition=${choice.id}`));
   }
  }finally{await act(async()=>root.unmount());host.remove();}
@@ -1093,7 +1099,7 @@ test("competition refresh ignores obsolete replies and clears private display on
 
 test("browser competition changes flush pending drafts and retain the current exercise on save failure",async()=>{
  for(const fail of [true,false]){
-  const originalFetch=globalThis.fetch,history=mockHistory();let record=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"grids"},now);const actions:CourseAction[]=[];
+  const originalFetch=globalThis.fetch,history=mockHistory();let record=applyCourseAction(newKidsCourse(content,now),{...content,connectedProblem:undefined},{type:"selectTopic",topicId:"grids"},now);const actions:CourseAction[]=[];
   globalThis.fetch=async(_url,init)=>{
    const id=new Headers(init?.headers).get("X-Maths-Competition");
    if(init?.method==="POST"){
@@ -1106,7 +1112,7 @@ test("browser competition changes flush pending drafts and retain the current ex
   const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
   try{
    await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={courseView(record,content,now)}/>));
-   await act(async()=>button(host,`Продължи: ${content.topics.find(topic=>topic.id==="grids")!.title}`).click());
+   await act(async()=>button(host,`Продължи: Лица и мрежи`).click());
    await act(async()=>button(host,"7").click());
    history.location.search="?competition=nvo";
    await act(async()=>window.dispatchEvent(new dom.window.Event("popstate")));
@@ -1118,7 +1124,7 @@ test("browser competition changes flush pending drafts and retain the current ex
 
 test("focus saves local input before refresh, restores newer remote drafts and denies obsolete account replies",async()=>{
  const originalFetch=globalThis.fetch,history=mockHistory(),pending:((response:Response)=>void)[]=[];
- let record=applyCourseAction(newKidsCourse(content,now),content,{type:"selectTopic",topicId:"grids"},now);
+ let record=applyCourseAction(newKidsCourse(content,now),{...content,connectedProblem:undefined},{type:"selectTopic",topicId:"grids"},now);
  const actions:CourseAction[]=[];
  globalThis.fetch=async(_url,init)=>{
   if(init?.method==="POST"){
@@ -1130,7 +1136,7 @@ test("focus saves local input before refresh, restores newer remote drafts and d
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
  try{
   await act(async()=>root.render(<KidsCompetitionPlayer learnerId="child-a" competitionChoices={publishedCompetitions()} initialView={courseView(record,content,now)}/>));
-  await act(async()=>button(host,`Продължи: ${content.topics.find(topic=>topic.id==="grids")!.title}`).click());
+  await act(async()=>button(host,`Продължи: Лица и мрежи`).click());
   await act(async()=>button(host,"7").click());
   await act(async()=>window.dispatchEvent(new dom.window.Event("focus")));
   assert.equal(actions.at(-1)?.type,"saveDraft");assert.deepEqual(courseView(record,content,now).task!.draft,["7"]);
@@ -1251,7 +1257,7 @@ test("derived task footers use the same linked competition/year pattern without 
   const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
   try{
    await act(async()=>root.render(<KidsCoursePlayer initialView={courseView(record,catalogue,now)} competitionId={competition.id}/>));
-   await act(async()=>button(host,`Продължи: ${topic.title}`).click());
+   await act(async()=>button(host,`Продължи: ${courseView(record,catalogue,now).topics.find(t=>t.id===courseView(record,catalogue,now).active?.topicId)!.title}`).click());
    const footer=host.querySelector('a[href^="/sources?"]')!;
    assert.ok(footer);assert.equal(footer.textContent,`По ${competition.title} · ${problemSource(practice,catalogue).sourceYear}`);
    assert.equal(footer.parentElement!.textContent,footer.textContent);
@@ -1301,7 +1307,7 @@ test("an immediate numeric answer coalesces its exact pending draft into one sav
 });
 
 test("immediate numeric multipart answers coalesce only the current part and award the original once",async()=>{
- const h=await mount("grids");try{
+ const h=await mount("grids",false,undefined,undefined,undefined,true);try{
   const attempt=h.record.topics.grids!.work.core!.attempt;
   const answers=attempt.problem.fields.map(field=>field.answer);
   assert.equal(answers.length,3);
@@ -1394,4 +1400,54 @@ test("a reward POST updates the wallet on an immediate cached competition revisi
   assert.equal(host.querySelectorAll("[data-gold-gain]").length,0);
   assert.equal(records.get("nvo")!.revision,0);assert.equal(records.get("nvo")!.attempts.length,0);
  }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
+});
+
+
+for (const [label, mapContent, width] of [["Spring", proletnoCourseContent, 1100], ["Regional Olympiad", regionalOlympiadCourseContent, 720]] as const) test(`${label} map presents four selectable islands inside its compact world`,async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ try{
+  const view=courseView(newKidsCourse(mapContent,now),mapContent,now);
+  let selected="";
+  await act(async()=>root.render(<KidsWorldMap topics={view.topics} panelId="spring-panel" seen={new Set()} buttons={{current:new Map()}} viewControls={null} onSelect={id=>{selected=id;}}/>));
+  assert.equal(host.querySelectorAll("[data-island-scenery]").length,4);
+  for(const topic of view.topics){
+   const place=islandPlaces[topic.id]!;
+   assert.ok(place && place.x>0 && place.x<width && place.y>0 && place.y<500);
+   const island=host.querySelector<HTMLButtonElement>(`button[aria-label="${topic.title}"]`);
+   assert.ok(island);await act(async()=>island.click());assert.equal(selected,topic.id);
+  }
+  assert.equal(button(host,"−").disabled,true);
+ }finally{await act(async()=>root.unmount());host.remove();}
+});
+
+test("connected UI groups the natural part fields, preserves drafts, and keeps earlier work collapsible",async()=>{
+ const base=content.problem("M1-03",0,false)!;
+ const solution=[{title:"Първа стъпка",paragraphs:["Точките от победите са 13 · 3."]},{title:"Продължаваме",paragraphs:["Равенствата са 44 − 39."]},{title:"Проверка",paragraphs:["13 + 5 + 4 = 22."]}] as const;
+ const connectedContent:KidsCourseContent={...content,connectedProblem:p=>p.id===base.id?{
+  sourceId:"M1-03",text:"Общо 22 мача и 44 точки. а) Колко точки носят 13 победи и колко са равенствата? б) Колко са загубите?",introduction:"Отбор има 44 точки от 22 мача и 13 победи. Победа носи 3 точки, равенство - 1.",
+  units:[{id:"a",skillId:"M1-03",text:"а) Колко точки носят победите и колко са равенствата?",fields:[{label:"Точки",answer:"39"},{label:"Равенства",answer:"5"}],solution:structuredClone(solution) as never},{id:"b",skillId:"M1-03",text:"б) Колко са загубите?",fields:[{label:"Загуби",answer:"4"}],dependsOn:["a"],solution:structuredClone(solution) as never}],
+ }:undefined};
+ const h=await mount("matches",false,undefined,undefined,undefined,false,connectedContent);try{
+  assert.equal(h.host.querySelectorAll("input").length,2);
+  assert.ok(h.host.textContent!.includes("Подусловие 1 от 2"));
+  assert.ok(h.host.textContent!.includes("Цялото условие"));
+  assert.ok(!h.host.textContent!.includes("Предишни подусловия"));
+  await act(async()=>button(h.host,"3").click());await act(async()=>button(h.host,"9").click());
+  const second=h.host.querySelectorAll<HTMLInputElement>("input")[1]!;
+  await act(async()=>second.dispatchEvent(new dom.window.Event("focusin",{bubbles:true})));
+  await act(async()=>button(h.host,"5").click());
+  await act(async()=>button(h.host,"← Начало").click());await h.reload();
+  await act(async()=>button(h.host,"Продължи: Точки и мачове").click());
+  assert.deepEqual([...h.host.querySelectorAll<HTMLInputElement>("input")].map(i=>i.value),["39","5"]);
+  await act(async()=>primary(h.host,"Провери отговора").click());
+  assert.equal(h.record.attempts.length,1);
+  await act(async()=>primary(h.host,"Следващо подусловие").click());
+  assert.equal(h.host.querySelectorAll("input").length,1);
+  assert.ok(h.host.textContent!.includes("Подусловие 2 от 2"));
+  const previous=[...h.host.querySelectorAll("details")].find(d=>d.querySelector("summary")?.textContent==="Предишни подусловия · 1")!;
+  assert.ok(previous);assert.equal(previous.hasAttribute("open"),false);assert.ok(previous.textContent!.includes("39"));
+  assert.equal(courseView(h.record,connectedContent,now).task!.hintLevel,0);
+  await act(async()=>button(h.host,"4").click());await act(async()=>primary(h.host,"Провери отговора").click());
+  primary(h.host,"Следваща задача");assert.equal(h.record.attempts.length,2);
+ }finally{await h.cleanup();}
 });

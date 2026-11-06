@@ -48,7 +48,7 @@ test("image generation is repeatable and changed pixels get a new URL",async()=>
  } finally {fs.rmSync(root,{recursive:true,force:true});}
 });
 
-test("only public image and lesson paths override no-store; legacy image URLs redirect",async()=>{
+test("only explicit public pages, images and lessons can override no-store; legacy image URLs redirect",async()=>{
  const matcher=new RegExp(`^${proxyConfig.matcher[0]}$`);
  assert.equal(matcher.test("/assets/images/test.hash.webp"),false);
  for(const url of ["/", "/profiles", "/auth/login", "/api/kids/course"]) assert.equal(matcher.test(url),true);
@@ -56,7 +56,13 @@ test("only public image and lesson paths override no-store; legacy image URLs re
  assert.ok(headers[0]);
  assert.equal(headers[0].source,"/(.*)");
  assert.ok(headers[0].headers.some(h=>h.key==="Cache-Control"&&h.value==="no-store"));
- assert.deepEqual(headers.slice(1).map(h=>h.source),["/assets/images/:path*","/kids/lessons/:path*"]);
+ assert.deepEqual(headers.slice(1).map(h=>h.source),["/about","/materiali","/materiali/priem-sled-4-klas-smg","/materiali/priem-sled-4-klas-npmg","/materiali/priem-sled-4-klas-smg-npmg","/robots.txt","/sitemap.xml","/assets/images/:path*","/kids/lessons/:path*"]);
+ const original={...process.env};try{
+  process.env.MATHS_MODE="hosted";process.env.VERCEL_ENV="production";
+  const productionHeaders=(await config.headers!())??[];
+  for(const entry of productionHeaders.slice(1,8))assert.ok(entry.headers.some(h=>h.key==="Cache-Control"&&h.value.includes("s-maxage=3600")));
+  for(const env of ["preview","development"]){process.env.VERCEL_ENV=env;for(const entry of ((await config.headers!())??[]).slice(1,8))assert.ok(entry.headers.some(h=>h.key==="Cache-Control"&&h.value==="no-store"));}
+ }finally{process.env=original;}
  const redirects=(await config.redirects!()) ?? [];
  for(const [source,destination] of Object.entries(images)) assert.ok(redirects.some(r=>r.source===source&&r.destination===destination&&r.permanent===false));
  assert.ok(config.outputFileTracingExcludes!["/*"]!.includes("./assets/**/*"));

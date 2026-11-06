@@ -10,10 +10,17 @@ import s from "./kids-world-map.module.css";
 
 const defaultWorld = { w: 1100, h: 1060 };
 const olympiadWorld = { w: 720, h: 500 };
+const proletnoWorld = { w: 1100, h: 500 };
 const nvoWorld = { w: 1100, h: 710 };
 // Positions belong to topic IDs, not course order or current attainment.
 export const islandPlaces: Record<string, { x: number; y: number; name: string }> = {
- "nvo-numbers": { x: 190, y: 135, name: "Числа и редици" },
+ "pms-numbers": { x: 190, y: 145, name: "Числови загадки" },
+ "pms-parts": { x: 550, y: 145, name: "Истории с количества" },
+ "pms-weight": { x: 910, y: 145, name: "Тегло и цени" },
+ "pms-geometry": { x: 190, y: 365, name: "Фигури и измервания" },
+ "pms-motion": { x: 550, y: 365, name: "Движение и работа" },
+ "pms-logic": { x: 910, y: 365, name: "Броене и логика" },
+ "nvo-numbers": { x: 190, y: 135, name: "Числа и пресмятане" },
  "nvo-addition": { x: 550, y: 135, name: "Събиране и изваждане" },
  "nvo-multiplication": { x: 910, y: 135, name: "Умножение и деление" },
  "nvo-expressions": { x: 190, y: 350, name: "Неизвестни числа и изрази" },
@@ -22,7 +29,11 @@ export const islandPlaces: Record<string, { x: number; y: number; name: string }
  "nvo-geometry": { x: 145, y: 565, name: "Фигури и ъгли" },
  "nvo-areas": { x: 415, y: 565, name: "Обиколки и лица" },
  "nvo-data": { x: 690, y: 565, name: "Таблици и схеми" },
- "nvo-stories": { x: 950, y: 565, name: "Текстови задачи" },
+ "nvo-stories": { x: 950, y: 565, name: "Истории с количества" },
+ "oli-ob-numbers": { x: 190, y: 145, name: "Числови загадки" },
+ "oli-ob-geometry": { x: 525, y: 145, name: "Геометрични открития" },
+ "oli-ob-stories": { x: 190, y: 365, name: "Истории с числа" },
+ "oli-ob-motion": { x: 525, y: 365, name: "Срещи и обиколки" },
  "oli-numbers": { x: 190, y: 145, name: "Числови загадки" },
  "oli-geometry": { x: 525, y: 145, name: "Геометрични открития" },
  "oli-stories": { x: 190, y: 365, name: "Истории с числа" },
@@ -31,10 +42,10 @@ export const islandPlaces: Record<string, { x: number; y: number; name: string }
  backwards: { x: 415, y: 160, name: "Рачешки задачи" },
  matches: { x: 690, y: 115, name: "Точки и мачове" },
  money: { x: 950, y: 165, name: "Пари и цени" },
- totals: { x: 240, y: 340, name: "Брой и възрасти" },
+ totals: { x: 240, y: 340, name: "Количества и разпределяне" },
  pieces: { x: 555, y: 330, name: "Разрези и части" },
- perimeters: { x: 870, y: 365, name: "Обиколки" },
- areas: { x: 140, y: 545, name: "Лица на фигури" },
+ perimeters: { x: 870, y: 365, name: "Обиколки на фигури" },
+ areas: { x: 140, y: 545, name: "Лица и мрежи" },
  clocks: { x: 420, y: 530, name: "Часовник" },
  constraints: { x: 685, y: 550, name: "Най-малко и най-много" },
  sequences: { x: 960, y: 550, name: "Числови редици" },
@@ -45,7 +56,7 @@ export const islandPlaces: Record<string, { x: number; y: number; name: string }
  motion: { x: 490, y: 945, name: "Движение" },
  sets: { x: 830, y: 950, name: "Групи и общи елементи" },
 };
-const compactNames: Record<string, string> = { "nvo-numbers": "Числа", "nvo-addition": "Събиране и изваждане", "nvo-multiplication": "Умножение и деление", "nvo-expressions": "Неизвестни числа", "nvo-fractions": "Части", "nvo-measures": "Мерки и време", "nvo-geometry": "Фигури и ъгли", "nvo-areas": "Обиколки и лица", "nvo-data": "Таблици и схеми", "nvo-stories": "Текстови задачи", digits: "Цифри", backwards: "Рачешки", matches: "Точки", money: "Пари", totals: "Брой и възрасти", pieces: "Разрези", perimeters: "Обиколки", areas: "Лица", clocks: "Часовник", constraints: "Най-малко / най-много", sequences: "Редици", counting: "Броим", grids: "Мрежа", fractions: "Части", units: "Мерки", motion: "Движение", sets: "Групи" };
+const compactNames: Record<string, string> = { "pms-numbers": "Числа", "pms-parts": "Количества", "pms-weight": "Тегло и цени", "pms-geometry": "Фигури", "pms-motion": "Движение", "pms-logic": "Логика", "nvo-numbers": "Числа", "nvo-addition": "Събиране и изваждане", "nvo-multiplication": "Умножение и деление", "nvo-expressions": "Неизвестни числа", "nvo-fractions": "Части", "nvo-measures": "Мерки и време", "nvo-geometry": "Фигури", "nvo-areas": "Обиколки и лица", "nvo-data": "Таблици и схеми", "nvo-stories": "Истории", digits: "Цифри", backwards: "Рачешки", matches: "Точки", money: "Пари", totals: "Количества", pieces: "Разрези", perimeters: "Обиколки", areas: "Лица", clocks: "Часовник", constraints: "Най-малко / най-много", sequences: "Редици", counting: "Броим", grids: "Мрежа", fractions: "Части", units: "Мерки", motion: "Движение", sets: "Групи" };
 const shores = [
  "M-108 14C-126-18-91-59-56-57C-36-84 3-65 31-66C75-80 113-45 105-16C139 16 98 59 61 54C28 80-9 63-43 66C-80 76-116 48-108 14Z",
  "M-109-6C-110-47-70-66-34-58C-4-81 29-60 58-65C100-63 127-26 111 4C123 41 83 67 49 60C15 79-12 57-48 63C-86 61-122 32-109-6Z",
@@ -73,7 +84,7 @@ export function IslandLandmark({ topicId, golden = false }: { topicId: string; g
   motion: <><path d="M-44 15h88L28 33h-56Z" fill={coral}/><path d="M0 15v-65l39 53H5Z" fill={stone}/><path d="m-6-36-30 39h30Z" fill={blue}/><path d="M-50 39q13-9 26 0t26 0t26 0t26 0" fill="none" stroke={blue} strokeWidth="3"/></>,
   sets: <><circle cx="-15" r="29" fill={blue} fillOpacity=".8" stroke={stone} strokeWidth="3"/><circle cx="15" r="29" fill={coral} fillOpacity=".7" stroke={stone} strokeWidth="3"/><circle r="6" fill={stone}/><circle cx="-28" r="4" fill={stone}/><circle cx="28" r="4" fill={stone}/></>,
  };
- return <svg viewBox="-60 -55 120 105" width="86" height="76" aria-hidden="true">{shapes[({ "oli-numbers": "digits", "oli-geometry": "perimeters", "oli-stories": "money", "oli-logic": "counting", "nvo-numbers": "sequences", "nvo-addition": "totals", "nvo-multiplication": "counting", "nvo-expressions": "backwards", "nvo-fractions": "fractions", "nvo-measures": "units", "nvo-geometry": "perimeters", "nvo-areas": "areas", "nvo-data": "grids", "nvo-stories": "money" } as Record<string, string>)[topicId] ?? topicId] ?? shapes.counting}</svg>;
+ return <svg viewBox="-60 -55 120 105" width="86" height="76" aria-hidden="true">{shapes[({ "pms-numbers": "digits", "pms-parts": "fractions", "pms-weight": "money", "pms-geometry": "perimeters", "pms-motion": "motion", "pms-logic": "counting", "oli-ob-numbers": "digits", "oli-ob-geometry": "perimeters", "oli-ob-stories": "money", "oli-ob-motion": "motion", "oli-numbers": "digits", "oli-geometry": "perimeters", "oli-stories": "money", "oli-logic": "counting", "nvo-numbers": "sequences", "nvo-addition": "totals", "nvo-multiplication": "counting", "nvo-expressions": "backwards", "nvo-fractions": "fractions", "nvo-measures": "units", "nvo-geometry": "perimeters", "nvo-areas": "areas", "nvo-data": "grids", "nvo-stories": "money" } as Record<string, string>)[topicId] ?? topicId] ?? shapes.counting}</svg>;
 }
 
 function SkillDiscoveries({ topic, detailed }: { topic: CourseTopicView; detailed: boolean }) {
@@ -108,7 +119,7 @@ type Props = {
  onSelect: (topicId: string) => void;
 };
 export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSelect, viewControls }: Props) {
- const world = topics.length > 0 && topics.every(topic => topic.id.startsWith("oli-")) ? olympiadWorld : topics.length > 0 && topics.every(topic => topic.id.startsWith("nvo-")) ? nvoWorld : defaultWorld;
+ const world = topics.length > 0 && topics.every(topic => topic.id.startsWith("pms-")) ? proletnoWorld : topics.length > 0 && topics.every(topic => topic.id.startsWith("oli-")) ? olympiadWorld : topics.length > 0 && topics.every(topic => topic.id.startsWith("nvo-")) ? nvoWorld : defaultWorld;
  const id = useId().replace(/:/g, "");
  const pointerNavigation = useRef(false);
  const surface = useRef<HTMLDivElement>(null), behavior = useRef<ZoomBehavior<HTMLDivElement, unknown> | null>(null);
@@ -166,7 +177,7 @@ export function KidsWorldMap({ topics, selectedId, panelId, seen, buttons, onSel
    </svg>
    {topics.map(topic => {
     const place = islandPlaces[topic.id]; if (!place) return null;
-    return <button key={topic.id} id={`island-${topic.id}`} ref={node => { if (node) buttons.current.set(topic.id, node); else buttons.current.delete(topic.id); }} className={s.islandTarget} data-compact={camera.zoom < .32} title={`${topic.title}${topic.professor ? " · Професор" : topic.doctor ? " · Доктор" : ""}`} style={{ left: camera.x + place.x * camera.zoom, top: camera.y + place.y * camera.zoom, width: Math.max(44, 222 * camera.zoom), height: Math.max(44, 150 * camera.zoom), fontSize: Math.max(13, Math.min(18, 24 * camera.zoom)) }} aria-label={topic.title} aria-expanded={selectedId === topic.id} aria-controls={selectedId === topic.id ? panelId : undefined} data-selected={selectedId === topic.id} onFocus={() => { if (!pointerNavigation.current && surface.current && behavior.current) select(surface.current).call(behavior.current.translateTo, place.x, place.y); }} onClick={() => onSelect(topic.id)}><span>{camera.zoom < .32 ? compactNames[topic.id] ?? place.name : place.name}</span></button>;
+    return <button key={topic.id} id={`island-${topic.id}`} ref={node => { if (node) buttons.current.set(topic.id, node); else buttons.current.delete(topic.id); }} className={s.islandTarget} data-compact={camera.zoom < .32} title={`${topic.title}${topic.professor ? " · Професор" : topic.doctor ? " · Доктор" : ""}`} style={{ left: camera.x + place.x * camera.zoom, top: camera.y + place.y * camera.zoom, width: Math.max(44, 222 * camera.zoom), height: Math.max(44, 150 * camera.zoom), fontSize: Math.max(13, Math.min(18, 24 * camera.zoom)) }} aria-label={topic.title} aria-expanded={selectedId === topic.id} aria-controls={selectedId === topic.id ? panelId : undefined} data-selected={selectedId === topic.id} onFocus={() => { if (!pointerNavigation.current && surface.current && behavior.current) select(surface.current).call(behavior.current.translateTo, place.x, place.y); }} onClick={() => onSelect(topic.id)}><span>{camera.zoom < .32 ? compactNames[topic.id] ?? topic.title : topic.title}</span></button>;
    })}
   </div>
   <p id={`${id}-help`} className={s.help}>Докосни остров и го разгледай. {zoomed ? "Премести морето с пръст или мишка." : "Приближи с + за повече подробности."}</p>

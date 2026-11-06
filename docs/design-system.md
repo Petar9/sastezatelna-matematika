@@ -2,12 +2,18 @@
 
 Status: compact shared foundation, approved 2026-11-05. Preserve the cream, otter and island identity. Evolve it through real product needs and testing. No external component framework or Storybook dependency is required.
 
+## Clarity before decoration
+
+Apply the quality standard in [AGENTS.md](../AGENTS.md): clear purpose, simple steps and enjoyable learning, with the existing child-friendly identity. Linear / Apple Notes set the standard for polish, not a replacement visual theme.
+
+Make the purpose and next action apparent through hierarchy and layout. Remove repeated headings, taglines, helper text and secondary labels when they add no useful information; repair a confusing layout before explaining it. Keep essential teaching hints, visible field labels, accessibility text and actionable error/recovery messages. Use short, concrete Bulgarian; do not add a generic learning tagline to every screen. This is guidance for approved future changes, not permission for a broad redesign.
+
 ## Sources of truth
 
 - `app/globals.css`: semantic color, spacing, type, radius, focus, sizing and motion tokens.
 - `components/ui/`: shared primitives and their states in `ui.module.css`.
 - `/design-system`: interactive catalogue and actual landing/onboarding/profile previews. Development only; production returns 404. Uses synthetic data and prevents form submission; never an authentication bypass.
-- This document: usage, exceptions and acceptance checklist. `plan.md` records delivered slices and verification.
+- This document: usage, exceptions and acceptance checklist. [plan.md](../plan.md) records current work and brief verification; its linked archive retains detailed delivery evidence.
 
 ## Visual rules
 
@@ -47,11 +53,15 @@ Keep labels visible. Preserve native form validation and server error recovery. 
 
 ## Product patterns and deliberate exceptions
 
-- `KidsLearningProgress`: three skill milestones, blue bar, accessible numeric value. `AdventureRoute`: completed tasks in the current adventure. These are different metrics and remain separate components.
+- Public resources reuse the landing shell/content width (1120px), header typography, primary `ButtonLink` for Вход and existing `LandingIllustration` at compact scale. `MaterialsHeader` links the brand home. No new asset, form or client state is needed.
+- `MaterialCard({guide})` is the domain pattern for hub and related-reading cards: school/year, H2, short summary and a single full-card link. Hover uses the existing accent; keyboard focus outlines the whole card. The two-column hub becomes one column below 700px. Examples live in the development catalogue.
+- `MaterialsArticle({guide,related,intro,contents,children})` owns breadcrumbs, one H1, review date, in-page navigation, related card and matching Article/Breadcrumb data. Body sections use H2/H3; anchor targets have scroll margin. The reading column is at most 800px with 18px text and 1.65 line height. Mobile uses the same landing gutters, wrapping formula and compact definition rows. Sources and dated limitations remain visible in HTML.
+- `materials.module.css` styles these public layouts with shared tokens: cream background/card, teal links, sea formula panel, accent notice and 44px navigation targets. No unrelated primitive variants. Pages remain server-rendered, free of learner data and Supabase calls. A historical formula must carry its admission year; pending methodology must not look like a confirmed formula.
+- `KidsLearningProgress`: three skill milestones, blue bar, accessible numeric value. `AdventureRoute`: completed natural steps in the current adventure. These are different metrics and remain separate components.
 - `GoldWallet` and `IslandGoldTotal`: earned gold only, no cumulative maximum or target bar. Do not derive learning confirmation from gold.
 - Competition selector, map zoom/pan, island markers, skill selectors, answer options and numeric keypad are domain controls. Retain their selection/keyboard semantics and custom layouts; do not force them into generic buttons. They reuse shared tokens or the compatibility classes in `kids.module.css`.
 - `KidsActionBar`: fixed next/check action, safe-area padding, measured content clearance and visual-viewport keyboard adjustment. Preserve its behavior, including multipart and secondary actions. Do not replace it with a normal-flow footer.
-- `ProgressCalendar`: shared read-only child/parent calendar. Receives projected competition summaries and dated events, never raw courses or answers. Monday-first months and Europe/Sofia dates; competition filter, labelled day buttons, current-day/selected-day states, inline details, empty days and separately labelled uncertain historical amounts. Three labelled monthly metrics separate gold, independent successes and hinted successes. Empty days show only the date; active cells show gold and the total successfully solved whole tasks. Selected-day headline metrics distinguish independent, hinted, incorrect and revealed attempts. The list groups attempts by competition and catalogue skill, showing successful whole-task counts or “Упражнявано”; raw sources and reward-ledger entries stay out of this list; buttons retain focus and 44px targets at 320px. Loading and retry states belong to `/progress`; parent-only last-task links are supplied by the server. The calendar is a domain component, not a general date picker.
+- `ProgressCalendar`: shared read-only child/parent calendar. Receives projected competition summaries and dated events, never raw courses or answers. Monday-first months and Europe/Sofia dates; competition filter, labelled day buttons, current-day/selected-day states, inline details, empty days and separately labelled uncertain historical amounts. Three labelled monthly metrics separate gold, independent successes and hinted successes. When new natural-part events exist, show separate subpart and whole-original totals without reclassifying historical records. Empty days show only the date; active cells show gold and the total successful whole tasks or natural steps, labelled accordingly. Selected-day headline metrics distinguish independent, hinted, incorrect and revealed attempts. The list groups attempts by competition and catalogue skill, showing successful whole-task counts or “Упражнявано”; raw sources and reward-ledger entries stay out of this list; buttons retain focus and 44px targets at 320px. Loading and retry states belong to `/progress`; parent-only last-task links are supplied by the server. The calendar is a domain component, not a general date picker.
 - `FeedbackButton`: permanent quiet action below the content on dashboard, islands, tasks and progress; full navigation footer appears only on the main dashboard. Task context is attached only while a task is visible. The modal preserves the mounted exercise and failed message. Modal focus follows the Dialog contract.
 - `ProfileNameForm`: parent/child nickname editing with shared Input, Button and Message. Trims and validates 1–40 characters on the server; retains input on failure, prevents duplicate submissions, announces errors/success and refreshes the saved label. Authorization remains family-scoped; changing a nickname never changes login links or learner IDs.
 - Onboarding/profile disclosures retain their native forms and optional child-email step. Landing invitation keeps its single email field and concise recovery state.
@@ -77,3 +87,7 @@ Use short transitions (`--motion-fast`) for controls. Progress uses its existing
 Shared buttons, fields, messages, badges and dialog now serve landing, onboarding/profiles, feedback and generic learning actions. Remaining specialist map/answer/illustration styles are intentional, not duplicate generic APIs. Migrate remaining legacy generic controls when their screens are changed; do not rebuild unrelated screens or educational state just to expand this library. Follow test feedback before adding more abstraction.
 
 Onboarding: `SkipChildEmailForm` keeps native POST navigation for the optional email step, announces “Зареждане…” and blocks duplicate submissions while pending; `pageshow` restores the action after back navigation. The catalogue includes first-profile and optional-email previews, with submissions prevented. Landing uses primary “Вход” and secondary “Заяви покана”.
+
+### Connected original pattern
+
+`CourseQuestion` presents shared context, a quiet native “Цялото условие” disclosure, and the current natural subpart with all its fields. Show “Подусловие i от n” only for multipart sources; previous completed subparts stay collapsed with submitted answers and their own solution disclosure. The next action is “Следващо подусловие” or “Следваща задача”; the adventure trail counts steps. Reuse existing question, figure, action bar and token styles. Future answers never enter the browser view.

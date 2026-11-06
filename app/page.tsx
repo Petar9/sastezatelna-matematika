@@ -1,3 +1,5 @@
+import {cookies} from "next/headers";
+import {publicMetadata,hasAuthCookie} from "@/src/public-site";
 import {notFound,redirect} from "next/navigation";
 import {KidsCompetitionPlayer} from "@/components/kids-competition-player";
 import {Landing} from "@/components/landing";
@@ -5,6 +7,11 @@ import {learnerContext,readKidsCourseView,mode} from "@/src/server";
 import {availableCompetitions} from "@/src/server/competitions";
 import {KidsError} from "@/src/core";
 export const dynamic="force-dynamic";
+export async function generateMetadata(){
+ const cookieNames=(await cookies()).getAll().map(cookie=>cookie.name);
+ // The home route also renders private learner data; never cache or index that response.
+ return publicMetadata("Математика за 4. клас: състезателни задачи и подготовка","Подготовка за Математика за всеки, Олимпиада и НВО в 4. клас. Истински задачи, подсказки стъпка по стъпка и запазен напредък.","/",{index:!hasAuthCookie(cookieNames)});
+}
 export default async function Home({searchParams}:{searchParams:Promise<{competition?:string;request?:string}>}){
  const params=await searchParams;
  if(mode()==="hosted"&&process.env.VERCEL_ENV==="preview")return <Landing request={params.request}/>;

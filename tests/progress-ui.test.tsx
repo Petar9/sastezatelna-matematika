@@ -136,3 +136,16 @@ test("a gold-only day retains its headline without a false no-activity message o
  assert.equal(document.querySelectorAll(".skillGroup").length,0);
  assert.ok(!document.toString().includes("Няма записана активност"));
 });
+
+test("natural subparts count as steps while whole original completion is shown separately",()=>{
+ const summary={attempts:3,confirmed:0,revisit:0,hasTask:false};
+ const base={day:"2026-11-05",kind:"attempt" as const,label:"Задача",wholeProblem:false,naturalPart:true,skillId:"one",skillTitle:"Фигури"};
+ const events=[{...base,key:"a",outcome:"independent" as const},{...base,key:"b",outcome:"hinted" as const,wholeOriginal:true},{...base,key:"old",naturalPart:undefined,wholeProblem:true,outcome:"independent" as const}];
+ const {document}=parseHTML(renderToStaticMarkup(<ProgressCalendar initialDay={base.day} collections={[{competitionId:"one",title:"Пример",summary,undatedGold:0,undatedAttempts:0,events}]}/>));
+ const values=[...document.querySelectorAll('dl[aria-label="За деня"] > div')].map(row=>[row.querySelector("dt")?.textContent,row.querySelector("dd")?.textContent]);
+ assert.ok(values.some(([label,value])=>label==="Подусловия"&&value==="2"));
+ assert.ok(values.some(([label,value])=>label==="Цели задачи"&&value==="1"));
+ assert.equal(document.querySelector('[aria-current="date"] .dayCounts')?.textContent,"3 стъпки");
+ assert.ok(document.querySelector(".skillResults")?.textContent?.includes("Самостоятелно: 2 · С подсказка: 1"));
+ assert.ok(!document.toString().includes("Подусловията не се броят"));
+});

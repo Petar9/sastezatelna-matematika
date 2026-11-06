@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 import Image from "next/image";
 import { publicImage } from "@/src/core/public-images";
-import {competitions, DEFAULT_COMPETITION_ID} from "@/src/core/competitions";
+import {competitions, competitionDifficultyLabel, DEFAULT_COMPETITION_ID} from "@/src/core/competitions";
 import type {Competition} from "@/src/core/competitions";
 import type { CourseAction, KidsCourseView, KidsSessionSummary, LearningSkillView } from "@/src/core";
 import { LearningMap, QuestTrail, QuestFinish, TreasureCollection } from "./kids-quest-map";
@@ -183,7 +183,7 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 			{view.task && <section className={`${s.card} ${s.taskCard}`}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title !== topic?.title && <h2 className={s.taskSkill}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title}</h2>}<CourseQuestion key={`${view.task.key}:${view.task.part?.index ?? 0}:${refreshEpoch}`} task={view.task} competitionId={competitionId} leaf={activeLeaf} inQuest={view.inQuest} goldGain={view.goldGain} busy={busy} act={act} draftChanged={draftChanged} />
 				{view.reward && <div className={s.reward} role="status"><KidsOtter rank={view.reward.rank} mood="celebrate" /><h2>Браво! Вече си {view.reward.rank === "doctor" ? "доктор" : "професор"} по {view.reward.topic}! <span aria-hidden="true">🎓</span></h2></div>}
 				{view.complete && view.reward && <div className={s.feedback}><h2>Завърши курса! <span aria-hidden="true">🎉</span></h2></div>}
-				{view.task.outcome && <div className={s.actions}><KidsActionBar label={view.task.part?.completed ? "Следващо подусловие" : view.inQuest && view.quest?.completed === view.quest?.total ? "Отвори съкровището" : view.task.outcome === "independent" ? "Следваща задача" : "Продължи"} disabled={busy} onClick={() => void act({ type: "nextQuestion" })}/><Button variant="secondary" className={s.secondary} disabled={busy} onClick={() => showMap()}>Към картата</Button></div>}
+				{view.task.outcome && <div className={s.actions}><KidsActionBar label={view.inQuest && view.quest?.completed === view.quest?.total ? "Отвори съкровището" : view.task.connected ? view.task.connected.index < view.task.connected.total ? "Следващо подусловие" : "Следваща задача" : view.task.part?.completed ? "Следващо подусловие" : view.task.outcome === "independent" ? "Следваща задача" : "Продължи"} disabled={busy} onClick={() => void act({ type: "nextQuestion" })}/><Button variant="secondary" className={s.secondary} disabled={busy} onClick={() => showMap()}>Към картата</Button></div>}
 			</section>}
 		</>}
   {showDashboard && !focusedIsland && <footer className={s.footer}><Link href="/about" onClick={event=>leave(event,"/about")} className={s.quiet}>За сайта</Link><Link href={learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress"} onClick={event=>leave(event,learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress")} className={s.quiet}>Напредък</Link><Link href="/profiles" onClick={event=>leave(event,"/profiles")} className={s.quiet}>Профили</Link></footer>}
@@ -207,10 +207,10 @@ export function CompetitionPicker({ choices, competitionId, disabled=false, onSe
  }}>
   <button ref={trigger} disabled={disabled} className={s.competitionTrigger} aria-label={`Избери състезание: ${current?.title ?? "Състезания"}`} aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)}>
    <span className={s.competitionName}><small>Състезание · 4. клас</small><strong>{current?.title ?? "Избери състезание"}</strong></span>
-   <Badge tone="warning">{current?.difficulty === "easy" ? "Лесно" : "Трудно"}</Badge><span className={s.competitionChevron} aria-hidden="true">⌄</span>
+   <Badge tone="warning">{competitionDifficultyLabel(current?.difficulty ?? "hard")}</Badge><span className={s.competitionChevron} aria-hidden="true">⌄</span>
   </button>
   {open && <nav id={id} className={s.competitionOptions} aria-label="Състезания">{choices.map(item => <Link key={item.id} prefetch={onSelect?false:undefined} className={s.competitionOption} aria-current={item.id === competitionId ? "page" : undefined} href={`/?competition=${encodeURIComponent(item.id)}`} onClick={event => {if(disabled){event.preventDefault();return;}if(onSelect&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();onSelect(item.id);}setOpen(false);}}>
-   <span>{item.title}</span><Badge tone="warning">{item.difficulty === "easy" ? "Лесно" : "Трудно"}</Badge><span className={s.competitionCheck} aria-hidden="true">{item.id === competitionId ? "✓" : ""}</span>
+   <span>{item.title}</span><Badge tone="warning">{competitionDifficultyLabel(item.difficulty)}</Badge><span className={s.competitionCheck} aria-hidden="true">{item.id === competitionId ? "✓" : ""}</span>
   </Link>)}</nav>}
  </div>;
 }
@@ -234,8 +234,10 @@ function CourseQuestion({ task, competitionId, leaf, inQuest, goldGain, busy, ac
 	const ready = task.options ? choice !== undefined : values.every(v => /^\d+(?:[.,]\d{1,2})?$/.test(v));
 	function digit(value: string) { updateValues(values.map((s, i) => i !== field ? s : value === "back" ? s.slice(0, -1) : (s + value).slice(0, 12))); }
 	return <>
+		{task.connected && <ConnectedProblemContext task={task}/>}
+		{task.connected && task.connected.total > 1 && <p className={s.connectedPart} role="status">Подусловие {task.connected.index} от {task.connected.total}</p>}
 		<p className={s.question}>{task.text}</p>
-  {task.part && <p className={s.small} role="status">Отговор {task.part.index} от {task.part.total}</p>}
+  {task.part && !task.connected && <p className={s.small} role="status">Отговор {task.part.index} от {task.part.total}</p>}
 		{task.figure && <figure className={s.figure}><Image src={publicImage(task.figure.src)} alt={task.figure.alt} width={360} height={360} unoptimized /><figcaption>{task.source.startsWith("Учебно") ? "Учебна схема; числата са в условието." : "Оригинален чертеж. Не измервай по изображението."}</figcaption></figure>}
 		{task.options ? <div className={s.options} role="group" aria-label="Отговори">{task.options.map((option, index) => <button key={index} className={s.option} aria-pressed={done ? task.answers?.[0] === String(index) : choice === index} disabled={busy || done} onClick={() => { setChoice(index); saveDraft([String(index)]); }}><span className={s.letter}>{["А", "Б", "В", "Г"][index]})</span>{option}</button>)}</div> : <>
 			<div className={s.numberFields}>{task.fields.map((item, i) => <label key={i} className={s.numberLabel}>{item.label}<Input aria-label={item.label} type="text" inputMode="decimal" autoComplete="off" maxLength={12} value={values[i] ?? ""} disabled={busy || done} onFocus={() => setField(i)} onChange={e => { const value = e.target.value; if (/^[\d.,]*$/.test(value)) updateValues(values.map((v, n) => n === i ? value : v)); }} /></label>)}</div>
@@ -248,6 +250,15 @@ function CourseQuestion({ task, competitionId, leaf, inQuest, goldGain, busy, ac
 		{task.outcome && <div className={s.feedback} role="status"><div className={s.feedbackHeading}><KidsOtter small mood={task.outcome === "independent" || task.outcome === "hinted" ? "celebrate" : "support"}/><h3 ref={feedbackHeading} tabIndex={-1}>{task.outcome === "hinted" ? "Верен отговор с помощ" : kidsOutcomeLabels[task.outcome]}</h3></div>{goldGain && <GoldReward gain={goldGain} concise/>}{leaf && <KidsLearningProgress leaf={leaf} concise/>} {task.outcome === "independent" || task.outcome === "hinted" ? <details><summary>Виж решението</summary><ol className={s.steps}>{task.explanation?.map((step, i) => <li key={i}>{step}</li>)}</ol>{task.teachingFigure && <TeachingFigure figure={task.teachingFigure} />}</details> : <ol className={s.steps}>{task.explanation?.map((step, i) => <li key={i}>{step}</li>)}</ol>}{task.outcome !== "independent" && task.outcome !== "hinted" && task.teachingFigure && <TeachingFigure figure={task.teachingFigure} />}</div>}
 		<p className={s.small}>{task.sourceProblemId ? <a href={`/sources?competition=${encodeURIComponent(competitionId)}&problem=${encodeURIComponent(task.sourceProblemId)}`} target="_blank" rel="noopener noreferrer">{sourceLabel}</a> : sourceLabel}</p>
 	</>;
+}
+
+function ConnectedProblemContext({ task }: { task: NonNullable<KidsCourseView["task"]> }) {
+ const connected = task.connected!;
+ return <div className={s.connectedContext}>
+  {connected.introduction && <p className={s.question}>{connected.introduction}</p>}
+  <details className={s.connectedDisclosure}><summary>Цялото условие</summary><p className={s.question}>{connected.text}</p>{connected.figures?.filter(figure => !!figure).map(figure => <figure key={figure.src} className={s.figure}><Image src={publicImage(figure.src)} alt={figure.alt} width={360} height={360} unoptimized/></figure>)}</details>
+  {connected.completed.length > 0 && <details className={s.connectedDisclosure}><summary>Предишни подусловия · {connected.completed.length}</summary><ol className={s.completedParts}>{connected.completed.map(part => <li key={part.id}><p>{part.text}</p><strong>{kidsOutcomeLabels[part.outcome]}</strong>{part.answers.length > 0 && <dl>{part.fields.map((field, index) => <div key={index}><dt>{field.label}</dt><dd>{part.answers[index] ?? "-"}</dd></div>)}</dl>}<details><summary>Виж решението</summary><ol className={s.steps}>{part.explanation.map((step, index) => <li key={index}>{step}</li>)}</ol></details></li>)}</ol></details>}
+ </div>;
 }
 
 function TeachingFigure({ figure }: { figure: NonNullable<KidsCourseView["lesson"]>["illustration"] }) {

@@ -19,3 +19,15 @@ export function olympiadPracticeDifficulty(id: string): Difficulty {
  if (!difficulty) throw new Error(`Missing practice difficulty review: ${id}`);
  return { ...difficulty };
 }
+
+export function proletnoPracticeDifficulty(id: string): Difficulty {
+ const difficulty = (review.proletnoPractice as Record<string, Difficulty>)[id];
+ if (!difficulty) throw new Error(`Missing Spring practice difficulty review: ${id}`);
+ return { ...difficulty };
+}
+
+export function regionalOlympiadPracticeDifficulty(id: string): Difficulty {
+ const difficulty = (review.regionalOlympiadPractice as Record<string, Difficulty>)[id];
+ if (!difficulty) throw new Error(`Missing regional Olympiad practice difficulty review: ${id}`);
+ return { ...difficulty };
+}

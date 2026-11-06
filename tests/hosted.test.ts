@@ -3,7 +3,7 @@ import {DEFAULT_COMPETITION_ID} from "../src/core/competitions.ts";
 import {test} from "node:test";
 import type {SupabaseClient} from "@supabase/supabase-js";
 import {createSupabaseCourseStore} from "../src/store/supabase-course.ts";
-import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
+import {kidsCourseContent as currentContent} from "../src/server/kids-course-content.ts";
 import {applyCourseAction,migrateKidsCourse,newKidsCourse} from "../src/core/kids-course.ts";
 import type {KidsCourse} from "../src/core/kids-course.ts";
 import {newGoldGain} from "../src/core/kids-gold.ts";
@@ -23,6 +23,8 @@ function fakeDatabase(initial:Row[]=[]){
  then(resolve:(value:unknown)=>unknown){const matched=rows.filter(matches);record(matched.length);return Promise.resolve({data:structuredClone(matched),error:null}).then(resolve);},
  async maybeSingle(){const row=rows.find(matches);record(row?1:0);if(operation==="update"&&row)Object.assign(row,structuredClone(value));return {data:row?structuredClone(row):null,error:null};}};return chain;}} as unknown as SupabaseClient};
 }
+// Keep the saved, pre-connected contract covered by the legacy regression suite.
+const content = { ...currentContent, connectedProblem: undefined, navigationGroups: undefined };
 const now="2026-11-03T10:00:00Z";
 test("Supabase course CAS rejects concurrent first inserts and updates, and scopes both owner keys",async()=>{
  const db=fakeDatabase();const store=createSupabaseCourseStore(db.client,"parent-a","child-a");
@@ -219,4 +221,21 @@ test("atomic POST rejects mismatched raw course revisions without writing",async
  const course=newKidsCourse(content,now),db=fakeDatabase([{parent_id:"p",child_id:"c",revision:course.revision+1,course}]);
  const response=await kidsCourseResponse(coursePost(course.revision,{type:"pause"}),createSupabaseCourseStore(db.client,"p","c"),content);
  assert.equal(response.status,409);assert.equal(db.requests.length,1);assert.equal(db.rows[0]!.revision,course.revision+1);
+});
+
+test("connected grouped drafts and unit awards survive hosted CAS and device reload",async()=>{
+ const db=fakeDatabase(),first=createSupabaseCourseStore(db.client,"p","c"),second=createSupabaseCourseStore(db.client,"p","c");
+ const owner=currentContent.topics.find(t=>t.skills.some(s=>s.id==="M2-2a"))!;
+ let course=await first.update(0,{type:"selectTopic",topicId:owner.id,skillId:"M2-2a"},currentContent);
+ const work=()=>course.topics[course.active!.topicId]!.skillWork![course.active!.skillId!]!;
+ assert.ok(work().connected);assert.ok(work().attempt.problem.fields.length>1);
+ const draft=work().attempt.problem.fields.map((_,i)=>i?"":"56");
+ course=await first.update(course.revision,{type:"saveDraft",taskKey:work().attempt.key,partIndex:0,answers:draft},currentContent);
+ const loaded=(await second.read(currentContent))!;
+ assert.deepEqual(loaded.topics[loaded.active!.topicId]!.skillWork![loaded.active!.skillId!]!.attempt.draft!.answers,draft);
+ const revision=course.revision,key=work().attempt.key;
+ course=await second.update(revision,{type:"answer",taskKey:key,answers:work().attempt.problem.fields.map(f=>f.answer)},currentContent);
+ assert.equal(course.attempts.length,1);assert.equal(course.problemGoldAwards!.length,1);assert.match(course.problemGoldAwards![0]!.key,/:unit:/);
+ await assert.rejects(async()=>first.update(revision,{type:"answer",taskKey:key,answers:["1"]},currentContent),{status:409});
+ const after=await first.read(currentContent);assert.deepEqual(after!.problemGoldAwards,course.problemGoldAwards);
 });

@@ -129,6 +129,7 @@ export function chooseQuestProblem(course: KidsCourse, content: KidsCourseConten
 }
 
 export function hasQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string): boolean {
+ if (course.questContinuation) return true;
  // The preview replaces quest work, reserving only manual work. Its fresh quest
  // is the only object selection mutates, so learner history needs no deep clone.
  const preview: KidsCourse = { ...course, quest: { id: "preview", startedAt: now, steps: [], completed: 0, diagnostic: false } };
@@ -137,8 +138,11 @@ export function hasQuestProblem(course: KidsCourse, content: KidsCourseContent, 
 
 export function questAchievement(course: KidsCourse): string {
  const attempts = course.attempts.filter(a => a.questId === course.quest!.id);
+ const connected = attempts.some(a => a.problem.naturalUnit);
  const independent = attempts.filter(a => a.outcome === "independent").length;
+ if (independent && connected) return `Завърши самостоятелно ${independent} ${independent === 1 ? "стъпка" : "стъпки"} в това приключение.`;
  if (independent) return `Реши ${independent} ${independent === 1 ? "задача" : "задачи"} самостоятелно в това приключение.`;
  if (attempts.some(a => a.outcome === "hinted")) return "Намери верен отговор с помощ и упражни нова идея.";
+ if (connected) return "Разгледа решенията и завърши стъпките на приключението. Запазихме идеите за още упражнение.";
  return `Разгледа ${attempts.length} ${attempts.length === 1 ? "задача и нейното решение" : "задачи и техните решения"}. Запазихме идеите за още упражнение.`;
 }

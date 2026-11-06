@@ -1,4 +1,6 @@
 import Link from "next/link";
+import {publicMetadata} from "@/src/public-site";
+export const metadata=publicMetadata("За приложението | Състезателна математика","Подготовка по математика за 4. клас с истински състезателни задачи, ясни подсказки и приключения с награди.","/about");
 import s from "@/components/kids.module.css";
 import styles from "./about.module.css";
 
@@ -27,6 +29,7 @@ export default function About() {
      <p>Националното външно оценяване проверява наученото до края на 4. клас. Включва задачи по смятане, геометрия и приложение на математиката в ежедневието.</p>
     </section>
    </div>
+   <p><Link href="/materiali">Ценни материали за подготовката и приема след 4. клас →</Link></p>
   </div>
  </main>;
 }

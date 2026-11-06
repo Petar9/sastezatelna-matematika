@@ -38,3 +38,17 @@ test("proxy rejects cross-origin writes and keeps previews disconnected from hos
   assert.equal(response.status,200);assert.equal(response.headers.get("Cache-Control"),"no-store");assert.equal(claimsCalls,before);
  }finally{process.env=original;}
 });
+
+test("public articles bypass Supabase for GET/HEAD even with cookies, but mutations retain origin checks",async()=>{
+ const original={...process.env};try{
+  process.env.MATHS_MODE="hosted";process.env.VERCEL_ENV="production";process.env.MATHS_APP_URL="https://maths.example";
+  const before=claimsCalls;
+  for(const path of ["/about","/materiali","/materiali/priem-sled-4-klas-smg-npmg","/robots.txt","/sitemap.xml"]){
+   for(const method of ["GET","HEAD"]){const response=await proxy(new NextRequest("https://maths.example"+path,{method,headers:{cookie:"sb-fixture-auth-token=private"}}));assert.equal(response.status,200);assert.equal(response.headers.get("set-cookie"),null);assert.equal(response.headers.get("cache-control"),null);}
+   assert.equal((await proxy(new NextRequest("https://maths.example"+path,{method:"POST",headers:{origin:"https://other.example"}}))).status,403);
+  }
+  assert.equal(claimsCalls,before);
+  process.env.VERCEL_ENV="preview";
+  assert.equal((await proxy(new NextRequest("https://maths.example/materiali"))).headers.get("x-robots-tag"),"noindex, nofollow");
+ }finally{process.env=original;}
+});

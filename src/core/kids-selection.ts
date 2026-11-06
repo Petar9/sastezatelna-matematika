@@ -1,6 +1,6 @@
 import type { CourseProblem, KidsCourse, KidsCourseContent } from "./kids-course.ts";
 
-export const problemIdentity = (p: CourseProblem) => JSON.stringify([p.text, p.options, p.fields.map(f => f.answer)]);
+export const problemIdentity = (p: CourseProblem) => p.naturalUnit ? JSON.stringify(["natural", p.naturalUnit.sourceId, p.naturalUnit.unitId]) : JSON.stringify([p.text, p.options, p.fields.map(f => f.answer)]);
 export const isCompetitionProblem = (p: CourseProblem) => p.archive ? p.archive.kind !== "scaffold" : !!p.provenance || p.id.endsWith(":original");
 const catalogues = new WeakMap<KidsCourseContent, Map<string, CourseProblem>>();
 function catalogueFor(content: KidsCourseContent) {
@@ -19,7 +19,7 @@ export function catalogueProblems(content: KidsCourseContent): CourseProblem[] {
 }
 export function problemSource(problem: CourseProblem, content: KidsCourseContent) {
  const catalogue = catalogueFor(content);
- const canonical = catalogue.get(problem.id);
+ const canonical = catalogue.get(problem.id) ?? (problem.naturalUnit ? [...catalogue.values()].find(p => p.archive?.sourceId === problem.naturalUnit!.sourceId && p.archive.kind === "original") : undefined);
  const archive = archiveFor(problem, content);
  const practice = archive ? archive.kind === "scaffold" : !isCompetitionProblem(problem);
  const reference = problem.practiceSource ?? canonical?.practiceSource;
@@ -60,8 +60,8 @@ export function overlaps(a: CourseProblem, b: CourseProblem, content?: KidsCours
  return !!left && !!right && left.sourceId === right.sourceId && left.covers.some(id => right.covers.includes(id));
 }
 export function pendingProblems(course: KidsCourse, replacingKey?: string) {
- return [...Object.values(course.topics).flatMap(topic => [...Object.values(topic.work), ...Object.values(topic.skillWork ?? {})]), course.quest?.work]
-  .filter(work => work && !work.attempt.outcome && work.attempt.key !== replacingKey).map(work => work!.attempt.problem);
+ return [...Object.values(course.topics).flatMap(topic => [...Object.values(topic.work), ...Object.values(topic.skillWork ?? {})]), course.quest?.work, course.questContinuation]
+  .filter(work => work && (!work.attempt.outcome || work.connected && work.connected.index + 1 < work.connected.problem.units.length) && work.attempt.key !== replacingKey).map(work => work!.connected ? { ...work!.attempt.problem, archive: { sourceId: work!.connected.problem.sourceId, kind: "original" as const, covers: work!.connected.problem.units.map(unit => unit.id) } } : work!.attempt.problem);
 }
 export function skillReviewDue(course: KidsCourse, topicId: string, skillId: string): string | undefined {
  const state = course.topics[topicId]!.skills[skillId]!;
@@ -81,6 +81,10 @@ export function createSelectionContext(course: KidsCourse, content: KidsCourseCo
   return value;
  };
  const archive = (problem: CourseProblem) => {
+  if (!problem.naturalUnit && problem.archive?.kind !== "scaffold") {
+   const connected = content.connectedProblem?.(problem);
+   if (connected) return { sourceId: connected.sourceId, kind: "original" as const, covers: connected.units.map(u => u.id) };
+  }
   if (problem.archive) return problem.archive;
   const canonical = catalogueFor(content).get(problem.id);
   return canonical && identity(canonical) === identity(problem) ? canonical.archive : undefined;
@@ -122,13 +126,13 @@ export function createSelectionContext(course: KidsCourse, content: KidsCourseCo
 
 // Enumerate finite catalogues from the beginning. Saved cursors remain compatible,
 // but cannot hide newly prioritised originals after a content-order change.
-export function chooseSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, now: string, review = false, replacingKey?: string, context = createSelectionContext(course, content, now, replacingKey), existenceOnly = false) {
+export function chooseSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, now: string, review = false, replacingKey?: string, context = createSelectionContext(course, content, now, replacingKey), existenceOnly = false, accepts?: (problem: CourseProblem) => boolean) {
  let chosen: { problem: CourseProblem; cursor: number; rank: number } | undefined;
  const ids = new Set<string>();
  for (const pool of harder ? [true] : [false, true]) for (let cursor = 0; cursor < 1000; cursor++) {
   const problem = content.problem(skillId, cursor, pool);
   if (!problem) break;
-  if (ids.has(problem.id)) continue;
+  if (ids.has(problem.id) || accepts && !accepts(problem)) continue;
   ids.add(problem.id);
   // Harder authored tasks remain challenges, rather than filling exhausted core pools.
   if (!harder && pool && !isCompetitionProblem(problem)) continue;

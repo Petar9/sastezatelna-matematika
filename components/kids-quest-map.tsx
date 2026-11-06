@@ -18,7 +18,7 @@ export function adventureAchievement(text = "") {
 export function QuestTrail({ quest }: { quest: NonNullable<KidsCourseView["quest"]> }) {
  return <section className={s.questTrail} aria-label="Пътят на приключението">
   <AdventureRoute completed={quest.completed} total={quest.total} compact/>
-  <span className={s.questCount}>{quest.completed}/{quest.total} задачи</span>
+  <span className={s.questCount}>{quest.completed}/{quest.total} стъпки</span>
  </section>;
 }
 

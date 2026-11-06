@@ -56,3 +56,7 @@
  .title { font-size: 32px; }
  .brand { font-size: 15px; }
 }
+
+.resources { display:flex; flex-wrap:wrap; gap:var(--space-4) var(--space-8); color:var(--primary); font-size:var(--text-small); }
+.resources a { display:inline-flex; align-items:center; min-height:var(--target-min); text-underline-offset:4px; }
+.resources a:focus-visible { outline:var(--focus-width) solid var(--focus); outline-offset:var(--focus-offset); }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button, ButtonLink } from "./ui/button";
 import { Input } from "./ui/field";
 import { Message } from "./ui/message";
@@ -31,5 +32,6 @@ export function Landing({request}:{request?:string}){
    <LandingIllustration />
   </section>
   <p className={l.collection}>Наличният комплект е по математика за 4. клас и включва задачи от „Математика за всеки“, Олимпиада, НВО (матура) за 2023-2026 г.</p>
+  <nav className={l.resources} aria-label="За приложението и подготовката"><Link href="/about">За сайта</Link><Link href="/materiali">Ценни материали</Link></nav>
  </div></main>;
 }

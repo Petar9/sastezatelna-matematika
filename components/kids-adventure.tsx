@@ -41,12 +41,12 @@ export function GoldReward({ gain, concise = false }: { gain: GoldGain; concise?
   });
   return () => cancelAnimationFrame(frame);
  }, [gain]);
- const milestone = gain.awards.some(a => a.milestone === "confirmed") ? "Вече го умееш!" : gain.awards.some(a => a.milestone === "correct") ? "Първо откритие!" : gain.problems?.length ? "Нова решена задача!" : "Нова стъпка в приключението!";
+ const milestone = gain.awards.some(a => a.milestone === "confirmed") ? "Вече го умееш!" : gain.awards.some(a => a.milestone === "correct") ? "Първо откритие!" : gain.problems?.length ? "Нова завършена стъпка!" : "Нова стъпка в приключението!";
  const labels = { started: "Първа стъпка", correct: "Първи верен отговор", confirmed: "Затвърдено умение" };
  return <div ref={reward} className={s.goldReward} role="status" data-gold-gain={gain.amount}>
   <div ref={flight} className={s.coinFlight} aria-hidden="true"><GoldCoin/><GoldCoin/><GoldCoin/></div>
   <strong>{!concise && `${milestone} `}<span>+{gain.amount} злато</span></strong>
-  {gain.awards.length + (gain.problems?.length ?? 0) > 1 && <details><summary>Откъде е златото?</summary><ul>{gain.awards.map(award => <li key={`${award.skillId}:${award.milestone}`}>{labels[award.milestone]} +{goldAmounts[award.milestone]}</li>)}{gain.problems?.map(award => <li key={award.key}>Решена задача +{problemAwardAmount(award)}</li>)}</ul></details>}
+  {gain.awards.length + (gain.problems?.length ?? 0) > 1 && <details><summary>Откъде е златото?</summary><ul>{gain.awards.map(award => <li key={`${award.skillId}:${award.milestone}`}>{labels[award.milestone]} +{goldAmounts[award.milestone]}</li>)}{gain.problems?.map(award => <li key={award.key}>{award.key.includes(":unit:") ? "Завършена стъпка" : "Решена задача"} +{problemAwardAmount(award)}</li>)}</ul></details>}
  </div>;
 }
 export const souvenirs = ["Морска звезда", "Перлена мида", "Компас на откривателя", "Кораб в бутилка"];
@@ -63,7 +63,7 @@ export function AdventureSouvenir({ index, hidden = false }: { index: number; hi
 export function AdventureRoute({ completed, total = 5, compact = false }: { completed: number; total?: number; compact?: boolean }) {
  const position = Math.min(total, completed);
  return <div className={`${s.voyage} ${compact ? s.voyageCompact : ""}`}>
-  <div className={s.voyageLine} role="progressbar" aria-label="Разгледани задачи в приключението" aria-valuemin={0} aria-valuemax={total} aria-valuenow={position} aria-valuetext={`${position} от ${total} задачи, включително с помощ`}><span style={{ width: `${position / total * 100}%` }}/></div>
+  <div className={s.voyageLine} role="progressbar" aria-label="Изминати стъпки в приключението" aria-valuemin={0} aria-valuemax={total} aria-valuenow={position} aria-valuetext={`${position} от ${total} стъпки, включително с помощ`}><span style={{ width: `${position / total * 100}%` }}/></div>
   {!compact && <ol className={s.voyageStops} aria-label={`${total} спирки до съкровището`} style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>{Array.from({ length: total }, (_, i) => i + 1).map(stop => <li key={stop} data-complete={stop <= position} aria-current={stop === position + 1 ? "step" : undefined}><span>{stop <= position ? "✓" : stop}</span></li>)}</ol>}
   <span className={s.voyageBoat} style={{ left: `calc(${position / total * 100}% - ${position / total * 34}px)` }} aria-hidden="true"><svg viewBox="0 0 60 60"><path d="M4 40h52L45 52H16Z" fill="#b87d52"/><path d="M27 38V4l25 31H30Z" fill="#fffaf0" stroke="#b9cfd0"/><path d="M23 12 7 34h16Z" fill="#4da3b9"/></svg></span>
  </div>;
@@ -74,7 +74,7 @@ export function AdventureHome({ view, nickname, busy, start, resumeTopic, headin
  const available = pending || view.questAvailable !== false;
  const total = pending ? view.quest!.total : 5;
  return <section className={s.adventureHome} aria-label="Твоето приключение">
-  <div className={s.hero}><KidsOtter/><div><h1 ref={headingRef} tabIndex={-1} className={s.title}>{nickname ? `Здравей, ${nickname}!` : "На път за съкровища!"}</h1><p>{pending ? `Вече разгледа ${completed} от ${total} задачи. Хайде нататък!` : available ? "До пет задачи. Нови открития. Твое съкровище." : "Разгледа всички задачи за момента! Можеш да се върнеш към островите."}</p></div></div>
+  <div className={s.hero}><KidsOtter/><div><h1 ref={headingRef} tabIndex={-1} className={s.title}>{nickname ? `Здравей, ${nickname}!` : "На път за съкровища!"}</h1><p>{pending ? `Премина ${completed} от ${total} стъпки. Хайде нататък!` : available ? "Пет стъпки. Нови открития. Твое съкровище." : "Разгледа всички задачи за момента! Можеш да се върнеш към островите."}</p></div></div>
   {available && <AdventureRoute completed={completed} total={total}/>}
   {available && <div className={s.treasurePreview}><AdventureSouvenir index={view.stamps?.length ?? 0}/><div><small>В следващото съкровище</small><strong>{souvenirs[(view.stamps?.length ?? 0) % souvenirs.length]}</strong></div><span aria-hidden="true">✦</span></div>}
   <Button variant="primary" className={`${s.button} ${s.questButton}`} disabled={busy || !available} onClick={start}>{pending ? "Продължи приключението" : available ? "Започни приключение" : "Всички спирки са разгледани"}</Button>

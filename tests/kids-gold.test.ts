@@ -6,9 +6,11 @@ import path from "node:path";
 import {applyCourseAction,courseView,newKidsCourse} from "../src/core/kids-course.ts";
 import type {CourseAction} from "../src/core/kids-course.ts";
 import {courseGoldAwards,courseGoldBalance,goldKey,newGoldGain,topicProblemGold} from "../src/core/kids-gold.ts";
-import {kidsCourseContent as content} from "../src/server/kids-course-content.ts";
+import {kidsCourseContent as currentContent} from "../src/server/kids-course-content.ts";
 import {createKidsCourseStore} from "../src/store/kids-course.ts";
 import {kidsCourseResponse,readKidsCourseView} from "../src/server/kids-course.ts";
+// Keep the saved, pre-connected contract covered by the legacy regression suite.
+const content = { ...currentContent, connectedProblem: undefined, navigationGroups: undefined };
 const now="2026-11-03T12:00:00Z";
 function harness(){
  let record=newKidsCourse(content,now);

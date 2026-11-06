@@ -5,10 +5,13 @@ import os from "node:os";
 import path from "node:path";
 import { applyCourseAction, courseView, newKidsCourse, normalizeCourseNumber, parseCourseCommand } from "../src/core/kids-course.ts";
 import type { CourseAction, KidsCourse, KidsCourseContent, CourseProblem } from "../src/core/kids-course.ts";
-import { kidsCourseContent as content } from "../src/server/kids-course-content.ts";
-import { olympiadCourseContent } from "../src/server/olimpiada-course-content.ts";
+import { kidsCourseContent as currentContent } from "../src/server/kids-course-content.ts";
+import { olympiadCourseContent as currentOlympiadContent } from "../src/server/olimpiada-course-content.ts";
 import { createKidsCourseStore } from "../src/store/kids-course.ts";
 
+// Retain the pre-connected course and migration contract as a historical fixture.
+const content: KidsCourseContent = { ...currentContent, connectedProblem: undefined, navigationGroups: undefined };
+const olympiadCourseContent: KidsCourseContent = { ...currentOlympiadContent, connectedProblem: undefined, navigationGroups: undefined };
 const now = "2026-11-02T12:00:00.000Z";
 function harness(material: KidsCourseContent = content) {
  let record = newKidsCourse(material, now);

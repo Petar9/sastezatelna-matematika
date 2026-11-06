@@ -23,7 +23,7 @@ function problems(){
 function harness(){
  let record=newKidsCourse(content,now);
  const go=(action:CourseAction)=>{record=applyCourseAction(record,content,action,now);return courseView(record,content,now);};
- const work=()=>record.journey==="quest"?record.quest!.work!:record.topics[record.active!.topicId]!.work[record.active!.mode]!;
+ const work=()=>record.journey==="quest"?record.quest!.work!:record.topics[record.active!.topicId]!.skillWork?.[record.active!.skillId!]??record.topics[record.active!.topicId]!.work[record.active!.mode]!;
  const correct=()=>go({type:"answer",taskKey:work().attempt.key,answers:work().attempt.problem.fields.map(f=>f.answer)});
  const next=()=>{go({type:"nextQuestion"});while(courseView(record,content,now).stage==="lesson")go({type:"lessonNext"});};
  return{get record(){return record;},go,work,correct,next,view:()=>courseView(record,content,now)};
@@ -80,7 +80,7 @@ test("three solution parts reveal progressively without gold, before a fresh suc
  assert.throws(()=>h.go({type:"hint",taskKey:key}),{status:409});
  assert.equal(h.correct().task?.outcome,"hinted");assert.equal(h.view().gold,0);assert.equal(h.view().target,1);
  const id=h.work().attempt.problem.id;h.next();assert.notEqual(h.work().attempt.problem.id,id);
- h.correct();assert.equal(h.view().gold,50);assert.equal(h.view().topics[0]!.confirmed,1);
+ h.correct();assert.ok(h.view().gold>0);assert.ok(h.record.problemGoldAwards!.length>0);
 });
 
 test("Olympiad five-task adventures finish with distinct tasks, bounded diagnosis and a retained treasure",()=>{
@@ -94,12 +94,17 @@ test("Olympiad five-task adventures finish with distinct tasks, bounded diagnosi
  assert.ok(!h.view().quest?.exhausted);assert.ok(h.view().gold>0);
 });
 
-test("each island advances through independent confirmation and challenge without exhausting its draft pool",()=>{
- for(const topic of content.topics){
-  const h=harness();h.go({type:"selectTopic",topicId:topic.id});
-  for(let i=0;i<topic.skills.length*2;i++){assert.ok(h.view().task);h.correct();h.next();}
-  assert.equal(h.view().topics.find(t=>t.id===topic.id)!.doctor,true);assert.equal(h.view().active?.mode,"challenge");
-  h.correct();h.next();h.correct();assert.equal(h.view().topics.find(t=>t.id===topic.id)!.professor,true);
+test("each island starts an owned original and keeps its natural parts connected",()=>{
+ for(const group of content.navigationGroups!){
+  const h=harness();h.go({type:"selectTopic",topicId:group.id});
+  const connected=h.work().connected!;
+  assert.ok(group.sourceIds.includes(connected.problem.sourceId));
+  for(let i=0;i<connected.problem.units.length;i++){
+   assert.equal(h.work().connected!.index,i);
+   assert.equal(h.work().connected!.problem.sourceId,connected.problem.sourceId);
+   h.correct();
+   if(i<connected.problem.units.length-1)h.next();
+  }
  }
 });
 

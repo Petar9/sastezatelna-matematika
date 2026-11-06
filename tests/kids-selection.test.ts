@@ -3,11 +3,15 @@ import { test } from "node:test";
 import { applyCourseAction, courseView, migrateKidsCourse, newKidsCourse } from "../src/core/kids-course.ts";
 import type { CourseAction, CourseProblem, KidsCourseContent } from "../src/core/kids-course.ts";
 import { catalogueProblems, problemSource, chooseSkillProblem, isCompetitionProblem, overlaps } from "../src/core/kids-selection.ts";
-import { kidsCourseContent } from "../src/server/kids-course-content.ts";
-import { olympiadCourseContent } from "../src/server/olimpiada-course-content.ts";
-import { nvoCourseContent } from "../src/server/nvo-course-content.ts";
+import { kidsCourseContent as currentKidsContent } from "../src/server/kids-course-content.ts";
+import { olympiadCourseContent as currentOlympiadContent } from "../src/server/olimpiada-course-content.ts";
+import { nvoCourseContent as currentNvoContent } from "../src/server/nvo-course-content.ts";
 import { originalStatement } from "../src/server/original-statement.ts";
 
+// Saved assignments keep the original field-level contract after content upgrades.
+const kidsCourseContent = { ...currentKidsContent, connectedProblem: undefined, navigationGroups: undefined };
+const olympiadCourseContent = { ...currentOlympiadContent, connectedProblem: undefined, navigationGroups: undefined };
+const nvoCourseContent = { ...currentNvoContent, connectedProblem: undefined, navigationGroups: undefined };
 const now = "2026-11-03T12:00:00.000Z", later = "2026-11-05T12:00:00.000Z";
 function harness(content: KidsCourseContent) {
  let course = newKidsCourse(content, now);

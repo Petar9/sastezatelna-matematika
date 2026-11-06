@@ -1,3 +1,4 @@
+import { connectedRegistry, connectedUnit, letteredStatement, navigationGroups, singleConnected } from "./connected-course-content.ts";
 import { originalDifficulty, olympiadPracticeDifficulty } from "./problem-difficulty.ts";
 import { olympiadIntroductions } from "./kids-teaching-introductions.ts";
 import archive from "../../content/olimpiada/municipal-2022-2025.json" with { type: "json" };
@@ -121,9 +122,32 @@ const topics: CourseTopic[] = islands.map(island => ({ id: island.id, title: isl
  skills: pack.practice.families.filter(family => family.island === island.key).map(family => ({ id: skillId(family), title: names[family.id]!,
   lesson: family.items[0]!.worked_steps_bg })) }));
 
+const dependencies: Record<string, number[][]> = {
+ "2022-p2": [[], [0]], "2023-p2": [[], [0], [0]], "2024-p2": [[], [0]],
+ "2024-p3": [[], [0], [0, 1]], "2025-p3": [[], [0], [0, 1]],
+};
+const connected = connectedRegistry(pack.originals.originals.filter(o => o.id !== blockedOriginal).map(original => {
+ const full = all.get(`${original.id}:original`)!;
+ const unlettered = original.units.length === 1 || (original.problem === 1 && [2022, 2023, 2025].includes(original.year));
+ const statement = unlettered ? undefined : letteredStatement(original.original_text_bg, original.units.length);
+ return { aliases: [full.id, ...original.units.map(unit => unit.id)], problem: unlettered ? singleConnected(full) : {
+  sourceId: original.id, text: original.original_text_bg, introduction: statement!.introduction, figure: full.figure,
+  units: original.units.map((unit, index) => {
+   const result = connectedUnit(all.get(unit.id)!, unit.id, statement!.parts[index]!);
+   const deps = dependencies[`${original.year}-p${original.problem}`]?.[index];
+   if (deps?.length) result.dependsOn = deps.map(i => original.units[i]!.id);
+   return result;
+  }),
+ } };
+}));
+const groups = navigationGroups(topics, islands.map(island => ({ id: island.id })), connected.sources, source => {
+ const full = all.get(`${source.sourceId}:original`)!;
+ return topics.find(topic => topic.skills.some(skill => skill.id === full.skillId))!.id;
+});
+
 // Published for the owner-approved pilot; outstanding source-review notes remain below.
 export const olympiadCourseContent: KidsCourseContent = {
- version, topics, introductions: olympiadIntroductions,
+ version, topics, navigationGroups: groups, connectedProblem: connected.connectedProblem, introductions: olympiadIntroductions,
  concepts: pack.practice.families.map(family => ({ id: skillId(family), title: names[family.id]!, prerequisites: [],
   attention: family.items[0]!.statement_bg, idea: family.items[0]!.worked_steps_bg[0]!, workedStep: family.items[0]!.worked_steps_bg.slice(1).join(" ") })),
  objectiveMap: Object.fromEntries(pack.practice.families.map(family => [skillId(family), { primary: skillId(family), related: [] }])),

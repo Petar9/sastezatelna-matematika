@@ -5,11 +5,13 @@ import path from "node:path";
 import { test } from "node:test";
 import { applyCourseAction, courseView, migrateKidsCourse, newKidsCourse, parseCourseCommand } from "../src/core/kids-course.ts";
 import type { CourseAction, KidsCourse, KidsCourseContent } from "../src/core/kids-course.ts";
-import { kidsCourseContent as content } from "../src/server/kids-course-content.ts";
+import { kidsCourseContent as currentContent } from "../src/server/kids-course-content.ts";
 import { isCompetitionProblem, teachingMethod } from "../src/core/kids-selection.ts";
 import { createKidsCourseStore } from "../src/store/kids-course.ts";
+// Keep the saved, pre-connected contract covered by the legacy regression suite.
+const content = { ...currentContent, connectedProblem: undefined, navigationGroups: undefined };
 const now = "2026-11-02T12:00:00.000Z";
-function harness(material = content, initial = newKidsCourse(material, now)) {
+function harness(material: KidsCourseContent = content, initial = newKidsCourse(material, now)) {
  let record = initial;
  const view = () => courseView(record, material, now);
  const go = (a: CourseAction) => { record = applyCourseAction(record, material, a, now); return view(); };

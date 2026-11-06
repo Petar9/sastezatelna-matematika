@@ -1,3 +1,4 @@
+import { nvoConnectedContent } from "./nvo-connected-content.ts";
 import archive from "../../content/nvo/grade4-2022-2025.json" with { type: "json" };
 import type { CourseProblem, CourseSolution, KidsCourseContent } from "../core/kids-course.ts";
 
@@ -60,6 +61,7 @@ const entry = (skill: string) => pools.get(skill)?.core[0] ?? pools.get(skill)?.
 
 export const nvoCourseContent: KidsCourseContent = {
  version: archive.version,
+ ...nvoConnectedContent([...all.values()], archive.topics),
  topics: archive.topics.map(topic => ({ ...topic, rewardName: topic.title.toLocaleLowerCase("bg"),
   skills: topic.skills.map(skill => ({ ...skill, lesson: [...entry(skill.id)!.explanation] })) })),
  introductions: Object.fromEntries(archive.topics.flatMap(topic => topic.skills.map(skill => [skill.id,

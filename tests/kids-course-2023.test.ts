@@ -6,9 +6,11 @@ import type { CourseAttempt, KidsCourseContent } from "../src/core/kids-course.t
 import { awardProblemGold, courseGoldBalance, problemGoldKey } from "../src/core/kids-gold.ts";
 import { catalogueProblems, chooseSkillProblem, isCompetitionProblem, overlaps } from "../src/core/kids-selection.ts";
 import { active2023Rows, competition2023Rows, original2023 } from "../src/server/kids-course-2023.ts";
-import { kidsCourseContent as content } from "../src/server/kids-course-content.ts";
+import { kidsCourseContent as currentContent } from "../src/server/kids-course-content.ts";
 import { originalStatement } from "../src/server/original-statement.ts";
 
+// Retain the pre-connected course and migration contract as a historical fixture.
+const content: KidsCourseContent = { ...currentContent, connectedProblem: undefined, navigationGroups: undefined };
 const now = "2026-11-04T12:00:00Z";
 const all = catalogueProblems(content), added = all.filter(p => p.provenance?.year === 2023);
 const previous: KidsCourseContent = { ...content, problem: (skill, index, hard) => {
