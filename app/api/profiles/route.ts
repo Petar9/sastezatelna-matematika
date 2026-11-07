@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       if (!nickname || nickname.length > 40) return fail("nickname", "Напиши прякор от 1 до 40 знака.", 400);
       failedAction = "rename-unavailable";
       const { data, error } = await parent.db.from("child_profiles").update({ nickname })
-        .eq("parent_id", parent.parentId).eq("id", child.id).eq("active", true).select("id").maybeSingle();
+        .eq("parent_id", child.parentId).eq("id", child.id).eq("active", true).select("id").maybeSingle();
       if (error) throw error;
       if (!data) return fail("missing", "Този профил вече не е достъпен.", 403);
       return json ? Response.json({ nickname }) : retry("status=renamed");
@@ -30,16 +30,16 @@ export async function POST(request: Request) {
     let childId: string;
     if (body.get("action") === "link-email" || body.get("action") === "unlink-email") {
       const child = parent.children.find(child => child.id === body.get("childId"));
-      if (!child) return retry("error=missing");
+      if (!child?.isOwner) return retry("error=missing");
       if (body.get("setup") === "1") setup = child.id;
       if (body.get("action") === "unlink-email") {
-        const { error } = await parent.db.from("child_profile_logins").delete().eq("parent_id", parent.parentId).eq("child_id", child.id);
+        const { error } = await parent.db.from("child_profile_logins").delete().eq("parent_id", parent.actorId).eq("child_id", child.id);
         if (error) throw error;
         return retry("status=removed");
       }
       const email = invitationEmail(body.get("email"));
       if (!email) return linkRetry("error=email");
-      const { error } = await parent.db.rpc("set_child_login", { p_parent_id: parent.parentId, p_child_id: child.id, p_email: email });
+      const { error } = await parent.db.rpc("set_child_login", { p_parent_id: parent.actorId, p_child_id: child.id, p_email: email });
       if (error?.code === "23505") return linkRetry("error=email-used");
       if (error?.code === "22023") return linkRetry("error=email");
       if (error) throw error;
@@ -47,9 +47,10 @@ export async function POST(request: Request) {
       childId = child.id;
     } else
     if (body.get("action") === "create") {
+      if (!parent.canCreateChildren) throw new KidsError("Тази промяна е достъпна за родителя.", 403);
       const nickname = String(body.get("nickname") ?? "").trim();
       if (!nickname || nickname.length > 40) return retry("error=nickname");
-      const { data, error } = await parent.db.from("child_profiles").insert({ parent_id: parent.parentId, nickname }).select("id").single();
+      const { data, error } = await parent.db.from("child_profiles").insert({ parent_id: parent.actorId, nickname }).select("id").single();
       if (error?.code === "P0001" && error.message.includes("active_child_limit")) return retry("full=1");
       if (error) throw error;
       childId = data.id;

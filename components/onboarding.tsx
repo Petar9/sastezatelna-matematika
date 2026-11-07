@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { SkipChildEmailForm } from "./skip-child-email-form";
+import { ChildSharing } from "./child-sharing";
 import { ProfileNameForm } from "./profile-name-form";
 import { FeedbackButton } from "./feedback";
 import { KidsOtter } from "./kids-otter";
@@ -42,7 +43,7 @@ export function LoginWelcome({ issue }: { issue?: LoginIssue }) {
   </OnboardingFrame>;
 }
 
-type Child = { id: string; nickname: string; loginEmail?: string | null; loginConnected?: boolean };
+type Child = { id: string; nickname: string; loginEmail?: string | null; loginConnected?: boolean; isOwner?: boolean };
 export type ProfileIssue = "nickname" | "unavailable" | "full" | "missing" | "email" | "email-used" | "create-unavailable" | "select-unavailable" | "save-email-unavailable" | "remove-email-unavailable" | "rename-unavailable";
 const profileMessages: Record<ProfileIssue, string> = {
   nickname: "Напиши прякор от 1 до 40 знака.",
@@ -89,9 +90,9 @@ function ProfileFooter() {
     <form method="post" action="/auth/logout"><Button type="submit" variant="quiet" className={o.textButton}>Изход</Button></form><Link href="/materiali">Ценни материали</Link><FeedbackButton/></>;
 }
 
-export function ChildProfiles({ children, issue, setup, status }: { children: Child[]; issue?: ProfileIssue; setup?: string; status?: "saved" | "removed" | "renamed" }) {
+export function ChildProfiles({ children, issue, setup, status, canCreateChildren = true }: { children: Child[]; canCreateChildren?: boolean; issue?: ProfileIssue; setup?: string; status?: "saved" | "removed" | "renamed" }) {
   const firstVisit = children.length === 0;
-  const setupChild = children.find(child => child.id === setup);
+  const setupChild = children.find(child => child.id === setup && child.isOwner !== false);
   if (setupChild) return <OnboardingFrame footer={<ProfileFooter />}>
     <h1>Google имейл на детето</h1>
     <p className={o.intro}>По желание добави Google имейла на {setupChild.nickname}, за да влиза самостоятелно. Можеш да го добавиш и по-късно.</p>
@@ -116,6 +117,7 @@ export function ChildProfiles({ children, issue, setup, status }: { children: Ch
             <summary>Промени името</summary>
             <ProfileNameForm child={child} />
           </details>
+          {child.isOwner !== false && <><ChildSharing childId={child.id} />
           <details className={o.loginSettings} open={issue === "email" || issue === "email-used" || issue === "save-email-unavailable" || issue === "remove-email-unavailable"}>
             <summary>Google имейл на детето</summary>
             <p className={o.note}>{child.loginConnected ? "Google профилът е свързан." : "По желание добави Google имейл за самостоятелен вход."}</p>
@@ -125,13 +127,13 @@ export function ChildProfiles({ children, issue, setup, status }: { children: Ch
               <input type="hidden" name="childId" value={child.id} />
               <Button type="submit" variant="quiet" className={o.textButton}>Премахни самостоятелния вход</Button>
             </form>}
-          </details>
+          </details></>}
         </div>)}
       </div>
-      <details className={o.additional} open={issue === "nickname" || issue === "full" || issue === "create-unavailable"}>
+      {canCreateChildren && <details className={o.additional} open={issue === "nickname" || issue === "full" || issue === "create-unavailable"}>
         <summary>Добави друг изследовател</summary>
         <NicknameForm issue={issue} />
-      </details>
+      </details>}
       <Link className={o.home} href="/">← Начало</Link>
     </>}
   </OnboardingFrame>;

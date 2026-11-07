@@ -5,7 +5,9 @@ export const state = {
   role: "parent" as "parent" | "child",
   rpcCall: undefined as unknown,
   deleteFilters: [] as [string, unknown][],
-  children: [] as { id: string; nickname: string }[],
+  canCreateChildren:true,
+  pendingToken:null as string|null,
+  children: [] as { id: string; nickname: string; parentId?:string; isOwner?:boolean }[],
   parentError: undefined as unknown,
   authError: false,
   exchangeError: false,
@@ -19,7 +21,7 @@ export const state = {
   databaseError: null as null | { code: string; message: string },
 };
 export function reset() {
-  Object.assign(state, { contextOptions: [], deployment: "hosted", role: "parent", rpcCall: undefined, deleteFilters: [], children: [], parentError: undefined, authError: false, exchangeError: false,
+  Object.assign(state, { canCreateChildren:true, pendingToken:null, contextOptions: [], deployment: "hosted", role: "parent", rpcCall: undefined, deleteFilters: [], children: [], parentError: undefined, authError: false, exchangeError: false,
     throws: false, signedOut: false, oauthOptions: undefined, inserted: undefined, updated: undefined, updateFilters: [], updateMissing: false, databaseError: null });
 }
 export const childCookie = "maths_child";
@@ -68,10 +70,12 @@ export async function accountContext(options: { learningOnly?: boolean } = {}) {
       throw new Error("Unexpected table");
     },
   };
-  return { role: state.role, parentId: "parent-a", children: state.children, db };
+  return { role: state.role, actorId: "parent-a", canCreateChildren:state.canCreateChildren, children: state.children.map(c=>({parentId:"parent-a",isOwner:true,...c})), db };
 }
 export async function parentContext() {
   const account = await accountContext();
   if (account.role !== "parent") throw new KidsError("Parent only", 403);
   return account;
 }
+
+export async function cookies(){return {get(){return state.pendingToken?{value:state.pendingToken}:undefined;},delete(){state.pendingToken=null;}};}

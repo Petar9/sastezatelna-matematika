@@ -24,7 +24,7 @@ export async function accountContext() {
   };
   return query;
  } };
- return { role: state.role, parentId: "parent-a", children: [{ id: "child-a", nickname: "Лисиче" }], db };
+ return { role: state.role, actorId: "parent-a", canCreateChildren:true, children: [{ id: "child-a", nickname: "Лисиче",parentId:"parent-a",isOwner:true }], db };
 }
 export async function parentContext() { const account = await accountContext();
  if (account.role !== "parent") throw new KidsError("Parent only", 403); return account;

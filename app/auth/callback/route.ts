@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { authClient } from "@/src/server/supabase";
 import { mode, appOrigin, accountContext } from "@/src/server";
 import { KidsError } from "@/src/core";
+import {pendingInvitation} from "@/src/server/child-sharing";
 export async function GET(request: Request) {
   if (mode() !== "hosted") return new Response(null, { status: 404 });
   const params = new URL(request.url).searchParams;
-  const login = (query: string) => NextResponse.redirect(`${appOrigin()}/login?${query}`, 303);
+  const pending=await pendingInvitation();
+  const login = (query: string) => NextResponse.redirect(`${appOrigin()}${pending?"/invite":"/login"}?${query}`, 303);
   if (params.get("error") === "access_denied") return login("error=cancelled");
   const code = params.get("code");
   if (!code || params.has("error")) return login("error=unavailable");
@@ -13,6 +15,7 @@ export async function GET(request: Request) {
     const client = await authClient();
     const { error } = await client.auth.exchangeCodeForSession(code);
     if (error) return login("error=unavailable");
+    if(pending)return NextResponse.redirect(`${appOrigin()}/invite`,303);
     try {
       await accountContext();
       return NextResponse.redirect(`${appOrigin()}/`, 303);

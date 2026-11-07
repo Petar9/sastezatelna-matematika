@@ -31,7 +31,7 @@ export default async function Progress({ searchParams }: { searchParams: Promise
    const child = progressChild(account.children, params.child, (await cookies()).get(childCookie)?.value);
    childId = child.id; nickname = child.nickname; parent = account.role === "parent";
    children = account.children.map(item => ({ id: item.id, nickname: item.nickname }));
-   const rows = await readProgressRows(account.db, account.parentId, child.id);
+   const rows = await readProgressRows(account.db, child.parentId, child.id);
    collections = competitions.map(competition => {
     const projection = projectProgressCourse(rows.find(row => row.competition_id === competition.id)?.course, competition.id, competitionContent(competition.id));
     return { ...projection, title: competition.title, ...(parent && projection.summary.hasTask ? { lastTaskHref: `/parent/task?child=${encodeURIComponent(child.id)}&competition=${encodeURIComponent(competition.id)}` } : {}) };

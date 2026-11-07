@@ -23,12 +23,12 @@ export async function POST(request: Request) {
   if (taskKey !== undefined) {
    if (!child || typeof competitionId !== "string") throw new KidsError("Невалидна задача.");
    const { data, error } = await account.db.from("course_progress").select("course")
-    .eq("parent_id", account.parentId).eq("child_id", child.id).eq("competition_id", competitionId).maybeSingle();
+    .eq("parent_id", child.parentId).eq("child_id", child.id).eq("competition_id", competitionId).maybeSingle();
    if (error) throw error;
    problem = courseProblemForTask(data?.course, taskKey as string);
    if (!problem) throw new KidsError("Задачата не е намерена. Затвори и отвори формата отново.", 404);
   }
-  const { error } = await account.db.from("problem_reports").insert({ parent_id: account.parentId,
+  const { error } = await account.db.from("problem_reports").insert({ parent_id: child?.parentId ?? account.actorId,
    child_id: child?.id ?? null, competition_id: competitionId ?? null, problem_id: problem ?? null,
    submitted_by: account.role, description: description.trim() });
   if (error) throw error;

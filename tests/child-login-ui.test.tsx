@@ -29,7 +29,7 @@ test("setup offers an independent skip form and only renders an owned child", ()
 test("parent can select, edit and unlink a child login; success is announced", () => {
   const doc = documentFor(<ChildProfiles children={children} status="saved" />);
   assert.equal(doc.querySelector('[role="status"]')?.textContent, "Имейлът е запазен.");
-  assert.equal(doc.querySelector('input[name="email"]')?.getAttribute("value"), "child@example.com");
+  assert.equal(doc.querySelector('form:has(input[name="action"][value="link-email"]) input[name="email"]')?.getAttribute("value"), "child@example.com");
   for (const action of ["select", "link-email", "unlink-email"]) assert.ok(doc.querySelector(`input[name="action"][value="${action}"]`));
   const login = documentFor(<LoginWelcome />);
   assert.equal(login.querySelectorAll('form[action="/auth/login"]').length, 1);

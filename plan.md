@@ -1,6 +1,6 @@
 # Current work - Състезателна математика
 
-Updated 2026-11-06. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
+Updated 2026-11-07. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
 
 ## Current release
 
@@ -147,3 +147,11 @@ Keep active tasks, material open decisions and a short latest-verification summa
 - [x] Production publication explicitly approved. The release contains this UX change only; pending calendar/article changes remain separate.
 - [x] Published `2a6cdca` to `main`; [Vercel deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/GTrGfdZnQRD4oBBJHm8YUah8ArkP) succeeded for that exact SHA. Live public routes returned 200, `/design-system` returned 404, unauthenticated course access returned 401/no-store, and production JS/CSS contained the new highlight with no obsolete full-statement disclosure.
 - No learner-data, API, reward-rule or schema changes. Real-account and physical-device smoke checks were not repeated.
+
+
+## Shared child access - release 2026-11-07
+
+- [x] Implemented the approved owner-entered Google email and manually shared, seven-day link; recipients reuse the existing child and history, with owner-only access management and optional child login.
+- [x] Actual Astra Bulgarian review: no changes recommended. Full regression 342/342, TypeScript, ESLint, production build/private-file checks and disposable PostgreSQL migration/security tests passed. Synthetic browser fixtures fit 320/390/1440px. See [implementation and verification](docs/child-sharing.md).
+- [x] Owner explicitly approved publication and deployment; owner reports the production migration completed with “Success. No rows returned.” on 2026-11-07. Release checks repeated: 342/342 tests, TypeScript, ESLint and production build/private-file trace checks passed.
+- [ ] Production deployment verification and real-account cross-device sharing smoke test remain pending.

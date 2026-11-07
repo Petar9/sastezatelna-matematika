@@ -12,6 +12,8 @@ export const state = {
   tables: {} as Record<string, Row[]>,
   errors: {} as Record<string, unknown>,
   links: [{ parent_id: "owning-parent", child_id: "mapped-child", nickname: "Моряк" }] as Row[],
+  shared: [] as Row[],
+  sharedError: null as unknown,
   resolverError: null as unknown,
   queries: [] as { table: string; filters: [string, unknown][] }[],
   upserts: [] as { table: string; value: Row; options: unknown }[],
@@ -20,7 +22,7 @@ export const state = {
 export function reset() {
   Object.assign(state, {
     user: { ...verifiedChild }, authError: null, getUserCalls: 0, databaseCalls: 0,
-    selectedCookie: undefined, tables: {}, errors: {}, resolverError: null,
+    selectedCookie: undefined, tables: {}, errors: {}, resolverError: null, shared: [], sharedError: null,
     links: [{ parent_id: "owning-parent", child_id: "mapped-child", nickname: "Моряк" }],
     queries: [], upserts: [], rpcCalls: [],
   });
@@ -51,9 +53,9 @@ export const db = {
     return chain;
   },
   async rpc(name: string, args: unknown) {
-    assert.equal(name, "resolve_child_login");
+    assert.ok(["shared_children", "resolve_child_login"].includes(name));
     state.rpcCalls.push({ name, args });
-    return { data: state.links, error: state.resolverError };
+    return name === "shared_children" ? {data:state.shared,error:state.sharedError} : { data: state.links, error: state.resolverError };
   },
 };
 export function database() { state.databaseCalls++; return db; }

@@ -22,7 +22,7 @@ export default async function LastTask({ searchParams }: { searchParams: Promise
  const competition = publishedCompetitions().find(competition => competition.id === params.competition);
  if (!child || !competition) notFound();
  const { data, error } = await parent.db.from("course_progress").select("course")
-  .eq("parent_id", parent.parentId).eq("child_id", child.id).eq("competition_id", competition.id).maybeSingle();
+  .eq("parent_id", child.parentId).eq("child_id", child.id).eq("competition_id", competition.id).maybeSingle();
  if (error) throw error;
  const statement = lastCourseStatement(data?.course);
  return <main className={s.shell}><div className={s.content}>

@@ -19,5 +19,5 @@ export default async function Profiles({ searchParams }: { searchParams: Promise
     if (!child) redirect("/login?denied=1");
     return <ChildProfileSettings child={child} issue={issue} status={status === "renamed" ? status : undefined} />;
   }
-  return <ChildProfiles children={account.children} issue={issue} setup={setup} status={status === "saved" || status === "removed" || status === "renamed" ? status : undefined} />;
+  return <ChildProfiles canCreateChildren={account.canCreateChildren} children={account.children} issue={issue} setup={setup} status={status === "saved" || status === "removed" || status === "renamed" ? status : undefined} />;
 }

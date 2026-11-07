@@ -36,3 +36,10 @@
  .mascot { width: 72px; height: 78px; }
 }
 @media (prefers-reduced-motion: reduce) { .primary { transition: none; } }
+
+.sharing { display: grid; gap: var(--space-4); min-width: 0; padding-bottom: var(--space-3); }
+.accessHeading { margin: 0 0 var(--space-2); font-size: var(--text-small); }
+.accessList { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+.accessList li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); border-top: 1px solid var(--border); padding-top: var(--space-2); }
+.accessList span { min-width: 0; overflow-wrap: anywhere; }
+.accessList button { font-size: var(--text-small); }

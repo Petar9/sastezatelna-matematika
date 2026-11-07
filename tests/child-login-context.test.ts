@@ -45,10 +45,10 @@ test("child account binds verified email and auth ID and exposes only its mapped
   const account = await accountContext();
   assert.equal(state.getUserCalls, 1);
   assert.equal(account.role, "child");
-  assert.equal(account.parentId, "owning-parent");
-  assert.deepEqual(account.children, [{ id: "mapped-child", nickname: "Моряк" }]);
+  assert.equal(account.actorId, "verified-google-user");
+  assert.deepEqual(account.children, [{ id: "mapped-child", nickname: "Моряк", parentId:"owning-parent", isOwner:false }]);
   assert.equal(account.db, db);
-  assert.deepEqual(state.rpcCalls, [{ name: "resolve_child_login", args: {
+  assert.deepEqual(state.rpcCalls, [{name:"shared_children",args:{p_auth_user_id:"verified-google-user"}}, { name: "resolve_child_login", args: {
     p_email: "child@example.com", p_auth_user_id: "verified-google-user",
   } }]);
   assert.deepEqual(state.upserts, []);
@@ -100,13 +100,13 @@ test("allowlisted parent retains active owned children and private login metadat
   ];
   const account = await parentContext();
   assert.equal(account.role, "parent");
-  assert.equal(account.parentId, "verified-parent");
+  assert.equal(account.actorId, "verified-parent");
   assert.deepEqual(account.children, [
-    { id: "first", nickname: "Лисиче", loginEmail: "first@example.com", loginConnected: true },
-    { id: "second", nickname: "Моряк", loginEmail: "second@example.com", loginConnected: false },
+    { id: "first", nickname: "Лисиче", parentId:"verified-parent", isOwner:true, loginEmail: "first@example.com", loginConnected: true },
+    { id: "second", nickname: "Моряк", parentId:"verified-parent", isOwner:true, loginEmail: "second@example.com", loginConnected: false },
   ]);
   assert.deepEqual(state.upserts, [{ table: "parents", value: { id: "verified-parent", email: "parent@example.com" }, options: { onConflict: "id" } }]);
-  assert.deepEqual(state.rpcCalls, []);
+  assert.deepEqual(state.rpcCalls, [{name:"shared_children",args:{p_auth_user_id:"verified-parent"}}]);
   assert.deepEqual(state.queries.filter(query => query.table !== "allowed_parent_emails"), [
     { table: "child_profiles", filters: [["parent_id", "verified-parent"], ["active", true]] },
     { table: "child_profile_logins", filters: [["parent_id", "verified-parent"]] },
@@ -119,14 +119,14 @@ test("unmapped, unlinked or revoked child resolution fails closed on every reque
   await assert.rejects(accountContext(), { status: 403 });
   await assert.rejects(learnerContext({ api: true, childId: "mapped-child" }), { status: 403 });
   assert.equal(state.getUserCalls, 3);
-  assert.equal(state.rpcCalls.length, 3);
+  assert.equal(state.rpcCalls.length, 6);
 });
 
 test("allowlist and resolver backend errors propagate without granting access", async () => {
   const allowlistError = new Error("Allowlist database unavailable");
   state.errors.allowed_parent_emails = allowlistError;
   await assert.rejects(accountContext(), error => error === allowlistError);
-  assert.deepEqual(state.rpcCalls, []);
+  assert.equal(state.rpcCalls[0]?.name,"shared_children");
   state.errors = {};
   const resolverError = new Error("Resolver database unavailable");
   state.resolverError = resolverError;
@@ -144,4 +144,24 @@ test("learner requests recheck ownership without parent writes or login-manageme
  assert.deepEqual(state.queries.map(query=>query.table),["allowed_parent_emails","child_profiles"]);
  state.tables.child_profiles=[];
  await assert.rejects(learnerContext({api:true,childId:"own"}),{status:428});
+});
+
+
+test("shared adults see only granted children across owners and use the original progress store",async()=>{
+ state.shared=[{parent_id:"owner-a",child_id:"shared-a",nickname:"Ема"},{parent_id:"owner-b",child_id:"shared-b",nickname:"Ива"}];
+ const account=await parentContext();
+ assert.equal(account.canCreateChildren,false);
+ assert.deepEqual(account.children.map(c=>[c.id,c.parentId,c.isOwner]),[["shared-a","owner-a",false],["shared-b","owner-b",false]]);
+ assert.deepEqual(state.upserts,[]);
+ const learner=await learnerContext({api:true,childId:"shared-b"});
+ await learner.courseStore.read();
+ assert.deepEqual(state.queries.at(-1)?.filters,[["parent_id","owner-b"],["child_id","shared-b"],["competition_id",DEFAULT_COMPETITION_ID]]);
+ await assert.rejects(learnerContext({api:true,childId:"sibling"}),{status:428});
+ state.shared=[];state.links=[];
+ await assert.rejects(learnerContext({api:true,childId:"shared-b"}),{status:403});
+});
+
+test("shared lookup failure denies access even to otherwise valid users",async()=>{
+ state.sharedError=new Error("Unavailable");
+ await assert.rejects(accountContext(),error=>error===state.sharedError);
 });

@@ -10,7 +10,7 @@ import { KidsError } from "../src/core/kids.ts";
 const fixture = new URL("./helpers/onboarding-server.ts", import.meta.url).href;
 const server = new URL("../src/server/index.ts", import.meta.url).href;
 const supabase = new URL("../src/server/supabase.ts", import.meta.url).href;
-registerHooks({ load(url, context, nextLoad) {
+registerHooks({ resolve(specifier,context,nextResolve){if(specifier==="next/headers")return {url:fixture,shortCircuit:true};return nextResolve(specifier,context);}, load(url, context, nextLoad) {
   if (url.endsWith(".module.css")) return { format: "module", source: "export default new Proxy({}, {get:(_,key)=>String(key)});", shortCircuit: true };
   if (url === server) return { format: "module", source: `export { mode,appOrigin,parentContext,accountContext,childCookie } from ${JSON.stringify(fixture)};`, shortCircuit: true };
   if (url === supabase) return { format: "module", source: `export { authClient } from ${JSON.stringify(fixture)};`, shortCircuit: true };
@@ -246,4 +246,30 @@ test("child settings expose only nickname and progress; native rename has a reco
   assert.equal(location(await profile(request({ action: "rename", childId: "child-a", nickname: "Ема" }))), "https://maths.example/profiles?status=renamed");
   state.databaseError = { code: "503", message: "Offline" };
   assert.equal(location(await profile(request({ action: "rename", childId: "child-a", nickname: "Ема" }))), "https://maths.example/profiles?error=rename-unavailable");
+});
+
+
+test("shared adult can select and rename but cannot manage logins or create children",async()=>{
+ reset();state.canCreateChildren=false;state.children=[{id:"shared",nickname:"Ема",parentId:"owner-b",isOwner:false}];
+ let doc=documentFor(await ProfilesPage({searchParams:Promise.resolve({})}));
+ assert.ok(doc.querySelector('input[value="select"]'));
+ assert.ok(doc.querySelector('input[value="rename"]'));
+ for(const action of ["create","link-email","unlink-email"])assert.equal(doc.querySelector(`input[name="action"][value="${action}"]`),null);
+ assert.ok(!doc.body.textContent.includes("Сподели достъп"));
+ assert.equal(location(await profile(request({action:"select",childId:"shared"}))),"https://maths.example/");
+ assert.equal(location(await profile(request({action:"rename",childId:"shared",nickname:"Ива"}))),"https://maths.example/profiles?status=renamed");
+ assert.deepEqual(state.updateFilters,[["parent_id","owner-b"],["id","shared"],["active",true]]);
+ for(const action of ["link-email","unlink-email"])await profile(request({action,childId:"shared",email:"adult@example.com"}));
+ await profile(request({action:"create",nickname:"Ива"}));
+ assert.equal(state.rpcCall,undefined);assert.equal(state.inserted,undefined);assert.deepEqual(state.deleteFilters,[]);
+});
+
+test("invitation OAuth retains the pending link and bypasses ordinary allowlist resolution until explicit acceptance",async()=>{
+ reset();state.pendingToken="a".repeat(43);
+ const req=new Request("https://maths.example/auth/login",{method:"POST",body:new URLSearchParams({invitation:"1"})});
+ assert.equal(location(await login(req)),"https://accounts.google.com/test");
+ assert.deepEqual(state.oauthOptions,{provider:"google",options:{redirectTo:"https://maths.example/auth/callback",queryParams:{prompt:"select_account"}}});
+ state.parentError=new KidsError("Not approved",403);
+ assert.equal(location(await callback(new Request("https://maths.example/auth/callback?code=x"))),"https://maths.example/invite");
+ assert.deepEqual(state.contextOptions,[]);assert.equal(state.rpcCall,undefined);
 });
