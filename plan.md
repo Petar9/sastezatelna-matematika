@@ -1,18 +1,18 @@
 # Current work - Състезателна математика
 
-## Unified email access - verified locally, publishing, 2026-11-08
+## Unified email access - released, 2026-11-08
 
-- Approved shared-email UI and access logic are implemented locally; independent actual Astra copy review recommended no changes. Local application tests, TypeScript, lint and production build passed; owner reported both production SQL queries succeeded on 2026-11-08; final local release checks passed.
+- Approved shared-email UI and access logic are published; independent actual Astra copy review recommended no changes. Local application tests, TypeScript, lint and production build passed; owner reported both production SQL queries succeeded on 2026-11-08; final local release checks passed.
 - Owner explicitly waived the pre-migration backup on 2026-11-08. Supabase SQL Editor initially reported a query truncated inside the email regex. Replaced the POSIX whitespace notation with equivalent PostgreSQL shorthand and supplied separate protected-table and function transactions for manual execution.
 - Disposable-database verification includes both separately committed queries, identity/family isolation, legacy access, revocation, RLS/RPC permissions, progress preservation and malformed/whitespace email rejection. Owner success is reported evidence, not an independent inspection of production database records.
 
 - Final verification: 361/361 application tests, disposable database migration/security/progress regression, TypeScript, ESLint, optimized production build/private-file exclusions and whitespace checks passed. Chrome sharing/fallback layouts at 320/390/1440px have no horizontal overflow and 44px icon targets; daily accordions were checked with keyboard/reduced motion. Real Google sessions and physical-device continuity remain owner smoke checks.
 
-## Daily progress details - verified locally, publishing, 2026-11-08
+## Daily progress details - released, 2026-11-08
 
 - [x] Reused the preparation accordion pattern for daily competition groups: collapsed initially, independently expandable, day totals always visible, and expansion reset when selecting another day. Existing skill copy, counts and history projection are unchanged.
 - [x] Verification: 361/361 tests, TypeScript, ESLint, optimized build/private-file checks and whitespace checks passed. Chrome confirmed Enter/Space activation, visible focus, day reset, reduced motion and no horizontal overflow at 320/390px and desktop; no browser errors observed.
-- Local review: http://127.0.0.1:3020/progress (select 2 November for activity across all five competitions in the isolated historical/synthetic preview). No learner/database writes; this follow-up has not been deployed.
+- Local review: http://127.0.0.1:3020/progress (select 2 November for activity across all five competitions in the isolated historical/synthetic preview). No learner/database writes during local testing; published with application revision `5053eef`.
 
 Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
 
@@ -38,6 +38,14 @@ Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 - Verification: on 2026-11-07 the coordinator repeated the targeted existing-behavior suite (29/29 passed), checked that the approved gold policy moved intact and that relative documentation references resolve, and inspected the Markdown diff/whitespace and scope. Independent Astra reviewed the final research draft; three precision corrections were applied. The 2026-11-08 revision checked documentation links, unchanged runtime-policy text and whitespace; no runtime tests were repeated for this documentation-only follow-up. These checks do not verify the proposed economy or a deployed release.
 
 ## Current release
+
+- Production: https://sastezatelna-matematika.vercel.app/ . Application revision `5053eef`, 2026-11-08. Vercel [deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/5SvVjxuKCYFbPKFbzxrgDWUdFunR) reports success for that exact commit.
+- Published one Google-email access flow, direct recipient login, compact × removal controls, approved share message with 📋 copy/fallback, preserved legacy access and owner-only management. Daily competition details now use collapsed independent accordions. No real learner records were edited by the agent; the owner reported manually applying both migration queries after waiving the backup.
+- Verification: 361/361 application tests, disposable PostgreSQL migration/security/history regression (atomic and exact split SQL), TypeScript, ESLint, production build/private-file exclusions, whitespace and 40 local documentation links passed. Chrome component/CSS fixtures at 320/390/1440px confirmed wrapping, 44px controls and copy fallback; daily accordions passed keyboard/reduced-motion checks.
+- Live HTTPS: home/login/materials/robots/sitemap return 200; updated login copy is present; profiles/progress retain login redirects with no-store/noindex; sharing/course APIs return 401/no-store; development catalogue returns 404. All eight login-referenced JS assets return 200. Live Chrome at 390px has no overflow or broken images. Browser reported only the existing missing `/favicon.ico` (404), unrelated to this release.
+- Real Google owner/recipient sign-in, cross-device continuity and physical-device behavior remain owner smoke checks; local tests and anonymous production checks do not establish these. Supabase application is owner-reported, not independently inspected.
+
+## Previous rewards release
 
 - Production: https://sastezatelna-matematika.vercel.app/ . Application release: `87edf03d3bbb9ec21a420edab6e61f291178d54d`, 2026-11-08. Vercel: [verified release](https://vercel.com/petar-s-projects33/sastezatelna-matematika/BR9ZXeA7ZFvX86eqwb1HRG1uqr8r); GitHub Vercel commit status reports success.
 - Published: competition gold rates and per-child same-browser last-worked competition resume, all-five-competition preparation panel, natural-part task counts, bottom-of-overview otter card with 24px separation, diploma/cap academic badges and calendar „задача/задачи“. Historical rewards, percentage weighting and earning criteria are preserved. See [acceptance evidence](docs/points-implementation-review.md).
