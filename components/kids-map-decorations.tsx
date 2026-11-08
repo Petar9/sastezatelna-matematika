@@ -44,7 +44,18 @@ export const Leaf = DiscoveryMarker;
 export function Award({ rank, earned, topicId, seen }: { rank: "doctor" | "professor"; earned: boolean; topicId: string; seen: Set<string> }) {
  const fresh = useFreshGrowth(earned, awardKey(topicId, rank), seen);
  return <svg className={s.award} data-rank={rank} data-earned={earned} data-growing={fresh || undefined} viewBox="0 0 48 52" aria-hidden="true">
-  {rank === "doctor" ? <><path d="m13 29-3 20 14-8 14 8-3-20" className={s.ribbon}/><circle cx="24" cy="22" r="17" className={s.medal}/><circle cx="24" cy="22" r="12" fill="none" stroke="currentColor"/><path d="m24 12 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor"/></> : <><path d="M24 46V25m0 14c-11 0-15-6-15-6 10-3 15 6 15 6Z" className={s.flowerStem}/><path d="M24 7C35-4 43 10 35 17C50 20 45 35 34 30C35 46 18 46 18 32C5 42-3 26 11 21C-1 11 14 1 20 12Z" className={s.blossom}/><circle cx="24" cy="23" r="6" className={s.flowerCentre}/></>}
+  {rank === "doctor" ? <>
+   <path d="M10 10h26v31H12c-5 0-7-7-3-10V14" className={s.paper}/>
+   <path d="M10 10c-5 0-5 8 0 8h4V10Zm2 21h24c-5 0-5 10 0 10H12c-5 0-5-10 0-10Z" className={s.paperRoll}/>
+   <path d="M19 18h11m-11 5h8" className={s.ink}/>
+   <path d="m24 35-2 13 6-3 6 3-2-13" className={s.ribbon}/>
+   <circle cx="28" cy="34" r="7" className={s.seal}/><path d="m25 34 2 2 4-5" className={s.ink}/>
+  </> : <>
+   <path d="M11 23v12c7 8 19 8 26 0V23" className={s.capBand}/>
+   <path d="m3 20 21-11 21 11-21 11Z" className={s.cap}/>
+   <path d="m24 20 18 5v13" className={s.cord}/>
+   <path d="m42 35-3 9h6Z" className={s.tassel}/><circle cx="24" cy="20" r="2" className={s.seal}/>
+  </>}
  </svg>;
 }
 

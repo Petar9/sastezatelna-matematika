@@ -29,14 +29,7 @@ Current approved rules for Състезателна математика, consol
 
 ## Gold - current rules
 
-- Skill milestones pay 5 for the first completed attempt/revealed solution, 10 for first correctness (assisted included), and 20 for independent confirmation, once each. These earned entitlements are separate from progress markers.
-- Future distinct correct problems pay 10 standard or 15 for reviewed hard reasoning (×1.5), including correctness after hints one or two. Reveal alone pays no problem bonus. Each natural а/б/в subpart has one entitlement after all its fields are correct. Unlettered multi-answer originals form one unit; scaffolds do not create entitlements. Legacy whole-original and part aliases block duplicate payment in both directions; historical amounts and dates remain unchanged. Replays, reconfirmation and reloads cannot pay again.
-- **Hint three excludes all new gold for that attempt**, including skill milestones; persist `goldEligible: false`. Show “Без злато след третата подсказка”. Learning and assisted classification continue unchanged; later eligible success can recover unpaid entitlements at the later date. Previously paid awards remain unchanged. Approved 2026-11-05.
-- Persist the actual paid problem amount. Legacy awards without an amount remain exactly 5. GET/historical projection must not backfill problem bonuses, replay celebrations or reprice history; compatible historical skill milestones restore quietly and persist with the next accepted command.
-- Each child has one wallet summed across separate competition ledgers. Validate and save awards server-side with revision-guarded learning updates; never maintain an independently mutable balance or combine children/families.
-- Island views show earned gold only, without a maximum, fraction, target bar or target chest. Keep saved target fields solely for compatibility; do not move targets, cap displayed earnings or recalculate history. This supersedes older island-goal display rules (2026-11-04).
-- Rate difficulty by actual reasoning, with rationale in `content/problem-difficulty.json`; combined methods, dependent steps, cases and proof/optimization can justify hard. Order, competition badge, text length, answer format, large numbers and the harder-selection pool alone cannot. Rate authored practice separately; parts inherit the original. Editorial ratings are provisional, not measured levels.
-- The multiplier changes rewards only, not hard-task frequency, adventure selection or confirmation/academic-award criteria. No shop or spending mechanic is approved.
+The authoritative [gold and rewards guide](docs/points.md#current-approved-policy) contains approved rates, hint eligibility, natural-part entitlements and history compatibility. Its research and proposed changes are explicitly separate from the active policy; do not implement a proposal without owner approval.
 
 ## Competitions and source integrity
 

@@ -62,6 +62,7 @@ export function database() { state.databaseCalls++; return db; }
 export function mode() { return "hosted"; }
 export function isLoopbackHost() { return false; }
 export async function cookies() { return { get(name: string) {
+  if (name === "maths_competition_mapped-child") return undefined;
   assert.equal(name, "maths_child");
   return state.selectedCookie === undefined ? undefined : { value: state.selectedCookie };
 } }; }

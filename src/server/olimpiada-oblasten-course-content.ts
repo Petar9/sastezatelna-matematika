@@ -1,3 +1,5 @@
+import { preparationBaselines } from "../core/preparation-baselines.ts";
+import { competitionRewardDifficulty } from "../core/competitions.ts";
 import { connectedRegistry, connectedUnit, letteredStatement, navigationGroups, singleConnected } from "./connected-course-content.ts";
 import archive from "../../content/olimpiada-oblasten/2023-2026.json" with { type: "json" };
 import { originalDifficulty, regionalOlympiadPracticeDifficulty } from "./problem-difficulty.ts";
@@ -109,6 +111,8 @@ const sourceHomes = Object.fromEntries(eligible.map(original => [original.id, fa
 const groups = navigationGroups(topics, islands.map(island => ({ id: `oli-ob-${island.key}`, title: island.title })),
  connected.sources, source => sourceHomes[source.sourceId]!);
 export const regionalOlympiadCourseContent: KidsCourseContent = {
+ rewardDifficulty: competitionRewardDifficulty("olimpiada-oblasten"),
+ preparationBaseline: preparationBaselines["olimpiada-oblasten"],
  version, topics, navigationGroups: groups, connectedProblem: connected.connectedProblem,
  introductions: Object.fromEntries(pack.families.map(family => {
   const original = eligible.find(item => item.owner === family.id);

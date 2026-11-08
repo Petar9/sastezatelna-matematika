@@ -21,3 +21,9 @@ export function publishedCompetitions(): Competition[] {
 export function competitionDifficultyLabel(difficulty: Competition["difficulty"]) {
  return {easy: "Лесно", medium: "Средно", hard: "Трудно"}[difficulty];
 }
+
+export function competitionRewardDifficulty(id: string): Competition["difficulty"] {
+ const competition = competitions.find(item => item.id === id);
+ if (!competition) throw new Error(`Unknown competition: ${id}`);
+ return competition.difficulty;
+}

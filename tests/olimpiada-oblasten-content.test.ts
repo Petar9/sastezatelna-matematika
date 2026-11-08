@@ -121,11 +121,11 @@ test('regional drafts, dependent help and third-hint exclusions persist and rese
  assert.equal(h.view().task!.connected!.total,3);
  h.go({type:'saveDraft',taskKey:key,partIndex:0,answers:['5']});h.reload();assert.deepEqual(h.view().task!.draft,['5']);
  for(let i=1;i<=3;i++)h.go({type:'hint',taskKey:key});h.reload();assert.equal(h.view().task!.goldReward,undefined);h.finish();assert.equal(h.record.problemGoldAwards?.length??0,0);
- h.next();assert.equal(h.view().task!.connected!.index,2);assert.equal(h.view().task!.hintLevel,0);assert.equal(h.view().task!.goldReward!.amount,15);h.finish();assert.equal(h.work().attempt.outcome,'hinted');
+ h.next();assert.equal(h.view().task!.connected!.index,2);assert.equal(h.view().task!.hintLevel,0);assert.equal(h.view().task!.goldReward!.amount,25);h.finish();assert.equal(h.work().attempt.outcome,'hinted');
  h.next();assert.equal(h.view().task!.fields.length,3);h.finish();assert.equal(h.record.problemGoldAwards!.length,2);
 });
 test('regional standard/hard rewards honor two hints, exclude the third, and legacy aliases never double-pay',()=>{
- for(const [id,amount] of [['oli-ob-g4-2025-p1:original',10],['oli-ob-g4-2023-p2:original',15]] as const){
+ for(const [id,amount] of [['oli-ob-g4-2025-p1:original',20],['oli-ob-g4-2023-p2:original',25]] as const){
   const p=all.find(p=>p.id===id)!;const topic=content.topics.find(t=>t.skills.some(s=>s.id===p.skillId))!;
   for(let hints=0;hints<=3;hints++){
    const single:KidsCourseContent={...content,problem:(skill,i,hard)=>skill===p.skillId&&i===0&&!hard?p:null};const h=harness(single);h.go({type:'selectTopic',topicId:topic.id,skillId:p.skillId});

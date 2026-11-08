@@ -1,10 +1,11 @@
-import {competitionContent,requireAvailableCompetition} from "./competitions.ts";
+import {availableCompetitions,competitionContent,requireAvailableCompetition} from "./competitions.ts";
 import {cookies,headers} from "next/headers";
 import {KidsError} from "../core/kids.ts";
 import {mode,isLoopbackHost} from "./config.ts";
 import {authClient,database} from "./supabase.ts";
 import {localStores} from "./stores.ts";
 import {createSupabaseCourseStore} from "../store/supabase-course.ts";
+import {competitionCookieName,resumedCompetition} from "./competition-resume.ts";
 export const childCookie="maths_child";
 export function approvedGoogleUser(user:{id:string;email?:string;email_confirmed_at?:string;app_metadata:{provider?:string}}|null){return !!user?.email&&!!user.email_confirmed_at&&user.app_metadata.provider==="google";}
 export type AccountChild={id:string;nickname:string;parentId:string;isOwner:boolean;loginEmail?:string;loginConnected?:boolean};
@@ -46,13 +47,17 @@ export async function parentContext(){
 }
 export function selectedChild<T extends {id:string;nickname:string}>(children:T[],selected:string|undefined){return children.find(child=>child.id===selected)??(children.length===1?children[0]:undefined);}
 export async function learnerContext(request?:{childId?:string;competitionId?:string;api:boolean}){
- const competitionId=requireAvailableCompetition(request?.competitionId).id;
- const content=competitionContent(competitionId);
+ const resolveCompetition=async(childId?:string)=>{
+  const remembered=request?.api?undefined:(await cookies()).get(competitionCookieName(childId))?.value;
+  return requireAvailableCompetition(resumedCompetition(request?.competitionId,remembered,availableCompetitions().map(item=>item.id))).id;
+ };
  if(mode()==="local"){
   if(!isLoopbackHost((await headers()).get("host")))throw new KidsError("Локалният режим е достъпен само на този компютър.",403);
+  const competitionId=await resolveCompetition();const content=competitionContent(competitionId);
   const stores=localStores(competitionId);return {courseStore:stores.kidsCourseStore,legacyStore:stores.kidsStore,childId:undefined,childNickname:undefined,competitionId,content};
  }
  const parent=await accountContext({learningOnly:true});const child=request?.api ? parent.children.find(child=>child.id===request.childId) : selectedChild(parent.children,(await cookies()).get(childCookie)?.value);
  if(!child)throw new KidsError("Избери детски профил.",428);
+ const competitionId=await resolveCompetition(child.id);const content=competitionContent(competitionId);
  return {courseStore:createSupabaseCourseStore(parent.db,child.parentId,child.id,competitionId),legacyStore:undefined,childId:child.id,childNickname:child.nickname,competitionId,content};
 }

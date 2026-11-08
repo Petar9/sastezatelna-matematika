@@ -265,7 +265,7 @@ test("early wins appear once for effort, reviewed solutions and first correct an
    }
    if(outcome==="revealed")await act(async()=>button(h.host,"Покажи решението").click());
    else await submitAnswer(h,outcome!=="incorrect");
-   const amount=outcome==="independent"||outcome==="hinted"?25:5;
+   const amount=outcome==="independent"||outcome==="hinted"?35:5;
    assert.equal(h.host.querySelectorAll(`[data-gold-gain="${amount}"]`).length,1);
    assert.equal(h.host.querySelector("[data-gold-wallet]")!.getAttribute("aria-label"),`${amount} злато`);
    const progress=h.host.querySelector('[aria-label^="Открития за умението:"]')!;
@@ -295,11 +295,11 @@ test("first correct after a mistake earns gold, and confirmation combines with D
    await act(async()=>button(h.host,v.lesson!.steps.length<v.lesson!.total?"Следваща стъпка":"Да пробвам нова задача").click());
   }
   await submitAnswer(h);
-  assert.equal(h.host.querySelector('[data-gold-gain]')!.getAttribute("data-gold-gain"),"20");
+  assert.equal(h.host.querySelector('[data-gold-gain]')!.getAttribute("data-gold-gain"),"30");
   await act(async()=>button(h.host,"Следваща задача").click());
   await submitAnswer(h);
   assert.ok(courseView(h.record,content,now).reward);
-  assert.equal(h.host.querySelector('[data-gold-gain]')!.getAttribute("data-gold-gain"),"30");
+  assert.equal(h.host.querySelector('[data-gold-gain]')!.getAttribute("data-gold-gain"),"40");
   assert.ok(h.host.textContent!.includes("Вече си доктор"));
  }finally{await h.cleanup();}
 });
@@ -309,7 +309,7 @@ test("a newly confirmed concept earns gold before the full topic award",async()=
   await submitAnswer(h);
   await act(async()=>button(h.host,"Следваща задача").click());
   await submitAnswer(h);
-  assert.equal(h.host.querySelector('[data-gold-gain]')!.getAttribute("data-gold-gain"),"30");
+  assert.equal(h.host.querySelector('[data-gold-gain]')!.getAttribute("data-gold-gain"),"40");
   assert.equal(courseView(h.record,content,now).reward,undefined);
  }finally{await h.cleanup();}
 });
@@ -336,7 +336,7 @@ test("island exploration is read-only and shows one compact island panel at a ti
  const h=await mount(null);try{
   const saved=JSON.stringify(h.record);
   assert.equal(h.host.querySelectorAll('[id^="island-"]').length,16);
-  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,1);
+  assert.equal(h.host.querySelectorAll('[role="progressbar"]').length,2);
   assert.ok(!h.host.textContent!.includes("Дървото"));assert.ok(!h.host.querySelector("[data-discoveries]"));
   await act(async()=>islandButton(h.host,"Рачешки задачи").click());
   const rows=h.host.querySelectorAll<HTMLButtonElement>('button.skillRow');assert.equal(rows.length,5);
@@ -905,9 +905,9 @@ test("problem gold preview stays compact and uses the actual ledger amount in fe
  const {ProblemGoldPreview,GoldReward}=await import("../components/kids-adventure.tsx");
  const host=document.createElement("div"),root=createRoot(host);
  try{
-  await act(async()=>root.render(<ProblemGoldPreview reward={{amount:15,multiplier:1.5}}/>));
-  assert.equal(host.textContent,"15· ×1,5");assert.ok(host.querySelector('[aria-label="Награда за задачата: 15 злато; бонус ×1,5"]'));
-  await act(async()=>root.render(<ProblemGoldPreview reward={{amount:10,multiplier:1}}/>));
+  await act(async()=>root.render(<ProblemGoldPreview reward={{amount:25}}/>));
+  assert.equal(host.textContent,"25");assert.ok(host.querySelector('[aria-label="Награда за задачата: 25 злато"]'));
+  await act(async()=>root.render(<ProblemGoldPreview reward={{amount:10}}/>));
   assert.equal(host.textContent,"10");
   await act(async()=>root.render(<GoldReward gain={{amount:25,awards:[{skillId:"a",milestone:"correct",earnedAt:now}],problems:[{key:"source:hard",skillId:"a",earnedAt:now,amount:15}]}}/>));
   assert.ok(String(host.textContent).includes("Решена задача +15"));
@@ -1349,7 +1349,7 @@ test("a coalesced answer conflict reconciles newer work and waits for an explici
   assert.deepEqual(posts.map(action=>action.type),["answer","answer"]);
   assert.equal(h.record.attempts.length,1);assert.equal(h.record.attempts[0]!.outcome,"hinted");
   assert.equal(h.record.goldAwards!.length,2);assert.equal(h.record.problemGoldAwards!.length,1);
-  assert.equal(courseView(h.record,content,now).gold,25);
+  assert.equal(courseView(h.record,content,now).gold,35);
  }finally{await h.cleanup();}
 });
 
@@ -1361,7 +1361,7 @@ test("a lost coalesced answer reply reconciles once without resubmitting or repe
   assert.deepEqual(h.actions.slice(before).map(action=>action.type),["answer"]);
   assert.equal(h.record.attempts.length,1);assert.equal(h.record.goldAwards!.length,2);assert.equal(h.record.problemGoldAwards!.length,1);
   const awards=structuredClone({skills:h.record.goldAwards,problems:h.record.problemGoldAwards});
-  assert.equal(courseView(h.record,content,now).gold,25);assert.equal(h.host.querySelectorAll("[data-gold-gain]").length,0);
+  assert.equal(courseView(h.record,content,now).gold,35);assert.equal(h.host.querySelectorAll("[data-gold-gain]").length,0);
   assert.ok(h.host.querySelector('[role="alert"]')!.textContent!.includes("Lost response"));
   await act(async()=>primary(h.host,"Следваща задача").click());
   await h.reload();
@@ -1393,10 +1393,10 @@ test("a reward POST updates the wallet on an immediate cached competition revisi
   const answer=Number(records.get(DEFAULT_COMPETITION_ID)!.topics.matches!.work.core!.attempt.problem.fields[0]!.answer);
   await act(async()=>host.querySelectorAll<HTMLButtonElement>('[aria-label="Отговори"] button')[answer]!.click());
   await act(async()=>primary(host,"Провери отговора").click());
-  assert.equal(host.querySelector("[data-gold-wallet]")!.getAttribute("aria-label"),"25 злато");
+  assert.equal(host.querySelector("[data-gold-wallet]")!.getAttribute("aria-label"),"35 злато");
   await act(async()=>button(host,"← Начало").click());await chooseCompetition(host,"nvo");
   assert.equal(gets,1,"the fresh revisit must use its existing learning snapshot");
-  assert.equal(host.querySelector("[data-gold-wallet]")!.getAttribute("aria-label"),"25 злато");
+  assert.equal(host.querySelector("[data-gold-wallet]")!.getAttribute("aria-label"),"35 злато");
   assert.equal(host.querySelectorAll("[data-gold-gain]").length,0);
   assert.equal(records.get("nvo")!.revision,0);assert.equal(records.get("nvo")!.attempts.length,0);
  }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;history.restore();}
@@ -1499,5 +1499,27 @@ test("connected originals show each figure once and single-part statements need 
   assert.equal(h.host.querySelectorAll(`img[alt="${first.alt}"]`).length,1);
   assert.equal(h.host.querySelectorAll(`img[alt="${second.alt}"]`).length,1);
   assert.equal(h.host.querySelectorAll(".connectedPart, .connectedDisclosure, [aria-current=step]").length,0);
+ }finally{await h.cleanup();}
+});
+
+
+test("competition preparation stays on the overview and uses saved evidence after an answer",async()=>{
+ const h=await mount(null,false,"child-a",DEFAULT_COMPETITION_ID);try{
+  const preparation=()=>h.host.querySelector('[role="progressbar"][aria-valuemin="0"][aria-valuemax="100"]');
+  const initial=preparation()!;assert.ok(initial);assert.equal(initial.getAttribute("aria-valuenow"),"0");
+  const card=initial.closest('section')!;
+  assert.equal(card.querySelector('h2')?.textContent,"Напредък в подготовката за това състезание.");
+  assert.ok(!card.textContent?.includes("Решени оригинални задачи"));
+  assert.equal(card.nextElementSibling?.tagName,"FOOTER");
+  assert.ok(h.host.querySelector(`a[href="/progress?competition=${DEFAULT_COMPETITION_ID}&child=child-a"]`));
+  await act(async()=>islandButton(h.host,"Точки и мачове").click());
+  assert.equal(preparation(),null);
+  await act(async()=>button(h.host,"Към задачите").click());assert.equal(preparation(),null);
+  await submitAnswer(h);
+  await act(async()=>button(h.host,"← Начало").click());
+  const expected=courseView(h.record,content,now).preparation;
+  assert.equal(preparation()!.getAttribute("aria-valuenow"),String(expected.percent));
+  assert.ok(expected.coverage.fraction>0);await h.reload();
+  assert.equal(preparation()!.getAttribute("aria-valuenow"),String(expected.percent));
  }finally{await h.cleanup();}
 });

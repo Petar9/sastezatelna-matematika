@@ -1,4 +1,5 @@
 import type { KidsCourse, CourseAttempt, KidsCourseContent } from "./kids-course.ts";
+import { currentPreparationScope, preparationProgress, type PreparationProgress } from "./preparation.ts";
 import { courseGoldAwards, goldAmounts, goldKey, problemAwardAmount } from "./kids-gold.ts";
 
 export type ProgressEvent = {
@@ -17,6 +18,10 @@ const successful = (attempt: CourseAttempt) => attempt.outcome === "independent"
 const milestoneLabels = { started: "Първа стъпка", correct: "Първо откритие", confirmed: "Затвърдено умение" };
 
 // Explicit projection: saved answers, grading fields, login metadata and raw course records stay on the server.
+export function projectPreparation(value: unknown, content: KidsCourseContent): PreparationProgress {
+ const course = value && typeof value === "object" ? value as KidsCourse : undefined;
+ return preparationProgress(course && Array.isArray(course.attempts) && course.topics ? course : { attempts: [], topics: {}, preparationScope: currentPreparationScope(content) } as unknown as KidsCourse, content);
+}
 export function projectProgressCourse(value: unknown, competitionId: string, content?: Pick<KidsCourseContent, "topics">): ProgressCourse {
  const result: ProgressCourse = { competitionId, summary: { attempts: 0, confirmed: 0, revisit: 0, hasTask: false }, events: [], undatedGold: 0, undatedAttempts: 0 };
  if (!value || typeof value !== "object") return result;

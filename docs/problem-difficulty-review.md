@@ -1,8 +1,8 @@
 # Problem difficulty review - 2026-11-04
 
-Status: editorial reward review for local pilot; human mathematical/language approval and publication gates remain separate. No claim of measured learner difficulty.
+Status: historical editorial review dated 2026-11-04, not measured learner difficulty or the current catalogue inventory. Human mathematical/language approval and publication gates remain separate.
 
-Ordinary distinct successful problems pay 10 gold; reviewed hard ones pay 15 (×1.5), with or without hints. Size of numbers, exam order, competition badge and text length do not decide the rate. Source parts share one rating and entitlement. Authored practice is reviewed separately. No change to selection frequency.
+Current rates, hint limits, natural-part entitlements and history rules live in [Gold and rewards](points.md#current-approved-policy). Later approved third-hint and natural-part rules supersede this review's former whole-original/unrestricted-hint policy. The tables below retain the dated rating evidence and counts; do not use them as current payout or island-target instructions.
 
 | Competition | Gradable originals | Ordinary | Hard |
 | --- | ---: | ---: | ---: |

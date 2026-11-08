@@ -7,6 +7,9 @@ import {catalogueProblems,problemIdentity} from "../src/core/kids-selection.ts";
 import {kidsCourseContent} from "../src/server/kids-course-content.ts";
 import {nvoCourseContent} from "../src/server/nvo-course-content.ts";
 import {olympiadCourseContent} from "../src/server/olimpiada-course-content.ts";
+import {regionalOlympiadCourseContent} from "../src/server/olimpiada-oblasten-course-content.ts";
+import {proletnoCourseContent} from "../src/server/proletno-course-content.ts";
+import {competitions} from "../src/core/competitions.ts";
 const now="2026-11-04T12:00:00Z";
 const contents=[kidsCourseContent,olympiadCourseContent,nvoCourseContent];
 function fixture(){
@@ -45,7 +48,7 @@ test("ordinary and hard rewards are 10 and 15 regardless of selection pool or hi
   assert.equal(problemGoldPreview(f.course,f.content,f.hard),undefined);
  }
  const f=fixture();awardProblemGold(f.course,f.content,f.attempt(f.hard,"revealed"),now);assert.equal(courseGoldBalance(f.course),0);
- assert.deepEqual(problemGoldPreview(f.course,f.content,f.hard),{amount:15,multiplier:1.5});
+ assert.deepEqual(problemGoldPreview(f.course,f.content,f.hard),{amount:15});
 });
 test("historical five-gold awards stay five while new hard amounts persist across JSON reload",()=>{
  const f=fixture();f.course.problemGoldAwards=[{key:problemGoldKey(f.ordinary,f.content),skillId:"skill",earnedAt:now}];
@@ -66,7 +69,49 @@ test("fresh targets use weighted unique originals; legacy snapshots borrow metad
  const changed={...saved,text:"Друга задача"};assert.equal(problemGoldRate(changed,f.content),10);
  assert.equal(problemGoldPreview(f.course,f.content,changed)!.amount,10);
  let course=applyCourseAction(f.course,f.content,{type:"selectTopic",topicId:"island"},now);
- assert.deepEqual(courseView(course,f.content,now).task!.goldReward,{amount:15,multiplier:1.5});
+ assert.deepEqual(courseView(course,f.content,now).task!.goldReward,{amount:15});
  const task=courseView(course,f.content,now).task!;course=applyCourseAction(course,f.content,{type:"answer",taskKey:task.key,answers:["3"]},now);
  assert.equal(courseView(course,f.content,now).task!.goldReward,undefined);
+});
+
+
+test("all competition prices match previews and persisted awards, including resumed unpaid work",()=>{
+ for (const [difficulty,standard,exceptional] of [["easy",10,15],["medium",15,20],["hard",20,25]] as const) {
+  const f=fixture(), content={...f.content,rewardDifficulty:difficulty};
+  for(const [problem,expected] of [[f.ordinary,standard],[f.hard,exceptional]] as const) {
+   const attempt=f.attempt(problem,"hinted");
+   const resumed=JSON.parse(JSON.stringify(attempt)) as CourseAttempt;
+   assert.equal(problemGoldPreview(f.course,content,resumed.problem)?.amount,expected);
+   awardProblemGold(f.course,content,resumed,now);
+   assert.equal(f.course.problemGoldAwards!.at(-1)!.amount,expected);
+   assert.equal(problemGoldPreview(f.course,content,resumed.problem),undefined);
+   awardProblemGold(f.course,content,resumed,now);
+  }
+  assert.equal(f.course.problemGoldAwards!.length,2);
+ }
+});
+
+ test("all server catalogue reward categories match their authoritative competition registry",()=>{
+  const catalogues=[kidsCourseContent,olympiadCourseContent,nvoCourseContent,proletnoCourseContent,regionalOlympiadCourseContent];
+  assert.equal(new Set(catalogues.map(content=>content.version)).size,competitions.length);
+  for(const competition of competitions){
+   const content=catalogues.find(item=>item.version===competition.contentVersion);
+   assert.ok(content,competition.id);assert.equal(content.rewardDifficulty,competition.difficulty,competition.id);
+  }
+ });
+
+test("saved unpaid work uses the current price while paid history stays untouched on reads and answers",()=>{
+ const f=fixture(), previous={...f.content,rewardDifficulty:"easy" as const}, current={...f.content,rewardDifficulty:"hard" as const};
+ let saved=applyCourseAction(newKidsCourse(previous,now),previous,{type:"selectTopic",topicId:"island"},now);
+ saved.problemGoldAwards=[{key:"problem:previous",skillId:"skill",earnedAt:"2025-01-01T00:00:00Z",amount:10},{key:"problem:legacy",skillId:"skill",earnedAt:"2024-01-01T00:00:00Z"}];
+ saved=JSON.parse(JSON.stringify(saved));
+ const before=JSON.stringify(saved), prior=structuredClone(saved.problemGoldAwards);
+ const preview=courseView(saved,current,now).task!;
+ assert.equal(preview.goldReward!.amount,25);
+ assert.equal(JSON.stringify(saved),before);
+ const next=applyCourseAction(saved,current,{type:"answer",taskKey:preview.key,answers:["3"]},now);
+ assert.deepEqual(next.problemGoldAwards!.slice(0,2),prior);
+ assert.equal(next.problemGoldAwards!.at(-1)!.amount,25);
+ assert.equal(next.problemGoldAwards!.at(-1)!.earnedAt,now);
+ assert.equal(courseGoldBalance(next),55);
 });

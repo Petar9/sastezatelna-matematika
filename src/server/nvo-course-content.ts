@@ -1,3 +1,5 @@
+import { preparationBaselines } from "../core/preparation-baselines.ts";
+import { competitionRewardDifficulty } from "../core/competitions.ts";
 import { nvoConnectedContent } from "./nvo-connected-content.ts";
 import archive from "../../content/nvo/grade4-2022-2025.json" with { type: "json" };
 import type { CourseProblem, CourseSolution, KidsCourseContent } from "../core/kids-course.ts";
@@ -60,6 +62,8 @@ const rationales: Record<string, string> = {
 const entry = (skill: string) => pools.get(skill)?.core[0] ?? pools.get(skill)?.hard[0];
 
 export const nvoCourseContent: KidsCourseContent = {
+ rewardDifficulty: competitionRewardDifficulty("nvo"),
+ preparationBaseline: preparationBaselines["nvo"],
  version: archive.version,
  ...nvoConnectedContent([...all.values()], archive.topics),
  topics: archive.topics.map(topic => ({ ...topic, rewardName: topic.title.toLocaleLowerCase("bg"),

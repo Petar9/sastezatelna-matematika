@@ -104,7 +104,7 @@ test("sequential original answers survive serialization and record one result on
  }
  assert.equal(h.course.attempts.length, 1); assert.equal(h.course.attempts[0]!.outcome, "independent");
  assert.equal(h.course.topics.grids!.skills["M2-2a"]!.streak, 1);
- assert.equal(h.view().gold, 30);
+ assert.equal(h.view().gold, 40);
  // A pending original from before this change keeps its all-fields contract.
  const old = harness(content); old.go({ type: "selectTopic", topicId: "grids" }); delete old.task().partIndex;
  assert.equal(old.view().task!.fields.length, 3);
@@ -136,7 +136,7 @@ test("retention is due per skill after two days before island Doctor and repeats
  h.go({ type: "nextQuestion" }, later); assert.equal(h.course.active!.mode, "review");
  h.go({ type: "answer", taskKey: h.task().key, answers: h.task().problem.fields.map(f => f.answer) }, later);
  assert.equal(h.course.topics[topic]!.skills[skillId]!.lastReviewAt, later);
- assert.equal(h.course.topics[topic]!.skills[skillId]!.streak, streak); assert.equal(h.view().gold, gold + 10);
+ assert.equal(h.course.topics[topic]!.skills[skillId]!.streak, streak); assert.equal(h.view().gold, gold + 20);
  // An archive-only bank can be revisited after spacing, but never earn a fresh confirmation.
  const only: KidsCourseContent = { ...content, problem: (id, i, hard) => !i && !hard ? content.problem(id, 0, false) : null };
  const r = harness(only); r.go({ type: "selectTopic", topicId: topic, skillId });

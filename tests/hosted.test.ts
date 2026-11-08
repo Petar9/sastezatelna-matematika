@@ -92,7 +92,7 @@ test("gold wallet sums competitions once and isolates both parent and child",asy
  const row=(parent_id:string,child_id:string,competition_id:string)=>({parent_id,child_id,competition_id,revision:earned.revision,course:earned});
  const db=fakeDatabase([row("p","c",DEFAULT_COMPETITION_ID),row("p","c","other"),row("p","other",DEFAULT_COMPETITION_ID),row("other","c",DEFAULT_COMPETITION_ID)]);
  const store=createSupabaseCourseStore(db.client,"p","c");
- assert.equal(await store.goldBalance!(earned),50);
+ assert.equal(await store.goldBalance!(earned),70);
  assert.equal(db.rows.length,4);
  for(const query of db.filters){assert.ok(query.some(c=>c.parent_id==="p"));assert.ok(query.some(c=>c.child_id==="c"));}
 });
@@ -106,7 +106,7 @@ test("concurrent gold awards use course CAS and cannot duplicate a milestone",as
  assert.equal(results.filter(r=>r.status==="fulfilled").length,1);
  const saved=(await store.read(content))!;
  assert.equal(saved.attempts.length,1);assert.equal(saved.goldAwards!.length,2);assert.equal(saved.problemGoldAwards!.length,1);
- assert.equal(await store.goldBalance!(saved),25);
+ assert.equal(await store.goldBalance!(saved),35);
 });
 
 
@@ -115,7 +115,7 @@ test("simultaneous rewards in different competitions both survive without a shar
  const [first,second]=await Promise.all([a.update(0,{type:"selectTopic",topicId:"matches"},content),b.update(0,{type:"selectTopic",topicId:"matches"},content)]);
  const answer=(course:typeof first)=>{const attempt=course.topics.matches!.work.core!.attempt;return{type:"answer",taskKey:attempt.key,answers:attempt.problem.fields.map(f=>f.answer)} as const;};
  const [savedA,savedB]=await Promise.all([a.update(first.revision,answer(first),content),b.update(second.revision,answer(second),content)]);
- assert.equal(await a.goldBalance!(savedA),50);assert.equal(await b.goldBalance!(savedB),50);
+ assert.equal(await a.goldBalance!(savedA),70);assert.equal(await b.goldBalance!(savedB),70);
  assert.equal(db.rows.length,2);assert.ok(db.rows.every(row=>(row.course as typeof first).goldAwards!.length===2));
 });
 
@@ -141,7 +141,7 @@ test("one private GET snapshot supplies fresh selected progress and cross-compet
  const store=createSupabaseCourseStore(db.client,"p","c");
  const {readKidsCourseView}=await import("../src/server/kids-course.ts");
  const view=await readKidsCourseView(store,content);
- assert.equal(view.revision,earned.revision);assert.equal(view.gold,50);
+ assert.equal(view.revision,earned.revision);assert.equal(view.gold,70);
  assert.equal(db.filters.length,1);assert.deepEqual(db.filters[0],[{parent_id:"p"},{child_id:"c"}]);
  db.rows[0]!.course=applyCourseAction(earned,content,{type:"pause"},now);db.rows[0]!.revision=earned.revision+1;
  assert.equal((await readKidsCourseView(store,content)).revision,earned.revision+1);
@@ -165,7 +165,7 @@ test("POST reuses its CAS input for exact gold gain and removes one database rea
   assert.equal(response.status,200);assert.equal(response.headers.get("Cache-Control"),"no-store");
   const {course:view}=await response.json();
   const saved=db.rows[0]!.course as KidsCourse;
-  assert.deepEqual(view.goldGain,newGoldGain(started,saved));assert.equal(view.goldGain.amount,25);assert.equal(view.gold,50);
+  assert.deepEqual(view.goldGain,newGoldGain(started,saved));assert.equal(view.goldGain.amount,35);assert.equal(view.gold,70);
   assert.equal(db.requests.length,optimized?3:4);
   const reads=db.requests.filter(request=>request.operation==="read");
   assert.equal(reads.length,optimized?2:3);
@@ -193,7 +193,7 @@ test("atomic POST migration compares projected revision but saves against raw re
  const response=await kidsCourseResponse(coursePost(projected.revision,{type:"pause"}),store,content);
  assert.equal(response.status,200);
  const {course:view}=await response.json();
- assert.equal(view.revision,projected.revision+1);assert.equal(view.gold,25);assert.equal(view.goldGain,undefined);
+ assert.equal(view.revision,projected.revision+1);assert.equal(view.gold,35);assert.equal(view.goldGain,undefined);
  assert.equal(db.requests.length,3);
  const write=db.requests.find(request=>request.operation==="update")!;
  assert.ok(write.conditions.some(filter=>filter.revision===old.revision));
@@ -212,7 +212,7 @@ test("atomic POST keeps first-insert and concurrent reward conflicts at 409",asy
  const answers=await Promise.all([kidsCourseResponse(coursePost(started.revision,action),store,content),kidsCourseResponse(coursePost(started.revision,action),store,content)]);
  assert.deepEqual(answers.map(response=>response.status).sort(),[200,409]);
  const success=answers.find(response=>response.status===200)!;
- const {course:view}=await success.json();assert.equal(view.goldGain.amount,25);assert.equal(view.gold,25);
+ const {course:view}=await success.json();assert.equal(view.goldGain.amount,35);assert.equal(view.gold,35);
  assert.equal((db.rows[0]!.course as KidsCourse).attempts.length,1);
  assert.equal(db.requests.filter(request=>request.exclusions.length).length,1,"only the successful writer reads the wallet");
 });

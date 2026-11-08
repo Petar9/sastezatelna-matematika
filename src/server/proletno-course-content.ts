@@ -1,3 +1,5 @@
+import { preparationBaselines } from "../core/preparation-baselines.ts";
+import { competitionRewardDifficulty } from "../core/competitions.ts";
 import { connectedRegistry, connectedUnit, letteredStatement, navigationGroups, singleConnected } from "./connected-course-content.ts";
 import archive from "../../content/proletno/2023-2026.json" with { type: "json" };
 import { originalDifficulty, proletnoPracticeDifficulty } from "./problem-difficulty.ts";
@@ -120,6 +122,8 @@ const groups = navigationGroups(topics, [
  { id: "pms-geometry", title: "Фигури и измервания" }, { id: "pms-logic" },
 ], connected.sources, source => sourceHomes[source.sourceId]!);
 export const proletnoCourseContent: KidsCourseContent = {
+ rewardDifficulty: competitionRewardDifficulty("proletno"),
+ preparationBaseline: preparationBaselines["proletno"],
  version, topics, navigationGroups: groups, connectedProblem: connected.connectedProblem,
  introductions: Object.fromEntries(pack.families.map(family => {
   const original = eligible.find(item => item.owner === family.id);

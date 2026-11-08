@@ -2,14 +2,13 @@ import type { CourseAttempt, CourseProblem, KidsCourse, KidsCourseContent } from
 
 import { archiveFor, catalogueProblems, difficultyFor, problemIdentity } from "./kids-selection.ts";
 
-export const problemGoldAmount = 10;
-export const hardProblemGoldAmount = 15;
+const problemGoldPrices = { easy: 10, medium: 15, hard: 20 } as const;
 const legacyProblemGoldAmount = 5;
 export interface ProblemGoldAward { key: string; skillId: string; earnedAt: string; amount?: number; groupId?: string }
 // Missing amounts belong to the pre-multiplier ledger and must never be repriced.
 export const problemAwardAmount = (award: ProblemGoldAward) => award.amount ?? legacyProblemGoldAmount;
 export function problemGoldRate(problem: CourseProblem, content?: KidsCourseContent) {
- return difficultyFor(problem, content)?.level === "hard" ? hardProblemGoldAmount : problemGoldAmount;
+ return problemGoldPrices[content?.rewardDifficulty ?? "easy"] + (difficultyFor(problem, content)?.level === "hard" ? 5 : 0);
 }
 export const goldAmounts = { started: 5, correct: 10, confirmed: 20 } as const;
 export type GoldMilestone = keyof typeof goldAmounts;
@@ -66,10 +65,9 @@ function alreadyPaid(course: KidsCourse, content: KidsCourseContent, problem: Co
  const source = archiveFor(problem, content)?.sourceId ?? content.connectedProblem?.(problem)?.sourceId;
  return course.problemGoldAwards?.some(a => a.key === key || (unit && (a.key === `source:${unit.sourceId}` || unit.legacyGoldKeys?.includes(a.key))) || (!unit && source && a.key.startsWith(`source:${source}:unit:`)));
 }
-export function problemGoldPreview(course: KidsCourse, content: KidsCourseContent, problem: CourseProblem): { amount: number; multiplier: 1 | 1.5 } | undefined {
+export function problemGoldPreview(course: KidsCourse, content: KidsCourseContent, problem: CourseProblem): { amount: number } | undefined {
  if (alreadyPaid(course, content, problem)) return undefined;
- const amount = problemGoldRate(problem, content);
- return { amount, multiplier: amount === hardProblemGoldAmount ? 1.5 : 1 };
+ return { amount: problemGoldRate(problem, content) };
 }
 export function awardProblemGold(course: KidsCourse, content: KidsCourseContent, attempt: CourseAttempt, now: string) {
  if (attempt.problemGoldEligible === false || attempt.goldEligible === false || (attempt.outcome !== "independent" && attempt.outcome !== "hinted")) return;

@@ -1,3 +1,4 @@
+import { currentPreparationScope, ensurePreparationScope, preparationProgress, type PreparationProgress, type PreparationScope } from "./preparation.ts";
 import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, problemAwardAmount, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
 import { chooseSkillProblem, problemSource, isCompetitionProblem, overlaps, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
@@ -51,6 +52,8 @@ export interface LearningSkillView extends Omit<LearningConceptView, "objectives
  confirmation: { earned: boolean; streak: number; target: number; revisit: boolean };
 }
 export interface KidsCourseContent {
+ rewardDifficulty?: "easy" | "medium" | "hard";
+ preparationBaseline?: PreparationScope;
 	version: string; topics: CourseTopic[]; navigationGroups?: { id: string; title: string; topicIds: string[]; sourceIds: string[] }[]; introductions?: Record<string, { problemId?: string; rationale: string }>; concepts?: CourseConcept[]; objectiveMap?: Record<string, CourseObjectiveMap>;
 	problem(skillId: string, index: number, harder: boolean): CourseProblem | null;
  connectedProblem?(problem: CourseProblem): ConnectedCourseProblem | undefined;
@@ -79,6 +82,7 @@ export interface CourseTopicProgress {
 	reviewDueAt?: string; lastReviewAt?: string; challengeNext: number; reviewNext: number;
 }
 export interface KidsCourse {
+ preparationScope?: PreparationScope;
  questContinuation?: CourseWork;
  goldAwards?: GoldAward[];
  problemGoldAwards?: ProblemGoldAward[];
@@ -107,13 +111,14 @@ export interface CourseTopicView {
 	skills: { id: string; title: string; confirmed: boolean; streak: number; target: number; revisit: boolean }[];
 }
 export interface KidsCourseView {
+ preparation: PreparationProgress;
  gold: number; goldGain?: GoldGain; lastTopicId?: string;
 	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string; groupId?: string };
 	topics: CourseTopicView[]; doctors: number; professors: number; professorGoal: number; complete: boolean; previouslyCompleted?: boolean;
 	quest?: { id: string; completed: number; total: number; step: number; finished: boolean; exhausted: boolean; achievement?: string };
  stamps?: QuestStamp[]; inQuest?: boolean; questAvailable?: boolean; nextReviewAt?: string;
  stage: "dashboard" | "question" | "lesson" | "questComplete"; streak?: number; target?: number; exhausted?: boolean;
-	task?: { goldReward?: { amount: number; multiplier: 1 | 1.5 }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; sourceIsPractice?: boolean; options?: string[];
+	task?: { goldReward?: { amount: number }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; sourceIsPractice?: boolean; options?: string[];
 		connected?: { sourceId: string; text: string; introduction?: string; figures?: NonNullable<CourseProblem["figure"]>[]; index: number; total: number; completed: { id: string; text: string; outcome: KidsOutcome; answers: string[]; fields: { label: string }[]; explanation: string[] }[] };
 		fields: { label: string }[]; part?: { index: number; total: number; completed: boolean }; figure?: CourseProblem["figure"]; hint?: string; hints?: string[]; hintLevel?: number; solutionParts?: CourseSolutionPart[];
 		draft?: string[]; outcome?: KidsOutcome; answers?: string[]; explanation?: string[]; reasoning?: string; teachingFigure?: CourseProblem["figure"] };
@@ -132,6 +137,7 @@ export function newKidsCourse(content: KidsCourseContent, now: string): KidsCour
 			skills: Object.fromEntries(topic.skills.map(skill => [skill.id, { streak: 0, target: 2, gap: false, revisit: false, nextCore: 0, nextHard: 0 }])),
 			work: {}, challengeStreak: 0, reviewStreak: 0, challengeNext: 0, reviewNext: 0,
 		}])) };
+ course.preparationScope = currentPreparationScope(content);
  course.islandGoldTargets = islandGoldTargets(course, content);
  return course;
 }
@@ -457,6 +463,7 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 export function applyCourseAction(record: KidsCourse, content: KidsCourseContent, action: CourseAction, now: string): KidsCourse {
 	if (record.contentVersion !== content.version) throw new KidsError("Учебният комплект е променен. Нужна е съвместима версия.", 409);
 	const course = structuredClone(record);
+ ensurePreparationScope(course, content);
  course.goldAwards = courseGoldAwards(record);
  course.islandGoldTargets = islandGoldTargets(record, content);
  course.updatedAt = now;
@@ -691,7 +698,7 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
  const lastProblem = course.attempts.at(-1)?.problem;
  const lastHistoricTopic = content.topics.find(t => t.skills.some(s => s.id === lastSkillId))?.id;
  const lastTopicId = (lastProblem && navigationGroup(content, lastProblem)?.id) ?? content.navigationGroups?.find(g => g.topicIds.includes(lastHistoricTopic ?? ""))?.id ?? lastHistoricTopic ?? activeGroup ?? course.active?.topicId;
- const view: KidsCourseView = { gold: courseGoldBalance(course), lastTopicId, revision: course.revision, paused: course.paused, active: course.active ? { ...course.active, topicId: activeGroup ?? course.active.topicId } : undefined,
+ const view: KidsCourseView = { preparation: preparationProgress(course, content), gold: courseGoldBalance(course), lastTopicId, revision: course.revision, paused: course.paused, active: course.active ? { ...course.active, topicId: activeGroup ?? course.active.topicId } : undefined,
 		topics, doctors: topics.filter(t => t.doctor).length, professors: topics.filter(t => t.professor).length,
 		professorGoal: Math.ceil(topics.length / 2), complete: !!course.completedAt, previouslyCompleted: !!course.previousCompletions?.length, stage: "dashboard" };
 	view.inQuest = course.journey === "quest";

@@ -32,7 +32,8 @@ For every new or expanded competition, new page or article, and substantial copy
 | Task | Guidance |
 | --- | --- |
 | Current work, outstanding checks or release status | [plan.md](plan.md) |
-| Education, content selection, progress, rewards or account behavior | [key-decisions.md](key-decisions.md) |
+| Education, content selection, progress or account behavior | [key-decisions.md](key-decisions.md) |
+| Gold, points, reward rates, eligibility or reward history | [Gold and rewards](docs/points.md); distinguish active policy from pending proposals |
 | UI, components, interaction or copy | [Design system](docs/design-system.md); inspect `components/ui` and the development-only `/design-system` catalogue |
 | Adding or expanding competition content | [Competition checklist](docs/content-workflow.md) and the collection's review record |
 | SEO, GEO, public articles or acquisition strategy | [SEO/GEO strategy](seo-geo.md) |

@@ -7,11 +7,13 @@ import { CompetitionCalendar } from "./competition-calendar";
 import { Button, ButtonLink } from "./ui/button";
 import { Select } from "./ui/field";
 import { Message } from "./ui/message";
+import { PreparationPanel } from "./competition-preparation";
+import type { PreparationProgress } from "../src/core/preparation";
 import type { ProgressCourse } from "../src/core/progress";
 import { dayProgress } from "../src/core/progress-calendar";
 import s from "./progress-calendar.module.css";
 
-export type ProgressCollection = ProgressCourse & { title: string; lastTaskHref?: string };
+export type ProgressCollection = ProgressCourse & { title: string; lastTaskHref?: string; preparation?: PreparationProgress };
 const weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 const outcomes = { independent: "Самостоятелно", hinted: "С подсказка", incorrect: "Грешен отговор", revealed: "Разгледано решение" };
 const monthLabel = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleDateString("bg-BG", { month: "long", year: "numeric", timeZone: "Europe/Sofia" });
@@ -25,9 +27,9 @@ export function shiftMonth(month: string, amount: number) {
  return new Date(Date.UTC(year!, number! - 1 + amount, 1)).toISOString().slice(0, 7);
 }
 
-export function ProgressCalendar({ collections, initialDay }: { collections: ProgressCollection[]; initialDay: string }) {
+export function ProgressCalendar({ collections, initialDay, initialCompetition }: { collections: ProgressCollection[]; initialDay: string; initialCompetition?: string }) {
  const [month, setMonth] = useState(initialDay.slice(0, 7));
- const [competition, setCompetition] = useState("all");
+ const [competition, setCompetition] = useState(collections.some(item => item.competitionId === initialCompetition) ? initialCompetition! : "all");
  const [selected, setSelected] = useState(initialDay);
  const id = useId();
  const scheduled = competitionCalendar.filter(item => competition === "all" || item.competitionId === competition);
@@ -82,7 +84,7 @@ export function ProgressCalendar({ collections, initialDay }: { collections: Pro
      return <button type="button" key={day} className={`${s.day} ${activity.length ? s.active : ""} ${competitions.length ? s.eventDay : ""}`} aria-pressed={selected === day} aria-current={day === initialDay ? "date" : undefined} aria-controls={`${id}-details`} aria-label={`${dateLabel(day)}: ${value.gold} злато, ${value.independent} самостоятелни, ${value.hinted} с подсказка, ${activity.filter(event => event.kind === "attempt" && event.outcome === "incorrect").length} грешни отговора, ${activity.filter(event => event.kind === "attempt" && event.outcome === "revealed").length} разгледани решения${activity.length ? "" : ", няма записана активност"}${competitions.map(event => `, ${event.kind === "deadline" ? "краен срок за провеждане" : "дата"}: ${event.label}`).join("")}`} onClick={() => setSelected(day)}>
       <span className={s.dayNumber}>{index + 1}</span>{activity.length > 0 && <>
        <span className={s.dayGold} aria-hidden="true">{value.gold}</span>
-       <span className={s.dayCounts} aria-hidden="true">{value.independent + value.hinted} {activity.some(event => event.naturalPart) ? "стъпки" : "реш."}</span>
+       <span className={s.dayCounts} aria-hidden="true">{value.independent + value.hinted} {value.independent + value.hinted === 1 ? "задача" : "задачи"}</span>
       </>}{competitions.length > 0 && <span className={s.eventMarker} aria-hidden="true">◆</span>}
      </button>;
     })}
@@ -108,6 +110,7 @@ export function ProgressCalendar({ collections, initialDay }: { collections: Pro
    {details.length === 0 && <p>Няма записана активност за този ден.</p>}
    {details.some(event => event.kind === "attempt" && !event.wholeProblem && !event.naturalPart) && <p className={s.legend}>Подусловията не се броят като завършени цели задачи.</p>}
   </section>
+  <PreparationPanel collections={collections}/>
   {upcoming.length > 0 && <section className={s.upcoming} aria-labelledby={`${id}-upcoming`}>
    <h2 id={`${id}-upcoming`}>Предстоящи дати</h2>
    <CompetitionCalendar events={upcoming}/>

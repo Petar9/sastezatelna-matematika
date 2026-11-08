@@ -53,7 +53,7 @@ export function KidsCompetitionPlayer(props:KidsCoursePlayerProps) {
  }
  useEffect(()=>{
   mounted.current=true;
-  const back=()=>{void select(new URLSearchParams(window.location.search).get("competition")??DEFAULT_COMPETITION_ID,false);};
+  const back=()=>{void select(new URLSearchParams(window.location.search).get("competition")??initialId,false);};
   const focus=()=>{
    if(saving.current||switching.current)return;
    const id=current.current;

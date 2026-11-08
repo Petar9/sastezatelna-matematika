@@ -1,3 +1,4 @@
+import {completedLearningAction} from "./competition-resume.ts";
 import {KidsError} from "../core/kids.ts";
 import {courseView,newKidsCourse,parseCourseCommand} from "../core/kids-course.ts";
 import type {KidsCourse,KidsCourseContent,CourseAction} from "../core/kids-course.ts";
@@ -21,7 +22,7 @@ export async function readKidsCourseView(store:CourseStore, content:KidsCourseCo
 }
 export const json=(body:unknown,status=200)=>Response.json(body,{status,headers:{"Cache-Control":"no-store"}});
 export function failure(error:unknown){if(error instanceof KidsError)return json({error:error.message},error.status);console.error("Course request failed",error);return json({error:"Не успяхме да запазим. Опитай отново."},500);}
-export async function kidsCourseResponse(request:Request,store:CourseStore,content:KidsCourseContent = kidsCourseContent){try{
+export async function kidsCourseResponse(request:Request,store:CourseStore,content:KidsCourseContent = kidsCourseContent, workedCookie?:string){try{
  if(request.method==="GET")return json({course:await readKidsCourseView(store,content)});
  const {revision,action}=parseCourseCommand(await request.json().catch(()=>null));
  const {before,next}=store.updateWithPrevious
@@ -30,5 +31,7 @@ export async function kidsCourseResponse(request:Request,store:CourseStore,conte
  const view=courseView(next,content,new Date().toISOString());
  if(store.goldBalance)view.gold=await store.goldBalance(next);
  view.goldGain=newGoldGain(before,next);
- return json({course:view});
+ const response=json({course:view});
+ if(workedCookie&&completedLearningAction(action,before,next))response.headers.append("Set-Cookie",workedCookie);
+ return response;
 }catch(error){return failure(error);}}

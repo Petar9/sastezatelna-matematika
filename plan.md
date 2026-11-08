@@ -1,6 +1,27 @@
 # Current work - Състезателна математика
 
-Updated 2026-11-07. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
+Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
+
+## Reward and preparation implementation - release approved, 2026-11-08
+
+- [x] Applied easy 10/15, medium 15/20 and hard 20/25 rewards through one preview/payout resolver; preserve historical payouts, milestones and full early-hint rewards. Added child-scoped same-browser last-worked competition resume after accepted graded work.
+- [x] Added immutable baseline/current-scope preparation projection (80/10/10), all-competition count-only accordion panel and bottom-of-overview otter card with 24px separation. Task totals count distinct graded natural parts: 102/21/108/38/23 across Maths/municipal/NVO/Spring/regional; percentages retain equal original weighting.
+- [x] Calendar cells use „1 задача“ / „N задачи“, including mixed independent/hinted successes. Doctor uses a diploma/seal and Professor a graduation cap; earning and motion rules are unchanged. Independent actual Astra review recommended no further wording changes; owner decisions and deferred proposals are recorded in [acceptance evidence](docs/points-implementation-review.md).
+- [x] Final local acceptance: 360/360 tests, TypeScript, ESLint, production build/private-file and whitespace checks passed. Real Chrome desktop and 320/390px checks covered independent keyboard accordions, task totals, calendar labels, reduced motion, badge artwork and spacing. Private historical/synthetic preview fingerprints unchanged.
+- [ ] Publish the exact tested revision and verify the live deployment. Production publication explicitly approved by the owner on 2026-11-08.
+- Local preview: http://127.0.0.1:3018/progress. Maths uses an isolated older import snapshot, the other four competitions synthetic histories; no Supabase or real learner writes.
+- Known content gaps: 134/136 skills confirm/review through normal commands. NVO `nvo-area-units` needs another core example (deferred by owner); regional `oli-ob-growth` routing remains a follow-up. Preserve honest incomplete progress.
+
+## Gold economy research - 2026-11-07
+
+- [x] Audited current rewards, natural-unit identities, authored variants and persistence; researched Duolingo/Khan Academy and primary educational/game-design studies with three workers, including independent gpt-6-astra decision review.
+- [x] Added [Gold and rewards](docs/points.md) as the authoritative policy/research guide; moved the existing approved gold rules intact and linked agent routing, learning decisions, content checklist, design system and historical difficulty review. Saved ranked recommendations, evidence limits, draft rates, approval decisions and staged acceptance checks.
+- [x] Recorded 2026-11-08 owner decisions: competition prices 10/15, 15/20 and 20/25; preserve easy/earned rewards, retire individual base-category downgrades, retain full rewards after hints one/two and the third-hint zero rule. Independent follow-up gpt-6-astra critique informed the revised recommendations.
+- [x] Recorded the owner-approved 80/20 preparation bar, primary competition-overview placement plus Напредък detail, existing exception reuse, milestone 5/10/20, unchanged variant eligibility and per-child browser-cookie resume.
+- [x] Wrote the [full implementation plan](docs/points.md#full-implementation-plan), including the otter UI proposal, finite coverage/consolidation, history protection, test matrix and local-before-production stages; linked the planned pattern from the design system. Independent gpt-6-astra inspected the denominator, legacy evidence, review routes and Bulgarian labels.
+- [x] Owner approved the detailed plan and final production release; see current implementation status and the explicit remaining content limitations above.
+- Planning verification (2026-11-08): 33 relative file links resolve, the active runtime-policy section is byte-for-byte unchanged, stale 60/40 proposals were removed, and `git diff --check` passes. Application tests were not rerun for documentation-only work.
+- Verification: on 2026-11-07 the coordinator repeated the targeted existing-behavior suite (29/29 passed), checked that the approved gold policy moved intact and that relative documentation references resolve, and inspected the Markdown diff/whitespace and scope. Independent Astra reviewed the final research draft; three precision corrections were applied. The 2026-11-08 revision checked documentation links, unchanged runtime-policy text and whitespace; no runtime tests were repeated for this documentation-only follow-up. These checks do not verify the proposed economy or a deployed release.
 
 ## Current release
 
@@ -156,3 +177,11 @@ Keep active tasks, material open decisions and a short latest-verification summa
 - [x] Owner explicitly approved publication and deployment; owner reports the production migration completed with “Success. No rows returned.” on 2026-11-07. Release checks repeated: 342/342 tests, TypeScript, ESLint and production build/private-file trace checks passed.
 - [x] Published `9f37c4e` to `main`; [Vercel deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/GrmFKTsAwL6mEtycc9WeqwjJzzYf) succeeded for that exact SHA. Live home/materials/invite returned 200; invite is no-store with noindex/nofollow and no-referrer metadata; anonymous sharing returns 401, acceptance GET 405, invalid acceptance 400, and foreign-origin acceptance 403. Development catalogue remains 404.
 - [ ] Real-account cross-device sharing smoke test remains pending; the three adults still need owner-created links and acceptance with their matching Google accounts.
+
+
+## Combined preparation panel - local acceptance 2026-11-08
+
+- [x] Consolidated started competitions into one panel below calendar/day activity, independent of the calendar filter; full-row independent accordions reveal only three X/Y counts. Untouched, rounded-zero and unavailable rows are omitted.
+- [x] Moved the otter preparation card to the bottom of competition overviews; applied the approved heading and removed the solved-original helper. Updated the design catalogue and guidance; actual Astra copy review recommended no changes.
+- [x] Verification: 359/359 regression tests, TypeScript, ESLint, optimized build/private-file checks and whitespace checks passed. Chrome at 1440/390/320px checked keyboard access, independent expansion/filtering, reduced motion, bottom placement and overflow; read-only history fingerprints unchanged.
+- Local only: http://127.0.0.1:3018/progress. Historical Maths copy plus synthetic histories for the other four competitions; no Supabase or production changes. [Acceptance evidence and limitations](docs/points-implementation-review.md).

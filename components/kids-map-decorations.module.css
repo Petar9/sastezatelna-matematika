@@ -1,14 +1,17 @@
 .sparkle { fill: #ffe198; stroke: #887044; stroke-width: 1.5px; }
 .award { width: 32px; height: 36px; overflow: visible; color: #738d78; }
-.medal, .blossom { fill: #243d33; stroke: #738d78; stroke-width: 1.8px; }
-.ribbon { fill: #243d33; stroke: #738d78; stroke-width: 1.5px; }
-.flowerStem { fill: #456949; stroke: #8ca481; stroke-width: 2px; }
-.flowerCentre { fill: #738d78; }
-.award[data-earned="true"] { color: #71501e; filter: drop-shadow(0 0 5px #e8c87f40); }
-.award[data-earned="true"] .medal { fill: #f4cf76; stroke: #ffe6a6; }
-.award[data-earned="true"] .ribbon { fill: #d79a56; stroke: #ffd38b; }
-.award[data-earned="true"] .blossom { fill: #b69ae7; stroke: #e2cfff; }
-.award[data-earned="true"] .flowerCentre { fill: #f8d782; }
+ .paper, .paperRoll, .cap, .capBand { fill: #e3e9e4; stroke: #7a9286; stroke-width: 1.7px; stroke-linejoin: round; }
+.paperRoll { fill: #cbd8cd; }
+.ink, .cord { fill: none; stroke: currentColor; stroke-width: 1.7px; stroke-linecap: round; stroke-linejoin: round; }
+.ribbon, .seal, .tassel { fill: #b5c6b8; stroke: #7a9286; stroke-width: 1.5px; stroke-linejoin: round; }
+.award[data-earned="true"] { color: #76551c; filter: drop-shadow(0 0 5px #e8c87f40); }
+.award[data-earned="true"] .paper { fill: #fff5d6; stroke: #b39560; }
+.award[data-earned="true"] .paperRoll { fill: #f0dfb0; stroke: #b39560; }
+.award[data-earned="true"] .ribbon { fill: #d79a56; stroke: #b9803e; }
+.award[data-earned="true"] .seal, .award[data-earned="true"] .tassel { fill: #f4cf76; stroke: #ac8030; }
+.award[data-earned="true"] .cap { fill: #247d77; stroke: #155e59; }
+.award[data-earned="true"] .capBand { fill: #166760; stroke: #155e59; }
+.award[data-earned="true"] .cord { stroke: #c49a42; }
 .marker { width: 40px; height: 40px; flex-shrink: 0; overflow: visible; }
 .marker[data-growing="true"], .award[data-growing="true"] { animation: discovery-pop 500ms ease-out; transform-origin: center; }
 @keyframes discovery-pop { from { opacity: .4; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }

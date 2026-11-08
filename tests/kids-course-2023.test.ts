@@ -69,7 +69,7 @@ test("2023 long tasks retain ordered drafts and progressive help; source parts s
   assert.equal(parts.length, 3); assert.equal(new Set(parts.map(q => problemGoldKey(q, content))).size, 1);
   const record = newKidsCourse(content, now);
   for (const q of parts) awardProblemGold(record, content, { key: q.id, problem: q, mode: "core", hintUsed: true, outcome: "hinted" } as CourseAttempt, now);
-  assert.equal(record.problemGoldAwards!.length, 1); assert.equal(courseGoldBalance(record), 15);
+  assert.equal(record.problemGoldAwards!.length, 1); assert.equal(courseGoldBalance(record), 25);
  }
 });
 

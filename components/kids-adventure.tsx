@@ -17,9 +17,9 @@ export function Treasure({ open = false }: { open?: boolean }) {
 export function GoldCoin() {
  return <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#f3c75f" stroke="#a47724" strokeWidth="2"/><circle cx="20" cy="20" r="12" fill="none" stroke="#ffedaf" strokeWidth="2"/><path d="m20 10 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z" fill="#a47724"/></svg>;
 }
-export function ProblemGoldPreview({ reward }: { reward: { amount: number; multiplier: 1 | 1.5 } }) {
- const label = `Награда за задачата: ${reward.amount} злато${reward.multiplier === 1.5 ? "; бонус ×1,5" : ""}`;
- return <div className={s.problemGoldRow}><span className={s.problemGoldPreview} aria-label={label} title={label}><GoldCoin/><strong>{reward.amount}</strong>{reward.multiplier === 1.5 && <small>· ×1,5</small>}</span></div>;
+export function ProblemGoldPreview({ reward }: { reward: { amount: number } }) {
+ const label = `Награда за задачата: ${reward.amount} злато`;
+ return <div className={s.problemGoldRow}><span className={s.problemGoldPreview} aria-label={label} title={label}><GoldCoin/><strong>{reward.amount}</strong></span></div>;
 }
 export function GoldWallet({ balance }: { balance: number }) {
  return <span className={s.goldWallet} data-gold-wallet aria-label={`${balance} злато`}><GoldCoin/><strong>{balance}</strong><span>злато</span></span>;

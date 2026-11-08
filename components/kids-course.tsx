@@ -18,6 +18,7 @@ import { LearningMap, QuestTrail, QuestFinish, TreasureCollection } from "./kids
 import { KidsActionBar } from "./kids-action-bar";
 import { FeedbackButton } from "./feedback";
 import { KidsOtter } from "./kids-otter";
+import { CompetitionPreparation } from "./competition-preparation";
 import { KidsLearningProgress } from "./kids-learning-progress";
 import { AdventureHome, GoldReward, GoldWallet, ProblemGoldPreview } from "./kids-adventure";
 import { knowledgeGrowthKeys } from "./kids-map-decorations";
@@ -173,6 +174,7 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
    <LearningMap topics={view.topics} progress={view} busy={busy} act={act} seenGrowth={seenMapGrowth} selection={{topicId:focusedIsland?mapTopic:undefined}} select={selectIsland} viewMode={mapMode} setViewMode={setMapMode}/>
 
 			{!focusedIsland && sessions.length > 0 && <details className={s.card}><summary>Предишни кратки занимания</summary><ul className={s.list}>{sessions.slice(0, 3).map(session => <li key={session.id}><Link href={`/kids/${session.id}`} className={s.secondary}>Отвори заниманието от {new Date(session.updatedAt).toLocaleDateString("bg-BG")}</Link></li>)}</ul></details>}
+   {!focusedIsland && <CompetitionPreparation progress={view.preparation} href={`/progress?competition=${encodeURIComponent(competitionId)}${learnerId ? `&child=${encodeURIComponent(learnerId)}` : ""}`} onNavigate={event => leave(event, `/progress?competition=${encodeURIComponent(competitionId)}${learnerId ? `&child=${encodeURIComponent(learnerId)}` : ""}`)}/>}
 		</> : view.paused ? <section className={s.card}><h1 ref={heading} tabIndex={-1} className={s.title}>Време за почивка</h1><p>Запазихме задачата и стъпките от решението. Продължи, когато поискаш.</p><KidsActionBar label="Продължи" disabled={busy} onClick={() => void act({ type: "resume" })}/></section> : <>
 			{view.stage!=="questComplete" && <h1 ref={heading} tabIndex={-1} className={`${s.title} ${s.practiceTitle}`}>{topic?.title}</h1>}
 			{view.inQuest && view.quest && <QuestTrail quest={view.quest}/>}

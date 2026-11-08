@@ -123,15 +123,15 @@ test('natural-part drafts and local hint exclusion survive reload while old sour
  for(let i=1;i<=3;i++){h.go({type:'hint',taskKey:key});assert.equal(h.view().task!.solutionParts!.length,i);}
  h.reload();assert.equal(h.view().task!.goldReward,undefined);h.finish();assert.equal(h.work().attempt.outcome,'hinted');assert.equal(h.view().gold,0);
  h.next();assert.equal(h.view().task!.connected!.index,2);assert.equal(h.view().task!.hintLevel,0);
- assert.equal(h.view().task!.goldReward!.amount,15);h.finish();assert.deepEqual(h.record.problemGoldAwards!.map(award=>award.amount),[15]);
+ assert.equal(h.view().task!.goldReward!.amount,25);h.finish();assert.deepEqual(h.record.problemGoldAwards!.map(award=>award.amount),[25]);
  const related=all.filter(q=>q.archive?.sourceId==='pms-g4-2026-p1');const paid=newKidsCourse(content,now);
  assert.equal(new Set(related.map(q=>problemGoldKey(q,content))).size,1);
  for(const q of [...related,...related])awardProblemGold(paid,content,{key:q.id,problem:q,mode:'core',hintUsed:true,hintLevel:2,outcome:'hinted',completedAt:now} as CourseAttempt,now);
- assert.equal(paid.problemGoldAwards!.length,1);assert.equal(courseGoldBalance(paid),15);
+ assert.equal(paid.problemGoldAwards!.length,1);assert.equal(courseGoldBalance(paid),25);
 });
 
-test('Spring ordinary/hard gold uses 10/15, survives two hints and excludes the third after reload',()=>{
- for(const [id,amount] of [['pms-g4-2023-p1:original',10],['pms-g4-2026-p1:original',15]] as const){
+test('Spring ordinary/hard gold uses 20/25, survives two hints and excludes the third after reload',()=>{
+ for(const [id,amount] of [['pms-g4-2023-p1:original',20],['pms-g4-2026-p1:original',25]] as const){
   const p=all.find(p=>p.id===id)!;
   const single:KidsCourseContent={...content,problem:(skill,i,hard)=>skill===p.skillId&&i===0&&!hard?p:null};
   for(let hints=0;hints<=3;hints++){

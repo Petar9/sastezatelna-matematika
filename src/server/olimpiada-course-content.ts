@@ -1,3 +1,5 @@
+import { preparationBaselines } from "../core/preparation-baselines.ts";
+import { competitionRewardDifficulty } from "../core/competitions.ts";
 import { connectedRegistry, connectedUnit, letteredStatement, navigationGroups, singleConnected } from "./connected-course-content.ts";
 import { originalDifficulty, olympiadPracticeDifficulty } from "./problem-difficulty.ts";
 import { olympiadIntroductions } from "./kids-teaching-introductions.ts";
@@ -147,6 +149,8 @@ const groups = navigationGroups(topics, islands.map(island => ({ id: island.id }
 
 // Published for the owner-approved pilot; outstanding source-review notes remain below.
 export const olympiadCourseContent: KidsCourseContent = {
+ rewardDifficulty: competitionRewardDifficulty("olimpiada"),
+ preparationBaseline: preparationBaselines["olimpiada"],
  version, topics, navigationGroups: groups, connectedProblem: connected.connectedProblem, introductions: olympiadIntroductions,
  concepts: pack.practice.families.map(family => ({ id: skillId(family), title: names[family.id]!, prerequisites: [],
   attention: family.items[0]!.statement_bg, idea: family.items[0]!.worked_steps_bg[0]!, workedStep: family.items[0]!.worked_steps_bg.slice(1).join(" ") })),
