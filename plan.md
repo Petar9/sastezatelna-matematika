@@ -1,5 +1,11 @@
 # Current work - Състезателна математика
 
+## Sharing action controls - verified locally, 2026-11-08
+
+- Owner approved quiet-outline option A after reviewing all three alternatives: red email-removal X, confirmation with primary “Да” and neutral close/Escape cancellation, and overlapping-rectangle copy icon with matching success tick. Independent configured `gpt-6-astra` copy review recommended no changes; approval context is saved in [shared access](docs/child-sharing.md#copy-review).
+- Verification: 363/363 application tests, TypeScript, ESLint and optimized production build/private-file checks passed. Chrome actual-component/CSS fixtures at 320/390/1440px confirmed no overflow, 44px controls, native modal/focus behavior, cancellation, failed-removal retry, duplicate prevention and clipboard/manual fallback. No API, authentication, database or learner-history changes.
+- Owner explicitly approved production publication in chat on 2026-11-08; deployment verification is pending. Real Google owner/recipient sessions remain an owner smoke check.
+
 ## Unified email access - released, 2026-11-08
 
 - Approved shared-email UI and access logic are published; independent actual Astra copy review recommended no changes. Local application tests, TypeScript, lint and production build passed; owner reported both production SQL queries succeeded on 2026-11-08; final local release checks passed.

@@ -24,6 +24,13 @@ async function proof(name:string,host:HTMLElement){
  await fs.writeFile(path.join(process.env.MATHS_UI_PROOF_DIR,`${name}.html`),`<!doctype html><html lang="bg"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{--font-sans3:Arial,sans-serif}${css.join("\n")}</style>${content}</html>`);
 }
 const labelled=(host:HTMLElement,label:string)=>host.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)!;
+// Linkedom lacks native modal methods; browser checks cover containment and Escape.
+function modalFor(host:HTMLElement){
+ const modal=host.querySelector<HTMLDialogElement>("dialog")!;
+ modal.showModal=()=>modal.setAttribute("open","");
+ modal.close=()=>{modal.removeAttribute("open");modal.dispatchEvent(new dom.window.Event("close"));};
+ return modal;
+}
 test("sharing lazily adds direct access, prevents duplicate submissions and copies the entire message via icon",async()=>{
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
  const oldFetch=globalThis.fetch,oldFormData=globalThis.FormData;
@@ -43,11 +50,13 @@ test("sharing lazily adds direct access, prevents duplicate submissions and copi
   await act(async()=>{submit();submit();});assert.equal(calls.length,2);assert.equal(button(host,"Добави достъп").disabled,true);
   await act(async()=>finish(Response.json({message})));
   assert.deepEqual(calls[1]!.body,{action:"add",email:"family@example.com",childId:"child-a"});assert.equal(host.querySelector<HTMLInputElement>('input[name="email"]')!.value,"");
-  await act(async()=>labelled(host,"Копирай съобщението").click());assert.equal(copied,message);assert.equal(labelled(host,"Копирай съобщението").textContent,"✓");
+  await act(async()=>labelled(host,"Копирай съобщението").click());assert.equal(copied,message);assert.equal(labelled(host,"Копирай съобщението").querySelector("path")?.getAttribute("d"),"m5 12 4 4L19 6");
   assert.ok(host.textContent?.includes("Съобщението е копирано."));assert.equal(host.querySelector('select'),null);
   await proof("sharing",host);
   await act(async()=>labelled(host,"Отмени поканата за waiting@example.com").click());assert.deepEqual(calls.at(-2)?.body,{action:"cancel",invitationId:"invite-a",childId:"child-a"});
-  await act(async()=>labelled(host,`Премахни достъпа на ${longEmail}`).click());assert.deepEqual(calls.at(-2)?.body,{action:"remove",email:longEmail,childId:"child-a"});assert.equal(host.textContent?.includes(longEmail),false);
+  const modal=modalFor(host),beforeRemoval=calls.length;
+  await act(async()=>labelled(host,`Премахни достъпа на ${longEmail}`).click());assert.equal(calls.length,beforeRemoval);assert.equal(modal.hasAttribute("open"),true);
+  await act(async()=>button(modal,"Да").click());assert.deepEqual(calls.at(-2)?.body,{action:"remove",email:longEmail,childId:"child-a"});assert.equal(host.textContent?.includes(longEmail),false);
  }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=oldFetch;globalThis.FormData=oldFormData;}
 });
 test("load and mutation failures preserve retry, email draft and existing access; clipboard fallback is selectable",async()=>{
@@ -59,7 +68,10 @@ test("load and mutation failures preserve retry, email draft and existing access
   await act(async()=>root.render(<ChildSharing childId="child-a"/>));
   await act(async()=>{const details=host.querySelector("details")!;details.open=true;details.dispatchEvent(new dom.window.Event("toggle"));});
   assert.ok(host.querySelector('[role="alert"]'));loadFail=false;await act(async()=>button(host,"Опитай отново").click());assert.equal(host.querySelector('[role="alert"]'),null);
-  await act(async()=>labelled(host,"Премахни достъпа на existing@example.com").click());assert.ok(host.textContent?.includes("existing@example.com"));
+  const modal=modalFor(host);
+  await act(async()=>labelled(host,"Премахни достъпа на existing@example.com").click());
+  await act(async()=>button(modal,"Да").click());assert.ok(host.textContent?.includes("existing@example.com"));assert.equal(modal.hasAttribute("open"),true);assert.ok(modal.querySelector('[role="alert"]'));
+  await act(async()=>labelled(modal,"Затвори").click());
   const input=host.querySelector<HTMLInputElement>('input[name="email"]')!,form=host.querySelector("form")!;input.value="draft@example.com";
   Object.assign(form,{reset(){input.value="";}});
   await act(async()=>{form.dispatchEvent(new dom.window.Event("submit",{bubbles:true,cancelable:true}));});assert.equal(input.value,"draft@example.com");
@@ -70,6 +82,34 @@ test("load and mutation failures preserve retry, email draft and existing access
   const fallback=host.querySelector<HTMLTextAreaElement>('textarea[aria-label="Съобщение за споделяне"]')!;assert.equal(fallback.value,"Съобщение https://maths.example/login.");
   await proof("sharing-fallback",host);
  }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=oldFetch;globalThis.FormData=oldFormData;}
+});
+test("removal requires confirmation, cancels safely, blocks duplicate requests and retries failures",async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host),oldFetch=globalThis.fetch;
+ let emails=["family@example.com"],posts=0,fail=true,finish!:(response:Response)=>void;
+ globalThis.fetch=async(_url,init)=>{if(!init?.body)return Response.json({invitations:[],emails});posts++;if(fail)return Response.json({message:"Опитай отново."},{status:503});return new Promise<Response>(resolve=>{finish=response=>{emails=[];resolve(response);};});};
+ try{
+  await act(async()=>root.render(<ChildSharing childId="child-a"/>));
+  await act(async()=>{const details=host.querySelector("details")!;details.open=true;details.dispatchEvent(new dom.window.Event("toggle"));});
+  const modal=modalFor(host),trigger=labelled(host,"Премахни достъпа на family@example.com"),close=labelled(modal,"Затвори");
+  let focused="";close.focus=()=>{focused="close";};trigger.focus=()=>{focused="trigger";};host.querySelector<HTMLHeadingElement>("h2")!.focus=()=>{focused="heading";};
+  await act(async()=>trigger.click());assert.equal(posts,0);assert.equal(focused,"close");assert.equal(modal.querySelector("h2")?.textContent,"Сигурен ли си, че искаш да спреш достъпа на family@example.com?");
+  await act(async()=>modal.click());assert.equal(modal.hasAttribute("open"),true);assert.equal(posts,0);
+  await act(async()=>close.click());assert.equal(modal.hasAttribute("open"),false);assert.equal(posts,0);assert.equal(focused,"trigger");
+  await act(async()=>trigger.click());const cancel=new dom.window.Event("cancel",{cancelable:true});modal.dispatchEvent(cancel);assert.equal(cancel.defaultPrevented,false);await act(async()=>modal.close());assert.equal(focused,"trigger");assert.equal(posts,0);
+  await act(async()=>trigger.click());await act(async()=>button(modal,"Да").click());assert.equal(posts,1);assert.equal(modal.hasAttribute("open"),true);assert.ok(modal.querySelector('[role="alert"]'));assert.ok(host.querySelector("li"));
+  fail=false;await act(async()=>{button(modal,"Да").click();button(modal,"Да").click();});assert.equal(posts,2);assert.equal(close.disabled,true);assert.equal(button(modal,"Да").disabled,true);
+  const pendingCancel=new dom.window.Event("cancel",{cancelable:true});modal.dispatchEvent(pendingCancel);assert.equal(pendingCancel.defaultPrevented,true);
+  await act(async()=>finish(Response.json({ok:true})));assert.equal(modal.hasAttribute("open"),false);assert.equal(host.querySelector("li"),null);assert.equal(focused,"heading");assert.equal(host.querySelector('[role="alert"]'),null);
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=oldFetch;}
+});
+test("accepted removal closes after refresh failure without restoring the email or resubmitting",async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host),oldFetch=globalThis.fetch;let accepted=false,posts=0;
+ globalThis.fetch=async(_url,init)=>{if(init?.body){accepted=true;posts++;return Response.json({ok:true});}if(accepted)throw new Error("offline");return Response.json({invitations:[],emails:["family@example.com"]});};
+ try{
+  await act(async()=>root.render(<ChildSharing childId="child-a"/>));await act(async()=>{const details=host.querySelector("details")!;details.open=true;details.dispatchEvent(new dom.window.Event("toggle"));});
+  const modal=modalFor(host);await act(async()=>labelled(host,"Премахни достъпа на family@example.com").click());await act(async()=>button(modal,"Да").click());
+  assert.equal(posts,1);assert.equal(modal.hasAttribute("open"),false);assert.equal(host.querySelector("li"),null);assert.ok(host.querySelector('[role="alert"]'));assert.ok(host.textContent?.includes("Не успяхме да обновим достъпа."));
+ }finally{await act(async()=>root.unmount());host.remove();globalThis.fetch=oldFetch;}
 });
 test("invitation strips URL token, retries the same token after failure and redirects after acceptance",async()=>{
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host),oldFetch=globalThis.fetch;
