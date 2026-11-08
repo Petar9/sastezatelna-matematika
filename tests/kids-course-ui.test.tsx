@@ -20,6 +20,17 @@ registerHooks({load(url,context,nextLoad){if(url.endsWith(".module.css"))return{
 const dom=parseHTML("<html><body></body></html>");
 Object.assign(globalThis,{React,window:dom.window,self:dom.window,document:dom.document,HTMLElement:dom.window.HTMLElement,IS_REACT_ACT_ENVIRONMENT:true});
 document.oninput=null;
+// linkedom does not implement the browser's native dialog methods.
+const createElement=document.createElement.bind(document);
+document.createElement=((name:string,options?:ElementCreationOptions)=>{
+ const element=createElement(name,options);
+ if(name==="dialog")Object.assign(element,{
+  showModal(){element.setAttribute("open","");},
+  close(){element.removeAttribute("open");element.dispatchEvent(new dom.window.Event("close"));}
+ });
+ return element;
+}) as typeof document.createElement;
+
 const {createRoot}=await import("react-dom/client");
 const {KidsCoursePlayer,CompetitionPicker}=await import("../components/kids-course.tsx");
 const {KidsActionBar}=await import("../components/kids-action-bar.tsx");
@@ -1521,5 +1532,25 @@ test("competition preparation stays on the overview and uses saved evidence afte
   assert.equal(preparation()!.getAttribute("aria-valuenow"),String(expected.percent));
   assert.ok(expected.coverage.fraction>0);await h.reload();
   assert.equal(preparation()!.getAttribute("aria-valuenow"),String(expected.percent));
+ }finally{await h.cleanup();}
+});
+
+
+test("personal progress opens once after a new independent answer and stays closed after reload/resume",async()=>{
+ const h=await mount();try{
+  await act(async()=>button(h.host,"Подсказка").click());
+  await submitAnswer(h);await act(async()=>primary(h.host,"Продължи").click());
+  await submitAnswer(h);
+  const dialog=h.host.querySelector<HTMLDialogElement>('dialog[open]');assert.ok(dialog);
+  assert.ok(dialog.textContent!.includes("Личен напредък!"));
+  assert.ok(dialog.textContent!.includes("Миналият път реши този тип задача с подсказка, а сега самостоятелно. Браво!"));
+  assert.equal(h.record.attempts.at(-1)!.personalProgress,true);
+  const paid=h.record.problemGoldAwards!.length;
+  await act(async()=>dialog.querySelector<HTMLButtonElement>('button:not([aria-label])')!.click());
+  assert.equal(h.host.querySelector('dialog[open]'),null);
+  await h.reload();assert.equal(h.host.querySelector('dialog[open]'),null);
+  await act(async()=>button(h.host,"Продължи: Точки и мачове").click());
+  assert.equal(h.host.querySelector('dialog[open]'),null);
+  assert.equal(h.record.problemGoldAwards!.length,paid);
  }finally{await h.cleanup();}
 });

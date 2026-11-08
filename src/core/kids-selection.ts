@@ -63,9 +63,12 @@ export function pendingProblems(course: KidsCourse, replacingKey?: string) {
  return [...Object.values(course.topics).flatMap(topic => [...Object.values(topic.work), ...Object.values(topic.skillWork ?? {})]), course.quest?.work, course.questContinuation]
   .filter(work => work && (!work.attempt.outcome || work.connected && work.connected.index + 1 < work.connected.problem.units.length) && work.attempt.key !== replacingKey).map(work => work!.connected ? { ...work!.attempt.problem, archive: { sourceId: work!.connected.problem.sourceId, kind: "original" as const, covers: work!.connected.problem.units.map(unit => unit.id) } } : work!.attempt.problem);
 }
+export function reviewDate(now: string, repeated = false) {
+ return new Date(Date.parse(now) + (repeated ? 30 : 2) * 86400000).toISOString();
+}
 export function skillReviewDue(course: KidsCourse, topicId: string, skillId: string): string | undefined {
  const state = course.topics[topicId]!.skills[skillId]!;
- return state.reviewDueAt ?? (state.confirmedAt ? new Date(Date.parse(state.lastReviewAt ?? state.confirmedAt) + 2 * 86400000).toISOString() : undefined);
+ return state.reviewDueAt ?? (state.confirmedAt ? reviewDate(state.lastReviewAt ?? state.confirmedAt, !!state.lastReviewAt) : undefined);
 }
 
 type Exposure = { seen: boolean; blocked: boolean; reserved: boolean };
@@ -129,18 +132,20 @@ export function createSelectionContext(course: KidsCourse, content: KidsCourseCo
 export function chooseSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, now: string, review = false, replacingKey?: string, context = createSelectionContext(course, content, now, replacingKey), existenceOnly = false, accepts?: (problem: CourseProblem) => boolean) {
  let chosen: { problem: CourseProblem; cursor: number; rank: number } | undefined;
  const ids = new Set<string>();
+ const lastReview = review ? course.attempts.findLast(a => a.problem.skillId === skillId && a.mode === "review" && a.outcome === "independent") : undefined;
+ const preferPractice = lastReview && isCompetitionProblem(lastReview.problem);
  for (const pool of harder ? [true] : [false, true]) for (let cursor = 0; cursor < 1000; cursor++) {
   const problem = content.problem(skillId, cursor, pool);
   if (!problem) break;
   if (ids.has(problem.id) || accepts && !accepts(problem)) continue;
   ids.add(problem.id);
-  // Harder authored tasks remain challenges, rather than filling exhausted core pools.
-  if (!harder && pool && !isCompetitionProblem(problem)) continue;
+  // Harder authored tasks can support review, but never fill exhausted core pools.
+  if (!harder && !review && pool && !isCompetitionProblem(problem)) continue;
   const exposure = context.exposure(problem);
   if (exposure.reserved || exposure.seen && (!review || exposure.blocked)) continue;
   if (existenceOnly) return { problem, cursor, rank: 0 };
   const rank = isCompetitionProblem(problem) ? problem.archive?.kind === "part" ? 3 : 4 : problem.archive?.kind === "scaffold" ? 1 : 0;
-  const candidate = { problem, cursor, rank: rank + (exposure.seen ? -10 : 0) + (!harder && isIntroduction(course, content, problem, context.independentMethods) ? 2 : 0) };
+  const candidate = { problem, cursor, rank: rank + (preferPractice && !isCompetitionProblem(problem) ? 5 : 0) + (exposure.seen ? -10 : 0) + (!harder && isIntroduction(course, content, problem, context.independentMethods) ? 2 : 0) };
   // Strict comparison preserves catalogue order for equal ranks, including pools.
   if (!chosen || candidate.rank > chosen.rank) chosen = candidate;
  }

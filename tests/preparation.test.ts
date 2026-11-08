@@ -78,7 +78,7 @@ function currentWork(course:KidsCourse) {
  const active=course.active!,topic=course.topics[active.topicId]!;
  return active.skillId?topic.skillWork?.[active.skillId]:topic.work[active.mode];
 }
-test("all five manifests deduplicate sources and normal selection confirms/reviews every skill except the two documented content/route gaps",()=>{
+test("all five manifests preserve source counts and normal selection confirms/reviews all 136 skills",()=>{
  const counts:Record<string,number>={"matematika-za-vseki":86,olimpiada:11,nvo:100,proletno:19,"olimpiada-oblasten":12};
  const units:Record<string,number>={"matematika-za-vseki":102,olimpiada:21,nvo:108,proletno:38,"olimpiada-oblasten":23};
  const gaps:string[]=[];
@@ -106,7 +106,7 @@ test("all five manifests deduplicate sources and normal selection confirms/revie
    assert.ok(reviewed(),`${comp.id}/${skill.id} delayed review unreachable`);
   }
  }
- assert.deepEqual(gaps,["nvo/nvo-area-units","olimpiada-oblasten/oli-ob-growth"]);
+ assert.deepEqual(gaps,[]);
 });
 
 

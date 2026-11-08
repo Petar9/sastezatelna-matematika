@@ -40,7 +40,7 @@ test("NVO contains 100 distinct full originals, 108 answer conditions, six visib
  assert.equal(content.topics.length, 10);
  assert.equal(content.navigationGroups!.length, 6);
  assert.equal(content.topics.flatMap(t => t.skills).length, 27);
- const all = problems(); assert.equal(all.length, 100); assert.equal(new Set(all.map(p => p.id)).size, 100);
+ const all = problems().filter(p => p.archive?.kind === "original"); assert.equal(all.length, 100); assert.equal(new Set(all.map(p => p.id)).size, 100);
  assert.equal(all.reduce((sum, p) => sum + p.fields.length, 0), 108);
  for (const p of all) {
   assert.equal(p.archive?.kind, "original"); assert.equal(p.provenance?.video, undefined);
@@ -84,7 +84,7 @@ test("all 40 original figure crops exist and source views preserve choices witho
 });
 
 test("every NVO natural question can be graded and earns its own original-part bonus", () => {
- for (const problem of problems()) {
+ for (const problem of problems().filter(p => p.archive?.kind === "original")) {
   const topic = content.topics.find(t => t.skills.some(s => s.id === problem.skillId))!;
   const isolated: KidsCourseContent = { ...content, navigationGroups: undefined,
    introductions: { [problem.skillId]: { problemId: problem.id, rationale: "Изолиран оригинал за проверка." } },
@@ -141,4 +141,19 @@ test("NVO progress and answer drafts persist separately without changing existin
   assert.equal(localStores("olimpiada").kidsCourseStore.read(), null);
   assert.equal(record.attempts.length, 0); assert.equal(record.goldAwards?.length ?? 0, 0);
  } finally { process.env = prior; fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
+
+test("NVO area conversions include two distinct, finite core exercises with checked answers", () => {
+ const practice = problems().filter(p => !p.archive);
+ assert.equal(practice.length, 2);
+ assert.equal(new Set(practice.map(p => p.text)).size, 2);
+ assert.deepEqual(practice.map(p => p.fields.map(f => Number(f.answer))), [[3 * 1000], [2500 - 2 * 1000]]);
+ for (const p of practice) {
+  assert.equal(p.skillId, "nvo-area-units");
+  assert.equal(content.connectedProblem!(p), undefined);
+  assert.equal(p.solution?.length, 3);
+  assert.deepEqual(content.solutionFor!(p), p.solution);
+  assert.ok(originalStatement(content, p.practiceSource!.problemId));
+ }
 });

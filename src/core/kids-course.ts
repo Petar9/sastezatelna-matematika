@@ -1,7 +1,7 @@
 import { currentPreparationScope, ensurePreparationScope, preparationProgress, type PreparationProgress, type PreparationScope } from "./preparation.ts";
 import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, problemAwardAmount, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
-import { chooseSkillProblem, problemSource, isCompetitionProblem, overlaps, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
+import { chooseSkillProblem, problemSource, isCompetitionProblem, overlaps, reviewDate, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
 import { chooseQuestProblem, hasQuestProblem, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
 
 export type CourseMode = "core" | "challenge" | "review" | "practice";
@@ -67,7 +67,7 @@ export interface CourseAttempt {
  problemGoldEligible?: false;
  draft?: { partIndex: number; answers: string[] };
  sourceComplete?: boolean;
- partIndex?: number; partOutcome?: KidsOutcome; partIncorrect?: boolean; freshEvidence?: boolean;
+ partIndex?: number; partOutcome?: KidsOutcome; partIncorrect?: boolean; freshEvidence?: boolean; personalProgress?: true;
 }
 export interface CourseSkillProgress {
 	streak: number; target: number; confirmedAt?: string; gap: boolean; revisit: boolean;
@@ -118,7 +118,7 @@ export interface KidsCourseView {
 	quest?: { id: string; completed: number; total: number; step: number; finished: boolean; exhausted: boolean; achievement?: string };
  stamps?: QuestStamp[]; inQuest?: boolean; questAvailable?: boolean; nextReviewAt?: string;
  stage: "dashboard" | "question" | "lesson" | "questComplete"; streak?: number; target?: number; exhausted?: boolean;
-	task?: { goldReward?: { amount: number }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; sourceIsPractice?: boolean; options?: string[];
+	task?: { personalProgress?: true; goldReward?: { amount: number }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; sourceIsPractice?: boolean; options?: string[];
 		connected?: { sourceId: string; text: string; introduction?: string; figures?: NonNullable<CourseProblem["figure"]>[]; index: number; total: number; completed: { id: string; text: string; outcome: KidsOutcome; answers: string[]; fields: { label: string }[]; explanation: string[] }[] };
 		fields: { label: string }[]; part?: { index: number; total: number; completed: boolean }; figure?: CourseProblem["figure"]; hint?: string; hints?: string[]; hintLevel?: number; solutionParts?: CourseSolutionPart[];
 		draft?: string[]; outcome?: KidsOutcome; answers?: string[]; explanation?: string[]; reasoning?: string; teachingFigure?: CourseProblem["figure"] };
@@ -329,7 +329,7 @@ function activeWork(course: KidsCourse, progress: CourseTopicProgress, mode: Cou
 
 function selectedSkillMode(progress: CourseTopicProgress, skillId: string, now: string): CourseMode {
  const skill = progress.skills[skillId]!;
- const due = skill.reviewDueAt ?? (skill.confirmedAt ? dueDate(skill.lastReviewAt ?? skill.confirmedAt) : undefined);
+ const due = skill.reviewDueAt ?? (skill.confirmedAt ? reviewDate(skill.lastReviewAt ?? skill.confirmedAt, !!skill.lastReviewAt) : undefined);
  return !skill.confirmedAt || skill.revisit ? "core" : due && due <= now ? "review" : progress.doctorAt && !progress.professorAt ? "challenge" : "practice";
 }
 
@@ -398,7 +398,6 @@ function finishQuestStep(course: KidsCourse, content: KidsCourseContent, now: st
  assignQuestWork(course, content, now, preferredSkill);
 }
 
-function dueDate(now: string) { return new Date(Date.parse(now) + 2 * 24 * 60 * 60 * 1000).toISOString(); }
 
 function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: CourseAttempt, now: string) {
 	const topic = content.topics.find(t => t.skills.some(s => s.id === attempt.problem.skillId))!;
@@ -407,6 +406,8 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 	const independent = attempt.outcome === "independent";
  const fresh = !course.attempts.some(a => overlaps(a.problem, attempt.problem, content) || !!attempt.problem.naturalUnit && a.problem.skillId === attempt.problem.skillId && (a.problem.naturalUnit?.sourceId ?? a.problem.archive?.sourceId ?? content.connectedProblem?.(a.problem)?.sourceId) === attempt.problem.naturalUnit.sourceId);
  attempt.freshEvidence = fresh;
+ const previous = course.attempts.findLast(a => a.problem.skillId === attempt.problem.skillId && a.completedAt);
+ if (independent && fresh && previous?.outcome === "hinted" && previous.hintUsed) attempt.personalProgress = true;
 	if (!independent) progress.challengeStreak = 0;
 	// An outcome in another mode supersedes old feedback, never an unanswered task.
 	for (const other of ["core", "challenge", "review", "practice"] as const) {
@@ -415,7 +416,10 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 	if (mode === "core" || mode === "practice") {
 		if (independent && fresh) {
 			skill.streak++;
-			if (skill.streak >= skill.target) { skill.confirmedAt ??= now; skill.revisit = false; skill.reviewDueAt = dueDate(now); }
+			if (skill.streak >= skill.target) {
+    if (!skill.confirmedAt || skill.revisit) skill.reviewDueAt = reviewDate(now);
+    skill.confirmedAt ??= now; skill.revisit = false;
+   }
 		} else if (!independent) {
 			skill.streak = 0;
 			if (attempt.outcome !== "hinted") skill.gap = true;
@@ -431,8 +435,8 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 	} else {
 		progress.reviewStreak = independent ? progress.reviewStreak + 1 : 0;
 		if (independent) {
-			progress.lastReviewAt = now; progress.reviewDueAt = dueDate(now);
-   skill.lastReviewAt = now; skill.reviewDueAt = dueDate(now);
+			progress.lastReviewAt = now; progress.reviewDueAt = reviewDate(now, true);
+   skill.lastReviewAt = now; skill.reviewDueAt = reviewDate(now, true);
 		} else {
 			skill.streak = 0; skill.target = attempt.outcome === "hinted" && !skill.gap ? 1 : 2;
 			skill.gap ||= attempt.outcome !== "hinted"; skill.revisit = true;
@@ -446,7 +450,7 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 	course.attempts.push(structuredClone(attempt));
  if (course.journey === "quest" && course.quest?.work?.attempt.key === attempt.key) course.quest.completed++;
 	if (!progress.doctorAt && topic.skills.every(s => progress.skills[s.id]!.confirmedAt)) {
-		progress.doctorAt = now; progress.reviewDueAt = dueDate(now);
+		progress.doctorAt = now; progress.reviewDueAt = reviewDate(now);
 		course.awards.push({ topicId: topic.id, rank: "doctor", earnedAt: now, taskKey: attempt.key });
 	}
 	const recentChallenges = course.attempts.filter(a => a.mode === "challenge" && a.freshEvidence !== false && topic.skills.some(s => s.id === a.problem.skillId)).slice(-2);
@@ -721,7 +725,7 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
 		view.stage = "lesson"; view.lesson = { title: skill.title, steps: skill.lesson.slice(0, work.lessonStep + 1), total: skill.lesson.length, illustration: skill.illustration };
 	} else {
 		view.stage = "question";
-		view.task = { goldReward: a.problemGoldEligible === false || (a.hintLevel ?? 0) >= 3 ? undefined : problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, ...problemSource(p, content), options: p.options,
+		view.task = { ...(a.personalProgress ? { personalProgress: true } : {}), goldReward: a.problemGoldEligible === false || (a.hintLevel ?? 0) >= 3 ? undefined : problemGoldPreview(course, content, p), key: a.key, skillId: p.skillId, text: p.text, source: p.source, ...problemSource(p, content), options: p.options,
 			fields: (a.partIndex !== undefined ? [p.fields[a.partIndex]!] : p.fields).map(f => ({ label: f.label })), figure: p.figure,
    ...(a.partIndex !== undefined ? { part: { index: a.partIndex + 1, total: p.fields.length, completed: !!a.partOutcome && !a.outcome } } : {}),
    ...(a.partOutcome && !a.outcome ? { outcome: a.partOutcome, answers: [a.answers![a.partIndex!]!], explanation: [`${p.fields[a.partIndex!]!.label}: ${p.fields[a.partIndex!]!.answer}.`] } : {}),

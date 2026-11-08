@@ -1,9 +1,11 @@
-// Frozen pre-optimization selector used only for synthetic parity checks and benchmarks.
+// Unindexed selector used for synthetic parity checks and benchmarks; routing policies match production.
 import type { CourseMode, CourseProblem, KidsCourse, KidsCourseContent, QuestKind } from "../../src/core/kids-course.ts";
 import { pendingProblems, overlaps, isCompetitionProblem, isIntroduction, teachingMethod, skillReviewDue, skillPrerequisitesReady } from "../../src/core/kids-selection.ts";
 export function referenceSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, now: string, review = false, replacingKey?: string) {
  const reserved = pendingProblems(course, replacingKey);
  const history = course.attempts;
+ const lastReview = review ? history.findLast(a => a.problem.skillId === skillId && a.mode === "review" && a.outcome === "independent") : undefined;
+ const preferPractice = lastReview && isCompetitionProblem(lastReview.problem);
  const candidates: { problem: CourseProblem; cursor: number; rank: number }[] = [];
  const ids = new Set<string>();
  for (const pool of harder ? [true] : [false, true]) for (let cursor = 0; cursor < 1000; cursor++) {
@@ -11,13 +13,13 @@ export function referenceSkillProblem(course: KidsCourse, content: KidsCourseCon
   if (!problem) break;
   if (ids.has(problem.id)) continue;
   ids.add(problem.id);
-  // Harder authored tasks remain challenges, rather than filling exhausted core pools.
-  if (!harder && pool && !isCompetitionProblem(problem)) continue;
+  // Harder authored tasks can support review, but never fill exhausted core pools.
+  if (!harder && !review && pool && !isCompetitionProblem(problem)) continue;
   if (reserved.some(p => overlaps(p, problem, content))) continue;
   const seen = history.filter(a => overlaps(a.problem, problem, content));
   if (seen.length && (!review || seen.some(a => !a.completedAt || Date.parse(now) - Date.parse(a.completedAt) < 2 * 86400000))) continue;
   const rank = isCompetitionProblem(problem) ? problem.archive?.kind === "part" ? 3 : 4 : problem.archive?.kind === "scaffold" ? 1 : 0;
-  candidates.push({ problem, cursor, rank: rank + (seen.length ? -10 : 0) + (!harder && isIntroduction(course, content, problem) ? 2 : 0) });
+  candidates.push({ problem, cursor, rank: rank + (preferPractice && !isCompetitionProblem(problem) ? 5 : 0) + (seen.length ? -10 : 0) + (!harder && isIntroduction(course, content, problem) ? 2 : 0) });
  }
  candidates.sort((a, b) => b.rank - a.rank);
  return candidates[0];
@@ -55,7 +57,7 @@ export function referenceQuestProblem(course: KidsCourse, content: KidsCourseCon
   const topicConfirmed = topic.skills.every(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit);
   const challenge = !!followup && last.outcome === "independent" && last.problem.skillId === skill.id && topicConfirmed && ready(skill.id);
   const due = skillReviewDue(course, topic.id, skill.id);
-  let mode: CourseMode = challenge ? "challenge" : familiar && !!due && due <= now ? "review" : "core";
+  let mode: CourseMode = familiar && !!due && due <= now ? "review" : challenge ? "challenge" : "core";
   let chosen = referenceSkillProblem(course, content, skill.id, mode === "challenge", now, mode === "review");
   if (!chosen && topicConfirmed && ready(skill.id)) {
    mode = "challenge";
@@ -81,7 +83,7 @@ export function referenceQuestProblem(course: KidsCourse, content: KidsCourseCon
   if (!ready(skill.id) && !gap) score -= 20000;
   if (sameConcept) score -= 600;
   if (previous?.topicId === topic.id) score -= 150;
-  if (mode === "review") score += 500;
+  if (mode === "review") score += state.lastReviewAt ? 20000 : 500;
   if (original) score += 3000;
   score -= (lastIndex + 1) * 2;
 

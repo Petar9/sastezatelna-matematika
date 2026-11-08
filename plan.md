@@ -1,5 +1,14 @@
 # Current work - Състезателна математика
 
+## Learning coverage and retention - 2026-11-08
+
+- [x] Added two reviewed core exercises each for NVO area units and regional growth; source originals, stable history and gold rules unchanged.
+- [x] Added personal improvement recognition and repeat review after Professor (first two days, then 30 days after independent review).
+- [x] Actual gpt-6-astra reviewed Bulgarian; owner approved both suggestions in chat, applied before acceptance tests. [Review and verification](docs/learning-retention-review.md).
+- [x] Local acceptance: 371/371 tests, TypeScript, ESLint, optimized build/private-file checks; Chrome desktop and 390/320px modal, keyboard, refresh/resume and console checks passed with disposable history.
+- [ ] Production deployment verification.
+
+
 ## Sharing action controls - released, 2026-11-08
 
 - Owner approved quiet-outline option A after reviewing all three alternatives: red email-removal X, confirmation with primary “Да” and neutral close/Escape cancellation, and overlapping-rectangle copy icon with matching success tick. Independent configured `gpt-6-astra` copy review recommended no changes; approval context is saved in [shared access](docs/child-sharing.md#copy-review).
@@ -30,7 +39,7 @@ Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 - [x] Final local acceptance: 360/360 tests, TypeScript, ESLint, production build/private-file and whitespace checks passed. Real Chrome desktop and 320/390px checks covered independent keyboard accordions, task totals, calendar labels, reduced motion, badge artwork and spacing. Private historical/synthetic preview fingerprints unchanged.
 - [x] Published tested application revision `87edf03` and verified Vercel success, live public routes/assets and private access protections; see current release below. Production publication explicitly approved by the owner on 2026-11-08.
 - Local preview: http://127.0.0.1:3018/progress. Maths uses an isolated older import snapshot, the other four competitions synthetic histories; no Supabase or real learner writes.
-- Known content gaps: 134/136 skills confirm/review through normal commands. NVO `nvo-area-units` needs another core example (deferred by owner); regional `oli-ob-growth` routing remains a follow-up. Preserve honest incomplete progress.
+- Content gaps closed on 2026-11-08: normal commands confirm/review 136/136 skills; see [follow-up acceptance](docs/learning-retention-review.md).
 
 ## Gold economy research - 2026-11-07
 

@@ -81,7 +81,7 @@ function selectQuestProblem(course: KidsCourse, content: KidsCourseContent, now:
   const topicConfirmed = topic.skills.every(s => progress.skills[s.id]!.confirmedAt && !progress.skills[s.id]!.revisit);
   const challenge = !!followup && last.outcome === "independent" && last.problem.skillId === skill.id && topicConfirmed && ready(skill.id);
   const due = skillReviewDue(course, topic.id, skill.id);
-  let mode: CourseMode = challenge ? "challenge" : familiar && !!due && due <= now ? "review" : "core";
+  let mode: CourseMode = familiar && !!due && due <= now ? "review" : challenge ? "challenge" : "core";
   let chosen = chooseSkillProblem(course, content, skill.id, mode === "challenge", now, mode === "review", undefined, context, existenceOnly);
   if (!chosen && topicConfirmed && ready(skill.id)) {
    mode = "challenge";
@@ -108,7 +108,7 @@ function selectQuestProblem(course: KidsCourse, content: KidsCourseContent, now:
   if (!ready(skill.id) && !gap) score -= 20000;
   if (sameConcept) score -= 600;
   if (previous?.topicId === topic.id) score -= 150;
-  if (mode === "review") score += 500;
+  if (mode === "review") score += state.lastReviewAt ? 20000 : 500;
   if (original) score += 3000;
   score -= (lastIndex + 1) * 2;
 

@@ -18,6 +18,7 @@ import { LearningMap, QuestTrail, QuestFinish, TreasureCollection } from "./kids
 import { KidsActionBar } from "./kids-action-bar";
 import { FeedbackButton } from "./feedback";
 import { KidsOtter } from "./kids-otter";
+import { PersonalProgressDialog } from "./personal-progress-dialog";
 import { CompetitionPreparation } from "./competition-preparation";
 import { KidsLearningProgress } from "./kids-learning-progress";
 import { AdventureHome, GoldReward, GoldWallet, ProblemGoldPreview } from "./kids-adventure";
@@ -29,6 +30,8 @@ export interface KidsCoursePlayerProps { initialView: KidsCourseView; sessions?:
 export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learnerNickname, competitionId = DEFAULT_COMPETITION_ID, competitionChoices = [], refreshing=false, refreshedView, onViewChange, onCompetitionChange, navigationGuard, onBusyChange, onAccessDenied }: KidsCoursePlayerProps) {
 	const [view, setView] = useState(initialView), [dashboard, setDashboard] = useState(true);
  const [refreshEpoch,setRefreshEpoch]=useState(0);
+ const [personalProgress,setPersonalProgress]=useState<string>();
+ const celebratedProgress=useRef(new Set<string>());
 	const [saving, setBusy] = useState(false), [error, setError] = useState("");
  const busy=saving||refreshing;
 	const [mapTopic, setMapTopic] = useState<string>();
@@ -117,7 +120,14 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
  }
  async function send(action: CourseAction) {
   setError("");
-		const receive = (next: KidsCourseView) => { if(accessDenied.current)return;viewRef.current = next; setView(next); onViewChange?.(next); };
+		const receive = (next: KidsCourseView) => {
+   if(accessDenied.current)return;
+   const previous=viewRef.current.task;
+   if(action.type==="answer" && previous?.key===action.taskKey && !previous.outcome && next.task?.key===action.taskKey && next.task.personalProgress && !celebratedProgress.current.has(action.taskKey)) {
+    celebratedProgress.current.add(action.taskKey); setPersonalProgress(action.taskKey);
+   }
+   viewRef.current = next; setView(next); onViewChange?.(next);
+  };
   const checked = (response:Response) => {
    if([401,403,428].includes(response.status)){
     accessDenied.current=true;onAccessDenied?.(response.status);
@@ -179,7 +189,7 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 			{view.stage!=="questComplete" && <h1 ref={heading} tabIndex={-1} className={`${s.title} ${s.practiceTitle}`}>{topic?.title}</h1>}
 			{view.inQuest && view.quest && <QuestTrail quest={view.quest}/>}
    {view.stage === "questComplete" && <QuestFinish view={view} busy={busy} act={act} finish={showHome} map={() => showMap(null)}/>}
-			{view.active?.mode === "review" && <p className={s.small}>Да си припомним с позната задача.</p>}
+			{view.active?.mode === "review" && <p className={s.small}>Да си припомним.</p>}
 			{view.exhausted && <section className={s.card}><h2>{view.active?.skillId ? "За момента няма следваща задача в тази подтема." : "За момента няма следваща задача за тази стъпка."}</h2><KidsActionBar label={view.active?.skillId ? "Към острова" : "Към картата"} disabled={busy} onClick={() => showMap(view.active?.skillId ? view.active.topicId : null)}/></section>}
 			{view.lesson && <section className={s.card}><h2>Да научим: {view.lesson.title}</h2><ol className={s.steps}>{view.lesson.steps.map((step, i) => <li key={i}>{step}</li>)}</ol>{view.lesson.illustration && <TeachingFigure figure={view.lesson.illustration} />}<p className={s.small}>Стъпка {view.lesson.steps.length} от {view.lesson.total}</p><KidsActionBar label={view.lesson.steps.length < view.lesson.total ? "Следваща стъпка" : view.inQuest && view.quest?.completed === view.quest?.total ? "Отвори съкровището" : "Да пробвам нова задача"} disabled={busy} onClick={() => void act({ type: "lessonNext" })}/></section>}
 			{view.task && <section className={`${s.card} ${s.taskCard}`}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title !== topic?.title && <h2 className={s.taskSkill}>{topic?.skills.find(skill => skill.id === view.task?.skillId)?.title}</h2>}<CourseQuestion key={`${view.task.key}:${view.task.part?.index ?? 0}:${refreshEpoch}`} task={view.task} competitionId={competitionId} leaf={activeLeaf} inQuest={view.inQuest} goldGain={view.goldGain} busy={busy} act={act} draftChanged={draftChanged} />
@@ -190,6 +200,7 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 		</>}
   {showDashboard && !focusedIsland && <footer className={s.footer}><Link href="/about" onClick={event=>leave(event,"/about")} className={s.quiet}>За сайта</Link><Link href={learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress"} onClick={event=>leave(event,learnerId?`/progress?child=${encodeURIComponent(learnerId)}`:"/progress")} className={s.quiet}>Напредък</Link><Link href="/profiles" onClick={event=>leave(event,"/profiles")} className={s.quiet}>Профили</Link></footer>}
   <div className={s.feedbackAction}><Link href="/materiali" onClick={event=>leave(event,"/materiali")} className={s.quiet}>Ценни материали</Link>{learnerId && <FeedbackButton childId={learnerId} competitionId={competitionId} taskKey={!showDashboard && !view.paused ? view.task?.key : undefined}/>}</div>
+  {personalProgress && <PersonalProgressDialog onDismiss={()=>{setPersonalProgress(undefined);heading.current?.focus({preventScroll:true});}}/>}
 	</div></main>;
 }
 

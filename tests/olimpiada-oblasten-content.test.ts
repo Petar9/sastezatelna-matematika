@@ -24,16 +24,16 @@ function harness(pack=content){
  const next=()=>{go({type:'nextQuestion'});while(view().stage==='lesson')go({type:'lessonNext'});};
  return{get record(){return record;},go,work,correct,finish,next,view,reload:()=>{record=JSON.parse(JSON.stringify(record));}};
 }
-test('regional Olympiad has 12 whole originals, 23 natural units, 21 finite exercises and four canonical islands',()=>{
+test('regional Olympiad has 12 whole originals, 23 natural units, 23 finite exercises and four canonical islands',()=>{
  assert.deepEqual(content.topics.map(t=>t.title),['Числови загадки','Истории с числа','Геометрични открития','Срещи и обиколки']);
  assert.deepEqual(content.topics.map(t=>t.skills.length),[1,3,2,1]);
  assert.equal(regionalOlympiadDraftReview.availableOriginals,12);assert.equal(regionalOlympiadDraftReview.learningUnits,23);
- assert.equal(regionalOlympiadDraftReview.authoredExercises,21);assert.deepEqual(regionalOlympiadDraftReview.missingOfficialSolutions,[]);
- assert.equal(all.length,56);assert.equal(new Set(all.map(p=>p.id)).size,56);
+ assert.equal(regionalOlympiadDraftReview.authoredExercises,23);assert.deepEqual(regionalOlympiadDraftReview.missingOfficialSolutions,[]);
+ assert.equal(all.length,58);assert.equal(new Set(all.map(p=>p.id)).size,58);
  const sources=all.filter(p=>p.archive?.kind==='original');
  assert.deepEqual(content.navigationGroups!.map(g=>g.sourceIds.length),[4,4,3,1]);
  for(const family of archive.families){
-  assert.equal(family.items.length,3);
+  assert.equal(family.items.length,family.id === "growth" ? 5 : 3);
   assert.ok(sources.some(p=>p.id===content.introductions![`oli-ob-${family.id}`]!.problemId));
   for(const hard of [false,true]){let i=0;while(content.problem(`oli-ob-${family.id}`,i,hard))assert.ok(++i<50);assert.equal(content.problem(`oli-ob-${family.id}`,i,hard),null);}
  }
@@ -92,7 +92,7 @@ test('independent calculations and enumeration verify all twelve original answer
  const cases=[];for(let g=0;g<=9;g++)for(let s=0;s<=17;s++)if(9*g+5*s===88)cases.push(g);
  assert.deepEqual(answers(2026,3),[250-33*7,111*2/3,...cases]);
 });
-test('all 21 authored exercises have independently checked answers',()=>{
+test('all 23 authored exercises have independently checked answers',()=>{
  for(const family of archive.families)for(const item of family.items){
   const k=Number(item.id.split('-').at(-1));let expected:number[];
   switch(family.id){
@@ -101,7 +101,7 @@ test('all 21 authored exercises have independently checked answers',()=>{
    case 'backwards':expected=[(20+k-(k%2?3:4))*3/2];break;
    case 'boxes':{if(k<3){const count=12+3*k,total=7*count+4+k;expected=[Array.from({length:count+1},(_,i)=>i).find(g=>8*g+7*(count-g)===total)!];}else{const possibilities=[];for(let g=0;g<5;g++)for(let s=0;s<9;s++)if(9*g+5*s===43)possibilities.push([g,s]);assert.equal(possibilities.length,1);expected=possibilities[0]!;}break;}
    case 'tiling':{const side=6+2*k,count=3+k;expected=[side,count*side*side];break;}
-   case 'growth':{let edges=4;for(let day=2;day<=2*k+1;day++)edges+=day%2?8:4;expected=[3*edges];break;}
+   case 'growth':{if(item.id.includes('-core-')){expected=[k===1?16+12+16-2*(4+4):Array.from({length:7},(_,i)=>i).find(n=>8+4*n===24)!];break;}let edges=4;for(let day=2;day<=2*k+1;day++)edges+=day%2?8:4;expected=[3*edges];break;}
    case 'relative':{if(k<3)expected=[6*(30+10*k)/5];else{const location=11*360/5%360;expected=[Math.min(location%60,60-location%60)];}break;}
    default:throw Error(`Unverified family: ${family.id}`);
   }

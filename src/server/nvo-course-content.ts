@@ -1,6 +1,7 @@
 import { preparationBaselines } from "../core/preparation-baselines.ts";
 import { competitionRewardDifficulty } from "../core/competitions.ts";
 import { nvoConnectedContent } from "./nvo-connected-content.ts";
+import practice from "../../content/nvo/practice.json" with { type: "json" };
 import archive from "../../content/nvo/grade4-2022-2025.json" with { type: "json" };
 import type { CourseProblem, CourseSolution, KidsCourseContent } from "../core/kids-course.ts";
 
@@ -27,6 +28,18 @@ for (const item of archive.problems) {
  pools.set(item.skill, pool);
  if (all.has(problem.id)) throw new Error(`Duplicate NVO problem: ${problem.id}`);
  all.set(problem.id, problem);
+}
+const connected = nvoConnectedContent([...all.values()], archive.topics);
+for (const item of practice) {
+ const problem: CourseProblem = {
+  id: item.id, skillId: item.skill, text: item.text, source: "Учебно упражнение · НВО",
+  practiceSource: { year: 2022, problemId: "nvo-2022-p22:original" },
+  difficulty: { level: "standard", rationale: "Преобразуваме декари в квадратни метри и прилагаме връзката между тях." },
+  fields: item.fields.map(field => ({ ...field })), hint: item.steps[0]!, hints: [...item.steps] as [string, string, string],
+  explanation: [...item.steps], solution: item.steps.map((step, i) => ({ title: `Стъпка ${i + 1}`, paragraphs: [step] })) as CourseSolution,
+ };
+ if (all.has(problem.id)) throw new Error(`Duplicate NVO problem: ${problem.id}`);
+ pools.get(item.skill)!.core.push(problem); all.set(problem.id, problem);
 }
 // Editorial entry points use a single method before a combined application.
 // Challenge flags are provisional teaching choices, not measured difficulty.
@@ -65,7 +78,7 @@ export const nvoCourseContent: KidsCourseContent = {
  rewardDifficulty: competitionRewardDifficulty("nvo"),
  preparationBaseline: preparationBaselines["nvo"],
  version: archive.version,
- ...nvoConnectedContent([...all.values()], archive.topics),
+ ...connected,
  topics: archive.topics.map(topic => ({ ...topic, rewardName: topic.title.toLocaleLowerCase("bg"),
   skills: topic.skills.map(skill => ({ ...skill, lesson: [...entry(skill.id)!.explanation] })) })),
  introductions: Object.fromEntries(archive.topics.flatMap(topic => topic.skills.map(skill => [skill.id,
