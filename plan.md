@@ -2,13 +2,13 @@
 
 Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
 
-## Reward and preparation implementation - release approved, 2026-11-08
+## Reward and preparation implementation - released, 2026-11-08
 
 - [x] Applied easy 10/15, medium 15/20 and hard 20/25 rewards through one preview/payout resolver; preserve historical payouts, milestones and full early-hint rewards. Added child-scoped same-browser last-worked competition resume after accepted graded work.
 - [x] Added immutable baseline/current-scope preparation projection (80/10/10), all-competition count-only accordion panel and bottom-of-overview otter card with 24px separation. Task totals count distinct graded natural parts: 102/21/108/38/23 across Maths/municipal/NVO/Spring/regional; percentages retain equal original weighting.
 - [x] Calendar cells use „1 задача“ / „N задачи“, including mixed independent/hinted successes. Doctor uses a diploma/seal and Professor a graduation cap; earning and motion rules are unchanged. Independent actual Astra review recommended no further wording changes; owner decisions and deferred proposals are recorded in [acceptance evidence](docs/points-implementation-review.md).
 - [x] Final local acceptance: 360/360 tests, TypeScript, ESLint, production build/private-file and whitespace checks passed. Real Chrome desktop and 320/390px checks covered independent keyboard accordions, task totals, calendar labels, reduced motion, badge artwork and spacing. Private historical/synthetic preview fingerprints unchanged.
-- [ ] Publish the exact tested revision and verify the live deployment. Production publication explicitly approved by the owner on 2026-11-08.
+- [x] Published tested application revision `87edf03` and verified Vercel success, live public routes/assets and private access protections; see current release below. Production publication explicitly approved by the owner on 2026-11-08.
 - Local preview: http://127.0.0.1:3018/progress. Maths uses an isolated older import snapshot, the other four competitions synthetic histories; no Supabase or real learner writes.
 - Known content gaps: 134/136 skills confirm/review through normal commands. NVO `nvo-area-units` needs another core example (deferred by owner); regional `oli-ob-growth` routing remains a follow-up. Preserve honest incomplete progress.
 
@@ -25,11 +25,12 @@ Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 
 ## Current release
 
-- Production: https://sastezatelna-matematika.vercel.app/ . Application release: `e001ef0`, 2026-11-06. Vercel: [verified release](https://vercel.com/petar-s-projects33/sastezatelna-matematika/7P3zqhZK367tew5birjiRYHLa82S).
-- Published: five competitions, including Пролетни and Олимпиада (областен кръг), approved Bulgarian revisions, connected natural subparts and the 16/4/6/4/4 island maps; public „Ценни материали“ and separate СМГ/НПМГ guides with SEO metadata. Earlier dated entries describing drafts/local-only work record their state at that time.
-- Final local checks: 317/317 tests, TypeScript, ESLint, production build/private-file checks and desktop/mobile Chrome passed. Verified draft restoration, grouped answers, next-part continuation and zero new gold after the third hint with disposable local data.
-- Live checks: Vercel deployment succeeded; anonymous public pages, canonical/indexing metadata, five-URL sitemap, robots and legacy 308 redirect passed. Public article routes have shared cache headers and no Set-Cookie, including with a disposable invalid auth-cookie fixture; private routes remain no-store/noindex and protected read APIs return 401. New competition assets return 200 with immutable caching. Chrome loaded the live materials hub and СМГ guide without layout overflow.
-- No database schema, real learner history or Supabase records changed. Real parent/child Google sessions, physical devices and final human content review remain owner checks. Commercial landing expansion and billing remain plan-only.
+- Production: https://sastezatelna-matematika.vercel.app/ . Application release: `87edf03d3bbb9ec21a420edab6e61f291178d54d`, 2026-11-08. Vercel: [verified release](https://vercel.com/petar-s-projects33/sastezatelna-matematika/BR9ZXeA7ZFvX86eqwb1HRG1uqr8r); GitHub Vercel commit status reports success.
+- Published: competition gold rates and per-child same-browser last-worked competition resume, all-five-competition preparation panel, natural-part task counts, bottom-of-overview otter card with 24px separation, diploma/cap academic badges and calendar „задача/задачи“. Historical rewards, percentage weighting and earning criteria are preserved. See [acceptance evidence](docs/points-implementation-review.md).
+- Final local checks: 360/360 tests, TypeScript, ESLint, optimized production build/private-file checks and desktop/mobile Chrome passed. Isolated historical/synthetic preview hashes are unchanged.
+- Live HTTPS checks: home, materials hub, six articles, sitemap and robots return 200; public materials retain canonical/indexing metadata, shared caching and no Set-Cookie. Anonymous progress uses a streamed login redirect with no-store/noindex; course API returns 401/no-store and development catalogue returns 404. All twelve live-referenced JS assets return 200, including the new preparation labels. Local chunk names differ from the production build and were not used as deployment evidence.
+- Live Chrome mobile check at 390px: materials page has no horizontal overflow, broken images or runtime console errors. Authenticated preparation UI was tested on the local production build, not through a real live Google account.
+- No database schema, real learner history or Supabase records changed. Real parent/child Google sessions and physical-device checks remain owner checks. The two documented content-route gaps remain honest incomplete preparation; commercial landing expansion and billing remain plan-only.
 - Competition snapshots retain the earlier 30-second mounted-learner reuse policy with stale/focus/write checks. Local checks and deployment success do not establish authenticated end-to-end latency for a real child.
 
 ## Approved release readiness - 2026-11-06

@@ -66,3 +66,11 @@ Independent reviewer **gpt-6-astra (high)** reviewed the approved calendar and p
 - Visually inspected earned/unearned Doctor diploma/seal and Professor cap in the development catalogue at their real 32px size. Reduced motion produces no badge animation; no runtime console errors in this check. Catalogue remains excluded from production.
 - Read-only preview SHA-256 fingerprints are unchanged; the archived historical Maths source still matches its recorded hash. No Supabase queries, migration or real learner writes. Earlier physical-device, real-account and two content-route limitations remain applicable.
 - Owner authorized production deployment after these refinements; live verification follows.
+
+
+### Production release verification
+
+- Owner-approved application revision `87edf03d3bbb9ec21a420edab6e61f291178d54d` pushed to main on 2026-11-08; [Vercel deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/BR9ZXeA7ZFvX86eqwb1HRG1uqr8r) reports success for that exact commit.
+- Live origin: https://sastezatelna-matematika.vercel.app/ . Home/materials/six articles/sitemap/robots return 200. Materials are publicly cached without Set-Cookie and retain production canonicals; anonymous progress streams a login redirect with no-store/noindex, course API returns 401/no-store, and development catalogue returns 404.
+- All twelve live-referenced JS assets return 200. The served preparation bundle includes „Задачи от състезания“ and „Напредък в подготовката за това състезание.“; production content hashes differ from local-build asset names, so only actual live references were accepted as evidence.
+- Chrome mobile materials smoke at 390px: no horizontal overflow, broken images or runtime console errors. Authenticated progress/calendar/reward behavior is covered by the final local production-build checks and tests above; no real live Google session or physical-device verification is claimed. No Supabase access, migration or real learner writes.

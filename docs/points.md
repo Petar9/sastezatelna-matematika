@@ -2,7 +2,7 @@
 
 Reviewed 2026-11-08. This is the authoritative guide for gold: active rules, evidence, proposed changes and rollout checks. [Learning decisions](../key-decisions.md) still govern selection, help and confirmation; the [design system](design-system.md) governs presentation.
 
-**Status:** owner-approved implementation and production release; final local acceptance passed, deployment verification is pending. The owner approved the detailed plan, then deferred additional NVO exercises to the next iteration. Current implementation uses 80% original coverage, 10% independent confirmation and 10% later independent review; it does not award free completion for missing content. [Implementation/copy review](points-implementation-review.md) records outstanding decisions and limitations.
+**Status:** owner-approved implementation released as `87edf03` on 2026-11-08; final local acceptance and live deployment verification passed. The owner approved the detailed plan, then deferred additional NVO exercises to the next iteration. Current implementation uses 80% original coverage, 10% independent confirmation and 10% later independent review; it does not award free completion for missing content. [Implementation/copy review](points-implementation-review.md) records outstanding decisions and limitations.
 
 ## Current approved policy
 
