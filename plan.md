@@ -1,12 +1,12 @@
 # Current work - Състезателна математика
 
-## Learning coverage and retention - 2026-11-08
+## Learning coverage and retention - released, 2026-11-08
 
 - [x] Added two reviewed core exercises each for NVO area units and regional growth; source originals, stable history and gold rules unchanged.
 - [x] Added personal improvement recognition and repeat review after Professor (first two days, then 30 days after independent review).
 - [x] Actual gpt-6-astra reviewed Bulgarian; owner approved both suggestions in chat, applied before acceptance tests. [Review and verification](docs/learning-retention-review.md).
 - [x] Local acceptance: 371/371 tests, TypeScript, ESLint, optimized build/private-file checks; Chrome desktop and 390/320px modal, keyboard, refresh/resume and console checks passed with disposable history.
-- [ ] Production deployment verification.
+- [x] Published application revision `269fdf6`; exact-commit Vercel success, live new-modal bundle, public routes/assets and private access protections verified. No database migration or real learner writes; authenticated Google sessions remain an owner smoke check.
 
 
 ## Sharing action controls - released, 2026-11-08

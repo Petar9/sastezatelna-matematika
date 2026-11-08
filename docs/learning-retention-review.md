@@ -21,6 +21,7 @@ Approved recognition: **„Личен напредък!“** / **„Минали
 - Full application regression: **371/371 tests passed**; TypeScript, ESLint and optimized production build/private-file trace checks passed.
 - Actual Chrome against the built local app with disposable synthetic history: hinted original followed by an independent new exercise opens the approved modal with Continue focused; native keyboard cycling and Escape work. Desktop and 390/320px captures show no horizontal overflow; refresh/resume does not reopen the celebration; no browser console errors.
 - Monthly review scheduling, Professor retention, recovery, mixed unseen tasks and unchanged gold are covered by core/UI regression and the all-skill normal-command simulation. No real learner or Supabase records were used.
-- Production deployment verification: pending.
+- Production application revision **`269fdf69fec80ba0676284d4e66feebdab859dd2`**: Vercel reports success for that exact commit ([deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/BaC7zBUtrosJji6rsfpvv3jwmLQ8)). After success, the stable production alias served all ten homepage JS assets with HTTP 200, including the exact approved modal heading/body in `3lnalr6ktrnh7.js`.
+- Live checks: home/login/materials/robots/sitemap 200; profiles/progress retain login protection and no-store; sharing/course APIs 401 and no-store; development catalogue 404; existing sharing confirmation and copy SVG remain in the login bundle. Real authenticated Google sessions were not exercised; learning flows used only the isolated local disposable history.
 
-Production remains the previous release until final deployment verification is recorded here.
+Published to [production](https://sastezatelna-matematika.vercel.app) on 2026-11-08 under the owner’s approval to execute and ship. No database migration or real learner writes.
