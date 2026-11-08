@@ -1,10 +1,10 @@
 # Current work - Състезателна математика
 
-## Sharing action controls - verified locally, 2026-11-08
+## Sharing action controls - released, 2026-11-08
 
 - Owner approved quiet-outline option A after reviewing all three alternatives: red email-removal X, confirmation with primary “Да” and neutral close/Escape cancellation, and overlapping-rectangle copy icon with matching success tick. Independent configured `gpt-6-astra` copy review recommended no changes; approval context is saved in [shared access](docs/child-sharing.md#copy-review).
 - Verification: 363/363 application tests, TypeScript, ESLint and optimized production build/private-file checks passed. Chrome actual-component/CSS fixtures at 320/390/1440px confirmed no overflow, 44px controls, native modal/focus behavior, cancellation, failed-removal retry, duplicate prevention and clipboard/manual fallback. No API, authentication, database or learner-history changes.
-- Owner explicitly approved production publication in chat on 2026-11-08; deployment verification is pending. Real Google owner/recipient sessions remain an owner smoke check.
+- Owner explicitly approved production publication in chat on 2026-11-08. Published application revision `9c352b4`; Vercel reports success for that exact commit, and live checks confirm the new confirmation and SVG in all eight successfully loaded login JS assets. Real Google owner/recipient sessions remain an owner smoke check.
 
 ## Unified email access - released, 2026-11-08
 
@@ -45,11 +45,11 @@ Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and ta
 
 ## Current release
 
-- Production: https://sastezatelna-matematika.vercel.app/ . Application revision `5053eef`, 2026-11-08. Vercel [deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/5SvVjxuKCYFbPKFbzxrgDWUdFunR) reports success for that exact commit.
-- Published one Google-email access flow, direct recipient login, compact × removal controls, approved share message with 📋 copy/fallback, preserved legacy access and owner-only management. Daily competition details now use collapsed independent accordions. No real learner records were edited by the agent; the owner reported manually applying both migration queries after waiving the backup.
-- Verification: 361/361 application tests, disposable PostgreSQL migration/security/history regression (atomic and exact split SQL), TypeScript, ESLint, production build/private-file exclusions, whitespace and 40 local documentation links passed. Chrome component/CSS fixtures at 320/390/1440px confirmed wrapping, 44px controls and copy fallback; daily accordions passed keyboard/reduced-motion checks.
-- Live HTTPS: home/login/materials/robots/sitemap return 200; updated login copy is present; profiles/progress retain login redirects with no-store/noindex; sharing/course APIs return 401/no-store; development catalogue returns 404. All eight login-referenced JS assets return 200. Live Chrome at 390px has no overflow or broken images. Browser reported only the existing missing `/favicon.ico` (404), unrelated to this release.
-- Real Google owner/recipient sign-in, cross-device continuity and physical-device behavior remain owner smoke checks; local tests and anonymous production checks do not establish these. Supabase application is owner-reported, not independently inspected.
+- Production: https://sastezatelna-matematika.vercel.app/ . Application revision `9c352b4`, 2026-11-08. Vercel [deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/5qZBtmhk3dkRrKZuNT1sAjoCPEgT) reports success for that exact commit; owner explicitly requested deployment in chat.
+- Published quiet-outline red removal X with confirmation, primary “Да”, neutral close/Escape cancellation, and overlapping-rectangle copy icon with matching success tick. Preserve owner-only management, direct Google email access, legacy access and daily progress accordions. This iteration changes no API, authentication, schema or learner records.
+- Local verification: 363/363 application tests, TypeScript, ESLint, optimized production build/private-file checks, whitespace and changed documentation links passed. Chrome actual-component/CSS fixtures at 320/390/1440px cover wrapping, 44px controls, native modal/focus, cancellation, failure/retry, duplicate prevention and copy/manual fallback. Independent configured Astra review recommended no copy changes; owner approved option A.
+- Live HTTPS: home/login/materials/robots/sitemap return 200; profiles/progress retain login redirects with no-store; sharing and course APIs return 401/no-store; development catalogue returns 404. All eight login-referenced JS assets return 200 and contain the new confirmation and copy SVG. No authenticated mutation was used for release verification.
+- Real Google owner/recipient sessions and physical-device behavior remain owner smoke checks. The earlier Supabase migration is owner-reported, not independently inspected; no additional migration is needed for these controls.
 
 ## Previous rewards release
 
