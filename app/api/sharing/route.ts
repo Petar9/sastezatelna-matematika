@@ -1,7 +1,7 @@
 import {mode,appOrigin,mutationAllowed} from "@/src/server/config";
 import {parentContext} from "@/src/server/context";
 import {invitationEmail} from "@/src/server/invitations";
-import {newInvitationToken,invitationHash,uuid} from "@/src/server/child-sharing";
+import {uuid} from "@/src/server/child-sharing";
 import {KidsError} from "@/src/core";
 const reply=(body:unknown,status=200)=>Response.json(body,{status,headers:{"Cache-Control":"no-store"}});
 async function owner(childId:unknown){
@@ -18,12 +18,13 @@ export async function GET(request:Request){
  if(mode()!=="hosted")return new Response(null,{status:404});
  try{
   const {account,child}=await owner(new URL(request.url).searchParams.get("childId"));
-  const [invites,members]=await Promise.all([
+  const [invites,...connections]=await Promise.all([
    account.db.from("child_access_invitations").select("id,email,expires_at").eq("child_id",child.id).eq("parent_id",account.actorId).is("cancelled_at",null).is("accepted_at",null).gt("expires_at",new Date().toISOString()).order("created_at"),
-   account.db.from("child_adult_memberships").select("auth_user_id,email").eq("child_id",child.id).eq("parent_id",account.actorId).order("created_at"),
+   ...["child_email_access","child_adult_memberships","child_profile_logins"].map(table=>account.db.from(table).select("email").eq("child_id",child.id).eq("parent_id",account.actorId).order("created_at")),
   ]);
-  if(invites.error)throw invites.error;if(members.error)throw members.error;
-  return reply({invitations:invites.data??[],adults:members.data??[]});
+  for(const result of [invites,...connections])if(result.error)throw result.error;
+  const emails=[...new Set(connections.flatMap(result=>(result.data??[]).map(row=>row.email as string)))];
+  return reply({invitations:invites.data??[],emails});
  }catch(error){return failure(error);}
 }
 export async function POST(request:Request){
@@ -33,21 +34,18 @@ export async function POST(request:Request){
   const body=await request.json();
   if(!body||typeof body!=="object")return reply({message:"Невалидна заявка."},400);
   const {account,child}=await owner(body.childId);
-  if(body.action==="create"){
+  if(body.action==="add"||body.action==="remove"){
    const email=invitationEmail(typeof body.email==="string"?body.email:null);
    if(!email)return reply({message:"Напиши валиден имейл адрес."},400);
-   const token=newInvitationToken();
-   const {data,error}=await account.db.rpc("create_child_access_invitation",{p_parent_id:account.actorId,p_child_id:child.id,p_email:email,p_token_hash:invitationHash(token)});
-   if(error?.code==="23505")return reply({message:"Този имейл вече има достъп или се използва за детски профил."},409);
-   if(error?.code==="P0001")return reply({message:"Създадени са твърде много покани. Опитай отново след час."},429);
+   const {error}=await account.db.rpc(body.action==="add"?"add_child_email_access":"remove_child_email_access",{p_parent_id:account.actorId,p_child_id:child.id,p_email:email});
+   if(error?.code==="23505")return reply({message:"Този имейл вече има достъп като собственик на профила."},409);
+   if(error?.code==="P0001")return reply({message:"Добавени са твърде много имейли. Опитай отново след час."},429);
    if(error)throw error;
-   if(!data?.[0])throw new Error("Missing invitation");
-   return reply({link:`${appOrigin()}/invite#token=${token}`,expiresAt:data[0].expires_at});
+   return reply(body.action==="add"?{message:`Здравей направих ти профил в Състезателна математика за ${child.nickname}. Можеш да влезеш с гугъл профила ти оттук ${appOrigin()}/login.`}:{ok:true});
   }
-  if(body.action!=="cancel"&&body.action!=="revoke")return reply({message:"Невалидна заявка."},400);
-  const target=body.action==="cancel"?body.invitationId:body.authUserId;
-  if(!uuid(target))return reply({message:"Невалидна заявка."},400);
-  const {error}=await account.db.rpc("remove_child_access",{p_parent_id:account.actorId,p_child_id:child.id,p_invitation_id:body.action==="cancel"?target:null,p_auth_user_id:body.action==="revoke"?target:null});
+  // Compatibility for invitations created before direct email access.
+  if(body.action!=="cancel"||!uuid(body.invitationId))return reply({message:"Невалидна заявка."},400);
+  const {error}=await account.db.rpc("remove_child_access",{p_parent_id:account.actorId,p_child_id:child.id,p_invitation_id:body.invitationId,p_auth_user_id:null});
   if(error)throw error;
   return reply({ok:true});
  }catch(error){return failure(error);}

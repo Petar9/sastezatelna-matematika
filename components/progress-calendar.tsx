@@ -27,6 +27,27 @@ export function shiftMonth(month: string, amount: number) {
  return new Date(Date.UTC(year!, number! - 1 + amount, 1)).toISOString().slice(0, 7);
 }
 
+type DailySkill = { title: string; independent: number; hinted: number };
+
+function DailyCompetitionDetails({ title, skills }: { title: string; skills: [string, DailySkill][] }) {
+ const id = useId();
+ const [expanded, setExpanded] = useState(false);
+ return <div className={s.skillGroup}>
+  <h3><button type="button" className={s.skillToggle} id={`${id}-toggle`} aria-expanded={expanded} aria-controls={`${id}-skills`} onClick={() => setExpanded(!expanded)}>
+   <span>{title}</span>
+   <svg className={s.chevron} viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  </button></h3>
+  <div className={s.skillDetails} id={`${id}-skills`} hidden={!expanded} aria-labelledby={`${id}-toggle`}>
+   <ul className={s.entries}>{skills.map(([key, skill]) => <li key={key}>
+    <span className={s.skillTitle}>{skill.title}</span>
+    <span className={s.skillResults}>{skill.independent + skill.hinted > 0
+     ? [skill.independent > 0 && `Самостоятелно: ${skill.independent}`, skill.hinted > 0 && `С подсказка: ${skill.hinted}`].filter(Boolean).join(" · ")
+     : "Упражнявано"}</span>
+   </li>)}</ul>
+  </div>
+ </div>;
+}
+
 export function ProgressCalendar({ collections, initialDay, initialCompetition }: { collections: ProgressCollection[]; initialDay: string; initialCompetition?: string }) {
  const [month, setMonth] = useState(initialDay.slice(0, 7));
  const [competition, setCompetition] = useState(collections.some(item => item.competitionId === initialCompetition) ? initialCompetition! : "all");
@@ -47,7 +68,7 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
   outcome, label, count: details.filter(event => event.kind === "attempt" && event.outcome === outcome).length,
  }));
  const skillGroups = visible.map(item => {
-  const skills = new Map<string, { title: string; independent: number; hinted: number }>();
+  const skills = new Map<string, DailySkill>();
   for (const event of details) {
    if (event.competitionId !== item.competitionId || event.kind !== "attempt") continue;
    const key = event.skillId ?? "unknown";
@@ -98,15 +119,7 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
     {selectedOutcomes.map(item => <div key={item.outcome}><dt>{item.label}</dt><dd>{item.count}</dd></div>)}
     {dayConnected.parts > 0 && <><div><dt>Подусловия</dt><dd>{dayConnected.parts}</dd></div><div><dt>Цели задачи</dt><dd>{dayConnected.originals}</dd></div></>}
    </dl>}
-   {skillGroups.map(group => <div className={s.skillGroup} key={group.competitionId}>
-    <h3>{group.title}</h3>
-    <ul className={s.entries}>{group.skills.map(([key, skill]) => <li key={key}>
-     <span className={s.skillTitle}>{skill.title}</span>
-     <span className={s.skillResults}>{skill.independent + skill.hinted > 0
-      ? [skill.independent > 0 && `Самостоятелно: ${skill.independent}`, skill.hinted > 0 && `С подсказка: ${skill.hinted}`].filter(Boolean).join(" · ")
-      : "Упражнявано"}</span>
-    </li>)}</ul>
-   </div>)}
+   {skillGroups.map(group => <DailyCompetitionDetails key={`${selected}:${group.competitionId}`} title={group.title} skills={group.skills}/>)}
    {details.length === 0 && <p>Няма записана активност за този ден.</p>}
    {details.some(event => event.kind === "attempt" && !event.wholeProblem && !event.naturalPart) && <p className={s.legend}>Подусловията не се броят като завършени цели задачи.</p>}
   </section>

@@ -53,9 +53,9 @@ export const db = {
     return chain;
   },
   async rpc(name: string, args: unknown) {
-    assert.ok(["shared_children", "resolve_child_login"].includes(name));
+    assert.equal(name, "resolve_child_access");
     state.rpcCalls.push({ name, args });
-    return name === "shared_children" ? {data:state.shared,error:state.sharedError} : { data: state.links, error: state.resolverError };
+    return {data:[...state.shared,...state.links],error:state.sharedError??state.resolverError};
   },
 };
 export function database() { state.databaseCalls++; return db; }

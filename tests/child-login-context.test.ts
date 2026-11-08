@@ -44,19 +44,22 @@ test("account context requires a verified Google user before accessing private d
 test("child account binds verified email and auth ID and exposes only its mapped child", async () => {
   const account = await accountContext();
   assert.equal(state.getUserCalls, 1);
-  assert.equal(account.role, "child");
+  assert.equal(account.role, "parent");
+  assert.equal(account.canCreateChildren, false);
   assert.equal(account.actorId, "verified-google-user");
   assert.deepEqual(account.children, [{ id: "mapped-child", nickname: "Моряк", parentId:"owning-parent", isOwner:false }]);
   assert.equal(account.db, db);
-  assert.deepEqual(state.rpcCalls, [{name:"shared_children",args:{p_auth_user_id:"verified-google-user"}}, { name: "resolve_child_login", args: {
+  assert.deepEqual(state.rpcCalls, [{ name: "resolve_child_access", args: {
     p_email: "child@example.com", p_auth_user_id: "verified-google-user",
   } }]);
   assert.deepEqual(state.upserts, []);
   assert.deepEqual(state.queries, [{ table: "allowed_parent_emails", filters: [["email", "child@example.com"]] }]);
 });
 
-test("parent context rejects a valid child account", async () => {
-  await assert.rejects(parentContext(), { status: 403 });
+test("legacy child Google login has the same access without owner privileges", async () => {
+  const account = await parentContext();
+  assert.equal(account.canCreateChildren, false);
+  assert.ok(account.children.every(child => !child.isOwner));
   assert.deepEqual(state.upserts, []);
 });
 
@@ -84,9 +87,10 @@ test("missing or stale selection cookies resolve only to the child's mapped prof
   }
 });
 
-test("allowlisted parent retains active owned children and private login metadata", async () => {
+test("allowlisted parent retains active owned children without eager management reads", async () => {
   state.user = { ...verifiedChild, id: "verified-parent", email: "PARENT@Example.COM" };
   state.tables.allowed_parent_emails = [{ email: "parent@example.com" }];
+  state.links = [];
   state.tables.child_profiles = [
     { id: "first", nickname: "Лисиче", parent_id: "verified-parent", active: true },
     { id: "second", nickname: "Моряк", parent_id: "verified-parent", active: true },
@@ -102,14 +106,13 @@ test("allowlisted parent retains active owned children and private login metadat
   assert.equal(account.role, "parent");
   assert.equal(account.actorId, "verified-parent");
   assert.deepEqual(account.children, [
-    { id: "first", nickname: "Лисиче", parentId:"verified-parent", isOwner:true, loginEmail: "first@example.com", loginConnected: true },
-    { id: "second", nickname: "Моряк", parentId:"verified-parent", isOwner:true, loginEmail: "second@example.com", loginConnected: false },
+    { id: "first", nickname: "Лисиче", parentId:"verified-parent", isOwner:true },
+    { id: "second", nickname: "Моряк", parentId:"verified-parent", isOwner:true },
   ]);
   assert.deepEqual(state.upserts, [{ table: "parents", value: { id: "verified-parent", email: "parent@example.com" }, options: { onConflict: "id" } }]);
-  assert.deepEqual(state.rpcCalls, [{name:"shared_children",args:{p_auth_user_id:"verified-parent"}}]);
+  assert.deepEqual(state.rpcCalls, [{name:"resolve_child_access",args:{p_auth_user_id:"verified-parent",p_email:"parent@example.com"}}]);
   assert.deepEqual(state.queries.filter(query => query.table !== "allowed_parent_emails"), [
     { table: "child_profiles", filters: [["parent_id", "verified-parent"], ["active", true]] },
-    { table: "child_profile_logins", filters: [["parent_id", "verified-parent"]] },
   ]);
 });
 
@@ -119,14 +122,14 @@ test("unmapped, unlinked or revoked child resolution fails closed on every reque
   await assert.rejects(accountContext(), { status: 403 });
   await assert.rejects(learnerContext({ api: true, childId: "mapped-child" }), { status: 403 });
   assert.equal(state.getUserCalls, 3);
-  assert.equal(state.rpcCalls.length, 6);
+  assert.equal(state.rpcCalls.length, 3);
 });
 
 test("allowlist and resolver backend errors propagate without granting access", async () => {
   const allowlistError = new Error("Allowlist database unavailable");
   state.errors.allowed_parent_emails = allowlistError;
   await assert.rejects(accountContext(), error => error === allowlistError);
-  assert.equal(state.rpcCalls[0]?.name,"shared_children");
+  assert.equal(state.rpcCalls[0]?.name,"resolve_child_access");
   state.errors = {};
   const resolverError = new Error("Resolver database unavailable");
   state.resolverError = resolverError;
@@ -148,6 +151,7 @@ test("learner requests recheck ownership without parent writes or login-manageme
 
 
 test("shared adults see only granted children across owners and use the original progress store",async()=>{
+ state.links=[];
  state.shared=[{parent_id:"owner-a",child_id:"shared-a",nickname:"Ема"},{parent_id:"owner-b",child_id:"shared-b",nickname:"Ива"}];
  const account=await parentContext();
  assert.equal(account.canCreateChildren,false);

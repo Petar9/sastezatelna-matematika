@@ -14,7 +14,7 @@ create role anon nologin;
 create role authenticated nologin;
 create role service_role nologin bypassrls;
 create schema auth;
-create table auth.users(id uuid primary key);
+create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_app_meta_data jsonb);
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
 create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
 grant usage on schema auth to authenticated,service_role;
@@ -22,7 +22,7 @@ grant execute on function auth.uid(),auth.jwt() to authenticated,service_role;
 SQL
 "${psql[@]}" -f "$root/supabase/migrations/202611030001_initial.sql" >/dev/null
 "${psql[@]}" >/dev/null <<'SQL'
-insert into auth.users values ('10000000-0000-4000-8000-000000000001'),('10000000-0000-4000-8000-000000000002');
+insert into auth.users(id) values ('10000000-0000-4000-8000-000000000001'),('10000000-0000-4000-8000-000000000002');
 insert into public.parents(id,email) values ('10000000-0000-4000-8000-000000000001','one@example.com'),('10000000-0000-4000-8000-000000000002','two@example.com');
 insert into public.child_profiles(id,parent_id,nickname) values ('10000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000001','seed');
 insert into public.course_progress(child_id,parent_id,revision,course) values ('10000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000001',7,'{"version":2,"revision":7,"topics":{},"attempts":[],"marker":"preserve"}');
@@ -85,6 +85,10 @@ do $$ begin
 end $$;
 reset role;
 SQL
+"${psql[@]}" -f "$root/supabase/migrations/202611070001_child_sharing.sql" >/dev/null
+"${psql[@]}" -f "$root/supabase/migrations/202611080001_email_access.sql" >/dev/null
+"${psql[@]}" -f "$root/tests/sql/child-sharing.sql" >/dev/null
+"${psql[@]}" -f "$root/tests/sql/email-access.sql" >/dev/null
 # Start twelve separate sessions concurrently. One profile already exists, so only four may commit.
 pids=()
 for n in {1..12}; do

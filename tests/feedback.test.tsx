@@ -82,12 +82,12 @@ test("feedback accepts parent general messages and child messages with validated
  reset(); let response = await report(request({ description: "  Неясен текст.  ", parent_id: "foreign" }));
  assert.equal(response.status, 200); assert.equal(response.headers.get("cache-control"), "no-store");
  assert.deepEqual(state.writes[0], { parent_id: "parent-a", child_id: null, competition_id: null, problem_id: null, submitted_by: "parent", description: "Неясен текст." });
- reset(); state.role = "child"; state.course = started(); const current = lastCourseAttempt(state.course)!;
+ reset(); state.canCreateChildren=false; state.course = started(); const current = lastCourseAttempt(state.course)!;
  response = await report(request({ description: "Подсказката е неясна.", competitionId: "matematika-za-vseki", taskKey: current.key }));
  assert.equal(response.status, 200); assert.equal(state.writes[0]?.child_id, "child-a");
- assert.equal(state.writes[0]?.problem_id, current.problem.id); assert.equal(state.writes[0]?.submitted_by, "child");
+ assert.equal(state.writes[0]?.problem_id, current.problem.id); assert.equal(state.writes[0]?.submitted_by, "parent");
  assert.deepEqual(state.reads, [[["parent_id", "parent-a"], ["child_id", "child-a"], ["competition_id", "matematika-za-vseki"]]]);
- reset(); state.role = "child"; response = await report(request({ description: "Обща обратна връзка" }));
+ reset(); state.canCreateChildren=false; response = await report(request({ description: "Обща обратна връзка" }));
  assert.equal(response.status, 200); assert.equal(state.writes[0]?.child_id, "child-a");
 });
 

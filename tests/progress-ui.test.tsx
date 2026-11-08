@@ -131,6 +131,42 @@ test("day details group by competition and skill, count whole successes and omit
  assert.equal(document.querySelector('dl[aria-label="За деня"] dd')?.textContent,"80");
 });
 
+test("daily competition details expand independently, preserve totals and reset for another day without writes",async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ const summary={attempts:1,confirmed:0,revisit:0,hasTask:false};
+ const collections=["one","two"].map((competitionId,index)=>({competitionId,title:index===0?"Първо":"Второ",summary,undatedGold:0,undatedAttempts:0,events:[
+  {key:`${competitionId}-task`,day:"2026-11-04",kind:"attempt" as const,label:"Задача",skillId:competitionId,skillTitle:`Умение ${index+1}`,outcome:"independent" as const,wholeProblem:true},
+ ]}));
+ const before=JSON.stringify(collections), writes=JSON.stringify(state.writes);
+ const toggles=()=>[...host.querySelectorAll<HTMLButtonElement>(".skillToggle")];
+ const content=(button:HTMLButtonElement)=>document.getElementById(button.getAttribute("aria-controls")!)!;
+ try{
+  await act(async()=>root.render(<ProgressCalendar collections={collections} initialDay="2026-11-04"/>));
+  assert.deepEqual(toggles().map(button=>button.textContent),["Първо","Второ"]);
+  for(const button of toggles()){
+   assert.equal(button.getAttribute("aria-expanded"),"false");
+   assert.equal(content(button).hidden,true);
+   assert.equal(content(button).getAttribute("aria-labelledby"),button.id);
+  }
+  const totals=host.querySelector('dl[aria-label="За деня"]')!.textContent;
+  await act(async()=>toggles()[0]!.click());
+  assert.equal(content(toggles()[0]!).hidden,false); assert.equal(toggles()[0]!.getAttribute("aria-expanded"),"true");
+  assert.equal(content(toggles()[1]!).hidden,true);
+  assert.equal(content(toggles()[0]!).textContent,"Умение 1Самостоятелно: 1");
+  await act(async()=>toggles()[1]!.click());
+  assert.ok(toggles().every(button=>!content(button).hidden));
+  await act(async()=>toggles()[0]!.click());
+  assert.equal(content(toggles()[0]!).hidden,true); assert.equal(content(toggles()[1]!).hidden,false);
+  assert.equal(host.querySelector('dl[aria-label="За деня"]')!.textContent,totals);
+  await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label^="5 ноември"]')!.click());
+  assert.equal(toggles().length,0); assert.ok(host.textContent?.includes("Няма записана активност"));
+  await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label^="4 ноември"]')!.click());
+  assert.ok(toggles().every(button=>content(button).hidden&&button.getAttribute("aria-expanded")==="false"));
+  assert.equal(host.querySelector('dl[aria-label="За деня"]')!.textContent,totals);
+  assert.equal(JSON.stringify(collections),before); assert.equal(JSON.stringify(state.writes),writes);
+ }finally{await act(async()=>root.unmount());host.remove();}
+});
+
 test("a gold-only day retains its headline without a false no-activity message or skill row",()=>{
  const {document}=parseHTML(renderToStaticMarkup(<ProgressCalendar initialDay="2026-11-05" collections={[{competitionId:"one",title:"Пример",summary:{attempts:0,confirmed:0,revisit:0,hasTask:false},undatedGold:0,undatedAttempts:0,events:[{key:"g",day:"2026-11-05",kind:"gold",label:"Запис за награда",amount:10}]}]}/>));
  assert.equal(document.querySelector('dl[aria-label="За деня"] dd')?.textContent,"10");

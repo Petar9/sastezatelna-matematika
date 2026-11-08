@@ -3,10 +3,10 @@ export { failure } from "../../src/server/kids-course.ts";
 export const state = {
  role: "parent" as "parent" | "child", deployment: "hosted", authError: undefined as unknown,
  course: undefined as unknown, writes: [] as Record<string, unknown>[], reads: [] as [string, unknown][][],
- databaseError: false,
+ databaseError: false, canCreateChildren:true,
 };
 export function reset() { Object.assign(state, { role: "parent", deployment: "hosted", authError: undefined,
- course: undefined, writes: [], reads: [], databaseError: false }); }
+ course: undefined, writes: [], reads: [], databaseError: false, canCreateChildren:true }); }
 export function mode() { return state.deployment; }
 export async function accountContext() {
  if (state.authError) throw state.authError;
@@ -24,7 +24,7 @@ export async function accountContext() {
   };
   return query;
  } };
- return { role: state.role, actorId: "parent-a", canCreateChildren:true, children: [{ id: "child-a", nickname: "Лисиче",parentId:"parent-a",isOwner:true }], db };
+ return { role: state.role, actorId: "parent-a", canCreateChildren:state.canCreateChildren, children: [{ id: "child-a", nickname: "Лисиче",parentId:"parent-a",isOwner:true }], db };
 }
 export async function parentContext() { const account = await accountContext();
  if (account.role !== "parent") throw new KidsError("Parent only", 403); return account;

@@ -87,7 +87,7 @@ test("OAuth callback separates cancellation, session failure, authorization deni
 test("profile creation saves trimmed nickname and selection cookie; invalid input and capacity stay recoverable", async () => {
   reset();
   const response = await profile(request({ action: "create", nickname: "  Лисиче  " }));
-  assert.equal(location(response), "https://maths.example/profiles?setup=created-child");
+  assert.equal(location(response), "https://maths.example/");
   assert.deepEqual(state.contextOptions, [{ learningOnly: false }]);
   assert.deepEqual(state.inserted, { parent_id: "parent-a", nickname: "Лисиче" });
   const cookie = response.headers.get("set-cookie")!;
@@ -126,9 +126,9 @@ test("email link normalizes input, respects ownership and finishes setup", async
   assert.equal(location(response), "https://maths.example/");
   assert.ok(response.headers.get("set-cookie")?.includes("maths_child=child-a"));
   const doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({ setup: "child-a" }) }));
-  assert.equal(doc.querySelector("h1")?.textContent, "Google имейл на детето");
-  assert.equal(doc.querySelector('input[name="setup"]')?.getAttribute("value"), "1");
-  assert.ok([...doc.querySelectorAll("button")].some(button => button.textContent === "Не сега"));
+  assert.equal(doc.querySelector("h1")?.textContent, "Кой ще открива днес?");
+  assert.equal(doc.querySelector('input[name="setup"]'),null);
+  assert.ok(doc.body.textContent.includes("Сподели достъп"));
 });
 
 test("email errors retain setup and unlink is scoped to parent and owned child", async () => {
@@ -144,22 +144,13 @@ test("email errors retain setup and unlink is scoped to parent and owned child",
   assert.deepEqual(state.deleteFilters, [["parent_id", "parent-a"], ["child_id", "child-a"]]);
 });
 
-test("child account cannot create, select, link or unlink profiles", async () => {
-  reset(); state.role = "child"; state.children = [{ id: "child-a", nickname: "Лисиче" }];
-  const actions: Record<string, string>[] = [
-    { action: "create", nickname: "Дете" },
-    { action: "select", childId: "child-a" },
-    { action: "link-email", childId: "child-a", email: "child@example.com" },
-    { action: "unlink-email", childId: "child-a" },
-  ];
-  for (const body of actions) {
-    const response = await profile(request(body));
-    assert.equal(location(response), "https://maths.example/login?denied=1");
-    assert.equal(response.headers.get("set-cookie"), null);
-  }
-  assert.equal(state.inserted, undefined);
-  assert.equal(state.rpcCall, undefined);
-  assert.deepEqual(state.deleteFilters, []);
+test("shared Google accounts select existing children but cannot create or manage access", async () => {
+  reset(); state.canCreateChildren=false; state.children=[{id:"child-a",nickname:"Лисиче",isOwner:false}];
+  const response=await profile(request({action:"select",childId:"child-a"}));
+  assert.equal(location(response),"https://maths.example/");
+  assert.ok(response.headers.get("set-cookie")?.includes("maths_child=child-a"));
+  for(const action of ["create","link-email","unlink-email"]) await profile(request({action,childId:"child-a",nickname:"Дете",email:"child@example.com"}));
+  assert.equal(state.inserted,undefined);assert.equal(state.rpcCall,undefined);assert.deepEqual(state.deleteFilters,[]);
 });
 
 test("local mode keeps authentication routes disabled", async () => {
@@ -198,7 +189,7 @@ test("profile failures name the action that failed and leave the relevant form a
   assert.equal(location(await profile(request(body))), `https://maths.example/profiles?error=${issue}`);
   const doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({ error: issue }) }));
   assert.ok(doc.querySelector('[role="alert"]')?.textContent?.includes(text));
-  assert.ok(doc.querySelector("details[open]"));
+  if(body.action==="create")assert.ok(doc.querySelector("details[open]"));
  }
 });
 
@@ -236,12 +227,12 @@ test("rename rejects foreign profiles, empty/long nicknames, stale ownership and
   assert.equal(response.headers.get("set-cookie"), null);
 });
 
-test("child settings expose only nickname and progress; native rename has a recoverable redirect", async () => {
-  reset(); state.role = "child"; state.children = [{ id: "child-a", nickname: "Лисиче" }];
+test("shared profiles expose selection, nickname and progress; native rename is recoverable", async () => {
+  reset(); state.canCreateChildren=false; state.children = [{ id: "child-a", nickname: "Лисиче",isOwner:false }];
   const doc = documentFor(await ProfilesPage({ searchParams: Promise.resolve({}) }));
   assert.ok(doc.querySelector('input[name="action"][value="rename"]'));
   assert.equal(doc.querySelector('input[name="nickname"]')?.getAttribute("value"), "Лисиче");
-  for (const action of ["create", "select", "link-email", "unlink-email"]) assert.equal(doc.querySelector(`input[name="action"][value="${action}"]`), null);
+  for (const action of ["create", "link-email", "unlink-email"]) assert.equal(doc.querySelector(`input[name="action"][value="${action}"]`), null);
   assert.ok(doc.querySelector('a[href="/progress"]'));
   assert.equal(location(await profile(request({ action: "rename", childId: "child-a", nickname: "Ема" }))), "https://maths.example/profiles?status=renamed");
   state.databaseError = { code: "503", message: "Offline" };

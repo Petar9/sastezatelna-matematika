@@ -15,9 +15,8 @@ export async function POST(request: Request) {
   const { description, childId, competitionId, taskKey } = body as Record<string, unknown>;
   if (typeof description !== "string" || !description.trim() || description.trim().length > 1000) throw new KidsError("Напиши съобщение от 1 до 1000 знака.");
   if ([childId, competitionId, taskKey].some(value => value !== undefined && (typeof value !== "string" || !value || value.length > 200))) throw new KidsError("Невалидна задача.");
-  const child = typeof childId === "string" ? account.children.find(child => child.id === childId)
-   : account.role === "child" ? account.children[0] : undefined;
-  if ((childId !== undefined || account.role === "child") && !child) throw new KidsError("Този профил не е достъпен.", 403);
+  const child = typeof childId === "string" ? account.children.find(child => child.id === childId) : !account.canCreateChildren ? account.children[0] : undefined;
+  if (childId !== undefined && !child) throw new KidsError("Този профил не е достъпен.", 403);
   if (competitionId !== undefined && !publishedCompetitions().some(competition => competition.id === competitionId)) throw new KidsError("Това състезание не е достъпно.", 404);
   let problem: string | undefined;
   if (taskKey !== undefined) {

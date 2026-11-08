@@ -49,7 +49,7 @@ select public.remove_child_access('10000000-0000-0000-0000-000000000001','200000
 select pg_temp.expect_error($q$select public.accept_child_access_invitation(repeat('a',64),'10000000-0000-0000-0000-000000000003','adult@test.example')$q$,'22023');
 do $$begin
  if (select count(*) from public.shared_children('10000000-0000-0000-0000-000000000003'))<>1 then raise exception 'Revocation isolation failed';end if;
- if (select revision<>125 or course->>'draft'<>'saved' or course->'attempts'->0->>'hintUsed'<>'true' from public.course_progress)then raise exception 'Progress changed';end if;
+ if (select revision<>125 or course->>'draft'<>'saved' or course->'attempts'->0->>'hintUsed'<>'true' from public.course_progress where child_id='20000000-0000-0000-0000-000000000001')then raise exception 'Progress changed';end if;
 end $$;
 -- Reissue cancels the previous link; cancellation and expiry never grant access.
 select * from public.create_child_access_invitation('10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001','other@test.example',repeat('c',64));

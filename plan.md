@@ -1,5 +1,19 @@
 # Current work - Състезателна математика
 
+## Unified email access - verified locally, publishing, 2026-11-08
+
+- Approved shared-email UI and access logic are implemented locally; independent actual Astra copy review recommended no changes. Local application tests, TypeScript, lint and production build passed; owner reported both production SQL queries succeeded on 2026-11-08; final local release checks passed.
+- Owner explicitly waived the pre-migration backup on 2026-11-08. Supabase SQL Editor initially reported a query truncated inside the email regex. Replaced the POSIX whitespace notation with equivalent PostgreSQL shorthand and supplied separate protected-table and function transactions for manual execution.
+- Disposable-database verification includes both separately committed queries, identity/family isolation, legacy access, revocation, RLS/RPC permissions, progress preservation and malformed/whitespace email rejection. Owner success is reported evidence, not an independent inspection of production database records.
+
+- Final verification: 361/361 application tests, disposable database migration/security/progress regression, TypeScript, ESLint, optimized production build/private-file exclusions and whitespace checks passed. Chrome sharing/fallback layouts at 320/390/1440px have no horizontal overflow and 44px icon targets; daily accordions were checked with keyboard/reduced motion. Real Google sessions and physical-device continuity remain owner smoke checks.
+
+## Daily progress details - verified locally, publishing, 2026-11-08
+
+- [x] Reused the preparation accordion pattern for daily competition groups: collapsed initially, independently expandable, day totals always visible, and expansion reset when selecting another day. Existing skill copy, counts and history projection are unchanged.
+- [x] Verification: 361/361 tests, TypeScript, ESLint, optimized build/private-file checks and whitespace checks passed. Chrome confirmed Enter/Space activation, visible focus, day reset, reduced motion and no horizontal overflow at 320/390px and desktop; no browser errors observed.
+- Local review: http://127.0.0.1:3020/progress (select 2 November for activity across all five competitions in the isolated historical/synthetic preview). No learner/database writes; this follow-up has not been deployed.
+
 Updated 2026-11-08. Read [AGENTS.md](AGENTS.md) for the working agreement and task-specific guides. This file tracks current work and evidence, not permanent product policy. Historical rollout requirements and completed slices are preserved in the [implementation history](docs/archive/implementation-history.md); approved behavior lives in [key-decisions.md](key-decisions.md).
 
 ## Reward and preparation implementation - released, 2026-11-08

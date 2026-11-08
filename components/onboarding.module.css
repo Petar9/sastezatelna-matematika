@@ -40,6 +40,12 @@
 .sharing { display: grid; gap: var(--space-4); min-width: 0; padding-bottom: var(--space-3); }
 .accessHeading { margin: 0 0 var(--space-2); font-size: var(--text-small); }
 .accessList { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
-.accessList li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); border-top: 1px solid var(--border); padding-top: var(--space-2); }
-.accessList span { min-width: 0; overflow-wrap: anywhere; }
-.accessList button { font-size: var(--text-small); }
+.accessList li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); border-top: 1px solid var(--border); padding-top: var(--space-2); }
+.accessList li > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+.iconButton { width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 0; flex-shrink: 0; border-radius: var(--radius-control); color: var(--muted); font-size: 24px; }
+.iconButton:hover { background: var(--sea); color: var(--primary); }
+.shareMessage { display: grid; grid-template-columns: minmax(0,1fr) 44px; align-items: start; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--success-surface); }
+.shareMessage p { margin: 0; font-size: var(--text-small); overflow-wrap: anywhere; }
+.copyFallback { grid-column: 1 / -1; width: 100%; min-height: 160px; resize: vertical; font: inherit; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }

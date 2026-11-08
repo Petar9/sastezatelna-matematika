@@ -17,32 +17,38 @@ test("invitation tokens have cryptographic entropy, fixed validation and hash-on
  for(const token of tokens){assert.equal(token.length,43);assert.equal(invitationToken(token),token);assert.match(invitationHash(token),/^[0-9a-f]{64}$/);assert.notEqual(invitationHash(token),token);}
  for(const value of [null,42,{},"a".repeat(42),"a".repeat(44),"/".repeat(43)])assert.equal(invitationToken(value),null);
 });
-test("owner creates a normalized email-bound link with only a hashed token reaching the database",async()=>{
- state.rpcData=[{id:"invite-id",expires_at:"2026-11-14"}];
- const response=await manage(request({action:"create",childId:"child-a",email:"  ADULT@Example.COM  ",parentId:"attacker"}));
+test("owner adds normalized email directly and receives a canonical plain-login message",async()=>{
+ const response=await manage(request({action:"add",childId:"child-a",email:"  FAMILY@Example.COM  ",parentId:"attacker"}));
  assert.equal(response.status,200);assert.equal(response.headers.get("cache-control"),"no-store");
- const body=await response.json();const link=new URL(body.link);assert.equal(link.pathname,"/invite");assert.equal(link.search,"");
- const token=new URLSearchParams(link.hash.slice(1)).get("token")!;
- assert.deepEqual(state.rpcCalls,[{name:"create_child_access_invitation",args:{p_parent_id:"owner-user",p_child_id:"child-a",p_email:"adult@example.com",p_token_hash:invitationHash(token)}}]);
- assert.ok(!JSON.stringify(state.rpcCalls).includes(token));
+ assert.deepEqual(await response.json(),{message:"Здравей направих ти профил в Състезателна математика за Ема. Можеш да влезеш с гугъл профила ти оттук https://maths.example/login."});
+ assert.deepEqual(state.rpcCalls,[{name:"add_child_email_access",args:{p_parent_id:"owner-user",p_child_id:"child-a",p_email:"family@example.com"}}]);
 });
-test("shared adults, children, foreign IDs and foreign-origin requests cannot manage access",async()=>{
- for(const mutation of [{owner:false},{role:"child"}]){Object.assign(state,mutation);assert.equal((await manage(request({action:"create",childId:"child-a",email:"adult@example.com"}))).status,403);assert.equal((await list(new Request("https://maths.example/api/sharing?childId=child-a"))).status,403);reset();}
- assert.equal((await manage(request({action:"create",childId:"sibling",email:"adult@example.com"}))).status,403);
- assert.equal((await manage(request({action:"create",childId:"child-a",email:"adult@example.com"},"https://evil.example"))).status,403);
+test("nonowners, foreign children and foreign origins cannot manage or list access",async()=>{
+ state.owner=false;
+ assert.equal((await manage(request({action:"add",childId:"child-a",email:"family@example.com"}))).status,403);
+ assert.equal((await list(new Request("https://maths.example/api/sharing?childId=child-a"))).status,403);
+ reset();assert.equal((await manage(request({action:"add",childId:"sibling",email:"family@example.com"}))).status,403);
+ assert.equal((await manage(request({action:"add",childId:"child-a",email:"family@example.com"},"https://evil.example"))).status,403);
  assert.equal(state.rpcCalls.length,0);
 });
-test("access listing excludes token hashes and scopes both tables to the owner and child",async()=>{
+test("listing merges legacy and direct email grants without exposing identity IDs or tokens",async()=>{
+ state.rows={child_email_access:[{email:"new@example.com"}],child_adult_memberships:[{email:"adult@example.com"}],child_profile_logins:[{email:"child@example.com"},{email:"new@example.com"}]};
  const response=await list(new Request("https://maths.example/api/sharing?childId=child-a"));assert.equal(response.status,200);
- assert.equal(state.queries.length,2);
- for(const query of state.queries){assert.ok(!query.columns.includes("token"));assert.deepEqual(query.filters.slice(0,2),[["child_id","child-a"],["parent_id","owner-user"]]);}
+ assert.deepEqual(await response.json(),{invitations:[],emails:["new@example.com","adult@example.com","child@example.com"]});
+ assert.equal(state.queries.length,4);
+ for(const query of state.queries){assert.ok(!query.columns.includes("token"));assert.ok(!query.columns.includes("auth_user_id"));assert.deepEqual(query.filters.slice(0,2),[["child_id","child-a"],["parent_id","owner-user"]]);}
+ state.tableError=true;assert.equal((await list(new Request("https://maths.example/api/sharing?childId=child-a"))).status,503);
 });
-test("management validates targets and keeps rate-limit and conflict failures recoverable",async()=>{
- for(const body of [{action:"create",childId:"child-a",email:"bad"},{action:"revoke",childId:"child-a",authUserId:"bad"},{action:"other",childId:"child-a"}])assert.equal((await manage(request(body))).status,400);
+test("invalid targets and storage failures remain recoverable; removal and legacy cancellation stay scoped",async()=>{
+ for(const body of [{action:"add",childId:"child-a",email:"bad"},{action:"remove",childId:"child-a",email:"bad"},{action:"cancel",childId:"child-a",invitationId:"bad"},{action:"create",childId:"child-a",email:"family@example.com"}])assert.equal((await manage(request(body))).status,400);
  assert.equal(state.rpcCalls.length,0);
- for(const [code,status] of [["23505",409],["P0001",429],["XX000",503]] as const){state.rpcError={code,message:"secret database"};const response=await manage(request({action:"create",childId:"child-a",email:"adult@example.com"}));assert.equal(response.status,status);assert.ok(!(await response.text()).includes("secret"));}
+ for(const [code,status] of [["23505",409],["P0001",429],["XX000",503]] as const){state.rpcError={code,message:"secret database"};const response=await manage(request({action:"add",childId:"child-a",email:"family@example.com"}));assert.equal(response.status,status);assert.ok(!(await response.text()).includes("secret"));}
  state.rpcError=null;
- for(const action of ["revoke","cancel"]){const target="10000000-0000-0000-0000-000000000003";assert.equal((await manage(request({action,childId:"child-a",authUserId:target,invitationId:target}))).status,200);assert.deepEqual(state.rpcCalls.at(-1)?.args,{p_parent_id:"owner-user",p_child_id:"child-a",p_invitation_id:action==="cancel"?target:null,p_auth_user_id:action==="revoke"?target:null});}
+ assert.equal((await manage(request({action:"remove",childId:"child-a",email:"family@example.com"}))).status,200);
+ assert.deepEqual(state.rpcCalls.at(-1),{name:"remove_child_email_access",args:{p_parent_id:"owner-user",p_child_id:"child-a",p_email:"family@example.com"}});
+ const target="10000000-0000-0000-0000-000000000003";
+ assert.equal((await manage(request({action:"cancel",childId:"child-a",invitationId:target}))).status,200);
+ assert.deepEqual(state.rpcCalls.at(-1),{name:"remove_child_access",args:{p_parent_id:"owner-user",p_child_id:"child-a",p_invitation_id:target,p_auth_user_id:null}});
 });
 test("acceptance requires POST, same-origin and verified Google identity; login retains HttpOnly token",async()=>{
  assert.equal("GET" in acceptance,false);

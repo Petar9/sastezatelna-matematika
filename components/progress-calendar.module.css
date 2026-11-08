@@ -28,8 +28,17 @@
 .daySummary dd { margin: 0; font-size: var(--text-heading); font-weight: 700; font-variant-numeric: tabular-nums; }
 .entries { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
 .entries li { display: grid; gap: var(--space-1); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
-.skillGroup + .skillGroup { margin-top: var(--space-6); }
-.skillGroup h3 { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--text-small); font-weight: 600; }
+.skillGroup { min-width: 0; }
+.skillGroup + .skillGroup { border-top: 1px solid var(--border); }
+.skillGroup h3 { margin: 0; font-size: var(--text-body); line-height: var(--line-heading); }
+.skillToggle { display: grid; grid-template-columns: minmax(0, 1fr) 20px; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--control-height); padding: var(--space-4) 0; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--foreground); text-align: left; }
+.skillToggle span { min-width: 0; overflow-wrap: anywhere; }
+.skillToggle:hover { color: var(--primary); }
+.skillToggle:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
+.chevron { color: var(--muted); transition: transform var(--motion-fast) ease-out; }
+.skillToggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+.skillDetails { padding-bottom: var(--space-4); }
+@media(prefers-reduced-motion: reduce) { .chevron { transition: none; } }
 .skillTitle { font-weight: 600; line-height: var(--line-body); }
 .skillResults { font-size: var(--text-small); color: var(--muted); line-height: var(--line-body); }
 .entries li:last-child { border-bottom: 0; padding-bottom: 0; }

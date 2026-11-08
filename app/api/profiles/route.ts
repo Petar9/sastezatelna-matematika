@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       if (!child) return retry("error=missing");
       childId = child.id;
     } else return retry("error=unavailable");
-    const target = body.get("action") === "create" ? `/profiles?setup=${encodeURIComponent(childId)}` : "/";
+    const target = "/";
     const response = NextResponse.redirect(`${appOrigin()}${target}`, 303);
     response.cookies.set(childCookie, childId, { httpOnly: true, secure: appOrigin().startsWith("https:"), sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
     return response;
