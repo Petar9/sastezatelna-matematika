@@ -8,9 +8,15 @@ import { Message } from "./ui/message";
 import { Dialog } from "./ui/dialog";
 import s from "./feedback.module.css";
 
-type FeedbackContext = { childId?: string; competitionId?: string; taskKey?: string };
-export function FeedbackButton({ childId, competitionId, taskKey }: FeedbackContext) {
- const dialog = useRef<HTMLDialogElement>(null), trigger = useRef<HTMLButtonElement>(null);
+export type FeedbackContext = { childId?: string; competitionId?: string; taskKey?: string };
+export function FeedbackButton(props: FeedbackContext) {
+ const [open, setOpen] = useState(false);
+ const trigger = useRef<HTMLButtonElement>(null);
+ return <><Button ref={trigger} variant="quiet" className={s.link} onClick={() => setOpen(true)}>Подай обратна връзка</Button><FeedbackDialog {...props} open={open} onClose={() => { setOpen(false); trigger.current?.focus(); }}/></>;
+}
+
+export function FeedbackDialog({ open, onClose, childId, competitionId, taskKey }: FeedbackContext & { open: boolean; onClose: () => void }) {
+ const dialog = useRef<HTMLDialogElement>(null);
  const sending = useRef(false);
  const confirmation = useRef<HTMLButtonElement>(null);
  const messageInput = useRef<HTMLTextAreaElement>(null);
@@ -20,11 +26,13 @@ export function FeedbackButton({ childId, competitionId, taskKey }: FeedbackCont
  const [busy, setBusy] = useState(false), [sent, setSent] = useState(false);
  const id = useId();
  useEffect(() => { if (sent && dialog.current?.open) confirmation.current?.focus(); }, [sent]);
- function open() {
-  context.current = { childId, competitionId, taskKey };
-  dialog.current?.showModal();
-  messageInput.current?.focus();
- }
+ useEffect(() => {
+  if (open && !dialog.current?.open) {
+   context.current = { childId, competitionId, taskKey };
+   dialog.current?.showModal();
+   messageInput.current?.focus();
+  } else if (!open && dialog.current?.open) dialog.current.close();
+ }, [open, childId, competitionId, taskKey]);
  function close() { dialog.current?.close(); }
  async function submit(event: FormEvent<HTMLFormElement>) {
   event.preventDefault();
@@ -39,9 +47,7 @@ export function FeedbackButton({ childId, competitionId, taskKey }: FeedbackCont
    setError("Не успяхме да изпратим. Опитай отново.");
   } finally { sending.current = false; setBusy(false); }
  }
- return <>
-  <Button ref={trigger} variant="quiet" className={s.link} onClick={open}>Подай обратна връзка</Button>
-  <Dialog ref={dialog} title="Подай обратна връзка" titleId={`${id}-title`} onClose={() => { if (sent) setSent(false); trigger.current?.focus(); }}>
+ return <Dialog ref={dialog} title="Подай обратна връзка" titleId={`${id}-title`} onClose={() => { if (sent) setSent(false); onClose(); }}>
    {sent ? <div className={s.confirmation}><Message tone="success">Благодарим! Получихме съобщението.</Message><Button ref={confirmation} onClick={close}>Затвори</Button></div>
     : <form onSubmit={event => void submit(event)} aria-busy={busy}>
      <label htmlFor={`${id}-message`}>Какво искаш да ни кажеш?</label>
@@ -51,6 +57,5 @@ export function FeedbackButton({ childId, competitionId, taskKey }: FeedbackCont
      {error && <Message className={s.error} tone="error" inline>{error}</Message>}
      <Button type="submit" loading={busy} disabled={!message.trim()}>Изпрати</Button>
     </form>}
-  </Dialog>
- </>;
+  </Dialog>;
 }

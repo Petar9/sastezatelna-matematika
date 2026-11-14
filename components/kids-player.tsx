@@ -120,7 +120,8 @@ function KidsQuestion({ task, busy, onAction }: { task: NonNullable<KidsView["ta
 		</div>
 		{!done && <p className={s.small}>{task.hint ? "Още е трудно? „Следваща подсказка“ ще покаже цялото решение." : "„Подсказка“ ще ти помогне да започнеш."}</p>}
 		{task.outcome && <div className={s.feedback} role="status">
-			<h3>{kidsOutcomeLabels[task.outcome]}</h3>
+			<h3>{task.outcome === "incorrect" ? "Отговорът не е верен." : kidsOutcomeLabels[task.outcome]}</h3>
+			{task.outcome === "incorrect" && <p>Нека разгледаме решението стъпка по стъпка.</p>}
 			{task.outcome === "independent" || task.outcome === "hinted" ? <details className={s.reasoning}><summary>Виж решението стъпка по стъпка</summary><Explanation steps={task.explanation ?? []} /></details>
 				: <Explanation steps={task.explanation ?? []} />}
 		</div>}

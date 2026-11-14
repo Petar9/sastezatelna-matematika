@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { competitionCalendar, competitionHref } from "../src/competition-dates";
 import { CompetitionCalendar } from "./competition-calendar";
 import { Button, ButtonLink } from "./ui/button";
+import { Dialog } from "./ui/dialog";
 import { Select } from "./ui/field";
 import { Message } from "./ui/message";
 import { PreparationPanel } from "./competition-preparation";
@@ -52,7 +53,24 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
  const [month, setMonth] = useState(initialDay.slice(0, 7));
  const [competition, setCompetition] = useState(collections.some(item => item.competitionId === initialCompetition) ? initialCompetition! : "all");
  const [selected, setSelected] = useState(initialDay);
+ const [dialogOpen, setDialogOpen] = useState(false);
+ const [dialogSession, setDialogSession] = useState(0);
+ const dialog = useRef<HTMLDialogElement>(null), dateHeading = useRef<HTMLHeadingElement>(null), dayTrigger = useRef<HTMLButtonElement>(null);
  const id = useId();
+ useEffect(() => {
+  if (!dialogOpen) return;
+  const overflow = document.documentElement.style.overflow || "";
+  document.documentElement.style.overflow = "hidden";
+  dialog.current?.showModal();
+  dateHeading.current?.focus({ preventScroll: true });
+  return () => { document.documentElement.style.overflow = overflow; };
+ }, [dialogOpen]);
+ function openDay(day: string, trigger: HTMLButtonElement) {
+  dayTrigger.current = trigger;
+  setSelected(day);
+  setDialogSession(session => session + 1);
+  setDialogOpen(true);
+ }
  const scheduled = competitionCalendar.filter(item => competition === "all" || item.competitionId === competition);
  const upcoming = scheduled.filter(item => item.date >= initialDay);
  const selectedCompetitions = scheduled.filter(item => item.date === selected);
@@ -102,7 +120,7 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
      const day = `${month}-${String(index + 1).padStart(2,"0")}`;
      const competitions = scheduled.filter(event => event.date === day);
      const activity = events.filter(event => event.day === day), value = dayProgress(activity);
-     return <button type="button" key={day} className={`${s.day} ${activity.length ? s.active : ""} ${competitions.length ? s.eventDay : ""}`} aria-pressed={selected === day} aria-current={day === initialDay ? "date" : undefined} aria-controls={`${id}-details`} aria-label={`${dateLabel(day)}: ${value.gold} злато, ${value.independent} самостоятелни, ${value.hinted} с подсказка, ${activity.filter(event => event.kind === "attempt" && event.outcome === "incorrect").length} грешни отговора, ${activity.filter(event => event.kind === "attempt" && event.outcome === "revealed").length} разгледани решения${activity.length ? "" : ", няма записана активност"}${competitions.map(event => `, ${event.kind === "deadline" ? "краен срок за провеждане" : "дата"}: ${event.label}`).join("")}`} onClick={() => setSelected(day)}>
+     return <button type="button" key={day} className={`${s.day} ${activity.length ? s.active : ""} ${competitions.length ? s.eventDay : ""}`} aria-pressed={selected === day} aria-current={day === initialDay ? "date" : undefined} aria-controls={`${id}-details`} aria-haspopup="dialog" aria-label={`${dateLabel(day)}: ${value.gold} злато, ${value.independent} самостоятелни, ${value.hinted} с подсказка, ${activity.filter(event => event.kind === "attempt" && event.outcome === "incorrect").length} грешни отговора, ${activity.filter(event => event.kind === "attempt" && event.outcome === "revealed").length} разгледани решения${activity.length ? "" : ", няма записана активност"}${competitions.map(event => `, ${event.kind === "deadline" ? "краен срок за провеждане" : "дата"}: ${event.label}`).join("")}`} onClick={event => openDay(day, event.currentTarget)}>
       <span className={s.dayNumber}>{index + 1}</span>{activity.length > 0 && <>
        <span className={s.dayGold} aria-hidden="true">{value.gold}</span>
        <span className={s.dayCounts} aria-hidden="true">{value.independent + value.hinted} {value.independent + value.hinted === 1 ? "задача" : "задачи"}</span>
@@ -111,18 +129,19 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
     })}
    </div>
   </section>
-  <section className={s.details} id={`${id}-details`} aria-labelledby={`${id}-date`}>
-   <h2 id={`${id}-date`} aria-live="polite">{dateLabel(selected)}</h2>
+  <Dialog key={dialogSession} ref={dialog} id={`${id}-details`} title={dateLabel(selected)} titleId={`${id}-date`} titleRef={dateHeading} variant="responsive" onClose={() => { setDialogOpen(false); dayTrigger.current?.focus({ preventScroll: true }); }}>
+   <div className={s.dayDetails}>
    {selectedCompetitions.map(event => <p className={s.scheduledEvent} key={event.date}><span className={s.eventMarker} aria-hidden="true">◆</span> <Link href={competitionHref(event)}>{event.label}</Link>{event.kind === "deadline" && <span className={s.deadlineCaption}>Краен срок за провеждане</span>}</p>)}
    {details.length > 0 && <dl className={s.daySummary} aria-label="За деня">
     <div><dt>Злато</dt><dd>{selectedTotals.gold}</dd></div>
     {selectedOutcomes.map(item => <div key={item.outcome}><dt>{item.label}</dt><dd>{item.count}</dd></div>)}
     {dayConnected.parts > 0 && <><div><dt>Подусловия</dt><dd>{dayConnected.parts}</dd></div><div><dt>Цели задачи</dt><dd>{dayConnected.originals}</dd></div></>}
    </dl>}
-   {skillGroups.map(group => <DailyCompetitionDetails key={`${selected}:${group.competitionId}`} title={group.title} skills={group.skills}/>)}
+   {skillGroups.map(group => <DailyCompetitionDetails key={`${dialogSession}:${selected}:${group.competitionId}`} title={group.title} skills={group.skills}/>)}
    {details.length === 0 && <p>Няма записана активност за този ден.</p>}
    {details.some(event => event.kind === "attempt" && !event.wholeProblem && !event.naturalPart) && <p className={s.legend}>Подусловията не се броят като завършени цели задачи.</p>}
-  </section>
+   </div>
+  </Dialog>
   <PreparationPanel collections={collections}/>
   {upcoming.length > 0 && <section className={s.upcoming} aria-labelledby={`${id}-upcoming`}>
    <h2 id={`${id}-upcoming`}>Предстоящи дати</h2>

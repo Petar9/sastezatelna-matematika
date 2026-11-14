@@ -40,6 +40,7 @@ const {Leaf,leafKey,leafPhase,knowledgeGrowthKeys}=await import("../components/k
 const {IslandGoldTotal,KidsLearningProgress,discoveryProgress}=await import("../components/kids-learning-progress.tsx");
 const now="2026-11-02T12:00:00.000Z";
 function button(host:HTMLElement,label:string){const b=[...host.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent===label);assert.ok(b,`Missing: ${label}`);return b;}
+async function openFeedback(host:HTMLElement){ await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label="Меню"]')!.click()); await act(async()=>button(host,"Обратна връзка").click()); }
 function primary(host:HTMLElement,label:string){const bars=host.querySelectorAll('[aria-label="Следващо действие"]');assert.equal(bars.length,1);assert.equal(bars[0]!.querySelectorAll("button").length,label==="Провери отговора"?2:1);assert.ok(bars[0]!.textContent!.includes(label));return button(host,label);}
 function islandButton(host:HTMLElement,topic:string){const b=host.querySelector<HTMLButtonElement>(`button[aria-label="${topic}"]`);assert.ok(b);return b;}
 async function practise(host:HTMLElement,topic:string){await act(async()=>islandButton(host,topic).click());await act(async()=>button(host,"Към задачите").click());}
@@ -239,7 +240,8 @@ test("feedback celebrates correct answers while retaining assisted and incorrect
    await act(async()=>primary(h.host,"Провери отговора").click());
    assert.equal(h.record.attempts[0]!.outcome,outcome);
    const feedback=h.host.querySelector('[role="status"] h3[tabindex="-1"]')!;
-   assert.equal(feedback.textContent,outcome==="independent"?"Верен отговор":outcome==="hinted"?"Верен отговор с помощ":"Грешен отговор");
+   assert.equal(feedback.textContent,outcome==="independent"?"Верен отговор":outcome==="hinted"?"Верен отговор с помощ":"Отговорът не е верен.");
+   assert.equal(feedback.parentElement!.parentElement!.textContent!.includes("Нека разгледаме решението стъпка по стъпка."),outcome==="incorrect");
    assert.equal(h.host.querySelectorAll("[data-gold-gain]").length,1);
    assert.ok(!h.host.querySelector("[data-gold-gain]")!.textContent!.includes("Първо откритие!"));
    primary(h.host,outcome==="independent"?"Следваща задача":"Продължи");
@@ -1003,7 +1005,7 @@ test("feedback modal keeps typed exercise work mounted, preserves failed message
   await act(async () => button(h.host, "5").click());
   await act(async () => button(h.host, "6").click());
   const input = h.host.querySelector<HTMLInputElement>("input")!, taskKey = courseView(h.record, content, now).task!.key;
-  await act(async () => button(h.host, "Подай обратна връзка").click());
+  await openFeedback(h.host);
   const textarea = modal.querySelector<HTMLTextAreaElement>("textarea")!;
   await act(async () => {
    Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value")!.set!.call(textarea, "Подсказката не е ясна.");
@@ -1026,7 +1028,7 @@ test("feedback modal keeps typed exercise work mounted, preserves failed message
   assert.equal(h.record.attempts.length, 0); assert.equal(h.record.goldAwards?.length ?? 0, 0);
   assert.ok(!h.actions.some(action => ["answer", "selectTopic", "dashboard"].includes(action.type)));
   await act(async () => button(modal, "Затвори").click());
-  await act(async () => button(h.host, "Подай обратна връзка").click());
+  await openFeedback(h.host);
   assert.equal(modal.querySelector<HTMLTextAreaElement>("textarea")!.value, "");
  } finally { await h.cleanup(); }
 });
@@ -1167,7 +1169,7 @@ test("focus saves local input before refresh, restores newer remote drafts and d
 });
 
 
-test("home navigation awaits pending drafts, retains failed input and exposes footer routes only on main",async()=>{
+test("home and menu navigation await pending drafts and retain failed input",async()=>{
  for(const href of ["/about","/profiles","/progress?child=child-a"]){
   for(const fail of [false,true]){
    const h=await mount("grids",false,"child-a"),fetchCourse=globalThis.fetch,routes:string[]=[];
@@ -1189,14 +1191,16 @@ test("home navigation awaits pending drafts, retains failed input and exposes fo
     assert.equal(input.value,"7");
     const modal=h.host.querySelector<HTMLDialogElement>("dialog")!;
     modal.showModal=()=>{modal.setAttribute("open","");};
-    await act(async()=>button(h.host,"Подай обратна връзка").click());
+    await openFeedback(h.host);
     assert.ok(modal.hasAttribute("open"),"pending route save must not block feedback");
     if(!fail)h.advance(submitted!);
     await act(async()=>finish!(fail?Response.json({error:"Не успяхме да запазим."},{status:500}):Response.json({course:courseView(h.record,content,now)})));
     assert.deepEqual(routes,[]);
     if(!fail){
-     assert.equal(h.host.querySelectorAll("footer a").length,3);
-     await act(async()=>h.host.querySelector<HTMLAnchorElement>(`footer a[href="${href}"]`)!.dispatchEvent(new dom.window.Event("click",{bubbles:true,cancelable:true})));
+     assert.equal(h.host.querySelector("footer"),null);
+     await act(async()=>h.host.querySelector<HTMLButtonElement>('button[aria-label="Меню"]')!.click());
+     assert.equal(h.host.querySelectorAll('nav[aria-label="Основна навигация"] a').length,4);
+     await act(async()=>h.host.querySelector<HTMLAnchorElement>(`nav[aria-label="Основна навигация"] a[href="${href}"]`)!.dispatchEvent(new dom.window.Event("click",{bubbles:true,cancelable:true})));
      assert.deepEqual(routes,[href]);
     }
     if(fail){assert.ok(h.host.querySelector('[role="alert"]'));assert.equal(h.host.querySelector("input"),input);assert.equal(input.value,"7");}
@@ -1234,13 +1238,13 @@ test("quiet feedback remains on main, island, task and pause and includes only v
  const bodies:Record<string,unknown>[]=[];
  try{
   globalThis.fetch=async(url,init)=>{if(url==="/api/reports"){bodies.push(JSON.parse(String(init?.body)));return Response.json({});}return fetchCourse(url,init);};
-  async function check(taskVisible:boolean,footerVisible:boolean){
-   assert.equal(!!h.host.querySelector("footer"),footerVisible);
-   assert.equal([...h.host.querySelectorAll("button")].filter(item=>item.textContent==="Подай обратна връзка").length,1);
+  async function check(taskVisible:boolean){
+   assert.equal(h.host.querySelector("footer"),null);
+   assert.equal([...h.host.querySelectorAll("button")].filter(item=>item.textContent==="Обратна връзка").length,1);
    const modal=h.host.querySelector<HTMLDialogElement>("dialog")!;
    modal.showModal=()=>modal.setAttribute("open","");
    modal.close=()=>{modal.removeAttribute("open");modal.dispatchEvent(new dom.window.Event("close"));};
-   await act(async()=>button(h.host,"Подай обратна връзка").click());
+   await openFeedback(h.host);
    const textarea=modal.querySelector<HTMLTextAreaElement>("textarea")!;
    await act(async()=>{Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype,"value")!.set!.call(textarea,"Тестова обратна връзка");textarea.dispatchEvent(new dom.window.Event("input",{bubbles:true}));});
    await act(async()=>modal.querySelector("form")!.dispatchEvent(new dom.window.Event("submit",{bubbles:true,cancelable:true})));
@@ -1248,11 +1252,11 @@ test("quiet feedback remains on main, island, task and pause and includes only v
    assert.equal(bodies.at(-1)?.childId,"child-a");
    await act(async()=>button(modal,"Затвори").click());
   }
-  await check(true,false);
-  await act(async()=>button(h.host,"← Начало").click());await check(false,true);
-  await act(async()=>islandButton(h.host,"Точки и мачове").click());await check(false,false);
-  await act(async()=>button(h.host,"Към задачите").click());await check(true,false);
-  await act(async()=>button(h.host,"Почивка").click());await check(false,false);
+  await check(true);
+  await act(async()=>button(h.host,"← Начало").click());await check(false);
+  await act(async()=>islandButton(h.host,"Точки и мачове").click());await check(false);
+  await act(async()=>button(h.host,"Към задачите").click());await check(true);
+  await act(async()=>button(h.host,"Почивка").click());await check(false);
   assert.equal(h.record.attempts.length,0);
  }finally{await h.cleanup();}
 });
@@ -1521,7 +1525,7 @@ test("competition preparation stays on the overview and uses saved evidence afte
   const card=initial.closest('section')!;
   assert.equal(card.querySelector('h2')?.textContent,"Напредък в подготовката за това състезание.");
   assert.ok(!card.textContent?.includes("Решени оригинални задачи"));
-  assert.equal(card.nextElementSibling?.tagName,"FOOTER");
+  assert.equal(card.nextElementSibling,null);
   assert.ok(h.host.querySelector(`a[href="/progress?competition=${DEFAULT_COMPETITION_ID}&child=child-a"]`));
   await act(async()=>islandButton(h.host,"Точки и мачове").click());
   assert.equal(preparation(),null);
@@ -1552,5 +1556,79 @@ test("personal progress opens once after a new independent answer and stays clos
   await act(async()=>button(h.host,"Продължи: Точки и мачове").click());
   assert.equal(h.host.querySelector('dialog[open]'),null);
   assert.equal(h.record.problemGoldAwards!.length,paid);
+ }finally{await h.cleanup();}
+});
+
+
+test("menu destinations and logout flush the current exercise before leaving",async()=>{
+ for(const destination of ["/materiali","/profiles","/progress?child=child-a","logout"]){
+  for(const fail of [false,true]){
+   const h=await mount("grids",false,"child-a"),fetchCourse=globalThis.fetch,routes:string[]=[];
+   Object.assign(globalThis,{__courseRoutes:routes});
+   let finish!:(response:Response)=>void,submitted:CourseAction|undefined,logouts=0;
+   try{
+    globalThis.fetch=async(url,init)=>{
+     if(init?.method==="POST"){
+      const {action}=JSON.parse(String(init.body)) as {action:CourseAction};
+      if(action.type==="saveDraft"){submitted=action;return new Promise(resolve=>{finish=resolve;});}
+     }
+     return fetchCourse(url,init);
+    };
+    await act(async()=>button(h.host,"7").click());
+    const input=h.host.querySelector<HTMLInputElement>("input")!;
+    await act(async()=>h.host.querySelector<HTMLButtonElement>('button[aria-label="Меню"]')!.click());
+    if(destination==="logout"){
+     const form=h.host.querySelector<HTMLFormElement>('form[action="/auth/logout"]')!;form.submit=()=>{logouts++;};
+     await act(async()=>form.dispatchEvent(new dom.window.Event("submit",{bubbles:true,cancelable:true})));
+    }else await act(async()=>h.host.querySelector<HTMLAnchorElement>(`nav a[href="${destination}"]`)!.dispatchEvent(new dom.window.Event("click",{bubbles:true,cancelable:true})));
+    assert.equal(submitted?.type,"saveDraft");assert.deepEqual(submitted?.answers,["7"]);assert.deepEqual(routes,[]);assert.equal(logouts,0);
+    if(!fail)h.advance(submitted!);
+    await act(async()=>finish(fail?Response.json({error:"Не успяхме да запазим."},{status:500}):Response.json({course:courseView(h.record,content,now)})));
+    assert.deepEqual(routes,!fail&&destination!=="logout"?[destination]:[]);assert.equal(logouts,!fail&&destination==="logout"?1:0);
+    if(fail){assert.equal(h.host.querySelector("input"),input);assert.equal(input.value,"7");assert.ok(h.host.querySelector('[role="alert"]'));}
+   }finally{Reflect.deleteProperty(globalThis,"__courseRoutes");await h.cleanup();}
+  }
+ }
+});
+
+
+test("several accomplishments share one native dialog and are not replayed by reload",async()=>{
+ const h=await mount(),fetchCourse=globalThis.fetch;
+ try{
+  globalThis.fetch=async(url,init)=>{
+   const response=await fetchCourse(url,init);const body=await response.json();
+   if(init?.method==="POST" && JSON.parse(String(init.body)).action.type==="answer")body.course.appreciations=[{kind:"whole-problem"},{kind:"scheduled-review"},{kind:"daily-tasks",day:"2026-11-02",amount:1},{kind:"daily-gold",day:"2026-11-02",amount:35}];
+   return Response.json(body,{status:response.status});
+  };
+  await submitAnswer(h);
+  assert.equal(h.host.querySelectorAll('dialog[open]').length,1);
+  const dialog=h.host.querySelector<HTMLDialogElement>('dialog[open]')!;
+  assert.ok(dialog.textContent!.includes("Реши всички части на тази задача самостоятелно. Браво!"));
+  assert.ok(dialog.textContent!.includes("При преговора реши задачата самостоятелно. Браво!"));
+  assert.ok(dialog.textContent!.includes("Днес реши 1 задача - най-много досега за един ден."));
+  assert.ok(dialog.textContent!.includes("Днес събра 35 злато - най-много досега за един ден."));
+  assert.equal(dialog.querySelectorAll('.appreciationMessages p').length,4);
+  assert.ok(dialog.getAttribute("aria-describedby"));
+  await act(async()=>dialog.querySelector<HTMLButtonElement>('button:not([aria-label])')!.click());
+  assert.equal(h.host.querySelector('dialog[open]'),null);
+  await h.reload();assert.equal(h.host.querySelector('dialog[open]'),null);
+ }finally{await h.cleanup();}
+});
+
+
+test("a lost personal-improvement reply reconciles saved history without opening an appreciation dialog",async()=>{
+ const h=await mount();try{
+  await act(async()=>button(h.host,"Подсказка").click());
+  await submitAnswer(h);await act(async()=>primary(h.host,"Продължи").click());
+  const fetchCourse=globalThis.fetch;
+  globalThis.fetch=async(url,init)=>{
+   const response=await fetchCourse(url,init);
+   if(init?.method==="POST" && JSON.parse(String(init.body)).action.type==="answer")throw new Error("Lost appreciation reply");
+   return response;
+  };
+  await submitAnswer(h);
+  assert.equal(h.record.attempts.at(-1)!.personalProgress,true);
+  assert.equal(h.host.querySelector('dialog[open]'),null);
+  assert.ok(h.host.querySelector('[role="alert"]'));
  }finally{await h.cleanup();}
 });

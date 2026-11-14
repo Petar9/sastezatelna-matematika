@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
-import { FeedbackButton } from "@/components/feedback";
+import { AppHeader } from "@/components/app-header";
 import { ProgressCalendar, type ProgressCollection } from "@/components/progress-calendar";
 import { KidsError } from "@/src/core/kids";
 import { projectPreparation, projectProgressCourse, sofiaDay } from "@/src/core/progress";
@@ -51,9 +51,8 @@ export default async function Progress({ searchParams }: { searchParams: Promise
   throw error;
  }
  return <main className={s.shell}><div className={s.content}>
-  <ButtonLink href="/">← Начало</ButtonLink><h1>Напредък</h1>
+  <AppHeader current="progress" childId={childId} allowLogout={mode() === "hosted"} allowFeedback={mode() === "hosted"}/><h1>Напредък</h1>
   {parent && children.length > 1 ? <form action="/progress" method="get" className={p.filter}><label htmlFor="progress-child">Детски профил</label><Select name="child" id="progress-child" defaultValue={childId}>{children.map(child => <option key={child.id} value={child.id}>{child.nickname}</option>)}</Select><Button type="submit" variant="secondary">Покажи напредъка</Button></form> : nickname && <p>{nickname}</p>}
   <ProgressCalendar key={childId ?? "local"} collections={collections} initialCompetition={params.competition} initialDay={sofiaDay(new Date().toISOString())!}/>
-  <div className={s.feedbackAction}><ButtonLink href="/materiali" variant="quiet">Ценни материали</ButtonLink>{childId && <FeedbackButton childId={childId}/>}</div>
  </div></main>;
 }

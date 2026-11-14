@@ -1,3 +1,4 @@
+import {firstIndependentWholeProblem, type Appreciation, type LearningAppreciation} from "./accomplishments.ts";
 import { currentPreparationScope, ensurePreparationScope, preparationProgress, type PreparationProgress, type PreparationScope } from "./preparation.ts";
 import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, problemAwardAmount, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
@@ -67,7 +68,7 @@ export interface CourseAttempt {
  problemGoldEligible?: false;
  draft?: { partIndex: number; answers: string[] };
  sourceComplete?: boolean;
- partIndex?: number; partOutcome?: KidsOutcome; partIncorrect?: boolean; freshEvidence?: boolean; personalProgress?: true;
+ partIndex?: number; partOutcome?: KidsOutcome; partIncorrect?: boolean; freshEvidence?: boolean; personalProgress?: true; appreciations?: LearningAppreciation[];
 }
 export interface CourseSkillProgress {
 	streak: number; target: number; confirmedAt?: string; gap: boolean; revisit: boolean;
@@ -112,7 +113,7 @@ export interface CourseTopicView {
 }
 export interface KidsCourseView {
  preparation: PreparationProgress;
- gold: number; goldGain?: GoldGain; lastTopicId?: string;
+ gold: number; goldGain?: GoldGain; appreciations?: Appreciation[]; lastTopicId?: string;
 	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string; groupId?: string };
 	topics: CourseTopicView[]; doctors: number; professors: number; professorGoal: number; complete: boolean; previouslyCompleted?: boolean;
 	quest?: { id: string; completed: number; total: number; step: number; finished: boolean; exhausted: boolean; achievement?: string };
@@ -126,6 +127,7 @@ export interface KidsCourseView {
 	reward?: { rank: "doctor" | "professor"; topic: string };
 }
 export interface KidsCourseStore {
+ claimDailyRecords?(before: KidsCourse, next: KidsCourse, now: string): Appreciation[];
  goldBalance?(current: KidsCourse): number;
 	read(content?: KidsCourseContent): KidsCourse | null;
 	update(revision: number, action: CourseAction, content: KidsCourseContent): KidsCourse;
@@ -407,7 +409,15 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
  const fresh = !course.attempts.some(a => overlaps(a.problem, attempt.problem, content) || !!attempt.problem.naturalUnit && a.problem.skillId === attempt.problem.skillId && (a.problem.naturalUnit?.sourceId ?? a.problem.archive?.sourceId ?? content.connectedProblem?.(a.problem)?.sourceId) === attempt.problem.naturalUnit.sourceId);
  attempt.freshEvidence = fresh;
  const previous = course.attempts.findLast(a => a.problem.skillId === attempt.problem.skillId && a.completedAt);
- if (independent && fresh && previous?.outcome === "hinted" && previous.hintUsed) attempt.personalProgress = true;
+ const appreciations: LearningAppreciation[] = [];
+ if (independent && fresh && previous?.outcome === "hinted" && previous.hintUsed) {
+  attempt.personalProgress = true; appreciations.push({kind: "hint-independent"});
+ }
+ const connected = (course.quest?.work?.attempt === attempt ? course.quest.work : progress.work[mode]?.attempt === attempt ? progress.work[mode] : Object.values(progress.skillWork ?? {}).find(work => work.attempt === attempt))?.connected;
+ if (independent && connected && attempt.sourceComplete && firstIndependentWholeProblem(course.attempts, connected.problem, [...connected.completed, attempt])) appreciations.push({kind: "whole-problem"});
+ const due = skillReviewDue(course, topic.id, attempt.problem.skillId);
+ if (independent && mode === "review" && due && due <= now) appreciations.push({kind: "scheduled-review"});
+ if (appreciations.length) attempt.appreciations = appreciations;
 	if (!independent) progress.challengeStreak = 0;
 	// An outcome in another mode supersedes old feedback, never an unanswered task.
 	for (const other of ["core", "challenge", "review", "practice"] as const) {

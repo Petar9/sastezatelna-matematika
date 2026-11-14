@@ -373,3 +373,10 @@
 
 .personalProgress { display: grid; justify-items: center; gap: var(--space-3); margin-block: var(--space-4); }
 .personalProgress p { margin: 0; }
+.appreciationMessages { display: grid; gap: var(--space-3); min-width: 0; text-align: center; }
+
+.headerUtilities { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); margin-left: auto; }
+.header:has(.headerNavigation) .headerUtilities { grid-column: 2; grid-row: 1; }
+.header:has(.headerNavigation) .headerActions { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+@media (max-width: 540px) { .headerUtilities { gap: var(--space-2); } .header:not(:has(.headerNavigation)) .brand { flex: 1 1 160px; } }
+@media (max-width: 380px) { .header:has(.headerNavigation) .headerUtilities { grid-row: 2; } .header:has(.headerNavigation) .brand { grid-row: 3; grid-column: 1 / -1; } .header:has(.headerNavigation) .headerActions { grid-row: 1; } }

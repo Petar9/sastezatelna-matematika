@@ -1,3 +1,4 @@
+import type {Appreciation} from "../core/accomplishments.ts";
 import {completedLearningAction} from "./competition-resume.ts";
 import {KidsError} from "../core/kids.ts";
 import {courseView,newKidsCourse,parseCourseCommand} from "../core/kids-course.ts";
@@ -5,6 +6,7 @@ import type {KidsCourse,KidsCourseContent,CourseAction} from "../core/kids-cours
 import {newGoldGain} from "../core/kids-gold.ts";
 import {kidsCourseContent} from "./kids-course-content.ts";
 export interface CourseStore {
+ claimDailyRecords?(before:KidsCourse,next:KidsCourse,now:string):Appreciation[]|Promise<Appreciation[]>;
  readSnapshot?(content:KidsCourseContent):Promise<{course:KidsCourse|null;gold:number}>;
  goldBalance?(current:KidsCourse):number|Promise<number>;
  read(content?:KidsCourseContent):KidsCourse|null|Promise<KidsCourse|null>;
@@ -31,6 +33,16 @@ export async function kidsCourseResponse(request:Request,store:CourseStore,conte
  const view=courseView(next,content,new Date().toISOString());
  if(store.goldBalance)view.gold=await store.goldBalance(next);
  view.goldGain=newGoldGain(before,next);
+ if(action.type==="answer") {
+  const completed=next.attempts.find(attempt=>attempt.key===action.taskKey);
+  if(completed?.completedAt && !before.attempts.some(attempt=>attempt.key===action.taskKey)) {
+   const appreciations:Appreciation[]=[...(completed.appreciations??[])];
+   // Recognition must never turn a successfully saved answer into an error.
+   try { appreciations.push(...await store.claimDailyRecords?.(before,next,completed.completedAt)??[]); }
+   catch(error) { console.error("Daily appreciation could not be claimed",error); }
+   if(appreciations.length)view.appreciations=appreciations;
+  }
+ }
  const response=json({course:view});
  if(workedCookie&&completedLearningAction(action,before,next))response.headers.append("Set-Cookie",workedCookie);
  return response;

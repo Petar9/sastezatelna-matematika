@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ChildSharing } from "./child-sharing";
-import { ProfileNameForm } from "./profile-name-form";
-import { FeedbackButton } from "./feedback";
+import { ProfileCard } from "./profile-card";
+import { AppHeader } from "./app-header";
+import { ActionIcon } from "./ui/action-icon";
+import p from "./profiles.module.css";
+import k from "./kids.module.css";
 import { KidsOtter } from "./kids-otter";
 import { Button } from "./ui/button";
 import { Input } from "./ui/field";
@@ -70,38 +72,24 @@ function NicknameForm({ issue }: { issue?: ProfileIssue }) {
   </form>;
 }
 
-function ProfileFooter() {
-  return <><Link href="/progress">Напредък</Link>
-    <form method="post" action="/auth/logout"><Button type="submit" variant="quiet" className={o.textButton}>Изход</Button></form><Link href="/materiali">Ценни материали</Link><FeedbackButton/></>;
-}
-
 export function ChildProfiles({ children, issue, status, canCreateChildren = true }: { children: Child[]; canCreateChildren?: boolean; issue?: ProfileIssue; setup?: string; status?: "saved" | "removed" | "renamed" }) {
   const firstVisit = children.length === 0;
-  return <OnboardingFrame footer={<ProfileFooter />}>
-    <h1>{firstVisit ? "Име на детето:" : "Кой ще открива днес?"}</h1>
-    <p className={o.intro}>{firstVisit ? "Видрата те очаква. Да направим ново откритие!" : "Избери своя профил и продължи приключението."}</p>
+  return <main lang="bg" className={k.shell}><div className={p.content}>
+    <AppHeader current="profiles"/>
+    <div className={p.profiles}>
+    <div className={p.welcome}><div className={p.mascot}><KidsOtter/></div><div>
+      <h1>{firstVisit ? "Име на детето:" : "Кой ще открива днес?"}</h1>
+      <p>{firstVisit ? "Видрата те очаква. Да направим ново откритие!" : "Избери своя профил и продължи приключението."}</p>
+    </div></div>
     {issue && <Message className={o.notice} tone="warning" role="alert">{profileMessages[issue]}</Message>}
     {status && <Message className={o.notice} tone="success" role="status">{status === "saved" ? "Имейлът е запазен." : status === "renamed" ? "Името е запазено." : "Самостоятелният вход е премахнат."}</Message>}
-    {firstVisit ? <NicknameForm issue={issue} /> : <>
-      <div className={o.profiles}>
-        {children.map(child => <div key={child.id}>
-          <form action="/api/profiles" method="post">
-            <input type="hidden" name="action" value="select" />
-            <input type="hidden" name="childId" value={child.id} />
-            <Button type="submit" variant="secondary" className={o.profile}>{child.nickname}<span aria-hidden="true">→</span></Button>
-          </form>
-          <details className={o.loginSettings} open={issue === "rename-unavailable"}>
-            <summary>Промени името</summary>
-            <ProfileNameForm child={child} />
-          </details>
-          {child.isOwner !== false && <ChildSharing childId={child.id} />}
-        </div>)}
-      </div>
-      {canCreateChildren && <details className={o.additional} open={issue === "nickname" || issue === "full" || issue === "create-unavailable"}>
-        <summary>Добави друг изследовател</summary>
-        <NicknameForm issue={issue} />
+    {firstVisit ? <div className={p.firstProfile}><NicknameForm issue={issue}/></div> : <>
+      <div className={p.list}>{children.map(child => <ProfileCard key={child.id} child={child} renameOpen={issue === "rename-unavailable"}/>)}</div>
+      {canCreateChildren && <details className={p.additional} open={issue === "nickname" || issue === "full" || issue === "create-unavailable"}>
+        <summary><ActionIcon name="plus"/><span>Добави друг изследовател</span><ActionIcon name="chevron"/></summary>
+        <NicknameForm issue={issue}/>
       </details>}
-      <Link className={o.home} href="/">← Начало</Link>
     </>}
-  </OnboardingFrame>;
+    </div>
+  </div></main>;
 }

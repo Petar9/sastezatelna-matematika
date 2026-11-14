@@ -20,13 +20,23 @@ registerHooks({ resolve(specifier,context,nextResolve) {
 } });
 const dom=parseHTML("<html><body></body></html>");
 Object.assign(globalThis,{React,window:dom.window,self:dom.window,document:dom.document,HTMLElement:dom.window.HTMLElement,IS_REACT_ACT_ENVIRONMENT:true});
+// linkedom has no native dialog implementation; browser checks cover focus containment and Escape.
+const createElement=document.createElement.bind(document);
+document.createElement=((name:string,options?:ElementCreationOptions)=>{
+ const element=createElement(name,options);
+ if(name==="dialog")Object.assign(element,{
+  showModal(){element.setAttribute("open","");},
+  close(){element.removeAttribute("open");element.dispatchEvent(new dom.window.Event("close"));}
+ });
+ return element;
+}) as typeof document.createElement;
 const {createRoot}=await import("react-dom/client");
 const {default:Progress}=await import("../app/progress/page.tsx");
 const {ProgressCalendar, monthDays, shiftMonth}=await import("../components/progress-calendar.tsx");
 const {default:Parent}=await import("../app/parent/page.tsx");
 const page=(child?:string)=>Progress({searchParams:Promise.resolve({child})});
 
-test("progress parent and child read the same authorized history, with no answers or management links for child",async()=>{
+test("progress parent and child read the same authorized history, with no answers or child management controls",async()=>{
  reset(); state.course={attempts:[],topics:{},goldAwards:[]};
  const parent=renderToStaticMarkup(await page("child-a"));
  assert.ok(parent.includes('href="/materiali"')); assert.ok(parent.includes("Напредък")); assert.ok(parent.includes("Всички състезания")); assert.ok(parent.includes("Подай обратна връзка")); assert.ok(!parent.includes("<footer"));
@@ -34,7 +44,7 @@ test("progress parent and child read the same authorized history, with no answer
  state.role="child"; state.reads=[];
  const child=renderToStaticMarkup(await page("child-a"));
  assert.ok(child.includes("Предстоящи дати")); assert.ok(parent.includes("Предстоящи дати"));
- assert.ok(child.includes('href="/materiali"')); assert.ok(child.includes("Подай обратна връзка")); assert.ok(child.includes("Общо досега")); assert.ok(!child.includes("/parent/task")); assert.ok(!child.includes('href="/profiles"'));
+ assert.ok(child.includes('href="/materiali"')); assert.ok(child.includes("Подай обратна връзка")); assert.ok(child.includes("Общо досега")); assert.ok(!child.includes("/parent/task")); assert.ok(child.includes('href="/profiles"')); assert.ok(!child.includes("Сподели достъп"));
  assert.deepEqual(state.reads,[[["parent_id","parent-a"],["child_id","child-a"]]]); assert.deepEqual(state.writes,[]);
  state.reads=[]; await assert.rejects(page("sibling"),/NEXT_HTTP_ERROR_FALLBACK;404/); assert.deepEqual(state.reads,[]);
  await assert.rejects(page("foreign"),/NEXT_HTTP_ERROR_FALLBACK;404/);
@@ -44,7 +54,7 @@ test("old parent URL redirects to shared progress preserving explicit child",asy
  await assert.rejects(Parent({searchParams:Promise.resolve({child:"child-a"})}),error=>!!error && typeof error==="object" && "digest" in error && String(error.digest).includes("/progress?child=child-a"));
 });
 
-test("calendar has Monday-first month, accessible per-day values and inline day details",()=>{
+test("calendar has Monday-first month, accessible per-day values and a closed day dialog",()=>{
  assert.deepEqual(monthDays("2026-11"),{offset:6,count:30});
  assert.deepEqual(monthDays("2028-02"),{offset:1,count:29});
  assert.equal(shiftMonth("2026-01",-1),"2025-12");assert.equal(shiftMonth("2026-12",1),"2027-01");
@@ -55,14 +65,16 @@ test("calendar has Monday-first month, accessible per-day values and inline day 
  assert.ok(selected.getAttribute("aria-label")!.includes("1 с подсказка"));
  assert.ok(document.getElementById(selected.getAttribute("aria-controls")!)?.textContent?.includes("С подсказка"));
  assert.ok(document.toString().includes("Злато без точна дата: 5"));
- assert.equal(document.querySelectorAll("dialog").length,0);
+ assert.equal(document.querySelectorAll("dialog").length,1);
+ assert.equal(document.querySelector("dialog[open]"),null);
+ assert.equal(selected.getAttribute("aria-haspopup"),"dialog");
  assert.equal(document.querySelector('dl[aria-label="За месеца"]')?.textContent,"Злато0Самостоятелно0С подсказка1");
  assert.equal(document.querySelector('button[aria-label^="1 ноември"]')?.textContent,"1");
  assert.equal(selected.querySelector(".dayCounts")?.textContent,"1 задача");
  assert.ok(!document.toString().includes("В клетките:"));
 });
 
-test("calendar day selection, month navigation and competition filtering update inline without writes",async()=>{
+test("calendar day selection, month navigation and competition filtering update modal details without writes",async()=>{
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
  const summary={attempts:1,confirmed:0,revisit:0,hasTask:false};
  const before=JSON.stringify(state.writes);
@@ -209,7 +221,7 @@ test("five upcoming dates link to preparation below the calendar without changin
   ]);
   assert.equal(host.querySelectorAll(".upcoming button").length,0);
   assert.ok(host.innerHTML.indexOf('class="calendar"') < host.innerHTML.indexOf('class="upcoming"'));
-  assert.ok(host.innerHTML.indexOf('class="details"') < host.innerHTML.indexOf('class="upcoming"'));
+  assert.ok(host.innerHTML.indexOf("<dialog") < host.innerHTML.indexOf('class="upcoming"'));
   assert.ok(!host.textContent?.includes("По графика на НПМГ"));
   await next();
   await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label^="12 декември"]')!.click());
@@ -269,7 +281,7 @@ test("preparation uses the same answer-free projection for parent and child and 
 });
 
 
-test("preparation panel stays after day details, includes every started competition independently of the filter, and expands rows independently",async()=>{
+test("preparation panel stays below the calendar, includes every started competition independently of the filter, and expands rows independently",async()=>{
  const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
  const preparation=(percent:number)=>({status:"available" as const,percent,tasks:{completed:percent===100?100:7,total:100},coverage:{solved:percent===100?86:5,total:86,fraction:percent===100?1:5/86},confirmation:{completed:percent===100?78:5,total:78},review:{completed:percent===100?78:0,total:78},scope:{version:1,contentVersion:"test"}});
  const collection=(competitionId:string,percent:number)=>({competitionId,title:competitionId,summary:{attempts:1,confirmed:1,revisit:0,hasTask:false},undatedGold:0,undatedAttempts:0,events:[],preparation:preparation(percent)});
@@ -280,7 +292,7 @@ test("preparation panel stays after day details, includes every started competit
   const panel=host.querySelector('.panel')!;
   assert.ok(panel);
   assert.deepEqual([...panel.querySelectorAll('.rowTitle')].map(row=>row.textContent),["partial","complete"]);
-  assert.ok(host.innerHTML.indexOf('class="details"')<host.innerHTML.indexOf('class="panel"'));
+  assert.ok(host.innerHTML.indexOf('class="calendar"')<host.innerHTML.indexOf('class="panel"'));
   assert.ok(host.innerHTML.indexOf('class="panel"')<host.innerHTML.indexOf('class="upcoming"'));
   const toggles=[...panel.querySelectorAll<HTMLButtonElement>('.toggle')];
   for(const toggle of toggles){assert.equal(toggle.getAttribute('aria-expanded'),'false');assert.ok(document.getElementById(toggle.getAttribute('aria-controls')!)?.hidden);}
@@ -300,4 +312,43 @@ test("preparation panel stays after day details, includes every started competit
   await act(async()=>root.render(<ProgressCalendar collections={[collection('untouched',0),collections[3]!]} initialDay="2026-11-08"/>));
   assert.equal(host.querySelector('.panel'),null);
  }finally{await act(async()=>root.unmount());host.remove();}
+});
+
+
+test("day modal opens only on activation, restores scrolling and trigger focus, and resets the same day on reopen",async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ const collections=[{competitionId:"one",title:"Математика за всеки",summary:{attempts:1,confirmed:0,revisit:0,hasTask:false},undatedGold:0,undatedAttempts:0,events:[{key:"a",day:"2026-11-05",kind:"attempt" as const,label:"Задача",skillId:"skill",skillTitle:"Точки и мачове",outcome:"independent" as const,wholeProblem:true}]}];
+ const before=JSON.stringify(collections), writes=JSON.stringify(state.writes);
+ const originalFocus=dom.window.HTMLElement.prototype.focus;
+ document.documentElement.style.overflow="scroll";
+ try{
+  await act(async()=>root.render(<ProgressCalendar collections={collections} initialDay="2026-11-05"/>));
+  let modal=host.querySelector<HTMLDialogElement>("dialog")!;
+  const day=host.querySelector<HTMLButtonElement>('button[aria-label^="5 ноември"]')!;
+  const focused:string[]=[];
+  dom.window.HTMLElement.prototype.focus=function(){focused.push(this.tagName==="H2"?"date":"trigger");};
+  day.focus=()=>{focused.push("trigger");};
+  assert.equal(modal.hasAttribute("open"),false);
+  assert.equal(document.documentElement.style.overflow,"scroll");
+  await act(async()=>day.click());
+  modal=host.querySelector<HTMLDialogElement>("dialog")!;
+  const heading=document.getElementById(modal.getAttribute("aria-labelledby")!)!;
+  assert.equal(modal.hasAttribute("open"),true);assert.deepEqual(focused,["date"]);
+  assert.equal(document.documentElement.style.overflow,"hidden");
+  assert.equal(heading.textContent,"5 ноември 2026 г.");
+  assert.equal(heading.getAttribute("tabindex"),"-1");
+  assert.equal(modal.getAttribute("aria-describedby"),null);
+  await act(async()=>host.querySelector<HTMLButtonElement>(".skillToggle")!.click());
+  assert.equal(host.querySelector(".skillToggle")!.getAttribute("aria-expanded"),"true");
+  await act(async()=>modal.querySelector<HTMLButtonElement>('button[aria-label="Затвори"]')!.click());
+  assert.equal(modal.hasAttribute("open"),false);assert.deepEqual(focused,["date","trigger"]);
+  assert.equal(document.documentElement.style.overflow,"scroll");assert.equal(day.getAttribute("aria-pressed"),"true");
+  const previousModal=modal;
+  await act(async()=>day.click());
+  modal=host.querySelector<HTMLDialogElement>("dialog")!;
+  assert.notEqual(modal,previousModal);
+  assert.equal(modal.hasAttribute("open"),true);assert.deepEqual(focused,["date","trigger","date"]);
+  assert.equal(host.querySelector(".skillToggle")!.getAttribute("aria-expanded"),"false");
+  assert.equal(JSON.stringify(collections),before);assert.equal(JSON.stringify(state.writes),writes);
+ }finally{dom.window.HTMLElement.prototype.focus=originalFocus;await act(async()=>root.unmount());host.remove();assert.equal(document.documentElement.style.overflow,"scroll");document.documentElement.style.overflow="";}
 });

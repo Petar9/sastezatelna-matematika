@@ -39,7 +39,7 @@ export function DesignSystemGallery() {
   <div onSubmitCapture={event => { event.preventDefault(); setNotice("Това е преглед. Няма изпратена заявка."); }}>
    {view === "landing" && <Landing />}
    {view === "login" && <LoginWelcome issue="cancelled" />}
-   {view === "profiles" && <ChildProfiles children={[{ id: "preview-one", nickname: "Мореплавател" }]} issue="email" />}
+   {view === "profiles" && <ChildProfiles children={[{ id: "preview-one", nickname: "Мореплавател" }, { id: "preview-two", nickname: "Откривател на математически съкровища", isOwner: false }]} />}
    {view === "firstProfile" && <ChildProfiles children={[]} />}
    {view === "components" && <main className={s.catalog}>
     <section className={s.section}><h2>Действия</h2><div className={s.row}><Button onClick={() => setNotice("Действието работи.")}>Продължи</Button><Button variant="secondary">Подсказка</Button><Button variant="quiet">← Начало</Button><Button disabled>Провери отговора</Button><Button loading>Изпращаме…</Button><ButtonLink href="#fields">Към полетата</ButtonLink><Button variant="quiet" aria-label="Копирай съобщението"><ActionIcon name="copy" /></Button><Button variant="quiet" aria-label="Съобщението е копирано."><ActionIcon name="check" /></Button><Button variant="quiet" aria-label="Премахни достъпа" style={{color:"var(--error)"}}><ActionIcon name="close" /></Button></div><p>Дълъг надпис:</p><Button>Продължи към следващата задача от приключението</Button></section>

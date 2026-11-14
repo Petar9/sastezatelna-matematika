@@ -1,0 +1,30 @@
+.content { width: 100%; max-width: 1060px; margin: 0 auto; min-width: 0; }
+.profiles { max-width: 760px; margin: var(--space-8) auto; }
+.welcome { display: flex; align-items: center; gap: var(--space-5); margin-bottom: var(--space-6); }
+.mascot { flex: 0 0 76px; width: 76px; height: 80px; }
+.mascot svg { display: block; width: 100%; height: 100%; }
+.welcome h1 { margin: 0; font-size: var(--text-title); line-height: 1.2; font-weight: 700; }
+.welcome p { margin: var(--space-2) 0 0; color: var(--muted); }
+.list { display: grid; gap: var(--space-4); }
+.card { padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); min-width: 0; }
+.entry { display: flex; justify-content: space-between; width: 100%; min-height: 88px; gap: var(--space-4); padding: var(--space-5) var(--space-6); border: 1px solid transparent; background: var(--success-surface); color: var(--foreground); text-align: left; font-size: 26px; line-height: 1.25; }
+.entry > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.entry:hover { border-color: var(--primary); background: var(--success-surface); }
+.arrow { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: var(--card); color: var(--primary); }
+.tools { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); padding: var(--space-2) var(--space-3) 0; }
+.tool { justify-content: flex-start; gap: var(--space-2); padding: var(--space-2); min-height: 44px; font-size: var(--text-small); color: var(--muted); }
+.tool svg { width: 18px; height: 18px; flex-shrink: 0; }
+.tool svg:last-child { width: 15px; transition: transform var(--motion-fast); }
+.tool[aria-expanded="true"] { color: var(--primary); }
+.tool[aria-expanded="true"] svg:last-child { transform: rotate(180deg); }
+.pane { margin-top: var(--space-2); padding: var(--space-5) var(--space-6); border-top: 1px solid var(--border); font-size: var(--text-small); }
+.pane[hidden] { display: none; }
+.additional { margin-top: var(--space-5); }
+.additional > summary { list-style: none; display: flex; align-items: center; gap: var(--space-2); min-height: 48px; width: fit-content; cursor: pointer; padding: var(--space-2); font-size: var(--text-small); color: var(--muted); font-weight: 600; }
+.additional > summary::-webkit-details-marker { display: none; }
+.additional > summary svg { width: 18px; height: 18px; }
+.additional > summary svg:last-child { transition: transform var(--motion-fast); }
+.additional[open] > summary svg:last-child { transform: rotate(180deg); }
+.additional > form, .firstProfile { max-width: 480px; padding: var(--space-5); margin-top: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); }
+@media (max-width: 540px) { .profiles { margin: var(--space-6) auto; } .welcome { gap: var(--space-3); align-items: flex-start; } .welcome h1 { font-size: 26px; } .welcome p { font-size: var(--text-small); } .mascot { flex-basis: 60px; width: 60px; height: 66px; } .entry { padding: var(--space-4); font-size: 24px; } .tools { gap: 0 var(--space-1); padding-inline: 0; } .tool { font-size: 15px; gap: var(--space-1); } .pane { padding: var(--space-4) var(--space-2); } }
+@media (prefers-reduced-motion: reduce) { .tool svg:last-child, .additional > summary svg:last-child { transition: none; } }

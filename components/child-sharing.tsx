@@ -7,12 +7,13 @@ import {Input} from "./ui/field";
 import {Message} from "./ui/message";
 import o from "./onboarding.module.css";
 type Access={invitations:{id:string;email:string;expires_at:string}[];emails:string[]};
-export function ChildSharing({childId}:{childId:string}){
+export function ChildSharing({childId,embedded=false,active=false}:{childId:string;embedded?:boolean;active?:boolean}){
  const [access,setAccess]=useState<Access|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(""),[shareMessage,setShareMessage]=useState(""),[copied,setCopied]=useState(false),[manualCopy,setManualCopy]=useState(false),[removal,setRemoval]=useState<string|null>(null);
  const dialog=useRef<HTMLDialogElement>(null),removeTrigger=useRef<HTMLButtonElement|null>(null),accessHeading=useRef<HTMLHeadingElement>(null),removed=useRef(false);
  const loaded=useRef(false),pending=useRef(false),copyText=useRef<HTMLTextAreaElement>(null),copyTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
  useEffect(()=>()=>{if(copyTimer.current)clearTimeout(copyTimer.current);},[]);
  useEffect(()=>{if(manualCopy){copyText.current?.focus();copyText.current?.select();}},[manualCopy]);
+ useEffect(()=>{if(embedded&&active&&!loaded.current)void refresh();},[embedded,active]);
  async function load(){
   const response=await fetch(`/api/sharing?childId=${encodeURIComponent(childId)}`,{cache:"no-store"});
   const data=await response.json();
@@ -56,16 +57,15 @@ export function ChildSharing({childId}:{childId:string}){
    copyTimer.current=setTimeout(()=>setCopied(false),2500);
   }catch{setManualCopy(true);setError("Копирай избраното съобщение.");}
  }
- return <details className={o.loginSettings} onToggle={event=>{if(event.currentTarget.open&&!loaded.current)void refresh();}}>
-  <summary>Сподели достъп</summary>
+ const content = <>
   <div className={o.sharing} aria-busy={busy}>
    {error&&!removal&&<Message role="alert" tone="warning">{error}</Message>}
    {!access&&!busy&&<Button variant="quiet" onClick={()=>void refresh()}>Опитай отново</Button>}
    {busy&&!access&&<p role="status" className={o.note}>Зареждаме достъпа…</p>}
    <form className={o.form} onSubmit={event=>{event.preventDefault();const form=event.currentTarget;void change({action:"add",email:String(new FormData(form).get("email")??"").trim().toLowerCase()},form);}}>
     <label className={o.label} htmlFor={`access-email-${childId}`}>Google имейл</label>
-    <Input id={`access-email-${childId}`} type="email" name="email" required maxLength={254} autoComplete="off" autoCapitalize="none" spellCheck={false} disabled={busy}/>
-    <Button type="submit" loading={busy}>Добави достъп</Button>
+    <div className={o.formRow}><Input id={`access-email-${childId}`} type="email" name="email" required maxLength={254} autoComplete="off" autoCapitalize="none" spellCheck={false} disabled={busy}/>
+    <Button type="submit" loading={busy}>Добави достъп</Button></div>
    </form>
    {shareMessage&&<div className={o.shareMessage}>
     <p>{shareMessage}</p>
@@ -84,5 +84,6 @@ export function ChildSharing({childId}:{childId:string}){
    {error&&removal&&<Message tone="error">{error}</Message>}
    <Button className={o.primary} loading={busy} onClick={()=>void confirmRemoval()}>Да</Button>
   </Dialog>
- </details>;
+ </>;
+ return embedded ? content : <details className={o.loginSettings} onToggle={event=>{if(event.currentTarget.open&&!loaded.current)void refresh();}}><summary>Сподели достъп</summary>{content}</details>;
 }

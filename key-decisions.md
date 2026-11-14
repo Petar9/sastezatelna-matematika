@@ -64,3 +64,5 @@ The authoritative [gold and rewards guide](docs/points.md#current-approved-polic
 - Two-day inactivity email/notification reminders remain future scope, separate from optional learning retention review. Channels, consent, schedule and repeat limits require an approved follow-up plan.
 
 Personal progress: celebrate the latest same-skill assisted success followed by a fresh independent different task with the shared native dialog. Show only on the accepted answer, never on refresh/resume/duplicate submission; a later new improvement may celebrate again. No bonus gold. [Review and acceptance](docs/learning-retention-review.md).
+
+Additional accomplishments (owner-approved 2026-11-14): recognize the first verified independent completion of every part of an original and each independent due skill review. Combine all accomplishments earned by one accepted answer in the existing native dialog. Preserve the same-skill improvement rule above. Daily personal records follow [the reward guide](docs/points.md#daily-personal-records); [approved wording and verification](docs/reviews/accomplishments-2026-11-14.md).

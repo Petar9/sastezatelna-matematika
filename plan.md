@@ -1,5 +1,31 @@
 # Current work - Състезателна математика
 
+## Calendar modal and production release - verified, publication pending, 2026-11-14
+
+- Approved: replace inline day details with a responsive bottom sheet below 600px and centered dialog on desktop; reuse existing daily metrics, breakdown and wording. Add a shared responsive Dialog variant with fixed header, internal scrolling, focus restoration and background scroll lock.
+- Release approved profile/navigation, accomplishments and calendar changes from an isolated source checkout. Exclude the unfinished long landing page, its form, assets and related changes; preserve the local draft.
+- Verification: 387/387 application tests, disposable PostgreSQL migration/RLS/concurrency tests, TypeScript, ESLint and a fresh private-file-audited production build passed. Calendar browser checks cover 320/390px mobile, 1280px desktop and 640×450 narrow desktop, focus restoration, fixed header and independent scrolling; reopening resets the day content. See [release evidence](docs/reviews/calendar-release-2026-11-14.md).
+- Production migration: owner reported “Success. No rows returned.”; read-only metadata confirmed six columns, primary/family foreign keys, both checks, RLS enabled, no anonymous read or authenticated browser write, and service-role write access.
+
+
+## Personal accomplishments - local implementation, 2026-11-14
+
+- Owner approved four additions, aggregate daily records and one combined appreciation dialog without extra gold. Independent actual `gpt-6-astra` review and owner copy approval are complete; [decisions, exact wording and evidence](docs/reviews/accomplishments-2026-11-14.md).
+- Implemented all four appreciations and retained the existing hint-to-independent message. Daily claims persist across competitions; saved answers, rewards and GET/refresh behavior remain unchanged. 164/164 relevant tests, TypeScript, ESLint, production build/private-file checks, disposable PostgreSQL migration/concurrency/isolation checks and desktop/320px mobile browser checks passed.
+- Isolated production-build preview: http://127.0.0.1:3041/?competition=olimpiada . Hosted claim-table migration was subsequently applied for the combined release above; this section records the original local acceptance.
+
+
+## Profile and app navigation - local implementation, 2026-11-11
+
+- Applied the approved POC with shared app header/menu, icon-only trigger, clearer profile entry and exclusive rename/share panes that retain drafts; owner-only email access loads lazily. Reused design tokens, buttons, fields, dialogs and icon strokes; removed duplicate app footer links.
+- Actual gpt-6-astra copy review recommended no changes; no pending wording proposals. [Approval context and verification](docs/reviews/profile-navigation-2026-11-11.md).
+- Local acceptance: 375/375 tests passed, including failed-save protection for menu navigation/logout and profile access/draft preservation. Desktop and 390/320px browser checks, TypeScript, ESLint, optimized build/private-file checks and disposable production-route smoke checks passed; evidence is recorded in the linked review. No production deployment.
+- Local review: http://127.0.0.1:3020/design-system - choose „Профили“ for the synthetic profile preview; the actual local course is at http://127.0.0.1:3020/.
+
+## Incorrect-answer wording - 2026-11-09
+
+- Owner approved the exact two-line replacement: „Отговорът не е верен.“ / „Нека разгледаме решението стъпка по стъпка.“ Applied to course and player feedback; history labels remain unchanged. Verification: all 70 course UI tests, targeted ESLint and whitespace checks passed; not published.
+
 ## Learning coverage and retention - released, 2026-11-08
 
 - [x] Added two reviewed core exercises each for NVO area units and regional growth; source originals, stable history and gold rules unchanged.

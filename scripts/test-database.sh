@@ -89,6 +89,21 @@ SQL
 "${psql[@]}" -f "$root/supabase/migrations/202611080001_email_access.sql" >/dev/null
 "${psql[@]}" -f "$root/tests/sql/child-sharing.sql" >/dev/null
 "${psql[@]}" -f "$root/tests/sql/email-access.sql" >/dev/null
+"${psql[@]}" -f "$root/supabase/migrations/202611140001_daily_accomplishments.sql" >/dev/null
+"${psql[@]}" -f "$root/tests/sql/accomplishments.sql" >/dev/null
+# Duplicate simultaneous daily claims must leave exactly one persisted recognition.
+claim_pids=()
+for amount in 10 20; do
+ "${psql[@]}" -c "set role service_role; insert into public.daily_accomplishments(child_id,parent_id,day,kind,amount) values ('10000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000001','2026-11-14','daily-tasks',$amount) on conflict (child_id,day,kind) do nothing" >"$tmp/claim-$amount.out" 2>&1 &
+ claim_pids+=("$!")
+done
+for pid in "${claim_pids[@]}"; do wait "$pid"; done
+"${psql[@]}" >/dev/null <<'SQL'
+do $$ begin
+ if (select count(*) from public.daily_accomplishments where day='2026-11-14' and kind='daily-tasks')<>1 then raise exception 'duplicate daily claim'; end if;
+ if not exists (select 1 from public.course_progress where revision=7 and course->>'marker'='preserve') then raise exception 'accomplishments changed progress'; end if;
+end $$;
+SQL
 # Start twelve separate sessions concurrently. One profile already exists, so only four may commit.
 pids=()
 for n in {1..12}; do
@@ -111,4 +126,4 @@ do $$ begin
  begin update public.child_profiles set active=true where id='10000000-0000-4000-8000-000000000003'; raise exception 'reactivation exceeded cap'; exception when raise_exception then if sqlerrm <> 'active_child_limit' then raise; end if; end;
 end $$;
 SQL
-printf '%s\n' 'PASS: migrations preserve progress and reports; feedback privacy and family checks; invitation privacy/rate limit; concurrent global cap and reactivation'
+printf '%s\n' 'PASS: migrations preserve progress and reports; feedback privacy and family checks; invitation privacy/rate limit; concurrent global cap and reactivation; daily accomplishment privacy, isolation and concurrent deduplication'

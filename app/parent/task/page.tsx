@@ -6,7 +6,7 @@ import { publicImage } from "@/src/core/public-images";
 import { mode, parentContext } from "@/src/server";
 import { publishedCompetitions } from "@/src/server/competitions";
 import { lastCourseStatement } from "@/src/server/pilot-summary";
-import { FeedbackButton } from "@/components/feedback";
+import { AppHeader } from "@/components/app-header";
 import s from "@/components/kids.module.css";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +26,7 @@ export default async function LastTask({ searchParams }: { searchParams: Promise
  if (error) throw error;
  const statement = lastCourseStatement(data?.course);
  return <main className={s.shell}><div className={s.content}>
+  <AppHeader childId={child.id} competitionId={competition.id}/>
   <Link href={`/progress?child=${encodeURIComponent(child.id)}`} className={s.secondary}>← Напредък</Link>
   <section className={s.card}><h1>Последната задача на {child.nickname}</h1>
    {statement ? <>
@@ -34,6 +35,6 @@ export default async function LastTask({ searchParams }: { searchParams: Promise
     {statement.figure && <figure className={s.figure}><Image src={publicImage(statement.figure.src)} alt={statement.figure.alt} width={360} height={360} unoptimized/></figure>}
     {statement.options && <ol className={s.list}>{statement.options.map((option, index) => <li key={index}>{["А", "Б", "В", "Г"][index] ?? index + 1}) {option}</li>)}</ol>}
    </> : <p>Все още няма записана задача.</p>}
-  </section><div className={s.feedbackAction}><Link href="/materiali" className={s.quietButton}>Ценни материали</Link><FeedbackButton/></div>
+  </section>
  </div></main>;
 }

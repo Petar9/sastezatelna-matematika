@@ -39,11 +39,11 @@ export function ProfileNameForm({ child }: { child: { id: string; nickname: stri
   return <form action="/api/profiles" method="post" className={o.form} onSubmit={save}>
     <input type="hidden" name="action" value="rename" />
     <input type="hidden" name="childId" value={child.id} />
-    <label className={o.label} htmlFor={inputId}>Твоят прякор</label>
-    <Input id={inputId} type="text" name="nickname" required minLength={1} maxLength={40} autoComplete="off" spellCheck={false}
+    <label className={o.label} htmlFor={inputId}>Име на детето:</label>
+    <div className={o.formRow}><Input id={inputId} type="text" name="nickname" required minLength={1} maxLength={40} autoComplete="off" spellCheck={false}
       value={nickname} onChange={event => { setNickname(event.target.value); setNotice(undefined); }} disabled={saving}
       aria-invalid={notice?.error || undefined} aria-describedby={notice ? `${inputId}-notice` : undefined} />
+    <Button type="submit" loading={saving}>Запази</Button></div>
     {notice && <Message id={`${inputId}-notice`} tone={notice.error ? "error" : "success"} inline>{notice.text}</Message>}
-    <Button type="submit" loading={saving}>Запази името</Button>
   </form>;
 }

@@ -58,3 +58,6 @@
 .removalDialog > div:first-child > button { grid-column: 2; grid-row: 1; }
 .removalDialog > button { margin-top: var(--space-4); }
 .accessHeading:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
+
+.formRow { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--space-3); align-items: start; }
+@media (max-width: 540px) { .formRow { grid-template-columns: minmax(0,1fr); } .formRow > button { width: 100%; } }

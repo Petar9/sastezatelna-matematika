@@ -1,5 +1,12 @@
 # Gold and rewards
 
+## Daily personal records
+
+Owner-approved 2026-11-14: appreciate the most successful tasks and most gold earned in one day, combined across competitions per child, without bonus gold. Match the calendar: correct independent and assisted tasks/subparts count; wrong answers and revealed solutions do not. Gold includes existing dated task and skill-milestone awards, using their saved amounts.
+
+Use Europe/Sofia days and existing dated history. An active day has a completed attempt. From the second active day, a total must strictly exceed every earlier day's total; ties do not qualify. Show each record type at most once per day, only after an accepted answer increases that metric. Persist claims across competitions/devices; later increases do not open another celebration. Never backfill celebrations on GET/refresh/resume, infer missing dates, reprice history or change rewards. See [copy approval and verification](reviews/accomplishments-2026-11-14.md).
+
+
 Reviewed 2026-11-08. This is the authoritative guide for gold: active rules, evidence, proposed changes and rollout checks. [Learning decisions](../key-decisions.md) still govern selection, help and confirmation; the [design system](design-system.md) governs presentation.
 
 **Status:** owner-approved implementation released as `87edf03` on 2026-11-08; final local acceptance and live deployment verification passed. The owner approved the detailed plan, then deferred additional NVO exercises to the next iteration. Current implementation uses 80% original coverage, 10% independent confirmation and 10% later independent review; it does not award free completion for missing content. [Implementation/copy review](points-implementation-review.md) records outstanding decisions and limitations.
