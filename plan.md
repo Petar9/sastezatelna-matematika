@@ -1,10 +1,10 @@
 # Current work - Състезателна математика
 
-## Continuous competition practice - verified, release pending, 2026-11-15
+## Continuous competition practice - released, 2026-11-15
 
 - Approved: when fresh tasks run out, immediately retry unresolved work, then offer unlimited “Започни отново”; preserve history, rewards, preparation percentage and scheduled reviews. Exact-skill routes and connected subparts continue too.
 - Applied owner wording: “Всички задачи от това състезание са решени.” Actual `gpt-6-astra` independently reviewed continuation/copy; no copy proposals remain pending, and both identified integration issues are fixed.
-- 397/397 tests, TypeScript, ESLint, optimized build/private-file audit and 320px/1280px production-build browser checks passed. [Scope, cause and evidence](docs/reviews/continuation-2026-11-15.md). Isolated release excludes unfinished landing work; no database migration or real learner writes.
+- 397/397 tests, TypeScript, ESLint, optimized build/private-file audit and 320px/1280px production-build browser checks passed. [Scope, cause and evidence](docs/reviews/continuation-2026-11-15.md). Application commit `96834ad` is live with exact-commit Vercel success, live continuation bundles and public/private access checks verified. Isolated release excludes unfinished landing work; no database migration or real learner writes.
 
 
 ## Regional hints - released, 2026-11-15
