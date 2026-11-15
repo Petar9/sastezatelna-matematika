@@ -28,7 +28,7 @@ export function QuestFinish({ view, busy, act, finish, map }: { view: KidsCourse
   <h2>Приключението е завършено! <span aria-hidden="true">🎉</span></h2><p>{adventureAchievement(view.quest?.achievement)}</p>
   <div className={s.treasureReveal}><AdventureSouvenir index={Math.max(0, (view.stamps?.length ?? 1)-1)}/><span className={s.questStamp}>Твоето съкровище №{view.stamps?.length}</span></div>
   <div className={s.actions}><Button variant="secondary" className={s.secondary} disabled={busy} onClick={map}>Към картата</Button><Button variant="quiet" className={s.quiet} disabled={busy} onClick={finish}>Приключвам засега</Button></div>
- </section>{view.questAvailable !== false ? <KidsActionBar label="Ново приключение" disabled={busy} onClick={() => void act({ type: "startQuest" })}/> : <p className={s.small}>Разгледа всички задачи за момента. Съкровищата ти остават!</p>}</>;
+ </section>{view.questAvailable !== false ? <KidsActionBar label={view.questPractice === "repeat" ? "Започни отново" : view.questPractice === "recovery" ? "Да си припомним" : "Ново приключение"} disabled={busy} onClick={() => void act({ type: "startQuest" })}/> : <p className={s.small}>Разгледа всички задачи за момента. Съкровищата ти остават!</p>}</>;
 }
 
 const statusLabels = learningStates;

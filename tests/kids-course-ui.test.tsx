@@ -67,6 +67,29 @@ async function mount(topic:string|null="matches",loseResponse=false,learnerId?:s
  return{host,actions,requestHeaders,get record(){return record;},advance:(action:CourseAction)=>{record=applyCourseAction(record,courseContent,action,now);},reload:async()=>{await act(async()=>root.unmount());root=createRoot(host);await act(async()=>root.render(<KidsCoursePlayer learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,courseContent,now)}/>));},cleanup:async()=>{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;}};
 }
 
+test("completed competitions offer immediate recall and restart through the player",async()=>{
+ const problem={id:"ui-repeat:original",skillId:"matches",text:"Колко е 2 + 2?",source:"Тест",fields:[{label:"Отговор",answer:"4"}],hint:"Събери.",explanation:["2 + 2 = 4."]};
+ const limited:KidsCourseContent={version:"repeat-ui",topics:[{id:"matches",title:"Точки и мачове",rewardName:"награда",skills:[{id:"matches",title:"Събиране",lesson:["Събираме."]}]}],problem:(_id,index,hard)=>!index&&!hard?structuredClone(problem):null};
+ const h=await mount(null,false,undefined,undefined,undefined,false,limited);try{
+  h.advance({type:"startQuest"});
+  h.advance({type:"answer",taskKey:h.record.quest!.work!.attempt.key,answers:["5"]});
+  h.advance({type:"nextQuestion"});await h.reload();
+  await act(async()=>button(h.host,"Да си припомним").click());
+  assert.equal(h.record.quest!.work!.attempt.mode,"practice");
+  h.advance({type:"answer",taskKey:h.record.quest!.work!.attempt.key,answers:["4"]});
+  h.advance({type:"nextQuestion"});await h.reload();
+  assert.ok(button(h.host,"Продължи приключението"));
+  for(let i=0;i<4;i++){
+   h.advance({type:"answer",taskKey:h.record.quest!.work!.attempt.key,answers:["4"]});
+   h.advance({type:"nextQuestion"});
+  }
+  await h.reload();const count=h.record.attempts.length;
+  await act(async()=>button(h.host,"Започни отново").click());
+  assert.equal(h.record.attempts.length,count);assert.equal(h.record.quest!.work!.attempt.outcome,undefined);
+  assert.ok(!h.host.textContent!.includes("Всички спирки"));
+ }finally{await h.cleanup();}
+});
+
 test("navigation buttons recover a stale tab in one click without losing newer progress",async()=>{
  for(const entry of ["quest","resume","island"] as const){
   const h=await mount(null);try{

@@ -146,7 +146,7 @@ test("finite exhaustion and malformed/stale task commands cannot manufacture suc
  assert.throws(()=>h.go({type:"answer",taskKey:task.key,answers:[]}));
  assert.throws(()=>h.go({type:"nextQuestion"})); h.correct();
  assert.throws(()=>h.go({type:"answer",taskKey:task.key,answers:["0"]}));
- h.next();assert.equal(h.view().exhausted,true);assert.equal(h.record.awards.length,0);
+ h.next();assert.equal(h.record.topics.matches!.work.core!.attempt.mode,"practice");assert.equal(h.view().task!.outcome,undefined);assert.equal(h.record.attempts.length,1);assert.equal(h.record.awards.length,0);
  assert.throws(()=>parseCourseCommand({revision:0,action:{type:"answer",taskKey:"a",answers:[1]}}));
  assert.throws(()=>parseCourseCommand({revision:-1,action:{type:"pause"}}));
  assert.equal(normalizeCourseNumber("004,00"),"4"); assert.equal(normalizeCourseNumber("1e3"),null);
@@ -252,13 +252,13 @@ test("scoped work persists alongside whole-island and quest work, hints, lessons
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test("selected skills never fall back on exhaustion and reject invalid or cross-island selection",()=>{
+test("exhausted selected skills repeat the same skill and reject invalid or cross-island selection",()=>{
  const topic=content.topics.find(t=>t.id==="backwards")!,skill=topic.skills[1]!;
  const limited={...content,problem:(id:string,index:number,harder:boolean)=>index===0?content.problem(id,index,harder):null};
  const h=harness(limited);
  h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id});h.correct();h.next();
- assert.equal(h.view().exhausted,true);assert.equal(h.view().active!.skillId,skill.id);
- h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id});assert.equal(h.view().exhausted,true);
+ assert.equal(h.record.topics[topic.id]!.skillWork![skill.id]!.attempt.mode,"practice");assert.equal(h.view().active!.skillId,skill.id);assert.equal(h.view().task!.skillId,skill.id);
+ h.go({type:"selectTopic",topicId:topic.id,skillId:skill.id});assert.equal(h.view().task!.skillId,skill.id);assert.equal(h.record.topics[topic.id]!.skillWork![skill.id]!.attempt.mode,"practice");
  const saved=JSON.stringify(h.record);
  for(const skillId of ["missing",content.topics[0]!.skills[0]!.id,""]){
   assert.throws(()=>h.go({type:"selectTopic",topicId:topic.id,skillId}));

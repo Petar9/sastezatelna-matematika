@@ -122,7 +122,7 @@ test("availability replaces current quest reservations while retaining all manua
  course.topics["topic-0"]!.work.core!.attempt.outcome = "hinted";
  assert.equal(hasQuestProblem(course, single, selectionNow), true);
  course.attempts.push(attempt(problem));
- assert.equal(hasQuestProblem(course, single, selectionNow), false);
+ assert.equal(hasQuestProblem(course, single, selectionNow), true, "seen work remains available for voluntary practice");
 });
 
 test("all published catalogues retain skill and quest choices with legacy synthetic history", () => {

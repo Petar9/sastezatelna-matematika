@@ -141,13 +141,13 @@ test("diagnostics reuse existing evidence, trigger after repeated unresolved dif
  h.go({ type: "startQuest" }); assert.equal(h.record.quest!.diagnostic, false);
 });
 
-test("finite content completes a shorter final adventure once without repeating material", () => {
+test("finite content finishes its shorter fresh adventure and immediately offers a practice restart", () => {
  const base = content.problem("M1-03", 0, false)!;
  const small: KidsCourseContent = { version: "small", topics: [{ id: "matches", title: "Тест", rewardName: "тест", skills: [{ id: base.skillId, title: "Тест", lesson: ["Идея"] }] }], problem: (_id, index, hard) => !hard && index === 0 ? base : null };
  const h = harness(small); h.go({ type: "startQuest" }); h.answer(); h.next();
  assert.equal(h.view().quest!.total, 1); assert.equal(h.view().quest!.finished, true);
- assert.equal(h.record.stamps!.length, 1); assert.equal(h.record.attempts.length, 1); assert.equal(h.view().questAvailable, false);
- h.go({ type: "startQuest" }); assert.equal(h.view().quest!.finished, true); assert.equal(h.record.attempts.length, 1); assert.equal(h.record.stamps!.length, 1);
+ assert.equal(h.record.stamps!.length, 1); assert.equal(h.record.attempts.length, 1); assert.equal(h.view().questAvailable, true); assert.equal(h.view().questPractice, "repeat");
+ h.go({ type: "startQuest" }); assert.equal(h.view().quest!.finished, false); assert.equal(h.work().attempt.mode, "practice"); assert.equal(h.record.attempts.length, 1); assert.equal(h.record.stamps!.length, 1);
 });
 
 test("legacy upgrade projects without writes and preserves pending single-hint content and awards", () => {

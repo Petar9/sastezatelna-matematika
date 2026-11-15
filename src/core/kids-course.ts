@@ -2,8 +2,8 @@ import {firstIndependentWholeProblem, type Appreciation, type LearningAppreciati
 import { currentPreparationScope, ensurePreparationScope, preparationProgress, type PreparationProgress, type PreparationScope } from "./preparation.ts";
 import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, awardProblemGold, topicProblemGold, problemGoldPreview, problemAwardAmount, type ProblemGoldAward, type GoldAward, type GoldGain } from "./kids-gold.ts";
 import { KidsError, type KidsOutcome } from "./kids.ts";
-import { chooseSkillProblem, problemSource, isCompetitionProblem, overlaps, reviewDate, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
-import { chooseQuestProblem, hasQuestProblem, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
+import { choosePracticeProblem, comparePractice, chooseSkillProblem, createSelectionContext, problemSource, isCompetitionProblem, overlaps, reviewDate, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
+import { chooseQuestProblem, questAvailability, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
 
 export type CourseMode = "core" | "challenge" | "review" | "practice";
 export interface CourseField { label: string; answer: string }
@@ -39,7 +39,7 @@ export type QuestKind = "familiar" | "gap" | "stretch" | "diagnostic";
 export interface CourseQuest {
  id: string; startedAt: string; steps: { key: string; topicId: string; skillId: string; kind: QuestKind }[];
  completed: number; total?: number; diagnostic: boolean; diagnosticFor?: string; work?: CourseWork;
- completedAt?: string; exhausted?: boolean;
+ completedAt?: string; exhausted?: boolean; practice?: boolean;
 }
 export interface QuestStamp { questId: string; earnedAt: string; achievement: string }
 export interface LearningConceptView {
@@ -117,7 +117,7 @@ export interface KidsCourseView {
 	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string; groupId?: string };
 	topics: CourseTopicView[]; doctors: number; professors: number; professorGoal: number; complete: boolean; previouslyCompleted?: boolean;
 	quest?: { id: string; completed: number; total: number; step: number; finished: boolean; exhausted: boolean; achievement?: string };
- stamps?: QuestStamp[]; inQuest?: boolean; questAvailable?: boolean; nextReviewAt?: string;
+ stamps?: QuestStamp[]; inQuest?: boolean; questAvailable?: boolean; questPractice?: "recovery" | "repeat"; nextReviewAt?: string;
  stage: "dashboard" | "question" | "lesson" | "questComplete"; streak?: number; target?: number; exhausted?: boolean;
 	task?: { personalProgress?: true; goldReward?: { amount: number }; key: string; skillId: string; text: string; source: string; sourceYear?: number; sourceProblemId?: string; sourceIsPractice?: boolean; options?: string[];
 		connected?: { sourceId: string; text: string; introduction?: string; figures?: NonNullable<CourseProblem["figure"]>[]; index: number; total: number; completed: { id: string; text: string; outcome: KidsOutcome; answers: string[]; fields: { label: string }[]; explanation: string[] }[] };
@@ -323,6 +323,15 @@ function nextWork(course: KidsCourse, content: KidsCourseContent, preferredSkill
   return assignedWork(content, { key: `${course.revision + 1}:${topic.id}:${mode}:${problem.id}`, problem, mode, hintUsed: false,
    ...(problem.provenance && problem.fields.length > 1 ? { partIndex: 0 } : {}) });
  }
+ const context = createSelectionContext(course, content, course.updatedAt);
+ const practiceSkills = course.active?.skillId ? skills.filter(s => s.id === course.active!.skillId) : skills;
+ const practice = practiceSkills.flatMap(skill => {
+  const chosen = choosePracticeProblem(course, content, skill.id, course.updatedAt, context, accepts);
+  return chosen ? [chosen] : [];
+ }).sort(comparePractice)[0];
+ if (practice) return assignedWork(content, { key: `${course.revision + 1}:${topic.id}:practice:${practice.problem.id}`,
+  problem: structuredClone(practice.problem), mode: "practice", hintUsed: false, hintLevel: 0,
+  ...(practice.problem.provenance && practice.problem.fields.length > 1 ? { partIndex: 0 } : {}) });
 }
 
 function activeWork(course: KidsCourse, progress: CourseTopicProgress, mode: CourseMode) {
@@ -381,6 +390,7 @@ function assignQuestWork(course: KidsCourse, content: KidsCourseContent, now: st
   return;
  }
  const { topicId, skillId, mode, problem, kind, cursor } = chosen;
+ if ("repeat" in chosen && chosen.repeat) quest.practice = true;
  const progress = course.topics[topicId]!, state = progress.skills[skillId]!;
  if (mode === "challenge") { state.nextHard = cursor + 1; progress.challengeNext++; }
  else state.nextCore = cursor + 1;
@@ -413,7 +423,7 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
  if (independent && fresh && previous?.outcome === "hinted" && previous.hintUsed) {
   attempt.personalProgress = true; appreciations.push({kind: "hint-independent"});
  }
- const connected = (course.quest?.work?.attempt === attempt ? course.quest.work : progress.work[mode]?.attempt === attempt ? progress.work[mode] : Object.values(progress.skillWork ?? {}).find(work => work.attempt === attempt))?.connected;
+ const connected = [course.quest?.work, ...Object.values(progress.work), ...Object.values(progress.skillWork ?? {})].find(work => work?.attempt === attempt)?.connected;
  if (independent && connected && attempt.sourceComplete && firstIndependentWholeProblem(course.attempts, connected.problem, [...connected.completed, attempt])) appreciations.push({kind: "whole-problem"});
  const due = skillReviewDue(course, topic.id, attempt.problem.skillId);
  if (independent && mode === "review" && due && due <= now) appreciations.push({kind: "scheduled-review"});
@@ -421,7 +431,7 @@ function recordOutcome(course: KidsCourse, content: KidsCourseContent, attempt: 
 	if (!independent) progress.challengeStreak = 0;
 	// An outcome in another mode supersedes old feedback, never an unanswered task.
 	for (const other of ["core", "challenge", "review", "practice"] as const) {
-		if (course.journey !== "quest" && !course.active?.skillId && other !== mode && progress.work[other]?.attempt.outcome && progress.work[other]?.lessonStep === undefined) delete progress.work[other];
+  if (course.journey !== "quest" && !course.active?.skillId && other !== mode && progress.work[other]?.attempt !== attempt && progress.work[other]?.attempt.outcome && progress.work[other]?.lessonStep === undefined) delete progress.work[other];
 	}
 	if (mode === "core" || mode === "practice") {
 		if (independent && fresh) {
@@ -501,6 +511,7 @@ export function applyCourseAction(record: KidsCourse, content: KidsCourseContent
    if (course.questContinuation) {
     course.quest.work = course.questContinuation; delete course.questContinuation;
     const a = course.quest.work.attempt; a.questId = course.quest.id;
+    if (a.mode === "practice") course.quest.practice = true;
     const topicId = content.topics.find(t => t.skills.some(s => s.id === a.problem.skillId))!.id;
     course.active = { topicId, mode: a.mode };
     course.quest.steps.push({ key: a.key, topicId, skillId: a.problem.skillId, kind: "familiar" });
@@ -717,7 +728,9 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
 		professorGoal: Math.ceil(topics.length / 2), complete: !!course.completedAt, previouslyCompleted: !!course.previousCompletions?.length, stage: "dashboard" };
 	view.inQuest = course.journey === "quest";
  view.stamps = course.stamps ?? [];
- view.questAvailable = hasQuestProblem(course, content, now);
+ const availability = questAvailability(course, content, now);
+ view.questAvailable = !!availability;
+ if (availability === "recovery" || availability === "repeat") view.questPractice = availability;
  view.nextReviewAt = topics.map(t => t.reviewDueAt).filter((date): date is string => !!date && date > now).sort()[0];
  if (course.quest) view.quest = { id: course.quest.id, completed: course.quest.completed, total: course.quest.total ?? 5,
   step: Math.min(course.quest.steps.length, course.quest.total ?? 5), finished: !!course.quest.completedAt, exhausted: !!course.quest.exhausted,

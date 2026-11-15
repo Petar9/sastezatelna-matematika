@@ -174,3 +174,24 @@ test("splitting geometry resumes a saved part in its current island without chan
  assert.equal(c.attempts.length,0);
  assert.equal(courseGoldBalance(c),0);
 });
+
+test("manual same-day connected repeats preserve feedback, subparts and awards",()=>{
+ const h=harness(fixture(2,1));h.go({type:"selectTopic",topicId:"topic"});
+ for(let i=0;i<2;i++){h.answer();h.go({type:"nextQuestion"});}
+ assert.equal(h.c.topics.topic!.work.core!.attempt.mode,"practice");
+ const gold=courseGoldBalance(h.c),history=structuredClone(h.c.attempts);
+ h.answer();assert.equal(h.view().task!.outcome,"independent");h.go({type:"nextQuestion"});assert.equal(h.view().task!.connected!.index,2);
+ h.answer();assert.equal(h.view().task!.outcome,"independent");assert.equal(courseGoldBalance(h.c),gold);
+ assert.deepEqual(h.c.attempts.slice(0,2),history);h.go({type:"nextQuestion"});assert.ok(h.view().task);
+});
+
+test("connected practice crossing five steps retains repeat status and fills the next adventure",()=>{
+ const h=harness(fixture(7,1));h.go({type:"startQuest"});
+ for(let i=0;i<7;i++){if(h.view().stage==="questComplete")h.go({type:"startQuest"});h.answer();h.go({type:"nextQuestion"});}
+ assert.equal(h.view().questPractice,"repeat");const gold=courseGoldBalance(h.c);
+ h.go({type:"startQuest"});for(let i=0;i<5;i++){h.answer();h.go({type:"nextQuestion"});}
+ assert.equal(h.view().stage,"questComplete");assert.equal(h.view().questPractice,"repeat");assert.equal(h.c.questContinuation!.attempt.mode,"practice");
+ h.c=JSON.parse(JSON.stringify(h.c));h.go({type:"startQuest"});assert.equal(h.c.quest!.practice,true);assert.equal(h.view().task!.connected!.index,6);
+ for(let i=0;i<5;i++){h.answer();h.go({type:"nextQuestion"});}
+ assert.equal(h.view().stage,"questComplete");assert.equal(h.view().quest!.total,5);assert.equal(courseGoldBalance(h.c),gold);
+});

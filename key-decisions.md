@@ -9,7 +9,7 @@ Current approved rules for Състезателна математика, consol
 - Diagnosis uses at most three original problems within the adventure, on first use or for unclear difficulty after teaching/recovery. Reuse evidence; diagnosis is routing evidence, not a measure of overall ability or competition readiness.
 - After an incorrect or revealed answer, show the worked solution and prioritize one fresh related problem before changing methods. End diagnosis early when difficulty identifies a need. Help adds no problem slot or second generic lesson.
 - Use reviewed concepts and prerequisites; a multi-concept failure does not prove a gap in every concept. All islands stay selectable; map geography never dictates order.
-- Select by source identity, exposure and saved work, not catalogue position. Exact-skill practice never silently switches skills when exhausted. Finish finite adventures at their actual one-to-four task count; with no eligible work show the return/review action, never an empty loop.
+- Select by source identity, exposure and saved work, not catalogue position. Exact-skill practice never silently switches skills when exhausted. Finish the last fresh adventure at its actual one-to-four task count. Once fresh work is exhausted, offer immediate voluntary practice: unresolved mistakes/help first ("Да си припомним"), then least recently attempted work ("Започни отново"). Continue five-step practice sessions indefinitely, including connected subparts across sessions, without resetting history or waiting for the scheduled review date. Exact-skill and island practice stay within their selected scope.
 
 ## Help, evidence and confirmation
 

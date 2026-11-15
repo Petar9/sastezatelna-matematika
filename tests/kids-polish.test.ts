@@ -40,8 +40,8 @@ test("one to four remaining tasks finish once at their actual count, with no che
   const h=harness(fixture(count,0));h.go({type:"startQuest"});
   for(let i=0;i<count;i++){h.answer();const gold=courseGoldBalance(h.record);h.next();assert.equal(courseGoldBalance(h.record),gold);}
   assert.equal(h.view().stage,"questComplete");assert.equal(h.view().quest!.total,count);assert.equal(h.record.stamps!.length,1);
-  assert.equal(h.view().questAvailable,false);const id=h.record.quest!.id;
-  h.go({type:"startQuest"});assert.equal(h.record.quest!.id,id);assert.equal(h.record.stamps!.length,1);assert.equal(h.record.attempts.length,count);
+  assert.equal(h.view().questAvailable,true);assert.equal(h.view().questPractice,"repeat");const id=h.record.quest!.id;
+  h.go({type:"startQuest"});assert.notEqual(h.record.quest!.id,id);assert.equal(h.record.quest!.work!.attempt.mode,"practice");assert.equal(h.record.stamps!.length,1);assert.equal(h.record.attempts.length,count);
  }
  const empty=harness(fixture(0,0));empty.go({type:"startQuest"});assert.equal(empty.view().questAvailable,false);assert.equal(empty.view().task,undefined);assert.equal(empty.record.stamps!.length,0);
 });

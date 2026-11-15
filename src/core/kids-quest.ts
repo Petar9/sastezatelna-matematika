@@ -1,6 +1,6 @@
 import type { CourseMode, CourseProblem, KidsCourse, KidsCourseContent, LearningConceptView, LearningSkillView, QuestKind } from "./kids-course.ts";
 
-import { chooseSkillProblem, createSelectionContext, isCompetitionProblem, isIntroduction, teachingMethod, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
+import { choosePracticeProblem, comparePractice, chooseSkillProblem, createSelectionContext, isCompetitionProblem, isIntroduction, teachingMethod, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
 
 export function learningSkillView(course: KidsCourse, content: KidsCourseContent, topicId: string, now: string): LearningSkillView[] {
  const topic = content.topics.find(t => t.id === topicId)!;
@@ -121,19 +121,38 @@ function selectQuestProblem(course: KidsCourse, content: KidsCourseContent, now:
   quest.diagnostic = false;
   return selectQuestProblem(course, content, now, preferredSkill, availabilityOnly, existenceOnly);
  }
- return chosen;
+ if (chosen) return chosen;
+ // Finish the last fresh session at its actual length; the next session can
+ // practise immediately. Once a practice session starts it still has five steps.
+ if (quest.completed > 0 && !quest.practice) return undefined;
+ const practice = content.topics.flatMap(topic => topic.skills.flatMap(skill => {
+  const choice = choosePracticeProblem(course, content, skill.id, now, context);
+  return choice ? [{ topicId: topic.id, skillId: skill.id, choice }] : [];
+ })).sort((a, b) => comparePractice(a.choice, b.choice))[0];
+ return practice && { topicId: practice.topicId, skillId: practice.skillId, mode: "practice" as const,
+  problem: practice.choice.problem, cursor: practice.choice.cursor, kind: practice.choice.recovery ? "gap" as const : "familiar" as const,
+  score: 0, repeat: true, recovery: practice.choice.recovery };
 }
 
 export function chooseQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string, preferredSkill?: string, availabilityOnly = false) {
  return selectQuestProblem(course, content, now, preferredSkill, availabilityOnly);
 }
 
-export function hasQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string): boolean {
- if (course.questContinuation) return true;
+export function questAvailability(course: KidsCourse, content: KidsCourseContent, now: string) {
+ if (course.questContinuation) {
+  const a = course.questContinuation.attempt;
+  if (a.mode !== "practice") return "fresh";
+  return createSelectionContext(course, content, now).exposure(a.problem).recovery ? "recovery" : "repeat";
+ }
  // The preview replaces quest work, reserving only manual work. Its fresh quest
  // is the only object selection mutates, so learner history needs no deep clone.
  const preview: KidsCourse = { ...course, quest: { id: "preview", startedAt: now, steps: [], completed: 0, diagnostic: false } };
- return !!selectQuestProblem(preview, content, now, undefined, true, true);
+ const chosen = selectQuestProblem(preview, content, now, undefined, true, true);
+ return chosen ? "repeat" in chosen && chosen.repeat ? chosen.recovery ? "recovery" : "repeat" : "fresh" : undefined;
+}
+
+export function hasQuestProblem(course: KidsCourse, content: KidsCourseContent, now: string): boolean {
+ return !!questAvailability(course, content, now);
 }
 
 export function questAchievement(course: KidsCourse): string {

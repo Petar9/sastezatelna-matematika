@@ -71,7 +71,7 @@ export function skillReviewDue(course: KidsCourse, topicId: string, skillId: str
  return state.reviewDueAt ?? (state.confirmedAt ? reviewDate(state.lastReviewAt ?? state.confirmedAt, !!state.lastReviewAt) : undefined);
 }
 
-type Exposure = { seen: boolean; blocked: boolean; reserved: boolean };
+type Exposure = { seen: boolean; blocked: boolean; reserved: boolean; lastIndex: number; recovery: boolean };
 export type SelectionContext = ReturnType<typeof createSelectionContext>;
 
 // A selection call owns this snapshot. Never retain it across commands: history,
@@ -97,7 +97,10 @@ export function createSelectionContext(course: KidsCourse, content: KidsCourseCo
  const independentSkills = new Set<string>(), independentMethods = new Set<string>(), lastMethodIndices = new Map<string, number>();
  const merge = (index: Map<string, Exposure>, key: string, value: Exposure) => {
   const existing = index.get(key);
-  if (existing) { existing.seen ||= value.seen; existing.blocked ||= value.blocked; existing.reserved ||= value.reserved; }
+  if (existing) {
+   existing.seen ||= value.seen; existing.blocked ||= value.blocked; existing.reserved ||= value.reserved;
+   if (value.lastIndex > existing.lastIndex) { existing.lastIndex = value.lastIndex; existing.recovery = value.recovery; }
+  }
   else index.set(key, { ...value });
  };
  const add = (problem: CourseProblem, value: Exposure) => {
@@ -114,17 +117,44 @@ export function createSelectionContext(course: KidsCourse, content: KidsCourseCo
   const method = teachingMethod(content, attempt.problem.skillId);
   lastMethodIndices.set(method, index);
   if (attempt.outcome === "independent") { independentSkills.add(attempt.problem.skillId); independentMethods.add(method); }
-  add(attempt.problem, { seen: true, blocked: !attempt.completedAt || time - Date.parse(attempt.completedAt) < 2 * 86400000, reserved: false });
+  add(attempt.problem, { seen: true, blocked: !attempt.completedAt || time - Date.parse(attempt.completedAt) < 2 * 86400000, reserved: false, lastIndex: index, recovery: attempt.outcome !== "independent" });
  }
- for (const problem of pendingProblems(course, replacingKey)) add(problem, { seen: false, blocked: false, reserved: true });
+ for (const problem of pendingProblems(course, replacingKey)) add(problem, { seen: false, blocked: false, reserved: true, lastIndex: -1, recovery: false });
  return { independentSkills, independentMethods, lastMethodIndices, exposure(problem: CourseProblem): Exposure {
-  const result = { seen: false, blocked: false, reserved: false };
-  const include = (value?: Exposure) => { if (value) { result.seen ||= value.seen; result.blocked ||= value.blocked; result.reserved ||= value.reserved; } };
+  const result: Exposure = { seen: false, blocked: false, reserved: false, lastIndex: -1, recovery: false };
+  const include = (value?: Exposure) => { if (value) { result.seen ||= value.seen; result.blocked ||= value.blocked; result.reserved ||= value.reserved; result.lastIndex = Math.max(result.lastIndex, value.lastIndex); result.recovery ||= value.recovery; } };
   include(byId.get(problem.id)); include(byIdentity.get(identity(problem)));
   const source = archive(problem);
-  if (source) { const covers = bySource.get(source.sourceId); for (const cover of source.covers) include(covers?.get(cover)); }
+  if (source) {
+   const covers = bySource.get(source.sourceId), units = source.covers.flatMap(cover => covers?.get(cover) ? [covers.get(cover)!] : []);
+   for (const unit of units) include(unit);
+   // Preserve all identity/reservation guards, but a later independent retry of
+   // each natural unit supersedes an earlier failed whole-source attempt.
+   if (units.length) { result.recovery = units.some(u => u.recovery); result.lastIndex = Math.max(...units.map(u => u.lastIndex)); }
+  }
   return result;
  } };
+}
+
+export type PracticeChoice = { problem: CourseProblem; cursor: number; rank: number; recovery: boolean; lastIndex: number };
+export const comparePractice = (a: PracticeChoice, b: PracticeChoice) => Number(b.recovery) - Number(a.recovery) || a.lastIndex - b.lastIndex || b.rank - a.rank;
+
+// Only an exhausted fresh route uses this fallback. Same-day practice is not a
+// spaced review, fresh mastery evidence, or a reset of the learner's history.
+export function choosePracticeProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, now: string, context = createSelectionContext(course, content, now), accepts?: (problem: CourseProblem) => boolean) {
+ let chosen: PracticeChoice | undefined;
+ const ids = new Set<string>();
+ for (const hard of [false, true]) for (let cursor = 0; cursor < 1000; cursor++) {
+  const problem = content.problem(skillId, cursor, hard);
+  if (!problem) break;
+  if (ids.has(problem.id) || accepts && !accepts(problem)) continue;
+  ids.add(problem.id);
+  const exposure = context.exposure(problem);
+  if (!exposure.seen || exposure.reserved) continue;
+  const candidate = { problem, cursor, rank: isCompetitionProblem(problem) ? 1 : 0, recovery: exposure.recovery, lastIndex: exposure.lastIndex };
+  if (!chosen || comparePractice(candidate, chosen) < 0) chosen = candidate;
+ }
+ return chosen;
 }
 
 // Enumerate finite catalogues from the beginning. Saved cursors remain compatible,
