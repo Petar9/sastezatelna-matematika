@@ -7,7 +7,7 @@ import archive from '../content/olimpiada-oblasten/2023-2026.json' with {type:'j
 import {regionalOlympiadCourseContent as content, regionalOlympiadDraftReview} from '../src/server/olimpiada-oblasten-course-content.ts';
 import {kidsCourseContent as existing} from '../src/server/kids-course-content.ts';
 import {applyCourseAction,courseView,newKidsCourse} from '../src/core/kids-course.ts';
-import type {CourseAction,CourseAttempt,KidsCourseContent} from '../src/core/kids-course.ts';
+import type {CourseAction,CourseAttempt,CourseProblem,CourseSolution,KidsCourseContent} from '../src/core/kids-course.ts';
 import {catalogueProblems,isCompetitionProblem} from '../src/core/kids-selection.ts';
 import {awardProblemGold,courseGoldBalance} from '../src/core/kids-gold.ts';
 import {originalStatement} from '../src/server/original-statement.ts';
@@ -62,6 +62,56 @@ test('regional original statements, natural boundaries, source years and all fiv
  const figures=new Set(all.flatMap(p=>p.figure?[p.figure.src]:[]));assert.equal(figures.size,5);
  for(const src of figures){const png=fs.readFileSync(path.join(process.cwd(),'assets/images',src));assert.equal(png.subarray(1,4).toString(),'PNG');assert.ok(png.readUInt32BE(16)>100);}
  for(const p of all.filter(p=>!p.provenance)){assert.ok(p.practiceSource);assert.ok(originalStatement(content,p.practiceSource!.problemId));}
+});
+test('current hints resolve for every saved natural unit and reject changed question contracts',()=>{
+ let count=0;
+ for(const original of all.filter(p=>p.archive?.kind==='original')){
+  const source=content.connectedProblem!(original)!;
+  for(const unit of source.units){
+   const saved:CourseProblem={...original,id:`${source.sourceId}:unit:${unit.id}`,skillId:unit.skillId,text:unit.text,fields:structuredClone(unit.fields),options:unit.options,
+    naturalUnit:{sourceId:source.sourceId,unitId:unit.id,total:source.units.length},
+    solution:[{title:'old 1',paragraphs:['old']},{title:'old 2',paragraphs:['old']},{title:'old 3',paragraphs:['old']}]};
+   const before=structuredClone(saved);
+   assert.deepEqual(content.solutionFor!(saved),unit.solution,saved.id);
+   assert.deepEqual(saved,before,'Reading updated hints must not rewrite a saved attempt');
+   for(const changed of [
+    {...saved,id:saved.id+'-unknown'}, {...saved,skillId:'unknown'}, {...saved,text:saved.text+' changed'},
+    {...saved,fields:saved.fields.map((field,i)=>i?field:{...field,answer:'changed'})}, {...saved,options:['changed']},
+    {...saved,naturalUnit:undefined}, {...saved,naturalUnit:{...saved.naturalUnit!,sourceId:'unknown'}},
+    {...saved,naturalUnit:{...saved.naturalUnit!,unitId:'unknown'}}, {...saved,naturalUnit:{...saved.naturalUnit!,total:99}},
+   ])assert.equal(content.solutionFor!(changed),undefined,saved.id);
+   const returned=content.solutionFor!(saved)!;returned[0].paragraphs[0]='changed';
+   assert.deepEqual(content.solutionFor!(saved),unit.solution,'Returned hints cannot mutate the content catalogue');
+   count++;
+  }
+ }
+ assert.equal(count,23);
+});
+test('resumed connected hints preserve drafts, hint eligibility, history and later saved parts',()=>{
+ for(const id of ['oli-ob-g4-2023-p1:original','oli-ob-g4-2023-p2:original'])for(let level=0;level<=3;level++){
+  const original=all.find(p=>p.id===id)!;
+  const single:KidsCourseContent={...content,problem:(skill,i,hard)=>skill===original.skillId&&i===0&&!hard?original:null};
+  const h=harness(single);const topic=content.topics.find(t=>t.skills.some(s=>s.id===original.skillId))!;
+  h.go({type:'selectTopic',topicId:topic.id,skillId:original.skillId});
+  h.go({type:'saveDraft',taskKey:h.work().attempt.key,partIndex:0,answers:h.work().attempt.problem.fields.map(()=> '123')});
+  for(let i=0;i<level;i++)h.go({type:'hint',taskKey:h.work().attempt.key});
+  const old:CourseSolution=[{title:'old 1',paragraphs:['old']},{title:'old 2',paragraphs:['old']},{title:'old 3',paragraphs:['old']}];
+  h.work().attempt.problem.solution=structuredClone(old);
+  for(const unit of h.work().connected!.problem.units)unit.solution=structuredClone(old);
+  h.reload();const before=structuredClone(h.record);const view=h.view();
+  const current=content.solutionFor!(h.work().attempt.problem)!;
+  assert.deepEqual(view.task!.solutionParts,level?current.slice(0,level):undefined);
+  assert.equal(view.task!.hintLevel,level);assert.equal(view.task!.draft![0],'123');
+  assert.equal(!!view.task!.goldReward,level<3);
+  assert.deepEqual(h.record,before,'Displaying new hints must not mutate saved history or rewards');
+  h.finish();assert.equal(h.record.problemGoldAwards?.length??0,level===3?0:1);
+  if(h.work().connected!.problem.units.length>1){
+   h.next();assert.equal(h.view().task!.connected!.index,2);
+   h.go({type:'hint',taskKey:h.work().attempt.key});
+   assert.deepEqual(h.view().task!.solutionParts,content.solutionFor!(h.work().attempt.problem)!.slice(0,1));
+   assert.ok(!h.view().task!.solutionParts![0]!.paragraphs.includes('old'));
+  }
+ }
 });
 test('independent calculations and enumeration verify all twelve original answer sets',()=>{
  const answers=(year:number,n:number)=>all.find(p=>p.id===`oli-ob-g4-${year}-p${n}:original`)!.fields.map(f=>Number(f.answer));

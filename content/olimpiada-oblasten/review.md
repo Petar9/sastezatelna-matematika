@@ -43,3 +43,7 @@ Release permission is recorded in the conversation; hosted catalogue enabled. Ph
 ## Core coverage follow-up - 2026-11-08
 
 Added `oli-ob-practice-growth-core-1/2` (answers 28 cm and 4 squares); existing originals and three harder growth exercises are unchanged. The collection now has 23 authored exercises. Actual gpt-6-astra reviewed the copy; the owner approved both proposed wording corrections in chat. See [review context and acceptance](../../docs/learning-retention-review.md). Normal commands now confirm and review the growth skill without relaxing source independence. Gold follows [current policy](../../docs/points.md#current-approved-policy). Human source/content review remains separate.
+
+## Detailed hints follow-up - 2026-11-15
+
+All 46 hint sequences (138 hints) expanded; independent actual Astra review and owner approval of R1–R7 completed. All 389 application tests, TypeScript, ESLint, production build/private-file checks and desktop/320px saved-task/reward smoke checks passed; production publication pending. [Scope, compatibility and current evidence](../../docs/reviews/regional-hints-2026-11-15.md). Original source/content approval and historical release evidence above are unchanged.

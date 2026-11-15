@@ -3,7 +3,7 @@ import { competitionRewardDifficulty } from "../core/competitions.ts";
 import { connectedRegistry, connectedUnit, letteredStatement, navigationGroups, singleConnected } from "./connected-course-content.ts";
 import archive from "../../content/olimpiada-oblasten/2023-2026.json" with { type: "json" };
 import { originalDifficulty, regionalOlympiadPracticeDifficulty } from "./problem-difficulty.ts";
-import type { CourseProblem, CourseSolution, CourseTopic, KidsCourseContent } from "../core/kids-course.ts";
+import type { ConnectedCourseUnit, CourseProblem, CourseSolution, CourseTopic, KidsCourseContent } from "../core/kids-course.ts";
 
 interface Field { label: string; answer: number | string; unit?: string }
 interface Unit { id: string; family: string; prompt: string; fields: Field[]; steps: string[]; scaffold: boolean; dependsOn: number[] }
@@ -20,21 +20,24 @@ const islands = [
 ];
 const skillId = (family: Family) => `oli-ob-${family.id}`;
 const eligible = pack.originals.filter(original => !original.blocked);
+function paragraphs(steps: string[]) {
+ return steps.flatMap(step => step.split(/\n\s*\n/).map(text => text.trim()).filter(Boolean));
+}
 function solution(steps: string[]): CourseSolution {
  if (steps.length !== 3 || steps.some(step => !step.trim())) throw new Error("Expected three concrete solution parts");
- return steps.map((step, i) => ({ title: `Стъпка ${i + 1}`, paragraphs: [step] })) as CourseSolution;
+ return steps.map((step, i) => ({ title: `Стъпка ${i + 1}`, paragraphs: paragraphs([step]) })) as CourseSolution;
 }
 function fullSolution(units: Unit[]): CourseSolution {
  if (units.length === 1) return solution(units[0]!.steps);
  if (units.length === 2) return [
-  { title: "Стъпка 1", paragraphs: units[0]!.steps },
-  { title: "Стъпка 2", paragraphs: units[1]!.steps.slice(0, 2) },
-  { title: "Стъпка 3", paragraphs: units[1]!.steps.slice(2) },
+  { title: "Стъпка 1", paragraphs: paragraphs(units[0]!.steps) },
+  { title: "Стъпка 2", paragraphs: paragraphs(units[1]!.steps.slice(0, 2)) },
+  { title: "Стъпка 3", paragraphs: paragraphs(units[1]!.steps.slice(2)) },
  ];
  return [
-  { title: "Стъпка 1", paragraphs: units.slice(0, -2).flatMap(unit => unit.steps) },
-  { title: "Стъпка 2", paragraphs: units.at(-2)!.steps },
-  { title: "Стъпка 3", paragraphs: units.at(-1)!.steps },
+  { title: "Стъпка 1", paragraphs: paragraphs(units.slice(0, -2).flatMap(unit => unit.steps)) },
+  { title: "Стъпка 2", paragraphs: paragraphs(units.at(-2)!.steps) },
+  { title: "Стъпка 3", paragraphs: paragraphs(units.at(-1)!.steps) },
  ];
 }
 function problem(id: string, owner: Family, text: string, source: string, input: Field[], worked: CourseSolution): CourseProblem {
@@ -106,6 +109,9 @@ const connected = connectedRegistry(eligible.map(original => {
  };
  return { problem: descriptor, aliases: [full.id, ...original.units.map(unit => unit.id)] };
 }));
+const connectedSolutions = new Map<string, { sourceId: string; total: number; unit: ConnectedCourseUnit }>(connected.sources.flatMap(source => source.units.map(unit => [
+ `${source.sourceId}:unit:${unit.id}`, { sourceId: source.sourceId, total: source.units.length, unit },
+] as const)));
 const familyHomes = Object.fromEntries(pack.families.map(family => [family.id, `oli-ob-${family.island}`]));
 const sourceHomes = Object.fromEntries(eligible.map(original => [original.id, familyHomes[original.owner]!]));
 const groups = navigationGroups(topics, islands.map(island => ({ id: `oli-ob-${island.key}`, title: island.title })),
@@ -129,8 +135,12 @@ export const regionalOlympiadCourseContent: KidsCourseContent = {
   return p ? structuredClone(p) : null;
  },
  solutionFor(saved) {
-  const p = all.get(saved.id);
-  return p && p.text === saved.text && JSON.stringify(p.fields) === JSON.stringify(saved.fields) && JSON.stringify(p.options) === JSON.stringify(saved.options)
+  const current = connectedSolutions.get(saved.id);
+  const natural = saved.naturalUnit;
+  const unit = current && natural?.sourceId === current.sourceId && natural.unitId === current.unit.id && natural.total === current.total
+   ? current.unit : undefined;
+  const p = all.get(saved.id) ?? unit;
+  return p && p.skillId === saved.skillId && p.text === saved.text && JSON.stringify(p.fields) === JSON.stringify(saved.fields) && JSON.stringify(p.options) === JSON.stringify(saved.options)
    ? structuredClone(p.solution) : undefined;
  },
 };

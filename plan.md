@@ -1,5 +1,13 @@
 # Current work - Състезателна математика
 
+## Regional hints - verified, publication pending, 2026-11-15
+
+- Approved scope: expand all 23 regional Olympiad natural units and 23 authored exercises into three progressive, child-friendly hints; preserve original statements, answers, identities, history and reward policy. Other competitions follow later.
+- Applied paragraph rendering and guarded current-solution lookup for resumed connected tasks, preserving draft answers, hint levels, history and rewards.
+- Separate actual `gpt-6-astra` drafting and independent review completed; owner approved R1–R7 in chat and all 138 hints are applied. 389/389 tests, TypeScript, ESLint, production build/private-file checks and desktop/320px saved-task/reward smoke checks passed. Production publication pending; isolated release excludes the unfinished landing page. [Review context](docs/reviews/regional-hints-2026-11-15.md).
+
+
+
 ## Calendar modal and production release - verified, publication pending, 2026-11-14
 
 - Approved: replace inline day details with a responsive bottom sheet below 600px and centered dialog on desktop; reuse existing daily metrics, breakdown and wording. Add a shared responsive Dialog variant with fixed header, internal scrolling, focus restoration and background scroll lock.
