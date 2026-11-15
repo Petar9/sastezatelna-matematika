@@ -2,7 +2,7 @@
 
 Reviewer: gpt-6-astra (actual assigned model), 2026-11-15.
 Scope: `/tmp/regional-hints-proposed.json`; 12 original problems, 23 natural answer units, 23 authored exercises, 138 hint stages; derived lessons/concept copy and relevant provider/rendering paths.
-Status: independent copy review complete; seven proposal groups below await owner approval. No application or draft files changed. This report is the only review deliverable written by the reviewer. Temporary PDF page renderings were created solely for inspection.
+Status: owner approved R1–R7 in chat on 2026-11-15; all eleven affected excerpts applied. The independent reviewer’s original findings and proposals are preserved below; the final owner decision is recorded at the end. The reviewer changed no application or draft files; temporary PDF page renderings were created solely for inspection.
 
 Reviewed draft SHA-256: `9ba4af0d848d1cb8a7b8944dbd45392e16a7d40e506f9489da281130bc01b26c`.
 
@@ -14,7 +14,7 @@ The substantive improvements already present include: explaining equal groups be
 
 ## Proposals for the owner's decision
 
-All proposals are pending. Apply none without the owner's decision in the conversation. The replacements below replace only the quoted excerpt, preserving surrounding text and all three stage boundaries.
+At review time all proposals were pending; the owner's subsequent approval and application are recorded above and at the end. The replacements below replace only the quoted excerpt, preserving surrounding text and all three stage boundaries.
 
 ### R1 - Medium: distinguish butterfly occupancy groups from leaf shapes
 

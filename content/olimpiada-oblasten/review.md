@@ -46,4 +46,4 @@ Added `oli-ob-practice-growth-core-1/2` (answers 28 cm and 4 squares); existing 
 
 ## Detailed hints follow-up - 2026-11-15
 
-All 46 hint sequences (138 hints) expanded; independent actual Astra review and owner approval of R1–R7 completed. All 389 application tests, TypeScript, ESLint, production build/private-file checks and desktop/320px saved-task/reward smoke checks passed; production publication pending. [Scope, compatibility and current evidence](../../docs/reviews/regional-hints-2026-11-15.md). Original source/content approval and historical release evidence above are unchanged.
+All 46 hint sequences (138 hints) expanded; independent actual Astra review and owner approval of R1–R7 completed. All 389 application tests, TypeScript, ESLint, production build/private-file checks and desktop/320px saved-task/reward smoke checks passed; published application commit `b8257a8`, with exact-commit Vercel success and live route/access checks verified. [Scope, compatibility and current evidence](../../docs/reviews/regional-hints-2026-11-15.md). Original source/content approval and historical release evidence above are unchanged.

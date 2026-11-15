@@ -1,6 +1,6 @@
 # Regional hint revision - 2026-11-15
 
-Status: independent Astra review and owner approval complete; approved hints applied. Local acceptance complete; production publication pending.
+Status: independent Astra review and owner approval complete; approved hints applied. Local acceptance complete; application release `b8257a8` published and exact-commit Vercel success verified.
 
 ## Approved scope
 
@@ -22,5 +22,5 @@ Drafter and independent reviewer: separate actual `gpt-6-astra` agents. All 46 u
 
 - 389/389 application tests passed using `NODE_ENV=test node --import tsx --test tests/*.test.ts tests/*.test.tsx`; the focused regional suite passed again (10/10) after the explicit Map-key type correction. Coverage includes all 23 saved natural units, mismatched contracts, defensive copies, levels 0–3, drafts, subsequent saved parts and unchanged reward eligibility.
 - TypeScript, ESLint and optimized production build passed, including private-file tracing and standalone checks. All 46 answer sets were independently recalculated; JSON changes are limited to the 138 hint strings.
-- Real Chrome against the built app at 1280px desktop and 320px emulated mobile: an old saved hint snapshot refreshed to current paragraph hints, six draft answers and hint level 2 survived, and the 25-gold preview remained. Opening hint 3 showed “Без злато след третата подсказка”; reload preserved level 3, all six drafts and no reward. No horizontal overflow at either width. Disposable local learner only; no real learner or Supabase writes.
-- Release checkout is based on verified production revision `1b38ecc`, excluding the unrelated unfinished landing page. No database migration required. Exact-commit hosted verification remains pending; authenticated live family sessions and physical devices are separate checks.
+- Real Chrome against the built app at 1280px desktop and 320px emulated mobile: an old saved hint snapshot refreshed to current paragraph hints, six draft answers and hint level 2 survived, and the 25-gold preview remained. Opening hint 3 showed “Без злато след третата подсказка”; reload preserved level 3, all six drafts and no reward. No horizontal overflow at either width; no browser console errors after reload. Disposable local learner only; no real learner or Supabase writes.
+- Release checkout is based on verified production revision `1b38ecc`, excluding the unrelated unfinished landing page. No database migration required. Application commit `b8257a8` published to main; Vercel reports success for that exact commit ([deployment](https://vercel.com/petar-s-projects33/sastezatelna-matematika/6CC3A1kDDhdJ5Sq4Q7nrHfR2ysuQ)). Live home/login return 200, anonymous course API returns 401/no-store, and a private materials path returns 404. Authenticated live family sessions and physical devices remain separate checks.
