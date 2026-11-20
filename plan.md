@@ -1,10 +1,10 @@
 # Current work - Състезателна математика
 
-## Contextual guide - production release preparation, 2026-11-20
+## Contextual guide - released, 2026-11-20
 
 - Owner approved a product-only release of the optional guide and its refined UI; preserve current production continuation, landing and SEO behavior. No migration or learner-history changes.
 - Independent actual `gpt-6-astra` copy review recommended no changes; approved wording and local evidence are in the [review](docs/reviews/contextual-guide-2026-11-20.md).
-- Release starts from verified production `5f23dc0`; only guide components, integration, tests and relevant documentation are included. Combined verification passed: 409/409 tests, TypeScript, ESLint, optimized build/private-file audit and desktop/320px/390px browser checks, including exhausted regional recovery and NVO restart. Exact-commit production deployment verification is pending.
+- Release starts from verified production `5f23dc0`; only guide components, integration, tests and relevant documentation are included. Combined verification passed: 409/409 tests, TypeScript, ESLint, optimized build/private-file audit and desktop/320px/390px browser checks, including exhausted regional recovery and NVO restart. Application commit `7187ae5` is live with [exact-commit Vercel success](https://vercel.com/petar-s-projects33/sastezatelna-matematika/69buk9Zpq9wMq4M3KWXjqonQFPwZ); production public/private routes, guide/continuation bundles and mobile landing layout verified. [Evidence and limitations](docs/reviews/contextual-guide-2026-11-20.md).
 
 
 ## Continuous competition practice - released, 2026-11-15
