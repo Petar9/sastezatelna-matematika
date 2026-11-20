@@ -1,5 +1,12 @@
 # Current work - Състезателна математика
 
+## Contextual guide - production release preparation, 2026-11-20
+
+- Owner approved a product-only release of the optional guide and its refined UI; preserve current production continuation, landing and SEO behavior. No migration or learner-history changes.
+- Independent actual `gpt-6-astra` copy review recommended no changes; approved wording and local evidence are in the [review](docs/reviews/contextual-guide-2026-11-20.md).
+- Release starts from verified production `5f23dc0`; only guide components, integration, tests and relevant documentation are included. Combined verification passed: 409/409 tests, TypeScript, ESLint, optimized build/private-file audit and desktop/320px/390px browser checks, including exhausted regional recovery and NVO restart. Exact-commit production deployment verification is pending.
+
+
 ## Continuous competition practice - released, 2026-11-15
 
 - Approved: when fresh tasks run out, immediately retry unresolved work, then offer unlimited “Започни отново”; preserve history, rewards, preparation percentage and scheduled reviews. Exact-skill routes and connected subparts continue too.

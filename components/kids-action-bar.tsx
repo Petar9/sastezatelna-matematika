@@ -2,10 +2,10 @@
 
 import { Button } from "./ui/button";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type Ref } from "react";
 import s from "./kids.module.css";
 
-export function KidsActionBar({ label, disabled, onClick, secondary }: { label: string; disabled: boolean; onClick: () => void; secondary?: {label:string; disabled:boolean; onClick:()=>void} }) {
+export function KidsActionBar({ label, disabled, onClick, secondary }: { label: string; disabled: boolean; onClick: () => void; secondary?: {ref?:Ref<HTMLButtonElement>;label:string; disabled:boolean; onClick:()=>void} }) {
 	const bar = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		const element = bar.current;
@@ -34,7 +34,7 @@ export function KidsActionBar({ label, disabled, onClick, secondary }: { label: 
 		};
 	}, []);
 	return <div ref={bar} className={s.actionBar} role="group" aria-label="Следващо действие"><div className={`${s.actionBarContent} ${secondary ? s.answerActions : ""}`}>
-  {secondary && <Button variant="secondary" className={s.secondary} disabled={secondary.disabled} onClick={secondary.onClick}>{secondary.label}</Button>}
+  {secondary && <Button ref={secondary.ref} variant="secondary" className={s.secondary} disabled={secondary.disabled} onClick={secondary.onClick}>{secondary.label}</Button>}
 		<Button variant="primary" className={s.button} disabled={disabled} onClick={onClick}>{label}</Button>
 	</div></div>;
 }

@@ -20,6 +20,8 @@ registerHooks({load(url,context,nextLoad){if(url.endsWith(".module.css"))return{
 const dom=parseHTML("<html><body></body></html>");
 Object.assign(globalThis,{React,window:dom.window,self:dom.window,document:dom.document,HTMLElement:dom.window.HTMLElement,IS_REACT_ACT_ENVIRONMENT:true});
 document.oninput=null;
+Object.assign(window,{innerWidth:1280,innerHeight:800});
+Object.defineProperty(window,"localStorage",{value:undefined,configurable:true});
 // linkedom does not implement the browser's native dialog methods.
 const createElement=document.createElement.bind(document);
 document.createElement=((name:string,options?:ElementCreationOptions)=>{
@@ -44,7 +46,7 @@ async function openFeedback(host:HTMLElement){ await act(async()=>host.querySele
 function primary(host:HTMLElement,label:string){const bars=host.querySelectorAll('[aria-label="Следващо действие"]');assert.equal(bars.length,1);assert.equal(bars[0]!.querySelectorAll("button").length,label==="Провери отговора"?2:1);assert.ok(bars[0]!.textContent!.includes(label));return button(host,label);}
 function islandButton(host:HTMLElement,topic:string){const b=host.querySelector<HTMLButtonElement>(`button[aria-label="${topic}"]`);assert.ok(b);return b;}
 async function practise(host:HTMLElement,topic:string){await act(async()=>islandButton(host,topic).click());await act(async()=>button(host,"Към задачите").click());}
-async function mount(topic:string|null="matches",loseResponse=false,learnerId?:string,competitionId?:string,learnerNickname?:string,legacy=false,courseContent:KidsCourseContent=content){
+async function mount(topic:string|null="matches",loseResponse=false,learnerId?:string,competitionId?:string,learnerNickname?:string,legacy=false,courseContent:KidsCourseContent=content,withPicker=false){
  const initialContent=legacy ? {...courseContent,connectedProblem:undefined} : courseContent;
  let record=topic ? applyCourseAction(newKidsCourse(courseContent,now),initialContent,{type:"selectTopic",topicId:topic},now) : newKidsCourse(courseContent,now);
  const originalFetch=globalThis.fetch;const actions:CourseAction[]=[];const requestHeaders:Headers[]=[];
@@ -62,9 +64,9 @@ async function mount(topic:string|null="matches",loseResponse=false,learnerId?:s
   return Response.json({course:{...courseView(record,courseContent,now),goldGain}});
  };
  const host=document.createElement("div");document.body.append(host);let root=createRoot(host);
- await act(async()=>root.render(<KidsCoursePlayer learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,courseContent,now)}/>));
+ await act(async()=>root.render(<KidsCoursePlayer competitionChoices={withPicker?publishedCompetitions():undefined} learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,courseContent,now)}/>));
  if(topic) await act(async()=>button(host,`Продължи: ${courseView(record,courseContent,now).topics.find(t=>t.id===courseView(record,courseContent,now).active?.topicId)!.title}`).click());
- return{host,actions,requestHeaders,get record(){return record;},advance:(action:CourseAction)=>{record=applyCourseAction(record,courseContent,action,now);},reload:async()=>{await act(async()=>root.unmount());root=createRoot(host);await act(async()=>root.render(<KidsCoursePlayer learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,courseContent,now)}/>));},cleanup:async()=>{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;}};
+ return{host,actions,requestHeaders,get record(){return record;},advance:(action:CourseAction)=>{record=applyCourseAction(record,courseContent,action,now);},reload:async()=>{await act(async()=>root.unmount());root=createRoot(host);await act(async()=>root.render(<KidsCoursePlayer competitionChoices={withPicker?publishedCompetitions():undefined} learnerId={learnerId} learnerNickname={learnerNickname} competitionId={competitionId} initialView={courseView(record,courseContent,now)}/>));},cleanup:async()=>{await act(async()=>root.unmount());host.remove();globalThis.fetch=originalFetch;}};
 }
 
 test("completed competitions offer immediate recall and restart through the player",async()=>{
@@ -1653,5 +1655,55 @@ test("a lost personal-improvement reply reconciles saved history without opening
   assert.equal(h.record.attempts.at(-1)!.personalProgress,true);
   assert.equal(h.host.querySelector('dialog[open]'),null);
   assert.ok(h.host.querySelector('[role="alert"]'));
+ }finally{await h.cleanup();}
+});
+
+
+async function replayGuide(host:HTMLElement){
+ await act(async()=>host.querySelector<HTMLButtonElement>('[aria-label="Меню"]')!.click());
+ await act(async()=>button(host,"Покажи ми как").click());
+}
+function guide(host:HTMLElement){return [...host.querySelectorAll<HTMLElement>('[role="region"]')].find(node=>!!node.querySelector('button[aria-label="Затвори напътствията"]'));}
+test("a fresh child can skip, revisit and use real controls before contextual hint guidance",async()=>{
+ const h=await mount(null,false,"guide-fresh",DEFAULT_COMPETITION_ID,undefined,false,content,true);try{
+  assert.ok(guide(h.host)?.textContent?.includes("Избери състезание."));assert.equal(h.actions.length,0);
+  // The highlighted real competition trigger remains enabled.
+  assert.ok(h.host.querySelector('button[aria-describedby]'));assert.equal(h.host.querySelector<HTMLButtonElement>('button[aria-describedby]')!.disabled,false);
+  await act(async()=>button(h.host,"Напред").click());assert.ok(guide(h.host)?.textContent?.includes("Започни оттук."));
+  await act(async()=>button(h.host,"Назад").click());assert.ok(guide(h.host)?.textContent?.includes("Избери състезание."));
+  await act(async()=>button(h.host,"Напред").click());
+  await act(async()=>button(h.host,"Напред").click());assert.ok(guide(h.host)?.textContent?.includes("Избери остров."));
+  await act(async()=>button(h.host,"Готово").click());assert.equal(guide(h.host),undefined);assert.equal(h.actions.length,0);
+  await act(async()=>button(h.host,"Започни приключение").click());assert.ok(guide(h.host)?.textContent?.includes("Нужна ти е помощ?"));
+  assert.equal(h.actions.filter(a=>a.type==="hint").length,0);assert.equal(h.record.attempts.length,0);
+  await act(async()=>h.host.querySelector<HTMLButtonElement>('[aria-label="Затвори напътствията"]')!.click());
+  assert.equal(guide(h.host),undefined);
+  await replayGuide(h.host);assert.ok(guide(h.host));
+  await act(async()=>button(h.host,"Подсказка").click());assert.equal(guide(h.host),undefined);
+  assert.equal(h.actions.filter(a=>a.type==="hint").length,1);assert.equal(courseView(h.record,content,now).task!.hintLevel,1);
+  assert.equal(h.record.attempts.length,0);assert.equal(courseView(h.record,content,now).gold,0);
+  await h.reload();assert.equal(guide(h.host),undefined);
+ }finally{await h.cleanup();}
+});
+
+test("closing guidance survives reload and stays separate between children",async()=>{
+ const h=await mount(null,false,"guide-dismissed");try{
+  assert.ok(guide(h.host));await act(async()=>h.host.querySelector<HTMLButtonElement>('[aria-label="Затвори напътствията"]')!.click());
+  await h.reload();assert.equal(guide(h.host),undefined);assert.equal(h.actions.length,0);
+  await replayGuide(h.host);assert.ok(guide(h.host));
+ }finally{await h.cleanup();}
+ const other=await mount(null,false,"guide-other-child");try{assert.ok(guide(other.host));assert.equal(other.actions.length,0);}finally{await other.cleanup();}
+});
+
+test("existing learners get manual guidance without changing a typed answer, hint level or gold",async()=>{
+ const h=await mount("grids",false,"guide-existing",undefined,undefined,true);try{
+  assert.equal(guide(h.host),undefined);
+  await act(async()=>button(h.host,"5").click());const task=courseView(h.record,content,now).task!;const before=h.actions.length;
+  await replayGuide(h.host);assert.ok(guide(h.host)?.textContent?.includes("Нужна ти е помощ?"));
+  assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"5");assert.equal(h.actions.length,before);
+  await act(async()=>{const event=new dom.window.Event("keydown",{bubbles:true,cancelable:true});Object.assign(event,{key:"Escape"});document.dispatchEvent(event);});
+  assert.equal(guide(h.host),undefined);assert.equal(h.host.querySelector<HTMLInputElement>("input")!.value,"5");
+  assert.equal(courseView(h.record,content,now).task!.key,task.key);assert.equal(courseView(h.record,content,now).task!.hintLevel,0);
+  assert.equal(h.record.attempts.length,0);assert.equal(courseView(h.record,content,now).gold,0);
  }finally{await h.cleanup();}
 });

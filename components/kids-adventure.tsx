@@ -1,5 +1,5 @@
 import { Button } from "./ui/button";
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, type Ref, type RefObject } from "react";
 import type { GoldGain, KidsCourseView } from "@/src/core";
 import { goldAmounts, problemAwardAmount } from "@/src/core/kids-gold";
 import { KidsOtter } from "./kids-otter";
@@ -68,7 +68,7 @@ export function AdventureRoute({ completed, total = 5, compact = false }: { comp
   <span className={s.voyageBoat} style={{ left: `calc(${position / total * 100}% - ${position / total * 34}px)` }} aria-hidden="true"><svg viewBox="0 0 60 60"><path d="M4 40h52L45 52H16Z" fill="#b87d52"/><path d="M27 38V4l25 31H30Z" fill="#fffaf0" stroke="#b9cfd0"/><path d="M23 12 7 34h16Z" fill="#4da3b9"/></svg></span>
  </div>;
 }
-export function AdventureHome({ view, nickname, busy, start, resumeTopic, headingRef }: { view: KidsCourseView; nickname?: string; busy: boolean; start: () => void; resumeTopic: () => void; headingRef: RefObject<HTMLHeadingElement | null> }) {
+export function AdventureHome({ view, nickname, busy, start, resumeTopic, headingRef, actionRef }: { actionRef?:Ref<HTMLButtonElement>; view: KidsCourseView; nickname?: string; busy: boolean; start: () => void; resumeTopic: () => void; headingRef: RefObject<HTMLHeadingElement | null> }) {
  const pending = view.quest && !view.quest.finished && !view.quest.exhausted;
  const completed = pending ? view.quest!.completed : 0;
  const available = pending || view.questAvailable !== false;
@@ -77,7 +77,7 @@ export function AdventureHome({ view, nickname, busy, start, resumeTopic, headin
   <div className={s.hero}><KidsOtter/><div><h1 ref={headingRef} tabIndex={-1} className={s.title}>{nickname ? `Здравей, ${nickname}!` : "На път за съкровища!"}</h1><p>{pending ? `Премина ${completed} от ${total} стъпки. Хайде нататък!` : available ? "Пет стъпки. Нови открития. Твое съкровище." : "Разгледа всички задачи за момента! Можеш да се върнеш към островите."}</p></div></div>
   {available && <AdventureRoute completed={completed} total={total}/>}
   {available && <div className={s.treasurePreview}><AdventureSouvenir index={view.stamps?.length ?? 0}/><div><small>В следващото съкровище</small><strong>{souvenirs[(view.stamps?.length ?? 0) % souvenirs.length]}</strong></div><span aria-hidden="true">✦</span></div>}
-  <Button variant="primary" className={`${s.button} ${s.questButton}`} disabled={busy || !available} onClick={start}>{pending ? "Продължи приключението" : available ? view.questPractice === "repeat" ? "Започни отново" : view.questPractice === "recovery" ? "Да си припомним" : "Започни приключение" : "Всички задачи от това състезание са решени."}</Button>
+  <Button ref={actionRef} variant="primary" className={`${s.button} ${s.questButton}`} disabled={busy || !available} onClick={start}>{pending ? "Продължи приключението" : available ? view.questPractice === "repeat" ? "Започни отново" : view.questPractice === "recovery" ? "Да си припомним" : "Започни приключение" : "Всички задачи от това състезание са решени."}</Button>
   <div className={s.homeSecondary}><a className={s.quiet} href="#learning-map">Избери тема →</a>{view.active && !view.inQuest && <details><summary>Започната тема</summary><Button variant="quiet" className={s.quiet} disabled={busy} onClick={resumeTopic}>Продължи: {view.topics.find(t => t.id === view.active?.topicId)?.title}</Button></details>}</div>
   {!available && view.nextReviewAt && <p className={s.small}>Нова проверка на запомненото: {new Date(view.nextReviewAt).toLocaleDateString("bg-BG")}.</p>}
  </section>;

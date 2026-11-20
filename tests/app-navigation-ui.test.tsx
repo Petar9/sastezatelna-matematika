@@ -27,7 +27,7 @@ test("icon-only navigation preserves ordinary links, current page and dismissal"
   const trigger=h.host.querySelector<HTMLButtonElement>('[aria-label="Меню"]')!, nav=h.host.querySelector("nav")!;
   assert.equal(trigger.textContent,"");assert.equal(trigger.getAttribute("title"),"Меню");assert.equal(nav.hidden,true);
   await act(async()=>trigger.click());assert.equal(trigger.getAttribute("aria-expanded"),"true");assert.equal(nav.hidden,false);
-  assert.equal(nav.getAttribute("role"),null);assert.deepEqual([...nav.querySelectorAll("a")].map(link=>link.textContent),["Напредък","Профили","Ценни материали","За сайта"]);
+  assert.equal(nav.getAttribute("role"),null);assert.deepEqual([...nav.querySelectorAll("a")].map(link=>link.textContent),["Напредък","Профили","Ценни материали","За сайта","Покажи ми как"]);
   assert.equal(nav.querySelector('a[aria-current="page"]')?.getAttribute("href"),"/profiles");assert.equal(nav.querySelector("a")?.getAttribute("href"),"/progress?child=child-a");
   await act(async()=>{const event=new dom.window.Event("keydown",{bubbles:true,cancelable:true});Object.assign(event,{key:"Escape"});document.dispatchEvent(event);});assert.equal(nav.hidden,true);
   await act(async()=>trigger.click());await act(async()=>document.body.dispatchEvent(new dom.window.Event("pointerdown",{bubbles:true})));assert.equal(nav.hidden,true);
@@ -66,4 +66,19 @@ test("profile tools preserve drafts, fetch sharing lazily once and hide ownershi
   assert.equal(shared.host.textContent!.includes("Сподели достъп"),false);assert.equal(shared.host.querySelector('input[name="email"]'),null);
   assert.equal(shared.host.querySelector('form')?.getAttribute("action"),"/api/profiles");assert.ok(button(shared.host,"Промени името"));
  }finally{await shared.cleanup();}
+});
+
+
+test("guide replay is a normal competition link elsewhere and a local action in the player",async()=>{
+ let replayed=0;const h=await mount(<AppMenu competitionId="olimpiada" onGuide={()=>{replayed++;}}/>);try{
+  await act(async()=>h.host.querySelector<HTMLButtonElement>('[aria-label="Меню"]')!.click());
+  await act(async()=>button(h.host,"Покажи ми как").click());
+  assert.equal(replayed,1);assert.equal(h.host.querySelector("nav")!.hidden,true);
+ }finally{await h.cleanup();}
+ let destination="";const other=await mount(<AppMenu competitionId="olimpiada" onNavigate={(event,href)=>{event.preventDefault();destination=href;}}/>);try{
+  await act(async()=>other.host.querySelector<HTMLButtonElement>('[aria-label="Меню"]')!.click());
+  const link=[...other.host.querySelectorAll<HTMLAnchorElement>("a")].find(a=>a.textContent==="Покажи ми как")!;
+  assert.equal(link.getAttribute("href"),"/?competition=olimpiada&guide=1");
+  await act(async()=>link.click());assert.equal(destination,"/?competition=olimpiada&guide=1");
+ }finally{await other.cleanup();}
 });

@@ -13,8 +13,9 @@ type Props = FeedbackContext & {
  allowFeedback?: boolean;
  onNavigate?: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
  beforeLogout?: () => Promise<boolean>;
+ onGuide?: () => void;
 };
-export function AppMenu({ current, allowLogout = true, allowFeedback = true, onNavigate, beforeLogout, ...context }: Props) {
+export function AppMenu({ current, allowLogout = true, allowFeedback = true, onNavigate, beforeLogout, onGuide, ...context }: Props) {
  const [open, setOpen] = useState(false), [feedback, setFeedback] = useState(false), [busy, setBusy] = useState(false);
  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), pending = useRef(false);
  const id = useId();
@@ -37,6 +38,7 @@ export function AppMenu({ current, allowLogout = true, allowFeedback = true, onN
    <Button ref={trigger} className={s.trigger} variant="secondary" aria-label="Меню" title="Меню" aria-expanded={open} aria-controls={id} onClick={() => setOpen(value => !value)}><ActionIcon name={open ? "close" : "menu"}/></Button>
    <nav id={id} className={s.panel} aria-label="Основна навигация" hidden={!open}>
     {links.map(link => <Link key={link.href} href={link.href} className={s.item} aria-current={current && current === link.page ? "page" : undefined} onClick={event => { onNavigate?.(event, link.href); setOpen(false); }}><ActionIcon name={link.icon}/><span>{link.label}</span></Link>)}
+    {onGuide ? <Button variant="quiet" className={s.item} onClick={()=>{setOpen(false);onGuide();}}><ActionIcon name="info"/><span>Покажи ми как</span></Button> : <Link className={s.item} href={context.competitionId ? `/?competition=${encodeURIComponent(context.competitionId)}&guide=1` : "/?guide=1"} onClick={event=>{const href=context.competitionId ? `/?competition=${encodeURIComponent(context.competitionId)}&guide=1` : "/?guide=1";onNavigate?.(event,href);setOpen(false);}}><ActionIcon name="info"/><span>Покажи ми как</span></Link>}
     {allowFeedback && <Button variant="quiet" className={s.item} onClick={() => { setOpen(false); setFeedback(true); }}><ActionIcon name="feedback"/><span>Обратна връзка</span></Button>}
     {allowLogout && <form action="/auth/logout" method="post" className={s.logout} onSubmit={event => {
      if (!beforeLogout) return;
