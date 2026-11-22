@@ -82,3 +82,15 @@ test("guide replay is a normal competition link elsewhere and a local action in 
   await act(async()=>link.click());assert.equal(destination,"/?competition=olimpiada&guide=1");
  }finally{await other.cleanup();}
 });
+
+
+test("every shared app menu outside practice links back to overview guidance",async()=>{
+ for(const current of ["progress","profiles",undefined] as const){
+  const h=await mount(<AppMenu current={current}/>);try{
+   await act(async()=>h.host.querySelector<HTMLButtonElement>('[aria-label="Меню"]')!.click());
+   const link=[...h.host.querySelectorAll<HTMLAnchorElement>("a")].find(a=>a.textContent==="Покажи ми как")!;
+   assert.equal(link.getAttribute("href"),"/?guide=1");
+   await act(async()=>link.click());assert.equal(h.host.querySelector("nav")!.hidden,true);
+  }finally{await h.cleanup();}
+ }
+});

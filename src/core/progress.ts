@@ -1,10 +1,12 @@
 import type { KidsCourse, CourseAttempt, KidsCourseContent } from "./kids-course.ts";
 import { currentPreparationScope, preparationProgress, type PreparationProgress } from "./preparation.ts";
 import { courseGoldAwards, goldAmounts, goldKey, problemAwardAmount } from "./kids-gold.ts";
+import type { LearningAppreciation } from "./accomplishments.ts";
 
 export type ProgressEvent = {
  key: string; day: string; kind: "attempt" | "gold"; label: string;
  outcome?: "independent" | "hinted" | "incorrect" | "revealed";
+ taskId?: string; completedAt?: string; appreciation?: LearningAppreciation["kind"];
  wholeProblem?: boolean; naturalPart?: boolean; wholeOriginal?: boolean; amount?: number; skillId?: string; skillTitle?: string;
 };
 export type ProgressCourse = {
@@ -17,12 +19,34 @@ export { sofiaDay, dayProgress } from "./progress-calendar.ts";
 const successful = (attempt: CourseAttempt) => attempt.outcome === "independent" || attempt.outcome === "hinted";
 const milestoneLabels = { started: "Първа стъпка", correct: "Първо откритие", confirmed: "Затвърдено умение" };
 
+type ProgressContent = Pick<KidsCourseContent, "topics" | "connectedProblem">;
+function taskIdentity(attempt: CourseAttempt, competitionId: string, connected?: ReturnType<NonNullable<KidsCourseContent["connectedProblem"]>>): string | undefined {
+ const problem = attempt.problem, unit = problem.naturalUnit;
+ if (unit?.sourceId && unit.unitId) return JSON.stringify([competitionId, "unit", unit.sourceId, unit.unitId]);
+ const archive = problem.archive;
+ // Historical teaching steps are separate exercises, not the original's final answer.
+ if (archive?.kind === "scaffold") return problem.id ? JSON.stringify([competitionId, "problem", problem.id]) : undefined;
+ if (archive?.kind === "part" && archive.covers.length !== 1) return;
+ if (connected?.units.length === 1) return JSON.stringify([competitionId, "unit", connected.sourceId, connected.units[0]!.id]);
+ if (archive?.kind === "part") return archive.sourceId ? JSON.stringify([competitionId, "unit", archive.sourceId, archive.covers[0]]) : undefined;
+ if (connected) return;
+ return problem.id ? JSON.stringify([competitionId, "problem", problem.id]) : undefined;
+}
+
+function appreciation(attempt: CourseAttempt): LearningAppreciation["kind"] | undefined {
+ if (attempt.outcome !== "independent") return;
+ const kinds = attempt.appreciations?.map(item => item.kind) ?? [];
+ if (kinds.includes("hint-independent") || attempt.personalProgress === true) return "hint-independent";
+ if (kinds.includes("whole-problem")) return "whole-problem";
+ if (kinds.includes("scheduled-review")) return "scheduled-review";
+}
+
 // Explicit projection: saved answers, grading fields, login metadata and raw course records stay on the server.
 export function projectPreparation(value: unknown, content: KidsCourseContent): PreparationProgress {
  const course = value && typeof value === "object" ? value as KidsCourse : undefined;
  return preparationProgress(course && Array.isArray(course.attempts) && course.topics ? course : { attempts: [], topics: {}, preparationScope: currentPreparationScope(content) } as unknown as KidsCourse, content);
 }
-export function projectProgressCourse(value: unknown, competitionId: string, content?: Pick<KidsCourseContent, "topics">): ProgressCourse {
+export function projectProgressCourse(value: unknown, competitionId: string, content?: ProgressContent): ProgressCourse {
  const result: ProgressCourse = { competitionId, summary: { attempts: 0, confirmed: 0, revisit: 0, hasTask: false }, events: [], undatedGold: 0, undatedAttempts: 0 };
  if (!value || typeof value !== "object") return result;
  const course = value as KidsCourse;
@@ -30,6 +54,7 @@ export function projectProgressCourse(value: unknown, competitionId: string, con
  const skillTitles = new Map(content?.topics.flatMap(topic => topic.skills.map(skill => [skill.id, skill.title] as const)) ?? []);
  const attempts = [...new Map(course.attempts.map(attempt => [attempt.key, attempt])).values()];
  const skills = Object.values(course.topics).flatMap(topic => Object.entries(topic.skills ?? {}));
+ const sources = new Map<string, ReturnType<NonNullable<KidsCourseContent["connectedProblem"]>>>();
  result.summary = { attempts: attempts.length, confirmed: skills.filter(([,skill]) => !!skill.confirmedAt).length,
   revisit: skills.filter(([,skill]) => skill.revisit).length,
   hasTask: attempts.length > 0 || Object.values(course.topics).some(topic => Object.values(topic.work ?? {}).some(Boolean) || Object.values(topic.skillWork ?? {}).some(Boolean)) || !!course.quest?.work };
@@ -37,7 +62,9 @@ export function projectProgressCourse(value: unknown, competitionId: string, con
   if (!attempt.outcome) continue;
   const day = sofiaDay(attempt.completedAt);
   if (!day) { result.undatedAttempts++; continue; }
+  if (!attempt.problem.naturalUnit && !sources.has(attempt.problem.id)) sources.set(attempt.problem.id, content?.connectedProblem?.(attempt.problem));
   result.events.push({ key: `attempt:${attempt.key}`, kind: "attempt", day,
+   taskId: taskIdentity(attempt, competitionId, sources.get(attempt.problem.id)), completedAt: attempt.completedAt, appreciation: appreciation(attempt),
    label: attempt.problem.source || "Задача", outcome: attempt.outcome,
    skillId: attempt.problem.skillId, skillTitle: skillTitles.get(attempt.problem.skillId) ?? "Други упражнения",
    ...(attempt.problem.naturalUnit ? { naturalPart: attempt.problem.naturalUnit.total > 1, wholeOriginal: attempt.sourceComplete === true } : {}),

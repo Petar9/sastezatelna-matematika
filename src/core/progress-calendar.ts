@@ -12,7 +12,14 @@ export function sofiaDay(value: string | undefined): string | undefined {
 }
 
 export function dayProgress(events: ProgressEvent[]) {
+ const attempts = events.filter(event => event.kind === "attempt");
+ const successfulUnits = attempts.filter(event => event.wholeProblem || event.naturalPart);
+ const incorrect = attempts.filter(event => event.outcome === "incorrect");
  return { gold: events.reduce((sum, event) => sum + (event.amount ?? 0), 0),
-  independent: events.filter(event => event.kind === "attempt" && (event.wholeProblem || event.naturalPart) && event.outcome === "independent").length,
-  hinted: events.filter(event => event.kind === "attempt" && (event.wholeProblem || event.naturalPart) && event.outcome === "hinted").length };
+  independent: successfulUnits.filter(event => event.outcome === "independent").length,
+  hinted: successfulUnits.filter(event => event.outcome === "hinted").length,
+  incorrect: new Set(incorrect.flatMap(event => event.taskId ? [event.taskId] : [])).size,
+  incorrectAttempts: incorrect.length,
+  legacyIncorrect: incorrect.filter(event => !event.taskId).length,
+  revealed: attempts.filter(event => event.outcome === "revealed").length };
 }

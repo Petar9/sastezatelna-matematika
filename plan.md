@@ -1,5 +1,27 @@
 # Current work - Състезателна математика
 
+## Product goodies - production release in progress, 2026-11-22
+
+- Owner authorized publishing all completed product improvements: weekly goal/summary, consistent errors and responsive progress UI, gold-only record precedence and guide replay across shared app-menu pages. Unfinished landing/SEO work is excluded; no migration or learner-history changes.
+- Resolved the build security advisory with Next.js/ESLint plugin 16.4.6; production dependency audit reports zero vulnerabilities. Final verification and deployment evidence: [review record](docs/reviews/weekly-progress-2026-11-20.md#production-release-authorization---2026-11-22).
+- The existing weekly panel is included. A separate arithmetic daily average remains unimplemented pending clarification of the requested metric.
+
+## Personal records and guide replay - locally verified, 2026-11-22
+
+- Owner approved: show only the gold record when daily task and gold records coincide; preserve task-only records, other learning praise, persisted claims and rewards.
+- External “Покажи ми как” requests from every shared app-menu page open the competition overview and guide after initialization/refresh, including repeat visits to a mounted player; task-local guidance stays contextual.
+- Verification: 93/93 affected tests, TypeScript, targeted ESLint, optimized build/private-file audit and browser replay from Progress and Profiles passed. Local preview: http://127.0.0.1:3048/progress . No production deployment; the existing Next security advisory remains.
+
+## Weekly goal and consistent progress - local verification, 2026-11-21
+
+- Owner approved and locally verified the visual consistency pass: four/two-column monthly totals, aligned all-time counts and shared progress/profile icons. 31/31 focused tests, TypeScript, targeted ESLint, optimized build/private-file audit and desktop/320px/390px checks passed; see the linked review record.
+
+- Refined the weekly card for local visual review: three aligned metrics, main-total breakdown and quiet checkmark footer; mobile stacks the total above two metrics. Focused 20/20 tests, TypeScript, targeted ESLint, build/private-file audit and desktop/320px/390px browser checks passed; existing Next security advisory remains.
+- Implemented one existing adventure per competition/week and a current-week summary above the calendar; no reward, selection, account, landing or SEO changes.
+- Shared daily/monthly/weekly distinct-error counts retain raw attempts and ambiguous historical errors separately; preserved saved history and per-competition accordions. Actual Astra independent copy and implementation audits completed; optional wording refinements await owner approval.
+- Verification and local preview: [review record](docs/reviews/weekly-progress-2026-11-20.md). This local review was subsequently approved for production on 2026-11-22; see the current release entry above.
+- 425/425 tests, TypeScript, ESLint, optimized build/private-file audit and desktop/320px/390px browser checks passed. Local review: http://127.0.0.1:3048/progress . Optional copy decisions and the build-reported existing Next security advisory remain open before release readiness.
+
 ## Contextual guide - released, 2026-11-20
 
 - Owner approved a product-only release of the optional guide and its refined UI; preserve current production continuation, landing and SEO behavior. No migration or learner-history changes.

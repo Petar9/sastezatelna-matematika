@@ -4,6 +4,7 @@ import { useId, useState, type MouseEvent } from "react";
 import type { PreparationProgress } from "../src/core/preparation";
 import { KidsOtter } from "./kids-otter";
 import { ButtonLink } from "./ui/button";
+import { ActionIcon } from "./ui/action-icon";
 import s from "./competition-preparation.module.css";
 
 type PreparationCollection = { competitionId: string; title: string; preparation?: PreparationProgress };
@@ -24,7 +25,7 @@ function PreparationRow({ title, progress }: { title: string; progress: Preparat
  return <div className={s.row}>
   <h3 className={s.rowHeading}><button type="button" className={s.toggle} id={`${id}-toggle`} aria-expanded={expanded} aria-controls={`${id}-details`} onClick={() => setExpanded(!expanded)}>
    <span className={s.rowTitle}>{title}</span><span className={s.rowPercent}>{progress.percent}%</span>
-   <svg className={s.chevron} viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+   <span className={s.chevron}><ActionIcon name="chevron"/></span>
    <span className={s.rowTrack} aria-hidden="true"><span style={{ width: `${progress.percent}%` }}/></span>
   </button></h3>
   <div id={`${id}-details`} hidden={!expanded} aria-labelledby={`${id}-toggle`}>
@@ -48,7 +49,7 @@ export function CompetitionPreparation({ progress, href, onNavigate }: { progres
     <div className={s.track} role="progressbar" aria-labelledby={`${id}-heading`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><span style={{ width: `${percent}%` }}/></div>
     <span className={s.otter} style={{ left: `clamp(26px, ${percent}%, calc(100% - 26px))` }} aria-hidden="true"><KidsOtter small/></span>
    </div>
-   {href && <div className={s.footer}><ButtonLink variant="quiet" href={href} onClick={onNavigate}>Напредък →</ButtonLink></div>}
+   {href && <div className={s.footer}><ButtonLink variant="quiet" href={href} onClick={onNavigate}>Напредък<ActionIcon name="arrow"/></ButtonLink></div>}
   </> : <p className={s.unavailable}>Няма достатъчно данни.</p>}
  </section>;
 }

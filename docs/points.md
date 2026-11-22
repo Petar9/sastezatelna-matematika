@@ -1,11 +1,17 @@
 # Gold and rewards
 
+## Weekly goal and summary
+
+The weekly goal recognizes an existing adventure completed this week, separately per competition. The weekly summary reuses dated history and persisted independent achievements. Neither pays extra gold, changes eligibility, infers mastery or writes progress on read; reward history stays unchanged. [Learning and counting rules](../key-decisions.md#progress-and-navigation) and [review](reviews/weekly-progress-2026-11-20.md).
+
 ## Daily personal records
 
 Owner-approved 2026-11-14: appreciate the most successful tasks and most gold earned in one day, combined across competitions per child, without bonus gold. Match the calendar: correct independent and assisted tasks/subparts count; wrong answers and revealed solutions do not. Gold includes existing dated task and skill-milestone awards, using their saved amounts.
 
 Use Europe/Sofia days and existing dated history. An active day has a completed attempt. From the second active day, a total must strictly exceed every earlier day's total; ties do not qualify. Show each record type at most once per day, only after an accepted answer increases that metric. Persist claims across competitions/devices; later increases do not open another celebration. Never backfill celebrations on GET/refresh/resume, infer missing dates, reprice history or change rewards. See [copy approval and verification](reviews/accomplishments-2026-11-14.md).
 
+
+Owner-approved 2026-11-22: when task and gold records coincide in one celebration, show only the gold record. Keep other learning appreciations visible, retain both persisted daily claims, and preserve task-only celebrations and all reward/history rules.
 
 Reviewed 2026-11-08. This is the authoritative guide for gold: active rules, evidence, proposed changes and rollout checks. [Learning decisions](../key-decisions.md) still govern selection, help and confirmation; the [design system](design-system.md) governs presentation.
 

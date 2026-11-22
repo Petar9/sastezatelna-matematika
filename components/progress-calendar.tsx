@@ -5,18 +5,19 @@ import Link from "next/link";
 import { competitionCalendar, competitionHref } from "../src/competition-dates";
 import { CompetitionCalendar } from "./competition-calendar";
 import { Button, ButtonLink } from "./ui/button";
+import { ActionIcon } from "./ui/action-icon";
 import { Dialog } from "./ui/dialog";
 import { Select } from "./ui/field";
 import { Message } from "./ui/message";
+import { WeeklyProgress } from "./weekly-progress";
 import { PreparationPanel } from "./competition-preparation";
 import type { PreparationProgress } from "../src/core/preparation";
-import type { ProgressCourse } from "../src/core/progress";
+import type { ProgressCourse, ProgressEvent } from "../src/core/progress";
 import { dayProgress } from "../src/core/progress-calendar";
 import s from "./progress-calendar.module.css";
 
 export type ProgressCollection = ProgressCourse & { title: string; lastTaskHref?: string; preparation?: PreparationProgress };
 const weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
-const outcomes = { independent: "Самостоятелно", hinted: "С подсказка", incorrect: "Грешен отговор", revealed: "Разгледано решение" };
 const monthLabel = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleDateString("bg-BG", { month: "long", year: "numeric", timeZone: "Europe/Sofia" });
 const dateLabel = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString("bg-BG", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Sofia" });
 export function monthDays(month: string) {
@@ -28,7 +29,7 @@ export function shiftMonth(month: string, amount: number) {
  return new Date(Date.UTC(year!, number! - 1 + amount, 1)).toISOString().slice(0, 7);
 }
 
-type DailySkill = { title: string; independent: number; hinted: number };
+type DailySkill = { title: string; events: ProgressEvent[] };
 
 function DailyCompetitionDetails({ title, skills }: { title: string; skills: [string, DailySkill][] }) {
  const id = useId();
@@ -36,15 +37,25 @@ function DailyCompetitionDetails({ title, skills }: { title: string; skills: [st
  return <div className={s.skillGroup}>
   <h3><button type="button" className={s.skillToggle} id={`${id}-toggle`} aria-expanded={expanded} aria-controls={`${id}-skills`} onClick={() => setExpanded(!expanded)}>
    <span>{title}</span>
-   <svg className={s.chevron} viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+   <span className={s.chevron}><ActionIcon name="chevron"/></span>
   </button></h3>
   <div className={s.skillDetails} id={`${id}-skills`} hidden={!expanded} aria-labelledby={`${id}-toggle`}>
-   <ul className={s.entries}>{skills.map(([key, skill]) => <li key={key}>
-    <span className={s.skillTitle}>{skill.title}</span>
-    <span className={s.skillResults}>{skill.independent + skill.hinted > 0
-     ? [skill.independent > 0 && `Самостоятелно: ${skill.independent}`, skill.hinted > 0 && `С подсказка: ${skill.hinted}`].filter(Boolean).join(" · ")
-     : "Упражнявано"}</span>
-   </li>)}</ul>
+   <ul className={s.entries}>{skills.map(([key, skill]) => {
+    const totals = dayProgress(skill.events);
+    const oldParts = skill.events.filter(event => !event.wholeProblem && !event.naturalPart && (event.outcome === "independent" || event.outcome === "hinted")).length;
+    return <li key={key}>
+     <span className={s.skillTitle}>{skill.title}</span>
+     <span className={s.skillResults}>{[
+      totals.independent > 0 && `Самостоятелно: ${totals.independent}`,
+      totals.hinted > 0 && `С подсказка: ${totals.hinted}`,
+      totals.incorrect > 0 && `Сгрешени задачи: ${totals.incorrect}`,
+      totals.incorrectAttempts > 0 && `Грешни опити: ${totals.incorrectAttempts}`,
+      totals.legacyIncorrect > 0 && `По-стари грешни опити: ${totals.legacyIncorrect}`,
+      totals.revealed > 0 && `Разгледани решения: ${totals.revealed}`,
+      oldParts > 0 && `Решени подусловия: ${oldParts}`,
+     ].filter(Boolean).join(" · ")}</span>
+    </li>;
+   })}</ul>
   </div>
  </div>;
 }
@@ -82,17 +93,13 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
  const selectedTotals = dayProgress(details);
  const connectedCounts = (items: typeof events) => ({ parts: items.filter(event => event.naturalPart).length, originals: items.filter(event => event.wholeOriginal).length });
  const monthConnected = connectedCounts(monthly), dayConnected = connectedCounts(details);
- const selectedOutcomes = Object.entries(outcomes).map(([outcome, label]) => ({
-  outcome, label, count: details.filter(event => event.kind === "attempt" && event.outcome === outcome).length,
- }));
  const skillGroups = visible.map(item => {
   const skills = new Map<string, DailySkill>();
   for (const event of details) {
    if (event.competitionId !== item.competitionId || event.kind !== "attempt") continue;
    const key = event.skillId ?? "unknown";
-   const skill = skills.get(key) ?? { title: event.skillTitle ?? "Други упражнения", independent: 0, hinted: 0 };
-   if ((event.wholeProblem || event.naturalPart) && event.outcome === "independent") skill.independent++;
-   if ((event.wholeProblem || event.naturalPart) && event.outcome === "hinted") skill.hinted++;
+   const skill: DailySkill = skills.get(key) ?? { title: event.skillTitle ?? "Други упражнения", events: [] };
+   skill.events.push(event);
    skills.set(key, skill);
   }
   return { competitionId: item.competitionId, title: item.title, skills: [...skills.entries()] };
@@ -105,12 +112,15 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
   <div className={s.filter}><label htmlFor={`${id}-competition`}>Състезание</label><Select id={`${id}-competition`} value={competition} onChange={event => setCompetition(event.target.value)}>
    <option value="all">Всички състезания</option>{collections.map(item => <option key={item.competitionId} value={item.competitionId}>{item.title}</option>)}
   </Select></div>
+  <WeeklyProgress collections={visible} initialDay={initialDay}/>
   <section className={s.calendar} aria-labelledby={`${id}-month`}>
-   <div className={s.monthNavigation}><Button variant="quiet" aria-label="Предишен месец" onClick={() => navigate(-1)}>←</Button><h2 id={`${id}-month`} aria-live="polite">{monthLabel(month)}</h2><Button variant="quiet" aria-label="Следващ месец" disabled={month >= lastMonth} onClick={() => navigate(1)}>→</Button></div>
+   <div className={s.monthNavigation}><Button variant="quiet" aria-label="Предишен месец" onClick={() => navigate(-1)}><span className={s.previousArrow}><ActionIcon name="arrow"/></span></Button><h2 id={`${id}-month`} aria-live="polite">{monthLabel(month)}</h2><Button variant="quiet" aria-label="Следващ месец" disabled={month >= lastMonth} onClick={() => navigate(1)}><ActionIcon name="arrow"/></Button></div>
    <dl className={s.totals} aria-label="За месеца">
     <div><dt>Злато</dt><dd>{totals.gold}</dd></div>
     <div><dt>Самостоятелно</dt><dd>{totals.independent}</dd></div>
     <div><dt>С подсказка</dt><dd>{totals.hinted}</dd></div>
+    <div><dt>Сгрешени задачи</dt><dd>{totals.incorrect}</dd></div>
+    {totals.legacyIncorrect > 0 && <div><dt>По-стари грешни опити</dt><dd>{totals.legacyIncorrect}</dd></div>}
     {monthConnected.parts > 0 && <><div><dt>Подусловия</dt><dd>{monthConnected.parts}</dd></div><div><dt>Цели задачи</dt><dd>{monthConnected.originals}</dd></div></>}
    </dl>
    <div className={s.grid} role="group" aria-label={`Дни през ${monthLabel(month)}`}>
@@ -120,10 +130,12 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
      const day = `${month}-${String(index + 1).padStart(2,"0")}`;
      const competitions = scheduled.filter(event => event.date === day);
      const activity = events.filter(event => event.day === day), value = dayProgress(activity);
-     return <button type="button" key={day} className={`${s.day} ${activity.length ? s.active : ""} ${competitions.length ? s.eventDay : ""}`} aria-pressed={selected === day} aria-current={day === initialDay ? "date" : undefined} aria-controls={`${id}-details`} aria-haspopup="dialog" aria-label={`${dateLabel(day)}: ${value.gold} злато, ${value.independent} самостоятелни, ${value.hinted} с подсказка, ${activity.filter(event => event.kind === "attempt" && event.outcome === "incorrect").length} грешни отговора, ${activity.filter(event => event.kind === "attempt" && event.outcome === "revealed").length} разгледани решения${activity.length ? "" : ", няма записана активност"}${competitions.map(event => `, ${event.kind === "deadline" ? "краен срок за провеждане" : "дата"}: ${event.label}`).join("")}`} onClick={event => openDay(day, event.currentTarget)}>
+     return <button type="button" key={day} className={`${s.day} ${activity.length ? s.active : ""} ${competitions.length ? s.eventDay : ""}`} aria-pressed={selected === day} aria-current={day === initialDay ? "date" : undefined} aria-controls={`${id}-details`} aria-haspopup="dialog" aria-label={`${dateLabel(day)}: ${value.gold} злато, ${value.independent} самостоятелни, ${value.hinted} с подсказка, сгрешени задачи: ${value.incorrect}${value.legacyIncorrect ? `, по-стари грешни опити: ${value.legacyIncorrect}` : ""}, разгледани решения: ${value.revealed}${activity.length ? "" : ", няма записана активност"}${competitions.map(event => `, ${event.kind === "deadline" ? "краен срок за провеждане" : "дата"}: ${event.label}`).join("")}`} onClick={event => openDay(day, event.currentTarget)}>
       <span className={s.dayNumber}>{index + 1}</span>{activity.length > 0 && <>
        <span className={s.dayGold} aria-hidden="true">{value.gold}</span>
        <span className={s.dayCounts} aria-hidden="true">{value.independent + value.hinted} {value.independent + value.hinted === 1 ? "задача" : "задачи"}</span>
+       {value.incorrect > 0 && <span className={s.dayErrors} aria-hidden="true">{value.incorrect} {value.incorrect === 1 ? "сгрешена" : "сгрешени"}</span>}
+       {value.legacyIncorrect > 0 && <span className={s.dayErrors} aria-hidden="true">{value.legacyIncorrect} {value.legacyIncorrect === 1 ? "грешен опит" : "грешни опита"}</span>}
       </>}{competitions.length > 0 && <span className={s.eventMarker} aria-hidden="true">◆</span>}
      </button>;
     })}
@@ -134,7 +146,11 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
    {selectedCompetitions.map(event => <p className={s.scheduledEvent} key={event.date}><span className={s.eventMarker} aria-hidden="true">◆</span> <Link href={competitionHref(event)}>{event.label}</Link>{event.kind === "deadline" && <span className={s.deadlineCaption}>Краен срок за провеждане</span>}</p>)}
    {details.length > 0 && <dl className={s.daySummary} aria-label="За деня">
     <div><dt>Злато</dt><dd>{selectedTotals.gold}</dd></div>
-    {selectedOutcomes.map(item => <div key={item.outcome}><dt>{item.label}</dt><dd>{item.count}</dd></div>)}
+    <div><dt>Самостоятелно</dt><dd>{selectedTotals.independent}</dd></div>
+    <div><dt>С подсказка</dt><dd>{selectedTotals.hinted}</dd></div>
+    <div><dt>Сгрешени задачи</dt><dd>{selectedTotals.incorrect}</dd></div>
+    <div><dt>Разгледани решения</dt><dd>{selectedTotals.revealed}</dd></div>
+    {selectedTotals.legacyIncorrect > 0 && <div><dt>По-стари грешни опити</dt><dd>{selectedTotals.legacyIncorrect}</dd></div>}
     {dayConnected.parts > 0 && <><div><dt>Подусловия</dt><dd>{dayConnected.parts}</dd></div><div><dt>Цели задачи</dt><dd>{dayConnected.originals}</dd></div></>}
    </dl>}
    {skillGroups.map(group => <DailyCompetitionDetails key={`${dialogSession}:${selected}:${group.competitionId}`} title={group.title} skills={group.skills}/>)}
@@ -149,7 +165,7 @@ export function ProgressCalendar({ collections, initialDay, initialCompetition }
   </section>}
   {(undatedGold > 0 || undatedAttempts > 0) && <Message>{undatedGold > 0 && <p>Злато без точна дата: {undatedGold}.</p>}{undatedAttempts > 0 && <p>Опити без точна дата: {undatedAttempts}.</p>}<p>Тези по-стари записи са запазени, но не са отнесени към конкретен ден.</p></Message>}
   <section className={s.details} aria-labelledby={`${id}-summary`}><h2 id={`${id}-summary`}>Общо досега</h2>
-   {visible.map(item => <div key={item.competitionId} className={s.summary}><h3>{item.title}</h3><p>Опити за решаване: {item.summary.attempts}. Затвърдени умения: {item.summary.confirmed}. Умения за припомняне: {item.summary.revisit}.</p>{item.lastTaskHref && <ButtonLink href={item.lastTaskHref}>Виж последната задача</ButtonLink>}</div>)}
+   {visible.map(item => <div key={item.competitionId} className={s.summary}><h3>{item.title}</h3><dl className={s.summaryCounts}><div><dt>Опити за решаване</dt><dd>{item.summary.attempts}</dd></div><div><dt>Затвърдени умения</dt><dd>{item.summary.confirmed}</dd></div><div><dt>Умения за припомняне</dt><dd>{item.summary.revisit}</dd></div></dl>{item.lastTaskHref && <ButtonLink href={item.lastTaskHref}>Виж последната задача</ButtonLink>}</div>)}
   </section>
  </div>;
 }

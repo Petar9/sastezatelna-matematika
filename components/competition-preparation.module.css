@@ -13,12 +13,12 @@
 .panelTitle { margin-bottom: var(--space-2); }
 .row + .row { border-top: 1px solid var(--border); }
 .rowHeading { margin: 0; font-size: var(--text-body); line-height: var(--line-heading); }
-.toggle { display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--control-height); padding: var(--space-4) 0; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--foreground); text-align: left; }
+.toggle { display: grid; grid-template-columns: minmax(0, 1fr) auto 24px; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--control-height); padding: var(--space-4) 0; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--foreground); text-align: left; }
 .toggle:hover { color: var(--primary); }
 .toggle:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
 .rowTitle { min-width: 0; }
 .rowPercent { color: var(--progress); font-variant-numeric: tabular-nums; }
-.chevron { color: var(--muted); transition: transform var(--motion-fast) ease-out; }
+.chevron { display: inline-flex; color: var(--muted); transition: transform var(--motion-fast) ease-out; }
 .toggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 .rowTrack { grid-column: 1 / -1; height: 6px; background: var(--progress-track); border-radius: var(--radius-pill); overflow: hidden; }
 .breakdown { margin: 0; padding: 0 0 var(--space-4); display: grid; gap: var(--space-2); font-size: var(--text-small); }

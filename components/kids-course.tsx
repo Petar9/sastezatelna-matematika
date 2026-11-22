@@ -179,13 +179,13 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
  const guideTargets=[competitionTarget,adventureTarget,mapTarget,hintTarget] as const;
  const guide=useCourseGuide({learnerId,hasActivity:initialView.revision>0 || initialView.gold>0 || !!initialView.active || sessions.length>0 || !!initialView.stamps?.length,overview:showDashboard && !focusedIsland,question:questionVisible,answered:!showDashboard && !!view.task?.outcome,targets:guideTargets});
  useEffect(()=>{
-  if(!window.location?.href)return;
+  if(!guide.ready || busy || inFlight.current || !window.location?.href)return;
   const url=new URL(window.location.href);
   if(url.searchParams.get("guide")!=="1")return;
   url.searchParams.delete("guide");window.history.replaceState(window.history.state,"",`${url.pathname}${url.search}${url.hash}`);
-  replayGuide();
- // The replay request is consumed once by this mounted learner's player.
- },[]);
+  navigate(()=>{setMapTopic(undefined);setDashboardSection("home");setDashboard(true);dashboardScroll.current=0;guide.replay(false);});
+ // A returning route can reuse this player; wait for guide initialization and course refresh before consuming each request.
+ });
  useEffect(() => { if(guide.ready && guide.index===undefined)heading.current?.focus({preventScroll:true}); }, [stageKey,guide.ready]);
  function replayGuide() {
   if(busy)return;

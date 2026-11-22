@@ -4,7 +4,7 @@
 .calendar, .details { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-6); min-width: 0; }
 .monthNavigation { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .monthNavigation h2 { margin: 0; text-align: center; font-size: var(--text-heading); line-height: var(--line-heading); }
-.totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-6) 0; }
+.totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-6) 0; }
 .totals > div { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); background: var(--accent); border-radius: var(--radius-control); min-width: 0; }
 .totals dt { color: var(--muted); font-size: var(--text-small); line-height: var(--line-control); overflow-wrap: anywhere; }
 .totals dd { margin: 0; font-size: var(--text-title); font-weight: 700; line-height: var(--line-heading); font-variant-numeric: tabular-nums; }
@@ -19,6 +19,7 @@
 .active { background: var(--sea); border-color: var(--border); }
 .dayNumber { font-size: var(--text-small); font-weight: 600; }
 .dayGold { background: var(--gold); border-radius: var(--radius-pill); min-width: 24px; padding-inline: var(--space-1); font-size: var(--text-small); font-weight: 700; }
+.dayErrors { font-size: var(--text-caption); color: var(--error); text-align: center; overflow-wrap: anywhere; line-height: var(--line-control); }
 .dayCounts { font-size: var(--text-caption); color: var(--muted); }
 .calendar .day:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: -3px; }
 .details h2 { margin-top: 0; font-size: var(--text-heading); line-height: var(--line-heading); }
@@ -39,11 +40,11 @@
 .skillGroup { min-width: 0; }
 .skillGroup + .skillGroup { border-top: 1px solid var(--border); }
 .skillGroup h3 { margin: 0; font-size: var(--text-body); line-height: var(--line-heading); }
-.skillToggle { display: grid; grid-template-columns: minmax(0, 1fr) 20px; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--control-height); padding: var(--space-4) 0; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--foreground); text-align: left; }
+.skillToggle { display: grid; grid-template-columns: minmax(0, 1fr) 24px; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--control-height); padding: var(--space-4) 0; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--foreground); text-align: left; }
 .skillToggle span { min-width: 0; overflow-wrap: anywhere; }
 .skillToggle:hover { color: var(--primary); }
 .skillToggle:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
-.chevron { color: var(--muted); transition: transform var(--motion-fast) ease-out; }
+.chevron { display: inline-flex; color: var(--muted); transition: transform var(--motion-fast) ease-out; }
 .skillToggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 .skillDetails { padding-bottom: var(--space-4); }
 @media(prefers-reduced-motion: reduce) { .chevron { transition: none; } }
@@ -52,8 +53,12 @@
 .entries li:last-child { border-bottom: 0; padding-bottom: 0; }
 .summary + .summary { margin-top: var(--space-6); }
 .summary h3 { font-size: var(--text-body); }
-.summary p { line-height: var(--line-body); }
-@media(max-width: 600px) { .calendar, .details { padding: var(--space-4); } .totals { gap: var(--space-2); } .totals > div { padding: var(--space-2); } .totals dt { font-size: var(--text-caption); } .totals dd { font-size: var(--text-heading); } }
+.summaryCounts { display: grid; gap: var(--space-2); margin: 0 0 var(--space-4); font-size: var(--text-small); line-height: var(--line-body); }
+.summaryCounts > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-4); }
+.summaryCounts dt { color: var(--muted); overflow-wrap: anywhere; }
+.summaryCounts dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.previousArrow { display: inline-flex; transform: rotate(180deg); }
+@media(max-width: 600px) { .calendar, .details { padding: var(--space-4); } .totals { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); } .totals > div { padding: var(--space-2); } .totals dt { font-size: var(--text-caption); } .totals dd { font-size: var(--text-heading); } }
 @media(max-width: 400px) { .calendar { margin-inline: -14px; padding: var(--space-3) 0; border-inline: 0; border-radius: 0; } .monthNavigation, .totals, .legend { margin-inline: var(--space-2); } .monthNavigation h2 { font-size: var(--text-body); } .totals { gap: var(--space-1); } .totals > div { padding-inline: var(--space-1); } .totals dt { overflow-wrap: normal; } .grid { gap: 1px; } .day { border-radius: 6px; } }
 
 .upcoming { min-width: 0; }

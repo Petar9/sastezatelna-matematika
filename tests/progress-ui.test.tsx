@@ -68,7 +68,7 @@ test("calendar has Monday-first month, accessible per-day values and a closed da
  assert.equal(document.querySelectorAll("dialog").length,1);
  assert.equal(document.querySelector("dialog[open]"),null);
  assert.equal(selected.getAttribute("aria-haspopup"),"dialog");
- assert.equal(document.querySelector('dl[aria-label="За месеца"]')?.textContent,"Злато0Самостоятелно0С подсказка1");
+ assert.equal(document.querySelector('dl[aria-label="За месеца"]')?.textContent,"Злато0Самостоятелно0С подсказка1Сгрешени задачи0");
  assert.equal(document.querySelector('button[aria-label^="1 ноември"]')?.textContent,"1");
  assert.equal(selected.querySelector(".dayCounts")?.textContent,"1 задача");
  assert.ok(!document.toString().includes("В клетките:"));
@@ -105,14 +105,14 @@ test("calendar day selection, month navigation and competition filtering update 
  const events=[
   {key:"independent",day:"2026-11-05",kind:"attempt" as const,label:"Самостоятелна",outcome:"independent" as const,wholeProblem:true},
   {key:"hinted",day:"2026-11-05",kind:"attempt" as const,label:"С помощ",outcome:"hinted" as const,wholeProblem:true},
-  {key:"wrong",day:"2026-11-05",kind:"attempt" as const,label:"Невярна",outcome:"incorrect" as const,wholeProblem:true},
+  {key:"wrong",taskId:"one:wrong",day:"2026-11-05",kind:"attempt" as const,label:"Невярна",outcome:"incorrect" as const,wholeProblem:true},
   {key:"revealed",day:"2026-11-05",kind:"attempt" as const,label:"Разгледана",outcome:"revealed" as const,wholeProblem:true},
  ];
  const {document}=parseHTML(renderToStaticMarkup(<ProgressCalendar initialDay="2026-11-05" collections={[{competitionId:"one",title:"Пример",summary,undatedGold:0,undatedAttempts:0,events}]}/>));
  const detail=document.querySelector('dl[aria-label="За деня"]')!;
- assert.deepEqual([...detail.querySelectorAll("div")].map(item=>[item.querySelector("dt")?.textContent,item.querySelector("dd")?.textContent]),[["Злато","0"],["Самостоятелно","1"],["С подсказка","1"],["Грешен отговор","1"],["Разгледано решение","1"]]);
+ assert.deepEqual([...detail.querySelectorAll("div")].map(item=>[item.querySelector("dt")?.textContent,item.querySelector("dd")?.textContent]),[["Злато","0"],["Самостоятелно","1"],["С подсказка","1"],["Сгрешени задачи","1"],["Разгледани решения","1"]]);
  assert.equal(document.querySelector('[aria-current="date"] .dayCounts')?.textContent,"2 задачи");
- assert.ok(document.querySelector('[aria-current="date"]')?.getAttribute("aria-label")?.includes("1 грешни отговора, 1 разгледани решения"));
+ assert.ok(document.querySelector('[aria-current="date"]')?.getAttribute("aria-label")?.includes("сгрешени задачи: 1, разгледани решения: 1"));
  });
 
 
@@ -136,10 +136,10 @@ test("day details group by competition and skill, count whole successes and omit
  ]}/>));
  const groups=document.querySelectorAll(".skillGroup"); assert.equal(groups.length,2);
  assert.equal(groups[0]!.querySelector("h3")?.textContent,"Първо");
- assert.deepEqual([...groups[0]!.querySelectorAll("li")].map(row=>row.textContent),["Точки и мачовеСамостоятелно: 2 · С подсказка: 1","Само упражняваноУпражнявано","Други упражненияУпражнявано"]);
+ assert.deepEqual([...groups[0]!.querySelectorAll("li")].map(row=>row.textContent),["Точки и мачовеСамостоятелно: 2 · С подсказка: 1 · Грешни опити: 1 · По-стари грешни опити: 1 · Разгледани решения: 1 · Решени подусловия: 1","Само упражняваноГрешни опити: 1 · По-стари грешни опити: 1","Други упражненияРазгледани решения: 1"]);
  assert.equal(groups[1]!.querySelector("li")?.textContent,"Точки и мачовеС подсказка: 1");
  assert.ok(!document.toString().includes("RAW-"));
- assert.ok(document.toString().includes("Умения за припомняне: 1"));
+ assert.ok([...document.querySelectorAll(".summaryCounts > div")].some(row => row.querySelector("dt")?.textContent === "Умения за припомняне" && row.querySelector("dd")?.textContent === "1"));
  assert.equal(document.querySelector('dl[aria-label="За деня"] dd')?.textContent,"80");
 });
 
@@ -234,7 +234,7 @@ test("five upcoming dates link to preparation below the calendar without changin
   assert.ok(day.getAttribute("aria-label")?.includes("дата: Олимпиада"));
   assert.equal(day.querySelector(".dayGold"),null);assert.equal(day.querySelector(".eventMarker")?.textContent,"◆");
   assert.ok(host.querySelector('.scheduledEvent a[href="/?competition=olimpiada-oblasten"]'));
-  assert.equal(host.querySelector('dl[aria-label="За месеца"]')?.textContent,"Злато0Самостоятелно0С подсказка0");
+  assert.equal(host.querySelector('dl[aria-label="За месеца"]')?.textContent,"Злато0Самостоятелно0С подсказка0Сгрешени задачи0");
   assert.equal(host.querySelector('dl[aria-label="За деня"]'),null);
   for(let i=0;i<4;i++)await next();
   await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label^="4 юни"]')!.click());
@@ -351,4 +351,74 @@ test("day modal opens only on activation, restores scrolling and trigger focus, 
   assert.equal(host.querySelector(".skillToggle")!.getAttribute("aria-expanded"),"false");
   assert.equal(JSON.stringify(collections),before);assert.equal(JSON.stringify(state.writes),writes);
  }finally{dom.window.HTMLElement.prototype.focus=originalFocus;await act(async()=>root.unmount());host.remove();assert.equal(document.documentElement.style.overflow,"scroll");document.documentElement.style.overflow="";}
+});
+
+
+test("calendar deduplicates wrong tasks per period, retains repeated attempts in skills and keeps solved counts separate", async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ const base={kind:"attempt" as const,label:"RAW",wholeProblem:true,skillId:"skill",skillTitle:"Умение",day:"2026-11-05"};
+ const events=[
+  ...["a","b","c"].map(key=>({...base,key,taskId:"one:task",outcome:"incorrect" as const})),
+  {...base,key:"success",taskId:"one:task",outcome:"independent" as const},
+  {...base,key:"tomorrow",day:"2026-11-06",taskId:"one:task",outcome:"incorrect" as const},
+  {...base,key:"legacy",outcome:"incorrect" as const},
+ ];
+ const collection={competitionId:"one",title:"Първо",summary:{attempts:6,confirmed:0,revisit:0,hasTask:false},undatedGold:0,undatedAttempts:0,events};
+ const second={...collection,competitionId:"two",title:"Второ",events:[{...base,key:"same-key",taskId:"two:task",outcome:"incorrect" as const}]};
+ const before=JSON.stringify([collection,second]);
+ const value=(label:string,scope:string)=>[...host.querySelectorAll(`${scope} > div`)].find(row=>row.querySelector("dt")?.textContent===label)?.querySelector("dd")?.textContent;
+ try{
+  await act(async()=>root.render(<ProgressCalendar collections={[collection,second]} initialDay="2026-11-05"/>));
+  assert.equal(value("Сгрешени задачи",'dl[aria-label="За месеца"]'),"2");
+  assert.equal(value("Сгрешени задачи",'dl[aria-label="За деня"]'),"2");
+  assert.equal(value("Самостоятелно",'dl[aria-label="За деня"]'),"1");
+  assert.equal(value("По-стари грешни опити",'dl[aria-label="За деня"]'),"1");
+  const today=host.querySelector('[aria-current="date"]')!;
+  assert.equal(today.querySelector(".dayCounts")?.textContent,"1 задача");
+  assert.deepEqual([...today.querySelectorAll(".dayErrors")].map(node=>node.textContent),["2 сгрешени","1 грешен опит"]);
+  assert.ok(host.querySelector(".skillResults")?.textContent?.includes("Сгрешени задачи: 1 · Грешни опити: 4"));
+  assert.ok(![...host.querySelectorAll(".skillResults")].some(node=>node.textContent?.includes("Упражнявано")));
+  const select=host.querySelector<HTMLSelectElement>("select")!;
+  Object.defineProperty(select,"value",{value:"one",configurable:true});
+  await act(async()=>select.dispatchEvent(new dom.window.Event("change",{bubbles:true})));
+  assert.equal(value("Сгрешени задачи",'dl[aria-label="За месеца"]'),"1");
+  await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label^="6 ноември"]')!.click());
+  assert.equal(value("Сгрешени задачи",'dl[aria-label="За деня"]'),"1");
+  assert.equal(value("Самостоятелно",'dl[aria-label="За деня"]'),"0");
+  assert.equal(value("По-стари грешни опити",'dl[aria-label="За деня"]'),undefined);
+  assert.equal(value("Сгрешени задачи",'dl[aria-label="За месеца"]'),"1");
+  assert.equal(JSON.stringify([collection,second]),before);
+ }finally{await act(async()=>root.unmount());host.remove();}
+});
+
+
+test("weekly summary follows the competition filter, stays in the current week when browsing months and separates legacy errors",async()=>{
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ const summary={attempts:3,confirmed:0,revisit:0,hasTask:false};
+ const base={day:"2026-11-20",kind:"attempt" as const,label:"PRIVATE-RAW-SOURCE",wholeProblem:true};
+ const collections=[
+  {competitionId:"one",title:"Първо",summary,undatedGold:0,undatedAttempts:0,events:[{...base,key:"right",taskId:"one:a",outcome:"independent" as const,appreciation:"hint-independent" as const},{...base,key:"wrong",taskId:"one:a",outcome:"incorrect" as const}]},
+  {competitionId:"two",title:"Второ",summary,undatedGold:0,undatedAttempts:0,events:[{...base,key:"hint",taskId:"two:b",outcome:"hinted" as const},{...base,key:"old",outcome:"incorrect" as const}]},
+ ];
+ const before=JSON.stringify(collections), writes=JSON.stringify(state.writes);
+ const weekly=()=>host.querySelector(".card")!;
+ try {
+  await act(async()=>root.render(<ProgressCalendar collections={collections} initialDay="2026-11-20"/>));
+  assert.ok(weekly().textContent?.includes("Задачи2"));
+  assert.ok(weekly().textContent?.includes("Самостоятелно: 1 · С помощ: 1"));
+  assert.equal(weekly().querySelector(".metric:last-child dd")?.textContent,"1");
+  assert.ok(weekly().textContent?.includes("По-стари грешни опити: 1"));
+  assert.equal(weekly().querySelectorAll(".achievement").length,1);
+  assert.ok(!host.textContent?.includes("PRIVATE-RAW-SOURCE"));
+  const text=weekly().textContent;
+  await act(async()=>host.querySelector<HTMLButtonElement>('button[aria-label="Предишен месец"]')!.click());
+  assert.equal(weekly().textContent,text);
+  const select=host.querySelector<HTMLSelectElement>("select")!;
+  Object.defineProperty(select,"value",{value:"two",configurable:true});
+  await act(async()=>select.dispatchEvent(new dom.window.Event("change",{bubbles:true})));
+  assert.ok(weekly().textContent?.includes("Задачи1"));
+  assert.equal(weekly().querySelector(".metric:last-child dd")?.textContent,"0");
+  assert.equal(weekly().querySelectorAll(".achievement").length,0);
+  assert.equal(JSON.stringify(collections),before);assert.equal(JSON.stringify(state.writes),writes);
+ } finally {await act(async()=>root.unmount());host.remove();}
 });

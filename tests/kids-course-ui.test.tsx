@@ -1630,9 +1630,9 @@ test("several accomplishments share one native dialog and are not replayed by re
   const dialog=h.host.querySelector<HTMLDialogElement>('dialog[open]')!;
   assert.ok(dialog.textContent!.includes("Реши всички части на тази задача самостоятелно. Браво!"));
   assert.ok(dialog.textContent!.includes("При преговора реши задачата самостоятелно. Браво!"));
-  assert.ok(dialog.textContent!.includes("Днес реши 1 задача - най-много досега за един ден."));
+  assert.ok(!dialog.textContent!.includes("Днес реши 1 задача - най-много досега за един ден."));
   assert.ok(dialog.textContent!.includes("Днес събра 35 злато - най-много досега за един ден."));
-  assert.equal(dialog.querySelectorAll('.appreciationMessages p').length,4);
+  assert.equal(dialog.querySelectorAll('.appreciationMessages p').length,3);
   assert.ok(dialog.getAttribute("aria-describedby"));
   await act(async()=>dialog.querySelector<HTMLButtonElement>('button:not([aria-label])')!.click());
   assert.equal(h.host.querySelector('dialog[open]'),null);
@@ -1706,4 +1706,53 @@ test("existing learners get manual guidance without changing a typed answer, hin
   assert.equal(courseView(h.record,content,now).task!.key,task.key);assert.equal(courseView(h.record,content,now).task!.hintLevel,0);
   assert.equal(h.record.attempts.length,0);assert.equal(courseView(h.record,content,now).gold,0);
  }finally{await h.cleanup();}
+});
+
+
+test("a task-only personal record still appears",async()=>{
+ const h=await mount(),fetchCourse=globalThis.fetch;
+ try{
+  globalThis.fetch=async(url,init)=>{
+   const response=await fetchCourse(url,init),body=await response.json();
+   if(init?.method==="POST" && JSON.parse(String(init.body)).action.type==="answer")body.course.appreciations=[{kind:"daily-tasks",day:"2026-11-02",amount:1}];
+   return Response.json(body,{status:response.status});
+  };
+  await submitAnswer(h);
+  assert.ok(h.host.querySelector('dialog[open]')?.textContent?.includes("Днес реши 1 задача - най-много досега за един ден."));
+ }finally{await h.cleanup();}
+});
+
+test("external guide replay waits for refreshing and handles requests on an already mounted player",async()=>{
+ const locationDescriptor=Object.getOwnPropertyDescriptor(window,"location"),historyDescriptor=Object.getOwnPropertyDescriptor(window,"history");
+ const location={href:"http://localhost/?competition=maths&guide=1"};
+ Object.defineProperty(window,"location",{configurable:true,value:location});
+ Object.defineProperty(window,"history",{configurable:true,value:{replaceState(_data:unknown,_unused:string,url:string){location.href=new URL(url,location.href).href;}}});
+ const host=document.createElement("div");document.body.append(host);const root=createRoot(host);
+ const initialView={...courseView(newKidsCourse(content,now),content,now),gold:1};
+ const render=async(refreshing=false)=>act(async()=>root.render(<KidsCoursePlayer learnerId="guide-external" competitionChoices={publishedCompetitions()} initialView={initialView} refreshing={refreshing}/>));
+ try{
+  await render(true);
+  assert.equal(guide(host),undefined);
+  assert.equal(new URL(location.href).searchParams.get("guide"),"1");
+  await render();
+  assert.ok(guide(host));
+  await act(async()=>host.querySelector<HTMLButtonElement>('[aria-label="Затвори напътствията"]')!.click());
+  assert.equal(guide(host),undefined);
+  location.href="http://localhost/?competition=maths&guide=1";
+  await render(true);
+  assert.equal(guide(host),undefined);
+  assert.equal(new URL(location.href).searchParams.get("guide"),"1","Do not lose replay while the course is refreshing");
+  await render();
+  assert.ok(guide(host)?.textContent?.includes("Избери състезание."));
+  assert.equal(new URL(location.href).searchParams.has("guide"),false);
+  assert.equal(new URL(location.href).searchParams.get("competition"),"maths");
+  await act(async()=>host.querySelector<HTMLButtonElement>('[aria-label="Затвори напътствията"]')!.click());
+  await render();assert.equal(guide(host),undefined,"Consumed requests must not reopen a dismissed guide");
+  location.href="http://localhost/?guide=1";
+  await render();assert.ok(guide(host),"A second visit from another page must replay again");
+ }finally{
+  await act(async()=>root.unmount());host.remove();
+  if(locationDescriptor)Object.defineProperty(window,"location",locationDescriptor);else Reflect.deleteProperty(window,"location");
+  if(historyDescriptor)Object.defineProperty(window,"history",historyDescriptor);else Reflect.deleteProperty(window,"history");
+ }
 });

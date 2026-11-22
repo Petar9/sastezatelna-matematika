@@ -4,6 +4,7 @@ import { courseGoldAwards, courseGoldBalance, goldAmounts, islandGoldTargets, aw
 import { KidsError, type KidsOutcome } from "./kids.ts";
 import { choosePracticeProblem, comparePractice, chooseSkillProblem, createSelectionContext, problemSource, isCompetitionProblem, overlaps, reviewDate, skillReviewDue, skillPrerequisitesReady } from "./kids-selection.ts";
 import { chooseQuestProblem, questAvailability, learningMapView, learningSkillView, questAchievement } from "./kids-quest.ts";
+import { weeklyAdventureGoal, type WeeklyAdventureGoal } from "./weekly-goal.ts";
 
 export type CourseMode = "core" | "challenge" | "review" | "practice";
 export interface CourseField { label: string; answer: string }
@@ -112,6 +113,7 @@ export interface CourseTopicView {
 	skills: { id: string; title: string; confirmed: boolean; streak: number; target: number; revisit: boolean }[];
 }
 export interface KidsCourseView {
+ weeklyGoal?: WeeklyAdventureGoal;
  preparation: PreparationProgress;
  gold: number; goldGain?: GoldGain; appreciations?: Appreciation[]; lastTopicId?: string;
 	revision: number; paused: boolean; active?: { topicId: string; mode: CourseMode; skillId?: string; groupId?: string };
@@ -723,7 +725,7 @@ export function courseView(course: KidsCourse, content: KidsCourseContent, now: 
  const lastProblem = course.attempts.at(-1)?.problem;
  const lastHistoricTopic = content.topics.find(t => t.skills.some(s => s.id === lastSkillId))?.id;
  const lastTopicId = (lastProblem && navigationGroup(content, lastProblem)?.id) ?? content.navigationGroups?.find(g => g.topicIds.includes(lastHistoricTopic ?? ""))?.id ?? lastHistoricTopic ?? activeGroup ?? course.active?.topicId;
- const view: KidsCourseView = { preparation: preparationProgress(course, content), gold: courseGoldBalance(course), lastTopicId, revision: course.revision, paused: course.paused, active: course.active ? { ...course.active, topicId: activeGroup ?? course.active.topicId } : undefined,
+ const view: KidsCourseView = { weeklyGoal: weeklyAdventureGoal(course, now), preparation: preparationProgress(course, content), gold: courseGoldBalance(course), lastTopicId, revision: course.revision, paused: course.paused, active: course.active ? { ...course.active, topicId: activeGroup ?? course.active.topicId } : undefined,
 		topics, doctors: topics.filter(t => t.doctor).length, professors: topics.filter(t => t.professor).length,
 		professorGoal: Math.ceil(topics.length / 2), complete: !!course.completedAt, previouslyCompleted: !!course.previousCompletions?.length, stage: "dashboard" };
 	view.inQuest = course.journey === "quest";

@@ -19,9 +19,10 @@ function appreciationMessage(appreciation:Appreciation) {
 export function PersonalProgressDialog({appreciations,onDismiss}:{appreciations:Appreciation[];onDismiss:()=>void}) {
  const dialog=useRef<HTMLDialogElement>(null),continueButton=useRef<HTMLButtonElement>(null);
  const titleId=useId(),descriptionId=useId();
+ const visibleAppreciations=appreciations.some(item=>item.kind==="daily-gold") ? appreciations.filter(item=>item.kind!=="daily-tasks") : appreciations;
  useEffect(()=>{dialog.current?.showModal();continueButton.current?.focus();},[]);
  return <Dialog ref={dialog} title="Личен напредък!" titleId={titleId} aria-describedby={descriptionId} onClose={onDismiss}>
-  <div className={s.personalProgress}><KidsOtter mood="celebrate"/><div id={descriptionId} className={s.appreciationMessages}>{appreciations.map(appreciation=><p key={appreciation.kind}>{appreciationMessage(appreciation)}</p>)}</div></div>
+  <div className={s.personalProgress}><KidsOtter mood="celebrate"/><div id={descriptionId} className={s.appreciationMessages}>{visibleAppreciations.map(appreciation=><p key={appreciation.kind}>{appreciationMessage(appreciation)}</p>)}</div></div>
   <Button ref={continueButton} onClick={()=>dialog.current?.close()}>Продължи</Button>
  </Dialog>;
 }
