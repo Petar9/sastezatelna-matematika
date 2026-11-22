@@ -1,9 +1,10 @@
 # Current work - Състезателна математика
 
-## Product goodies - production release in progress, 2026-11-22
+## Product goodies - released, 2026-11-22
 
 - Owner authorized publishing all completed product improvements: weekly goal/summary, consistent errors and responsive progress UI, gold-only record precedence and guide replay across shared app-menu pages. Unfinished landing/SEO work is excluded; no migration or learner-history changes.
 - Resolved the build security advisory with Next.js/ESLint plugin 16.4.6; production dependency audit reports zero vulnerabilities. Final verification and deployment evidence: [review record](docs/reviews/weekly-progress-2026-11-20.md#production-release-authorization---2026-11-22).
+- Application commit `4bd115b` is live with [exact-commit Vercel success](https://vercel.com/petar-s-projects33/sastezatelna-matematika/8iRKqLbss9TBfr1meXLSoX5vThEW); public routes, protected access and deployed weekly/guide/continuation bundles passed live smoke checks. Authenticated learner flows were tested locally with disposable records, not against production learner data.
 - The existing weekly panel is included. A separate arithmetic daily average remains unimplemented pending clarification of the requested metric.
 
 ## Personal records and guide replay - locally verified, 2026-11-22
