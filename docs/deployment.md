@@ -2,6 +2,18 @@
 
 This guide describes setup and recovery, not proof that a particular operation has completed. See [current release status](../plan.md) and its linked history for recorded production evidence. Production already exists; use the setup steps below for a new environment or an approved configuration change, not to recreate existing resources. Do not upload `data/`, `backups/`, `materials/`, or environment files to a repository or deployment. Review every file before publishing a remote repository. `.gitignore`, `.vercelignore`, Next tracing exclusions, and the build check are complementary safeguards; inspect the upload and build output before release. The service-role key belongs only in server-side secrets and must never use a `NEXT_PUBLIC_` name.
 
+## Release workflow: localhost review before any push
+
+Owner-required 2026-11-27. Nothing is pushed to GitHub before the owner has reviewed it on localhost and approved it explicitly in the conversation.
+
+1. Commit the change on a feature branch. Run the no-mistakes checks without publishing: `no-mistakes axi run --skip=push,pr,ci --intent "..."`, then resolve its gates as usual.
+2. Run `npm run build` and start the production build in a persistent terminal session that is independent of the pipeline and the agent, for example `screen -dmS maths-review` running `PORT=3417 MATHS_DATA_DIR=<disposable dir> node scripts/start-local.mjs --production`. Use a disposable data directory, never production learner data.
+3. Verify the server responds (HTTP 200 on `/` and the changed routes), then give the owner the local link. Keep the server running for the whole review.
+4. Stop. Push, PR creation, merge and deployment wait for the owner's explicit approval in the conversation. Silence, an earlier approval or approval of a different change is not approval.
+5. After approval, run the full `no-mistakes axi run --intent "..."` through push, PR and CI, merge, then verify the Vercel deployment and production using the procedure below. Stop the review server afterwards.
+
+Any change after approval (including pipeline fix commits that alter behavior or copy) returns to step 2.
+
 ## Verify a release and reconcile local work
 
 1. Read remote `main` directly and record its full SHA/date. Check the Vercel status for that exact SHA and the stable production origin; a cached `origin/main` or local branch name is insufficient evidence.
