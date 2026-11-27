@@ -15,7 +15,7 @@ Make the app's purpose clear, its steps simple, and learning enjoyable. Use Line
 - Follow approved decisions. Ask one focused multiple-choice question for a material unresolved design, behavior, data or release decision before dependent work; continue independent work. Do not reopen settled decisions.
 - Preserve learner history, saved work, rewards and family isolation. Keep credentials, `data/`, `backups/` and `materials/` private; use disposable learners for checks. Never fabricate source verification or completed human review.
 - Use bounded parallel workers only when authorized and independently useful; one owner integrates and verifies the result. Runtime instructions govern model choice and team limits.
-- Never push before the owner has reviewed the change on localhost and approved it explicitly in the conversation. Run the checks without publishing, keep a production build running in a persistent session independent of the pipeline, share the local link and wait; see the [release workflow](docs/deployment.md#release-workflow-localhost-review-before-any-push).
+- Never push or open a PR before the owner approves in the conversation. Run each check once per candidate version, choose extra verification by what changed, and give the owner a persistent localhost build for application changes; see the [release workflow](docs/deployment.md#release-workflow).
 - Verify proportionately to the change. Report evidence and limitations; a local build is not a verified deployment. Record completed work briefly in `plan.md`, update the affected authoritative guide, and archive lengthy evidence instead of growing mandatory reading.
 
 ## Verify the review baseline

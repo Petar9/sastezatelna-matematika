@@ -2,17 +2,22 @@
 
 This guide describes setup and recovery, not proof that a particular operation has completed. See [current release status](../plan.md) and its linked history for recorded production evidence. Production already exists; use the setup steps below for a new environment or an approved configuration change, not to recreate existing resources. Do not upload `data/`, `backups/`, `materials/`, or environment files to a repository or deployment. Review every file before publishing a remote repository. `.gitignore`, `.vercelignore`, Next tracing exclusions, and the build check are complementary safeguards; inspect the upload and build output before release. The service-role key belongs only in server-side secrets and must never use a `NEXT_PUBLIC_` name.
 
-## Release workflow: localhost review before any push
+## Release workflow
 
-Owner-required 2026-11-27. Nothing is pushed to GitHub before the owner has reviewed it on localhost and approved it explicitly in the conversation.
+Owner-required 2026-11-27. Nothing is pushed to GitHub, and no PR is created, before the owner has approved it in the conversation. Run each check once per candidate version; do not restart a whole pipeline to re-validate unchanged code.
 
-1. Commit the change on a feature branch. Run the no-mistakes checks without publishing: `no-mistakes axi run --skip=push,pr,ci --intent "..."`, then resolve its gates as usual.
-2. Run `npm run build` and start the production build in a persistent terminal session that is independent of the pipeline and the agent, for example `screen -dmS maths-review` running `PORT=3417 MATHS_DATA_DIR=<disposable dir> node scripts/start-local.mjs --production`. Use a disposable data directory, never production learner data.
-3. Verify the server responds (HTTP 200 on `/` and the changed routes), then give the owner the local link. Keep the server running for the whole review.
-4. Stop. Push, PR creation, merge and deployment wait for the owner's explicit approval in the conversation. Silence, an earlier approval or approval of a different change is not approval.
-5. After approval, run the full `no-mistakes axi run --intent "..."` through push, PR and CI, merge, then verify the Vercel deployment and production using the procedure below. Stop the review server afterwards.
+1. **Branch and checks.** Commit one coherent outcome on a feature branch: a fix with its tests and documentation belongs together; unrelated workflow changes or historical documentation go in their own PR. Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build` once. Reinstall dependencies only when `package-lock.json` changed.
+2. **Targeted verification.** Choose extra learner simulations and screenshots by what changed, not by habit:
+   - Selection or recovery: exhausted content, mistakes awaiting recovery, completed/Professor skills, multipart problems, competition isolation.
+   - Rewards or evidence: hints, duplicate attempts, fresh versus familiar problems, stored historical awards.
+   - Accounts or sharing: ownership, invited access, revocation, unauthorized access.
+   - UI: the affected flow on desktop and a narrow viewport; 320, 360 and 390 px when the responsive layout changes.
+3. **Independent review where it adds value.** Changes to selection, learning evidence, rewards, persistence or access get one independent review of the changed code and its tests. New or materially changed Bulgarian text follows the [copy review gate](../AGENTS.md#independent-copy-review-before-testing); unchanged copy is not re-reviewed.
+4. **Localhost review.** Start the production build in a persistent terminal session independent of the agent, for example `screen -dmS maths-review` running `PORT=3417 MATHS_DATA_DIR=<disposable dir> node scripts/start-local.mjs --production`. Use disposable synthetic learners, never production learner data. Verify HTTP 200 on `/` and the changed routes, then give the owner the local link and a short list of what to inspect. Keep the server running during the review. Serve on the local network only when the owner asks to test on a phone.
+5. **Approval.** Stop before any push or PR. The owner approves in plain words; the agent records which commit and link were approved. Silence, an earlier approval or approval of a different version is not approval. A material change after approval needs a new review and approval.
+6. **Publish.** After approval, push the approved commit as is and open the PR without re-running checks or reviews. Merge when the required PR checks pass, then verify the deployment and production using the procedure below, and stop the review server.
 
-Any change after approval (including pipeline fix commits that alter behavior or copy) returns to step 2.
+Documentation-only changes need a link, consistency and diff review instead of a build and localhost review; they still wait for the owner's approval before pushing. Commit messages, PR descriptions and comments carry no tool or assistant attribution.
 
 ## Verify a release and reconcile local work
 
