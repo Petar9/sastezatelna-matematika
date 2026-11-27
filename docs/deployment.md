@@ -17,6 +17,8 @@ Owner-required 2026-11-27. Nothing is pushed to GitHub, and no PR is created, be
 5. **Approval.** Stop before any push or PR. The owner approves in plain words; the agent records which commit and link were approved. Silence, an earlier approval or approval of a different version is not approval. A material change after approval needs a new review and approval.
 6. **Publish.** After approval, push the approved commit as is and open the PR without re-running checks or reviews. Merge when the required PR checks pass, then verify the deployment and production using the procedure below, and stop the review server.
 
+After a failed check, fix and rerun the affected checks; an unchanged commit needs no rerun.
+
 Documentation-only changes need a link, consistency and diff review instead of a build and localhost review; they still wait for the owner's approval before pushing. Commit messages, PR descriptions and comments carry no tool or assistant attribution.
 
 ## Verify a release and reconcile local work
