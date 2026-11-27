@@ -33,4 +33,4 @@ Calendar review result: `gpt-6.1-sol` (low), 2026-11-06, recommends no substanti
 
 ## Reviewer model correction
 
-Owner clarified on 2026-11-06 that the required reviewer is Astra (`gpt-6-astra`), not “Alpha”. The completed reviews above actually used `gpt-6.1-sol`; they are historical evidence, not completed Astra reviews. Future qualifying work must follow the [Astra review gate](../../AGENTS.md#astra-copy-review-before-testing).
+Owner clarified on 2026-11-06 that the required reviewer is Astra (`gpt-6-astra`), not “Alpha”. The completed reviews above actually used `gpt-6.1-sol`; they are historical evidence, not completed Astra reviews. Future qualifying work must follow the [Astra review gate](../../AGENTS.md#independent-copy-review-before-testing).

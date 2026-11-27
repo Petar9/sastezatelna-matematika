@@ -95,7 +95,7 @@ Use short transitions (`--motion-fast`) for controls. Progress uses its existing
 2. Reuse an existing primitive or product pattern. Extend it with a documented state/variant when the same semantic need fits.
 3. If a real reusable gap remains, create the smallest complete component in `components/ui` (domain patterns stay with domain components). Document props, states, accessibility and examples here; add it to the gallery in the same change. Keep one-off layouts local.
 4. Ask the owner before material new visual/interaction decisions. Do not create hypothetical variants or silently redesign approved behavior.
-5. For new pages or substantial copy revisions, complete the [Astra copy review and owner approval gate](../AGENTS.md#astra-copy-review-before-testing); save the review context and approved wording before acceptance testing.
+5. For new pages or substantial copy revisions, complete the [independent copy review and owner approval gate](../AGENTS.md#independent-copy-review-before-testing); save the review context and approved wording before acceptance testing.
 6. Check keyboard focus and semantics, error/loading/disabled states, long Bulgarian labels, 320/390px mobile and desktop, reduced motion, and the fixed action bar where affected. Do not write learner data for a visual check.
 7. Run proportionate interaction tests, `npm run typecheck`, `npm run lint`, and production build. Confirm `/design-system` returns 404 in production. Record results and any limitation in `plan.md`.
 

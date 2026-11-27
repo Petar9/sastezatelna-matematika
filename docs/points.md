@@ -172,7 +172,7 @@ Before implementation, decide whether this applies only to future catalogue addi
 | UI | 0/partial/80/100%, endpoint clamps, long Bulgarian, 320/390px and desktop, keyboard, screen reader values, reduced motion, no task/action-bar overlap or duplicate adventure meaning. |
 | Privacy | Authorized child scope, sibling/family isolation, no answers in preparation projection; disposable fixtures only. |
 
-Astra reviews new visible Bulgarian and the owner approves its wording in conversation before acceptance testing, following [AGENTS.md](../AGENTS.md#astra-copy-review-before-testing).
+An independent frontier-model reviewer checks new visible Bulgarian and the owner approves its wording in conversation before acceptance testing, following [AGENTS.md](../AGENTS.md#independent-copy-review-before-testing).
 
 ## Full implementation plan
 

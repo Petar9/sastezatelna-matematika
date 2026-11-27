@@ -160,6 +160,16 @@ export function choosePracticeProblem(course: KidsCourse, content: KidsCourseCon
 // Enumerate finite catalogues from the beginning. Saved cursors remain compatible,
 // but cannot hide newly prioritised originals after a content-order change.
 export function chooseSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, now: string, review = false, replacingKey?: string, context = createSelectionContext(course, content, now, replacingKey), existenceOnly = false, accepts?: (problem: CourseProblem) => boolean) {
+ const chosen = scanSkillProblem(course, content, skillId, harder, review, context, existenceOnly, accepts, false);
+ if (chosen || harder || review) return chosen;
+ // A skill needing revisit can only recover through fresh evidence. Once its core
+ // pool is exhausted, unseen harder authored tasks are the remaining fresh work.
+ const topic = content.topics.find(t => t.skills.some(s => s.id === skillId));
+ if (!topic || !course.topics[topic.id]?.skills[skillId]?.revisit) return chosen;
+ return scanSkillProblem(course, content, skillId, harder, review, context, existenceOnly, accepts, true);
+}
+
+function scanSkillProblem(course: KidsCourse, content: KidsCourseContent, skillId: string, harder: boolean, review: boolean, context: SelectionContext, existenceOnly: boolean, accepts: ((problem: CourseProblem) => boolean) | undefined, harderRecovery: boolean) {
  let chosen: { problem: CourseProblem; cursor: number; rank: number } | undefined;
  const ids = new Set<string>();
  const lastReview = review ? course.attempts.findLast(a => a.problem.skillId === skillId && a.mode === "review" && a.outcome === "independent") : undefined;
@@ -169,8 +179,8 @@ export function chooseSkillProblem(course: KidsCourse, content: KidsCourseConten
   if (!problem) break;
   if (ids.has(problem.id) || accepts && !accepts(problem)) continue;
   ids.add(problem.id);
-  // Harder authored tasks can support review, but never fill exhausted core pools.
-  if (!harder && !review && pool && !isCompetitionProblem(problem)) continue;
+  // Harder authored tasks support review, and fill an exhausted core pool only for revisit recovery.
+  if (!harder && !review && !harderRecovery && pool && !isCompetitionProblem(problem)) continue;
   const exposure = context.exposure(problem);
   if (exposure.reserved || exposure.seen && (!review || exposure.blocked)) continue;
   if (existenceOnly) return { problem, cursor, rank: 0 };

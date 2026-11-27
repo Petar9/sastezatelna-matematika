@@ -74,7 +74,7 @@ export function AdventureHome({ view, nickname, busy, start, resumeTopic, headin
  const available = pending || view.questAvailable !== false;
  const total = pending ? view.quest!.total : 5;
  return <section className={s.adventureHome} aria-label="Твоето приключение">
-  <div className={s.hero}><KidsOtter/><div><h1 ref={headingRef} tabIndex={-1} className={s.title}>{nickname ? `Здравей, ${nickname}!` : "На път за съкровища!"}</h1><p>{pending ? `Премина ${completed} от ${total} стъпки. Хайде нататък!` : available ? "Пет стъпки. Нови открития. Твое съкровище." : "Разгледа всички задачи за момента! Можеш да се върнеш към островите."}</p></div></div>
+  <div className={s.hero}><KidsOtter/><div><h1 ref={headingRef} tabIndex={-1} className={s.title}>{nickname ? `Здравей, ${nickname}!` : "На път за съкровища!"}</h1><p>{pending ? `Премина ${completed} от ${total} стъпки. Хайде нататък!` : available ? view.questPractice === "recovery" ? "Да затвърдим знанията си." : view.questPractice === "repeat" ? "Нека да преговорим някои задачи." : "Пет стъпки. Нови открития. Твое съкровище." :"Разгледа всички задачи за момента! Можеш да се върнеш към островите."}</p></div></div>
   {view.weeklyGoal && <p className={s.small} data-weekly-goal={view.weeklyGoal.achieved ? "achieved" : "pending"}><span>Тази седмица</span>{" · "}{view.weeklyGoal.achieved ? "Приключението за тази седмица е завършено." : "Завърши едно приключение."}</p>}
   {available && <AdventureRoute completed={completed} total={total}/>}
   {available && <div className={s.treasurePreview}><AdventureSouvenir index={view.stamps?.length ?? 0}/><div><small>В следващото съкровище</small><strong>{souvenirs[(view.stamps?.length ?? 0) % souvenirs.length]}</strong></div><span aria-hidden="true">✦</span></div>}

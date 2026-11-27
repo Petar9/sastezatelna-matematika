@@ -12,6 +12,7 @@ Reconciled 2026-11-27 against remote `main`, exact-commit Vercel status and read
 
 ## Local only and not yet verified
 
+- Branch `fix/exhausted-recovery` (local, not pushed or deployed): revisit skills with an exhausted core pool now use unseen harder authored tasks as fresh recovery work, and the adventure home names repeat practice („Да затвърдим знанията си.“ / „Нека да преговорим някои задачи.“). Copy gate is now model-agnostic. Tests 429/429 and build pass. Replay of a real Olympiad record unblocks 9 of 10 revisit skills; NVO's 21 exhausted skills still need new content. [Review record](docs/reviews/exhausted-recovery-2026-11-27.md).
 - New landing/product-trial UI, screenshots, US-market research and landing-copy proposal remain in `/Users/mac/ideas/maths`; they are not in the verified production tree. The commercial offer and billing remain unimplemented. [Landing specification](landing-page-plan.md).
 - Year-by-year HTML competition archives, the 2021/2022 Maths enrichment integration and its reminder exercises, and the competition-import skill were discussed in chat, but implementation artifacts were not located in the audited source/docs. Treat these as **unverified**, not ready to publish; locate their worktree/branch and review before resuming.
 - A separate arithmetic weekly/daily average is **not implemented**; the published feature is a weekly summary. The metric and denominator need a decision before coding.
@@ -26,4 +27,4 @@ Reconciled 2026-11-27 against remote `main`, exact-commit Vercel status and read
 
 ## Next-work boundary
 
-The original checkout has an old HEAD, a stale cached remote and mixed published/local changes. Do not reset it or publish its whole working tree. Start from fresh remote `main`, preserve local drafts and port only reviewed differences using the [release verification procedure](docs/deployment.md#verify-a-release-and-reconcile-local-work). Run the [Astra copy gate](AGENTS.md#astra-copy-review-before-testing) for applicable new visible copy, then proportionate tests and local acceptance before any newly authorized release.
+The original checkout has an old HEAD, a stale cached remote and mixed published/local changes. Do not reset it or publish its whole working tree. Start from fresh remote `main`, preserve local drafts and port only reviewed differences using the [release verification procedure](docs/deployment.md#verify-a-release-and-reconcile-local-work). Run the [independent copy gate](AGENTS.md#independent-copy-review-before-testing) for applicable new visible copy, then proportionate tests and local acceptance before any newly authorized release.

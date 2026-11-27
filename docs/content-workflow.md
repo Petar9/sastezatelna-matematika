@@ -44,7 +44,7 @@ Do not change app behavior, publish content or reset learner progress just to co
 
 ## 4. Review and release
 
-- [ ] Complete the [Astra copy review and owner approval gate](../AGENTS.md#astra-copy-review-before-testing) for the collection's visible Bulgarian before the tests below; save the review context and decisions in its review record.
+- [ ] Complete the [independent copy review and owner approval gate](../AGENTS.md#independent-copy-review-before-testing) for the collection's visible Bulgarian before the tests below; save the review context and decisions in its review record.
 - [ ] Have a human reviewer check every original against its source, all answers and three-part explanations, authored exercises, figures and skill mappings. Resolve discrepancies and record the reviewer, date and outcome.
 - [ ] Confirm permission to publish the intended statements, figures and other assets. Keep private source packs, full transcripts, answer packs, credentials and learner data out of public assets and deployment output.
 - [ ] Test original-first selection, answers, assisted versus independent evidence, subcondition persistence, repeat prevention, rewards and exhausted-content behavior using disposable learners. Prove normal-command confirmation and delayed review reachability for every skill. Retention must remain available after Professor: first after two days, then 30 days after independent review; preserve saved due dates, recovery and earned awards.
@@ -67,7 +67,7 @@ Copy this record into a collection-specific review document; keep the detailed s
 | Coverage by island and skill / missing years and methods | |
 | Answer verification / source exceptions / unresolved issues | |
 | Difficulty review: ordinary / hard original counts, rationale registry / practice exceptions | |
-| Astra copy review / context and proposals / owner decisions / date | |
+| Independent copy review (reviewer model) / context and proposals / owner decisions / date | |
 | Human reviewer / review date / outcome | |
 | Verification commands and results / history compatibility | |
 | Publication permission and approval / release status | |

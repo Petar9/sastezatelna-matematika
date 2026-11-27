@@ -23,6 +23,19 @@ function harness(content = fixture()) {
  return {get c(){return c;},set c(v){c=v;},view,go,work,answer,next,content};
 }
 
+test("a revisit skill with an exhausted core recovers through unseen harder authored tasks before voluntary practice",()=>{
+ const base=fixture(1),harder:CourseProblem={id:"harder-practice",skillId:"skill",text:"По-трудна задача",source:"Тест",fields:[{label:"Отговор",answer:"7"}],hint:"Помощ",explanation:["Решение"]};
+ const h=harness({...base,problem:(skill,i,hard)=>hard?i===0?structuredClone(harder):null:base.problem(skill,i,false)});
+ h.go({type:"startQuest"});h.answer(false);
+ assert.equal(h.c.topics.topic!.skills.skill!.revisit,true);
+ h.next();
+ assert.equal(h.work().attempt.problem.id,"harder-practice");assert.equal(h.work().attempt.mode,"core");
+ h.answer();
+ assert.equal(h.c.attempts.at(-1)!.freshEvidence,true);assert.equal(h.c.topics.topic!.skills.skill!.streak,1);
+ h.next();
+ assert.equal(h.view().stage,"questComplete");assert.equal(h.view().questPractice,"recovery");
+});
+
 test("exhausted adventures retry mistakes immediately, rotate successes and never end voluntary practice",()=>{
  const h=harness();h.go({type:"startQuest"});h.answer(false);h.next();h.answer();h.next();
  assert.equal(h.view().stage,"questComplete");assert.equal(h.view().questPractice,"recovery");
