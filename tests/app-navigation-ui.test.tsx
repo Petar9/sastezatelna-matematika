@@ -94,3 +94,19 @@ test("every shared app menu outside practice links back to overview guidance",as
   }finally{await h.cleanup();}
  }
 });
+
+test("the sound toggle shows its state and remembers the choice on this browser",async()=>{
+ const values=new Map<string,string>();
+ const storage={getItem:(k:string)=>values.get(k)??null,setItem:(k:string,v:string)=>{values.set(k,v);},removeItem:(k:string)=>{values.delete(k);}};
+ Object.defineProperty(window,"localStorage",{value:storage,configurable:true});
+ try{
+  let h=await mount(<AppMenu/>);try{
+   await act(async()=>button(h.host,"Звук: включен").click());
+   assert.equal(values.get("maths:sound"),"off");assert.ok(button(h.host,"Звук: изключен"));
+  }finally{await h.cleanup();}
+  h=await mount(<AppMenu/>);try{
+   await act(async()=>button(h.host,"Звук: изключен").click());
+   assert.equal(values.has("maths:sound"),false);assert.ok(button(h.host,"Звук: включен"));
+  }finally{await h.cleanup();}
+ }finally{Object.defineProperty(window,"localStorage",{value:undefined,configurable:true});}
+});

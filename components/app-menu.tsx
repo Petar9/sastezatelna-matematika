@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { Button } from "./ui/button";
 import { ActionIcon, type ActionIconName } from "./ui/action-icon";
 import { FeedbackDialog, type FeedbackContext } from "./feedback";
+import { setSoundEnabled, soundEnabled } from "./sound";
 import s from "./app-navigation.module.css";
 
 type Props = FeedbackContext & {
@@ -16,7 +17,8 @@ type Props = FeedbackContext & {
  onGuide?: () => void;
 };
 export function AppMenu({ current, allowLogout = true, allowFeedback = true, onNavigate, beforeLogout, onGuide, ...context }: Props) {
- const [open, setOpen] = useState(false), [feedback, setFeedback] = useState(false), [busy, setBusy] = useState(false);
+ const [open, setOpen] = useState(false), [feedback, setFeedback] = useState(false), [busy, setBusy] = useState(false), [sound, setSound] = useState(true);
+ useEffect(() => setSound(soundEnabled()), []);
  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), pending = useRef(false);
  const id = useId();
  useEffect(() => {
@@ -39,6 +41,7 @@ export function AppMenu({ current, allowLogout = true, allowFeedback = true, onN
    <nav id={id} className={s.panel} aria-label="Основна навигация" hidden={!open}>
     {links.map(link => <Link key={link.href} href={link.href} className={s.item} aria-current={current && current === link.page ? "page" : undefined} onClick={event => { onNavigate?.(event, link.href); setOpen(false); }}><ActionIcon name={link.icon}/><span>{link.label}</span></Link>)}
     {onGuide ? <Button variant="quiet" className={s.item} onClick={()=>{setOpen(false);onGuide();}}><ActionIcon name="info"/><span>Покажи ми как</span></Button> : <Link className={s.item} href={context.competitionId ? `/?competition=${encodeURIComponent(context.competitionId)}&guide=1` : "/?guide=1"} onClick={event=>{const href=context.competitionId ? `/?competition=${encodeURIComponent(context.competitionId)}&guide=1` : "/?guide=1";onNavigate?.(event,href);setOpen(false);}}><ActionIcon name="info"/><span>Покажи ми как</span></Link>}
+    <Button variant="quiet" className={s.item} onClick={() => { setSoundEnabled(!sound); setSound(!sound); }}><ActionIcon name={sound ? "sound" : "muted"}/><span aria-live="polite">{sound ? "Звук: включен" : "Звук: изключен"}</span></Button>
     {allowFeedback && <Button variant="quiet" className={s.item} onClick={() => { setOpen(false); setFeedback(true); }}><ActionIcon name="feedback"/><span>Обратна връзка</span></Button>}
     {allowLogout && <form action="/auth/logout" method="post" className={s.logout} onSubmit={event => {
      if (!beforeLogout) return;

@@ -13,6 +13,8 @@ const states = {
  recovery: { wrongEvery: 4, done: (c: KidsCourse, v: View) => v.questPractice === "recovery" && !c.quest?.work },
  // At least one island has reached Professor.
  professor: { wrongEvery: 0, done: (c: KidsCourse) => Object.values(c.topics).some(t => t.professorAt) && !c.quest?.work },
+ // Two answers yesterday and none today: answering a few today sets a new daily record.
+ "record-ready": { wrongEvery: 0, done: (c: KidsCourse) => c.attempts.filter(a => a.outcome).length >= 2 },
 } as const;
 type View = ReturnType<typeof courseView>;
 type StateName = keyof typeof states;
@@ -29,7 +31,8 @@ if (fs.existsSync(directory) && fs.readdirSync(directory).length) throw new Erro
 function build(content: KidsCourseContent, state: StateName): KidsCourse {
  const { wrongEvery, done } = states[state];
  // Recent past timestamps: earlier than the server's clock, but too recent for scheduled reviews to fall due.
- let time = Date.now() - 2 * 3600000;
+ // The record state places its history on the previous day.
+ let time = Date.now() - (state === "record-ready" ? 26 : 2) * 3600000;
  const now = () => new Date(time).toISOString();
  let course = newKidsCourse(content, now());
  const go = (action: CourseAction) => { time += 1000; course = applyCourseAction(course, content, action, now()); };

@@ -89,6 +89,8 @@ Short, concrete Bulgarian. Preserve approved “Откриваме заедно�
 
 Use short transitions (`--motion-fast`) for controls. Progress uses its existing short transition. Respect `prefers-reduced-motion` in controls, progress and celebrations; no essential information may depend on movement.
 
+Sound marks rare achievements only, decided from a newly accepted answer in any practice mode (`src/core/sounds.ts`): a rising three-note chord for a learning milestone (whole competition problem solved independently, improvement after hints, independent review, new Doctor/Professor) and a four-note chord for a new daily record. Never per answer, for mistakes, on reload/resume, or as the only signal; the dialog, otter and award carry the meaning. Sounds are synthesised (`components/sound.ts`), quiet, on by default, muted by „Звук“ in the app menu per browser, and obey the iOS silent switch (do not set `navigator.audioSession`).
+
 ## Every UI change
 
 1. Read this guide, inspect the catalogue and the existing implementation before designing.
