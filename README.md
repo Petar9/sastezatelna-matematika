@@ -17,7 +17,7 @@ npm run local:start
 
 ## Онлайн режим със Supabase
 
-Приложението е публикувано на https://sastezatelna-matematika.vercel.app/ . Следващите стъпки са за настройка на отделна среда; не създавай повторно съществуващия production проект. Текущият статус и неприключилите проверки са в [plan.md](plan.md).
+Приложението е публикувано на https://sastezatelna-matematika.vercel.app/ . Следващите стъпки са за настройка на отделна среда; не създавай повторно съществуващия production проект. Текущият статус и неприключилите проверки са в локалния файл plan.md (не е в Git).
 
 1. Създай отделен Supabase проект и приложи всички файлове от `supabase/migrations/` по реда на имената им чрез SQL Editor или Supabase CLI.
 2. Включи Google provider в Supabase Auth. В Google Cloud настрой callback адреса, даден от Supabase. В Supabase URL Configuration задай домейна и разреши точно `https://YOUR-DOMAIN/auth/callback`.
@@ -57,7 +57,7 @@ npm run progress:import -- --parent-id PARENT_UUID --child-id CHILD_UUID --file 
 ## Ръководства
 
 - [AGENTS.md](AGENTS.md): принципи за работа и избор на подходящото ръководство.
-- [plan.md](plan.md): текуща версия, оставащи проверки и бъдещ обхват; съдържа връзка към историята на изпълнението.
+- plan.md (локален файл, не е в Git): текуща версия, оставащи проверки и бъдещ обхват; съдържа връзка към историята на изпълнението.
 - [key-decisions.md](key-decisions.md): актуални продуктови и образователни правила; съдържа връзка към предишните решения.
 - [SEO и GEO](seo-geo.md): публични материали, домейн, търговска страница и измерване.
 - [Дизайн система](docs/design-system.md): компоненти, оформление, текстове и достъпност.

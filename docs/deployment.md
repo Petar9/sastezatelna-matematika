@@ -27,7 +27,7 @@ Documentation-only changes need a link, consistency and diff review instead of a
 2. Compare local file contents with the verified remote tree. A modified/untracked local file may already be published; a different file may be older than production. Keep local-only drafts, missing artifacts and intentionally deferred work separate.
 3. Preserve a dirty checkout. Start an isolated checkout from fresh remote `main` and port only reviewed changes; never overwrite current continuation, access or dependency fixes by copying an old working tree wholesale. Keep landing/SEO drafts excluded until separately approved.
 4. Record actual public HTTP/bundle checks and applicable authenticated checks separately. Anonymous public success and shipped JS markers do not prove a real Google learner journey. Use disposable records for functional acceptance; avoid production learner writes.
-5. Update [current status](../plan.md) with one linked dated evidence record. Preserve earlier acceptance history; qualify its dates rather than reporting old tests or audits as freshly run. A documentation-only reconciliation needs link/diff checks, not a new app deployment.
+5. Update the local, untracked [current status](../plan.md) (no commit or push) with one linked dated evidence record. Preserve earlier acceptance history; qualify its dates rather than reporting old tests or audits as freshly run. A documentation-only reconciliation needs link/diff checks, not a new app deployment.
 
 The [2026-11-27 audit](reviews/production-audit-2026-11-27.md) demonstrates this separation. Deployment-provider success, live alias checks, content approval and search indexing are distinct claims.
 

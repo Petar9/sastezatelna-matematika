@@ -7,3 +7,6 @@ backups/
 *.tsbuildinfo
 next-env.d.ts
 materials/
+
+# Local-only status log; never pushed.
+/plan.md

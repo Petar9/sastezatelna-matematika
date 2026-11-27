@@ -16,7 +16,7 @@ Make the app's purpose clear, its steps simple, and learning enjoyable. Use Line
 - Preserve learner history, saved work, rewards and family isolation. Keep credentials, `data/`, `backups/` and `materials/` private; use disposable learners for checks. Never fabricate source verification or completed human review.
 - Use bounded parallel workers only when authorized and independently useful; one owner integrates and verifies the result. Runtime instructions govern model choice and team limits.
 - Never push or open a PR before the owner approves in the conversation. Run each check once per candidate version, choose extra verification by what changed, and give the owner a persistent localhost build for application changes; see the [release workflow](docs/deployment.md#release-workflow).
-- Verify proportionately to the change. Report evidence and limitations; a local build is not a verified deployment. Record completed work briefly in `plan.md`, update the affected authoritative guide, and archive lengthy evidence instead of growing mandatory reading.
+- Verify proportionately to the change. Report evidence and limitations; a local build is not a verified deployment. Record completed work briefly in `plan.md` (a local, untracked file; update it without a commit or push), update the affected authoritative guide, and archive lengthy evidence instead of growing mandatory reading.
 
 ## Verify the review baseline
 
@@ -38,7 +38,7 @@ For every new or expanded competition, new page or article, and substantial copy
 
 | Task | Guidance |
 | --- | --- |
-| Current work, outstanding checks or release status | [plan.md](plan.md) |
+| Current work, outstanding checks or release status | [plan.md](plan.md) (local only, not in Git) |
 | Education, content selection, progress or account behavior | [key-decisions.md](key-decisions.md) |
 | Gold, points, reward rates, eligibility or reward history | [Gold and rewards](docs/points.md); distinguish active policy from pending proposals |
 | UI, components, interaction or copy | [Design system](docs/design-system.md); inspect `components/ui` and the development-only `/design-system` catalogue |
