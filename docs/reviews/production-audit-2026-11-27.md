@@ -77,6 +77,30 @@ The conversation describes yearly HTML competition archives, 2021/2022 Maths enr
 - Search Console/Bing ownership, index coverage, keyword volume and provider billing/plan configuration were not verified. The commercial price is a proposal, not evidence of validated demand or implemented payments.
 - Real Google owner/shared-family flows, physical-device behavior, cross-device continuity and the reported “Не сега” latency were not re-tested. Authenticated product acceptance in prior records used disposable local fixtures; public HTTP checks do not settle these questions.
 
+## Critical review correction - 2026-11-27
+
+The subsequent Claude review inspected the dirty `/Users/mac/ideas/maths` checkout, then treated missing or older local implementation as current-product evidence. This conflated an old checkout with production and approved design choices with defects. The corrected review used `/private/tmp/maths-docs-reconcile-20261127`, whose local HEAD was `566d7220e6e507bfb1e8e07e98d5bbf189327d66`: a documentation-only reconciliation based on verified production source `4bf453b6f178244451587c19285e8cdb44a56c0a`, not a deployed revision. These identities are dated evidence; verify again before future implementation or release claims.
+
+The following original findings are withdrawn or narrowed against that production source:
+
+| Original finding | Correction and source |
+| --- | --- |
+| No mistakes on calendar tiles | `components/progress-calendar.tsx` renders the distinct incorrect-task count. |
+| No attempt logging or learning evidence | `CourseAttempt` in `src/core/kids-course.ts` already retains the problem, answers, outcome, hint level, completion date and mode. Activity records do not by themselves establish learning effectiveness. |
+| No weekly summaries or goals | `components/weekly-progress.tsx` and the weekly goal in `components/kids-adventure.tsx` are already shipped. |
+| Three-part hints only for regional Olympiad | Three progressive worked parts are an established [content requirement](../content-workflow.md) with catalogue tests in `tests/kids-quest.test.ts`; the regional set received expanded explanations. |
+| No report-a-problem control | `components/app-menu.tsx` already opens feedback. A more direct task-specific entry point is a proposal, not a missing-feedback defect. |
+| First correct task always pays 25/30 gold | `src/core/kids-gold.ts` can award 35/40 for a new hard-competition problem including first skill milestones. The actual payout depends on eligibility and prior awards. |
+| Selection policy is untestable | Selection/review tests exist; adequacy of coverage remains a review question. |
+
+Confirmed concerns remain: skill awards have no stored paid amount and balances read current milestone constants; wrong answers still share the feedback surface and immediately show the explanation. Approved reward, help and review policies remain in [points](../points.md) and [current decisions](../../key-decisions.md), and copy review remains governed by [AGENTS.md](../../AGENTS.md#independent-copy-review-before-testing). No redesign was approved by accepting this correction.
+
+The explanation for the three screenshot days remains an inference: no child's saved records were read. A future investigation should first prepare an owner-facing reward breakdown from an explicitly agreed data source. A child-facing breakdown is a separate UI proposal. Use existing attempt history before adding measurement; time-on-task is optional and needs a defined question because idle tabs and interruptions distort it. Separate immediate recovery practice from actually delayed reviews when assessing retention. Phone/readability and assistive-technology findings require observed checks rather than assumptions from source alone.
+
+The owner approved this documentation correction in chat. The reusable [review-baseline rule](../../AGENTS.md#verify-the-review-baseline) requires future reviews to separate confirmed defects, already-shipped behavior, approved policies and proposals. This correction adds no application change, private-data access, live recheck or deployment; the evidence and limits above still apply.
+
+Correction verification: 40 relative file/anchor links across the three changed Markdown files passed, as did `git diff --check`; the changed-file scope contains only `AGENTS.md`, `plan.md` and this record. Application tests were not rerun for this documentation-only change.
+
 ## Documentation reconciliation and verification
 
 Current status is now concise in [plan.md](../../plan.md); its previous mixed local/released log is retained in the [status archive](../archive/status-2026-11-27.md). Current decisions/checklist now agree with the always-visible connected-original UI and five published competitions. Rewards record the already released NVO/regional exercises; design rules record gold-only precedence. SEO/landing docs distinguish published resources from the unpublished commercial draft. README/access wording and the deployment verification procedure match current behavior.

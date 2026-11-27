@@ -18,6 +18,12 @@ Make the app's purpose clear, its steps simple, and learning enjoyable. Use Line
 - Never push before the owner has reviewed the change on localhost and approved it explicitly in the conversation. Run the checks without publishing, keep a production build running in a persistent session independent of the pipeline, share the local link and wait; see the [release workflow](docs/deployment.md#release-workflow-localhost-review-before-any-push).
 - Verify proportionately to the change. Report evidence and limitations; a local build is not a verified deployment. Record completed work briefly in `plan.md`, update the affected authoritative guide, and archive lengthy evidence instead of growing mandatory reading.
 
+## Verify the review baseline
+
+Before reviewing current behavior, record the checkout path, commit and verification date, and establish its relationship to production using the [release verification procedure](docs/deployment.md#verify-a-release-and-reconcile-local-work). A local documentation commit is not a deployed application revision. Missing features in an unverified checkout are unconfirmed findings, not proof of a production defect.
+
+Separate confirmed defects, already-shipped behavior, approved product policies and proposals needing approval. Check the authoritative guide before recommending a policy change; do not reopen an approved decision as a bug. Identify source findings, observed behavior and inferences separately. Preserve dirty checkouts and compare them only to identify work worth retaining. See the [stale-checkout correction](docs/reviews/production-audit-2026-11-27.md#critical-review-correction---2026-11-27).
+
 ## Independent copy review before testing
 
 For every new or expanded competition, new page or article, and substantial copy revision, complete this gate after drafting and before acceptance/regression testing:
