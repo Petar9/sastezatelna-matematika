@@ -79,7 +79,7 @@ The conversation describes yearly HTML competition archives, 2021/2022 Maths enr
 
 ## Critical review correction - 2026-11-27
 
-The subsequent Claude review inspected the dirty `/Users/mac/ideas/maths` checkout, then treated missing or older local implementation as current-product evidence. This conflated an old checkout with production and approved design choices with defects. The corrected review used `/private/tmp/maths-docs-reconcile-20261127`, whose local HEAD was `566d7220e6e507bfb1e8e07e98d5bbf189327d66`: a documentation-only reconciliation based on verified production source `4bf453b6f178244451587c19285e8cdb44a56c0a`, not a deployed revision. These identities are dated evidence; verify again before future implementation or release claims.
+The subsequent critical review inspected the dirty `/Users/mac/ideas/maths` checkout, then treated missing or older local implementation as current-product evidence. This conflated an old checkout with production and approved design choices with defects. The corrected review used `/private/tmp/maths-docs-reconcile-20261127`, whose local HEAD was `566d7220e6e507bfb1e8e07e98d5bbf189327d66`: a documentation-only reconciliation based on verified production source `4bf453b6f178244451587c19285e8cdb44a56c0a`, not a deployed revision. These identities are dated evidence; verify again before future implementation or release claims.
 
 The following original findings are withdrawn or narrowed against that production source:
 
