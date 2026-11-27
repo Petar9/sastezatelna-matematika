@@ -2,13 +2,13 @@
 
 Use this checklist for each new grade 4 competition or source expansion. Read [key-decisions.md](../key-decisions.md) for learning, [gold and rewards](points.md#current-approved-policy) for reward policy and [plan.md](../plan.md) for current work/release status. Pending reward proposals do not change the active checklist. Keep a separate review record for each collection. An unchecked item is pending, not approval; record a reason and reviewer for anything marked not applicable.
 
-Do not change app behavior, publish content or reset learner progress just to complete this checklist. The three existing pilot collections were explicitly approved for publication despite disclosed outstanding review; that dated exception is recorded in [current decisions](../key-decisions.md) and does not approve future unreviewed content.
+Do not change app behavior, publish content or reset learner progress just to complete this checklist. The first three pilot collections were explicitly approved on 2026-11-04 for publication despite disclosed outstanding review; that dated exception is recorded in [current decisions](../key-decisions.md) and does not approve future unreviewed content.
 
 ## 1. Collect and verify sources
 
 - [ ] Record the competition, grade, years, rounds and intended source scope; do not describe a partial archive as all past tournaments.
 - [ ] Keep unchanged original PDFs, answer keys and solutions privately under `materials/`, outside Git and deployment bundles. Inventory the title, filename or URL, date received, year, round, problem number, page and matching answer key. Keep private learner information out of review documents.
-- [ ] Save available tutor transcripts as Markdown alongside their sources, with video URLs, timestamps and uncertain or missing passages. Record unavailable transcripts; never invent them. Tutor explanations inform teaching methods, not the answer key.
+- [ ] Save available tutor transcripts as Markdown alongside their sources, with video URLs, timestamps and uncertain or missing passages. Record unavailable transcripts; never invent them. Use verified transcript reasoning to draft the three progressive hints, then check every calculation against the source and independently. For complex problems, show the intermediate transformations and why they work, following the [regional hint review](reviews/regional-hints-2026-11-15.md). Tutor explanations inform teaching methods, not official-key status.
 - [ ] Preserve original wording, choices, problem numbering and figures. Check extraction against the PDF for OCR errors, broken words, mixed alphabets, units and decimal notation. Label any necessary clarification separately instead of silently rewriting the original.
 - [ ] Check each answer against the official key and solution where available, and independently verify the mathematics. Record missing keys, conflicting answers and ambiguous conditions; exclude unresolved problems from automatic grading.
 - [ ] Review Bulgarian explanations for clear grade 4 language and mathematical accuracy. Prefer concrete instructions to academic shorthand such as “максимизирай”; do not simplify away a mathematical condition.
@@ -21,7 +21,7 @@ Do not change app behavior, publish content or reset learner progress just to co
 - [ ] Propose the island count and skill grouping, with coverage and gaps, for the owner's approval before implementation. Group by the main solving method; split an oversized mixed-method island when both resulting groups have useful coverage. Keep each whole original together. Do not force equal island counts or disguise thin coverage.
 - [ ] Prioritize eligible unseen real competition problems in adventures, diagnostics, island practice and exact-skill practice. Use reviewed similar exercises for confirmation or documented source gaps; distinguish them from originals and never invent a competition year.
 - [ ] Provide exactly three concrete worked-solution parts for each prepared problem, using its actual numbers, calculations and reasoning. “Подсказка” and “Следваща подсказка” reveal them progressively; check the final answer and every intermediate step. Explain why each nontrivial transformation works in short paragraphs, using grade 4 methods. Start the model in hint 1, explain the decisive method in hint 2, and finish/check in hint 3; avoid revealing the current part’s requested answers in hint 1.
-- [ ] Give each whole original one canonical island. Show shared context and the current natural а/б/в part, with all its answer fields and relevant diagrams; keep the full statement and completed parts collapsed. Preserve source order. An unlettered multi-answer original is one unit; scaffolds are unpaid teaching support.
+- [ ] Give each whole original one canonical island. Show the full statement, all natural а/б/в parts and each original figure once, always visible; highlight the active part and place its answer fields below without repeating the question. Collapse only completed answers/solutions, following the [connected-original pattern](design-system.md#connected-original-pattern). Preserve source order. An unlettered multi-answer original is one unit; scaffolds are unpaid teaching support.
 - [ ] Document a provisional introductory real problem for each covered method and explain its prerequisites. Do not infer difficulty from exam numbering, text length or answer format; do not claim measured difficulty without evidence.
 - [ ] Record an explicit `standard` or `hard` editorial rating and a short reasoning-based rationale for every original in `content/problem-difficulty.json`. Hard means combined methods, dependent reasoning, case analysis or proof/optimization; exam numbering, the competition badge, text length and large numbers alone do not qualify. Original parts inherit the source rating. Review authored templates separately; a harder-selection pool is not a reward rating.
 - [ ] Independently check every authored exercise, harder variant, answer, diagram and explanation. Record remaining skill/source gaps rather than claiming complete coverage.
@@ -44,7 +44,7 @@ Do not change app behavior, publish content or reset learner progress just to co
 
 ## 4. Review and release
 
-- [ ] Complete the [Astra copy review and owner approval gate](../AGENTS.md#astra-copy-review-before-testing) for the collection's visible Bulgarian before the tests below; save the review context and decisions in its review record.
+- [ ] Complete the [independent copy review and owner approval gate](../AGENTS.md#independent-copy-review-before-testing) for the collection's visible Bulgarian before the tests below; save the review context and decisions in its review record.
 - [ ] Have a human reviewer check every original against its source, all answers and three-part explanations, authored exercises, figures and skill mappings. Resolve discrepancies and record the reviewer, date and outcome.
 - [ ] Confirm permission to publish the intended statements, figures and other assets. Keep private source packs, full transcripts, answer packs, credentials and learner data out of public assets and deployment output.
 - [ ] Test original-first selection, answers, assisted versus independent evidence, subcondition persistence, repeat prevention, rewards and exhausted-content behavior using disposable learners. Prove normal-command confirmation and delayed review reachability for every skill. Retention must remain available after Professor: first after two days, then 30 days after independent review; preserve saved due dates, recovery and earned awards.
@@ -67,7 +67,7 @@ Copy this record into a collection-specific review document; keep the detailed s
 | Coverage by island and skill / missing years and methods | |
 | Answer verification / source exceptions / unresolved issues | |
 | Difficulty review: ordinary / hard original counts, rationale registry / practice exceptions | |
-| Astra copy review / context and proposals / owner decisions / date | |
+| Independent copy review (reviewer model) / context and proposals / owner decisions / date | |
 | Human reviewer / review date / outcome | |
 | Verification commands and results / history compatibility | |
 | Publication permission and approval / release status | |

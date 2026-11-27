@@ -1,6 +1,6 @@
 # Landing-page plan
 
-Agreed specification, 6 November 2026. Status: planning complete; page, demo and billing implementation remain future work.
+Commercial specification agreed 6 November 2026. Reconciled 27 November: a later landing/product-trial UI, copy proposal and US-market research exist locally in `/Users/mac/ideas/maths`, outside the verified production tree. Billing is unimplemented; this document is a specification, not proof that its complete offer or demo has shipped. See the [audit inventory](docs/reviews/production-audit-2026-11-27.md#local-only-work-and-missing-artifacts) before resuming the draft.
 
 ## 1. Purpose and positioning
 

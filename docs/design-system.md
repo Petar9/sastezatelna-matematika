@@ -75,7 +75,7 @@ Keep labels visible. Preserve native form validation and server error recovery. 
 - `ProfileCard`: centered profile column (760px maximum) within the shared app shell, otter welcome and prominent full-width name/arrow selection. Quiet icon/label tools open one settings pane per child at a time; keep hidden panes mounted to preserve drafts. Owner-only „Сподели достъп“ fetches unified email access only on first opening and caches it while mounted; shared users retain selection/name editing without owner controls. Reuse wrapping email rows, existing removal/copy controls and shared fields/messages. Preserve native selection/create forms and the optional additional-profile disclosure. Landing invitation keeps its single email field and concise recovery state. See the [approved profile/navigation review](reviews/profile-navigation-2026-11-11.md).
 - `kids.module.css` exports compatibility classes composed from shared button/surface styles so existing page links and domain layouts stay consistent. New generic controls import primitives directly. Page-specific CSS owns layout, not a competing primitive theme.
 
-## Competition preparation pattern - local implementation
+## Competition preparation pattern
 
 The owner-approved preparation metric uses the existing 80/10/10 calculation; its authoritative evidence rules remain in [Gold and rewards](points.md#full-implementation-plan).
 
@@ -95,7 +95,7 @@ Use short transitions (`--motion-fast`) for controls. Progress uses its existing
 2. Reuse an existing primitive or product pattern. Extend it with a documented state/variant when the same semantic need fits.
 3. If a real reusable gap remains, create the smallest complete component in `components/ui` (domain patterns stay with domain components). Document props, states, accessibility and examples here; add it to the gallery in the same change. Keep one-off layouts local.
 4. Ask the owner before material new visual/interaction decisions. Do not create hypothetical variants or silently redesign approved behavior.
-5. For new pages or substantial copy revisions, complete the [Astra copy review and owner approval gate](../AGENTS.md#astra-copy-review-before-testing); save the review context and approved wording before acceptance testing.
+5. For new pages or substantial copy revisions, complete the [independent copy review and owner approval gate](../AGENTS.md#independent-copy-review-before-testing); save the review context and approved wording before acceptance testing.
 6. Check keyboard focus and semantics, error/loading/disabled states, long Bulgarian labels, 320/390px mobile and desktop, reduced motion, and the fixed action bar where affected. Do not write learner data for a visual check.
 7. Run proportionate interaction tests, `npm run typecheck`, `npm run lint`, and production build. Confirm `/design-system` returns 404 in production. Record results and any limitation in `plan.md`.
 
@@ -124,4 +124,4 @@ Use the shared native `Dialog`, celebratory otter, primary „Продължи�
 
 ### Combined accomplishment dialog
 
-Owner-approved 2026-11-14: reuse the native personal-progress dialog, celebrating otter, „Личен напредък!“ and „Продължи“. Put learning appreciations first, followed by task and gold daily records, as separate short paragraphs in one dialog. Open only from a new accepted-answer response, never from restored history; restore focus to the exercise heading on dismissal. Preserve native keyboard/Escape behavior and mobile scrolling. Exact approved copy and Astra review: [accomplishments](reviews/accomplishments-2026-11-14.md).
+Owner-approved 2026-11-14: reuse the native personal-progress dialog, celebrating otter, „Личен напредък!“ and „Продължи“. Put learning appreciations first, followed by daily records as separate short paragraphs in one dialog. Owner-approved 2026-11-22: when task and gold records coincide, show only the gold record; retain task-only celebrations, other appreciations and both persisted claims. See [daily-record policy](points.md#daily-personal-records). Open only from a new accepted-answer response, never from restored history; restore focus to the exercise heading on dismissal. Preserve native keyboard/Escape behavior and mobile scrolling. Exact approved copy and Astra review: [accomplishments](reviews/accomplishments-2026-11-14.md).

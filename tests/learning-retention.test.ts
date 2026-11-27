@@ -76,6 +76,11 @@ test("review prefers unseen tasks, admits old eligible tasks when finite pools a
  h.course.attempts=h.course.attempts.filter(a=>a.problem.id!=="hard-1");
  assert.equal(chooseSkillProblem(h.course,h.content,"skill",false,day(30),true)!.problem.id,"hard-1");
  assert.equal(chooseSkillProblem(h.course,h.content,"skill",false,day(30)),undefined);
+ // Revisit recovery is the only core use of an unseen harder authored task.
+ h.course.topics.topic!.skills.skill!.revisit=true;
+ assert.equal(chooseSkillProblem(h.course,h.content,"skill",false,day(30))!.problem.id,"hard-1");
+ h.course.attempts=h.course.attempts.filter(a=>a.problem.id!=="source-0:original");
+ assert.equal(chooseSkillProblem(h.course,h.content,"skill",false,day(30))!.problem.id,"source-0:original");
 });
 test("personal progress celebrates the latest hinted success followed by a fresh independent task only",()=>{
  const h=harness();h.go({type:"selectTopic",topicId:"topic"});

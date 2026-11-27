@@ -76,6 +76,8 @@ test("completed competitions offer immediate recall and restart through the play
   h.advance({type:"startQuest"});
   h.advance({type:"answer",taskKey:h.record.quest!.work!.attempt.key,answers:["5"]});
   h.advance({type:"nextQuestion"});await h.reload();
+  assert.ok(h.host.textContent!.includes("Да затвърдим знанията си."));
+  assert.ok(!h.host.textContent!.includes("Нови открития"));
   await act(async()=>button(h.host,"Да си припомним").click());
   assert.equal(h.record.quest!.work!.attempt.mode,"practice");
   h.advance({type:"answer",taskKey:h.record.quest!.work!.attempt.key,answers:["4"]});
@@ -86,6 +88,7 @@ test("completed competitions offer immediate recall and restart through the play
    h.advance({type:"nextQuestion"});
   }
   await h.reload();const count=h.record.attempts.length;
+  assert.ok(h.host.textContent!.includes("Нека да преговорим някои задачи."));
   await act(async()=>button(h.host,"Започни отново").click());
   assert.equal(h.record.attempts.length,count);assert.equal(h.record.quest!.work!.attempt.outcome,undefined);
   assert.ok(!h.host.textContent!.includes("Всички спирки"));
