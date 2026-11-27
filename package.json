@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "progress:import": "node --env-file=.env.local --import tsx scripts/import-progress.ts",
-    "assets:build": "node scripts/optimize-images.mjs"
+    "assets:build": "node scripts/optimize-images.mjs",
+    "review:state": "node --import tsx scripts/review-state.ts",
+    "diagnose:progress": "node --import tsx scripts/diagnose-progress.ts",
+    "content:supply": "node --import tsx scripts/content-supply.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
