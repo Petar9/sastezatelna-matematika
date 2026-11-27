@@ -75,7 +75,7 @@ Keep labels visible. Preserve native form validation and server error recovery. 
 - `ProfileCard`: centered profile column (760px maximum) within the shared app shell, otter welcome and prominent full-width name/arrow selection. Quiet icon/label tools open one settings pane per child at a time; keep hidden panes mounted to preserve drafts. Owner-only „Сподели достъп“ fetches unified email access only on first opening and caches it while mounted; shared users retain selection/name editing without owner controls. Reuse wrapping email rows, existing removal/copy controls and shared fields/messages. Preserve native selection/create forms and the optional additional-profile disclosure. Landing invitation keeps its single email field and concise recovery state. See the [approved profile/navigation review](reviews/profile-navigation-2026-11-11.md).
 - `kids.module.css` exports compatibility classes composed from shared button/surface styles so existing page links and domain layouts stay consistent. New generic controls import primitives directly. Page-specific CSS owns layout, not a competing primitive theme.
 
-## Competition preparation pattern - local implementation
+## Competition preparation pattern
 
 The owner-approved preparation metric uses the existing 80/10/10 calculation; its authoritative evidence rules remain in [Gold and rewards](points.md#full-implementation-plan).
 
@@ -124,4 +124,4 @@ Use the shared native `Dialog`, celebratory otter, primary „Продължи�
 
 ### Combined accomplishment dialog
 
-Owner-approved 2026-11-14: reuse the native personal-progress dialog, celebrating otter, „Личен напредък!“ and „Продължи“. Put learning appreciations first, followed by task and gold daily records, as separate short paragraphs in one dialog. Open only from a new accepted-answer response, never from restored history; restore focus to the exercise heading on dismissal. Preserve native keyboard/Escape behavior and mobile scrolling. Exact approved copy and Astra review: [accomplishments](reviews/accomplishments-2026-11-14.md).
+Owner-approved 2026-11-14: reuse the native personal-progress dialog, celebrating otter, „Личен напредък!“ and „Продължи“. Put learning appreciations first, followed by daily records as separate short paragraphs in one dialog. Owner-approved 2026-11-22: when task and gold records coincide, show only the gold record; retain task-only celebrations, other appreciations and both persisted claims. See [daily-record policy](points.md#daily-personal-records). Open only from a new accepted-answer response, never from restored history; restore focus to the exercise heading on dismissal. Preserve native keyboard/Escape behavior and mobile scrolling. Exact approved copy and Astra review: [accomplishments](reviews/accomplishments-2026-11-14.md).

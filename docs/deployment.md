@@ -2,6 +2,16 @@
 
 This guide describes setup and recovery, not proof that a particular operation has completed. See [current release status](../plan.md) and its linked history for recorded production evidence. Production already exists; use the setup steps below for a new environment or an approved configuration change, not to recreate existing resources. Do not upload `data/`, `backups/`, `materials/`, or environment files to a repository or deployment. Review every file before publishing a remote repository. `.gitignore`, `.vercelignore`, Next tracing exclusions, and the build check are complementary safeguards; inspect the upload and build output before release. The service-role key belongs only in server-side secrets and must never use a `NEXT_PUBLIC_` name.
 
+## Verify a release and reconcile local work
+
+1. Read remote `main` directly and record its full SHA/date. Check the Vercel status for that exact SHA and the stable production origin; a cached `origin/main` or local branch name is insufficient evidence.
+2. Compare local file contents with the verified remote tree. A modified/untracked local file may already be published; a different file may be older than production. Keep local-only drafts, missing artifacts and intentionally deferred work separate.
+3. Preserve a dirty checkout. Start an isolated checkout from fresh remote `main` and port only reviewed changes; never overwrite current continuation, access or dependency fixes by copying an old working tree wholesale. Keep landing/SEO drafts excluded until separately approved.
+4. Record actual public HTTP/bundle checks and applicable authenticated checks separately. Anonymous public success and shipped JS markers do not prove a real Google learner journey. Use disposable records for functional acceptance; avoid production learner writes.
+5. Update [current status](../plan.md) with one linked dated evidence record. Preserve earlier acceptance history; qualify its dates rather than reporting old tests or audits as freshly run. A documentation-only reconciliation needs link/diff checks, not a new app deployment.
+
+The [2026-11-27 audit](reviews/production-audit-2026-11-27.md) demonstrates this separation. Deployment-provider success, live alias checks, content approval and search indexing are distinct claims.
+
 ## Production setup
 
 1. Use the owner-approved source repository and a separate Supabase project. Apply the migrations in `supabase/migrations/` in order. Do not run destructive SQL against existing progress.

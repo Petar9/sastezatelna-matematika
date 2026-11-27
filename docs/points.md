@@ -13,9 +13,9 @@ Use Europe/Sofia days and existing dated history. An active day has a completed 
 
 Owner-approved 2026-11-22: when task and gold records coincide in one celebration, show only the gold record. Keep other learning appreciations visible, retain both persisted daily claims, and preserve task-only celebrations and all reward/history rules.
 
-Reviewed 2026-11-08. This is the authoritative guide for gold: active rules, evidence, proposed changes and rollout checks. [Learning decisions](../key-decisions.md) still govern selection, help and confirmation; the [design system](design-system.md) governs presentation.
+Status reconciled with production source on 2026-11-27; the policy and research decisions below retain their original dates. [Audit and limits](reviews/production-audit-2026-11-27.md). This is the authoritative guide for gold: active rules, evidence, proposed changes and rollout checks. [Learning decisions](../key-decisions.md) still govern selection, help and confirmation; the [design system](design-system.md) governs presentation.
 
-**Status:** owner-approved implementation released as `87edf03` on 2026-11-08; final local acceptance and live deployment verification passed. The owner approved the detailed plan, then deferred additional NVO exercises to the next iteration. Current implementation uses 80% original coverage, 10% independent confirmation and 10% later independent review; it does not award free completion for missing content. [Implementation/copy review](points-implementation-review.md) records outstanding decisions and limitations.
+**Status:** owner-approved implementation released as `87edf03` on 2026-11-08; final local acceptance and live deployment verification passed. The follow-up release `269fdf6` added two authored core exercises each for NVO area units and regional growth, with historical normal-command confirmation/review reachability verified for all 136 skills. [Retention acceptance](learning-retention-review.md). Current preparation remains 80% original coverage, 10% independent confirmation and 10% later independent review; missing content never earns free completion. [Implementation/copy review](points-implementation-review.md) preserves the resolved decisions and dated limitations.
 
 ## Current approved policy
 
@@ -115,7 +115,7 @@ Record a successfully saved graded answer (including wrong or partial answers) o
 
 ## Preparation progress - approved 80/10/10
 
-The chosen weights are a product convention, not a validated prediction of competition performance. The owner approved the following evidence rules for local implementation.
+The chosen weights are a product convention, not a validated prediction of competition performance. The following owner-approved evidence rules are implemented and published.
 
 ### Original coverage: 80%
 
@@ -224,7 +224,7 @@ Observe ordinary sessions for relevant original coverage, later independent succ
 
 The owner approved the full plan before implementation: equal original weights, fractional natural-unit credit, assisted-success coverage, 80/10/10 calculation, versioned scope preservation, increased rates for unpaid saved work, meaningful-work browser memory and the compact otter layout. The earlier labels „Решени оригинални задачи: X от Y“ and „Самостоятелни упражнения и преговор“ were superseded by the approved count-only panel: „Задачи от състезания“, „Затвърдени умения“ and „Преговор“.
 
-The subsequent Astra copy proposals and their approval status are recorded in [the local implementation review](points-implementation-review.md). Final acceptance tests wait for that copy decision. No new NVO exercises or production release are included in this iteration.
+The subsequent Astra proposals, owner decisions, completed acceptance and production release are recorded in the [implementation review](points-implementation-review.md). The initial deferral of NVO exercises was superseded by the [November 8 retention follow-up](learning-retention-review.md). These dated records are not pending approval for the already released reward/preparation implementation.
 
 ## Review and verification record
 
