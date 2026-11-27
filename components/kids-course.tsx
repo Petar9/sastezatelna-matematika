@@ -23,6 +23,8 @@ import { AppMenu } from "./app-menu";
 import { KidsOtter } from "./kids-otter";
 import type {Appreciation} from "../src/core/accomplishments";
 import { PersonalProgressDialog } from "./personal-progress-dialog";
+import { achievementSound } from "@/src/core/sounds";
+import { playAchievement, unlockSound } from "./sound";
 import { CompetitionPreparation } from "./competition-preparation";
 import { KidsLearningProgress } from "./kids-learning-progress";
 import { AdventureHome, GoldReward, GoldWallet, ProblemGoldPreview } from "./kids-adventure";
@@ -35,7 +37,8 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
 	const [view, setView] = useState(initialView), [dashboard, setDashboard] = useState(true);
  const [refreshEpoch,setRefreshEpoch]=useState(0);
  const [personalProgress,setPersonalProgress]=useState<Appreciation[]>();
- const celebratedProgress=useRef(new Set<string>());
+ const celebratedProgress=useRef(new Set<string>()),soundedAchievements=useRef(new Set<string>());
+ useEffect(()=>unlockSound(),[]);
 	const [saving, setBusy] = useState(false), [error, setError] = useState("");
  const busy=saving||refreshing;
 	const [mapTopic, setMapTopic] = useState<string>();
@@ -130,6 +133,10 @@ export function KidsCoursePlayer({ initialView, sessions = [], learnerId, learne
    const previous=viewRef.current.task;
    if(acceptedAnswer && action.type==="answer" && previous?.key===action.taskKey && !previous.outcome && next.task?.key===action.taskKey && (next.appreciations?.length || next.task.personalProgress) && !celebratedProgress.current.has(action.taskKey)) {
     celebratedProgress.current.add(action.taskKey); setPersonalProgress(next.appreciations?.length?next.appreciations:[{kind:"hint-independent"}]);
+   }
+   if(acceptedAnswer && action.type==="answer" && !soundedAchievements.current.has(action.taskKey)) {
+    const sound=achievementSound(previous,next,action.taskKey);
+    if(sound){soundedAchievements.current.add(action.taskKey); playAchievement(sound);}
    }
    viewRef.current = next; setView(next); onViewChange?.(next);
   };

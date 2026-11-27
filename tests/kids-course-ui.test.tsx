@@ -1568,6 +1568,23 @@ test("competition preparation stays on the overview and uses saved evidence afte
 });
 
 
+test("an achievement plays its sound once from the accepted answer, never on reload, resume or ordinary answers",async()=>{
+ let notes=0;
+ class FakeAudioContext{state="running";currentTime=0;destination={};resume(){return Promise.resolve();}
+  createOscillator(){notes++;return {type:"",frequency:{value:0},connect:(node:unknown)=>node,start(){},stop(){}};}
+  createGain(){return {gain:{setValueAtTime(){},exponentialRampToValueAtTime(){}},connect:(node:unknown)=>node};}}
+ Object.assign(window,{AudioContext:FakeAudioContext});
+ const h=await mount();try{
+  await act(async()=>window.dispatchEvent(new dom.window.Event("pointerdown")));
+  await act(async()=>button(h.host,"Подсказка").click());
+  await submitAnswer(h);assert.equal(notes,0,"a hinted answer without an achievement stays silent");
+  await act(async()=>primary(h.host,"Продължи").click());
+  await submitAnswer(h);assert.ok(h.host.querySelector('dialog[open]'));assert.equal(notes,3,"milestone: three rising notes");
+  await h.reload();await act(async()=>button(h.host,"Продължи: Точки и мачове").click());
+  assert.equal(notes,3);
+ }finally{await h.cleanup();Object.assign(window,{AudioContext:undefined});}
+});
+
 test("personal progress opens once after a new independent answer and stays closed after reload/resume",async()=>{
  const h=await mount();try{
   await act(async()=>button(h.host,"Подсказка").click());

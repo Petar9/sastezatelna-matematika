@@ -26,6 +26,7 @@ Current approved rules for Състезателна математика, review
 - Doctor requires every topic objective confirmed. Professor requires two further consecutive independent harder successes across different objectives when available. Preserve earned awards after later difficulty; remaining eligible hard practice stays accessible after Professor. These awards are not claims of permanent mastery.
 - Adventure completion earns one stamp/souvenir, including helped/revealed work, without bonus gold. Describe actual session evidence; the four souvenir illustrations repeat and are not an unlimited unique collection.
 - No timers, lost lives, streak penalties, reward deductions or forced advancement. Children can pause, change topics or stop. Keep learning milestones, adventure completion and collectible gold distinct.
+- Achievement sounds (owner-approved 2026-11-27): two short sounds, one for a learning milestone and one for a new daily record, from the accepted answer's outcome in any mode. On by default with a menu mute; never for ordinary answers or mistakes. See [design system](docs/design-system.md#copy-and-motion).
 
 ## Gold - current rules
 

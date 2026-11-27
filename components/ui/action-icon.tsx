@@ -1,4 +1,4 @@
-export type ActionIconName = "copy" | "check" | "close" | "menu" | "progress" | "profiles" | "book" | "info" | "feedback" | "logout" | "pencil" | "share" | "chevron" | "arrow" | "plus";
+export type ActionIconName = "copy" | "check" | "close" | "menu" | "progress" | "profiles" | "book" | "info" | "feedback" | "logout" | "pencil" | "share" | "chevron" | "arrow" | "plus" | "sound" | "muted";
 const paths: Record<Exclude<ActionIconName, "copy">, string> = {
  check: "m5 12 4 4L19 6", close: "m7 7 10 10M17 7 7 17",
  menu: "M4 6h16M4 12h16M4 18h16", progress: "M4 19V5m0 14h16M8 15l4-5 4 2 4-7",
@@ -8,6 +8,7 @@ const paths: Record<Exclude<ActionIconName, "copy">, string> = {
  logout: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5M21 12H9",
  pencil: "m16 3 5 5-13 13H3v-5Zm-2 2 5 5", share: "m8 11 8-5m-8 7 8 5",
  chevron: "m8 10 4 4 4-4", arrow: "M4 12h16m-6-6 6 6-6 6", plus: "M12 5v14M5 12h14",
+ sound: "M3 9h4l5-4v14l-5-4H3ZM16 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12", muted: "M3 9h4l5-4v14l-5-4H3Zm13 0 5 6m0-6-5 6",
 };
 export function ActionIcon({name}:{name:ActionIconName}) {
  return <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
