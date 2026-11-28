@@ -83,6 +83,10 @@ The owner-approved preparation metric uses the existing 80/10/10 calculation; it
 
 `CompetitionPreparation` sits at the bottom of the competition overview, after learning content; it remains absent on islands and tasks. Separate it from the map with `--space-6` (24px). Keep the owner heading „Напредък в подготовката за това състезание.“, overall percentage, decorative endpoint otter and quiet „Напредък →“ link. Use the shared card and blue progress tokens, clamp the otter at both endpoints, label the progressbar and respect reduced motion. No solved-original sentence. The development catalogue covers zero, partial, complete, unavailable and long Bulgarian states; [copy review and verification](points-implementation-review.md) records approval context.
 
+## Favicon
+
+The tab and home-screen icon is the otter head on brand teal (`app/icon.svg`, with `app/apple-icon.png` full-bleed and `app/favicon.ico` for old browsers). Only the head is used: the full figure, hat and details are unreadable at 16 px. Keep the three files in sync when the otter's colors change; `proxy.ts` leaves them out of its matcher so they can be cached.
+
 ## Copy and motion
 
 Short, concrete Bulgarian. Preserve approved “Откриваме заедно”, “Неприпокриващи се случаи”, “Гаранция чрез най-лош случай”. Use “Подсказка” / “Следваща подсказка”, “Верен отговор” / “Грешен отговор”, and one “← Начало” navigation action. Avoid repeated progress headings, explanatory perk blocks and technical recovery wording. Doctor uses a rolled diploma with a seal; Professor uses a graduation cap. Reuse the shared `Award` SVG, muted unearned and coloured earned states, existing growth animation and reduced-motion handling. Doctor/Professor eligibility remains educational logic; show earned achievements without restoring unearned badge clutter.

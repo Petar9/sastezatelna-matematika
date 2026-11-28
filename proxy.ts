@@ -20,4 +20,4 @@ export async function proxy(request:NextRequest){
  if(!indexableDeployment())response.headers.set("X-Robots-Tag","noindex, nofollow");
  return response;
 }
-export const config={matcher:["/((?!_next/static|_next/image|favicon.ico|assets/images/|kids/figures/|kids/lessons/).*)"]};
+export const config={matcher:["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|assets/images/|kids/figures/|kids/lessons/).*)"]};
